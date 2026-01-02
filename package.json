@@ -1,5 +1,5 @@
 {
-  "name": "illust-library",
+  "name": "picstash",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,5 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "Apache-2.0 OR MPL-2.0",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
 }
