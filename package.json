@@ -1,14 +1,14 @@
 {
   "name": "picstash",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "イラスト画像を管理するための Web アプリケーション",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "Apache-2.0 OR MPL-2.0",
-  "devDependencies": {
-    "typescript": "^5.9.3"
-  }
+  "license": "Apache-2.0 OR MPL-2.0"
 }

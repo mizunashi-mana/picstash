@@ -1,0 +1,17 @@
+{
+  "name": "@picstash/server",
+  "version": "1.0.0",
+  "description": "Picstash API server",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@picstash/shared": "*"
+  },
+  "license": "Apache-2.0 OR MPL-2.0"
+}

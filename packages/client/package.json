@@ -1,0 +1,17 @@
+{
+  "name": "@picstash/client",
+  "version": "1.0.0",
+  "description": "Picstash web client",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@picstash/shared": "*"
+  },
+  "license": "Apache-2.0 OR MPL-2.0"
+}
