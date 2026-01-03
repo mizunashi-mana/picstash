@@ -4,6 +4,7 @@ export interface Image {
   id: string;
   filename: string;
   path: string;
+  thumbnailPath: string | null;
   mimeType: string;
   size: number;
   width: number | null;
@@ -18,4 +19,8 @@ export async function fetchImages(): Promise<Image[]> {
 
 export function getImageUrl(imageId: string): string {
   return `/api/images/${imageId}/file`;
+}
+
+export function getThumbnailUrl(imageId: string): string {
+  return `/api/images/${imageId}/thumbnail`;
 }

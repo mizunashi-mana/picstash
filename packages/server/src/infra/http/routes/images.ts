@@ -9,6 +9,10 @@ import {
   getAbsolutePath,
   saveOriginal,
 } from '@/infra/storage/file-storage.js';
+import {
+  generateThumbnail,
+  getImageMetadata,
+} from '@/infra/storage/image-processor.js';
 import type { FastifyInstance } from 'fastify';
 
 const ALLOWED_MIME_TYPES = [
@@ -59,12 +63,19 @@ export function imageRoutes(app: FastifyInstance): void {
     // Save file to storage
     const { filename, path } = await saveOriginal(buffer, extension);
 
+    // Get image metadata and generate thumbnail
+    const metadata = await getImageMetadata(buffer);
+    const thumbnail = await generateThumbnail(buffer, filename);
+
     // Create database record
     const image = await createImage({
       filename,
       path,
+      thumbnailPath: thumbnail.path,
       mimeType: file.mimetype,
       size: buffer.length,
+      width: metadata.width,
+      height: metadata.height,
     });
 
     return reply.status(201).send(image);
@@ -95,6 +106,32 @@ export function imageRoutes(app: FastifyInstance): void {
 
       return reply
         .header('Content-Type', image.mimeType)
+        .header('Cache-Control', 'public, max-age=31536000, immutable')
+        .send(stream);
+    },
+  );
+
+  // Get thumbnail file
+  app.get<{ Params: { id: string } }>(
+    '/api/images/:id/thumbnail',
+    async (request, reply) => {
+      const { id } = request.params;
+
+      const image = await findImageById(id);
+      if (!image) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      // If no thumbnail, return original (for backwards compatibility)
+      const thumbnailPath = image.thumbnailPath ?? image.path;
+      const absolutePath = getAbsolutePath(thumbnailPath);
+      const stream = createReadStream(absolutePath);
+
+      return reply
+        .header('Content-Type', 'image/jpeg')
         .header('Cache-Control', 'public, max-age=31536000, immutable')
         .send(stream);
     },

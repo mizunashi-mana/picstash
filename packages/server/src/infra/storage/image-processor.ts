@@ -1,0 +1,64 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import sharp from 'sharp';
+import { config } from '@/config.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const storagePath = resolve(__dirname, '../../..', config.storage.path);
+const thumbnailsPath = join(storagePath, 'thumbnails');
+
+const THUMBNAIL_SIZE = 300;
+
+export interface ImageMetadata {
+  width: number;
+  height: number;
+}
+
+export interface ThumbnailResult {
+  filename: string;
+  path: string;
+}
+
+async function ensureDirectory(dir: string): Promise<void> {
+  await mkdir(dir, { recursive: true });
+}
+
+/**
+ * Get image metadata (width, height)
+ */
+export async function getImageMetadata(buffer: Buffer): Promise<ImageMetadata> {
+  const metadata = await sharp(buffer).metadata();
+  return {
+    width: metadata.width,
+    height: metadata.height,
+  };
+}
+
+/**
+ * Generate a thumbnail from an image buffer
+ */
+export async function generateThumbnail(
+  buffer: Buffer,
+  filename: string,
+): Promise<ThumbnailResult> {
+  await ensureDirectory(thumbnailsPath);
+
+  const thumbnailBuffer = await sharp(buffer)
+    .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
+      fit: 'cover',
+      position: 'center',
+    })
+    .jpeg({ quality: 80 })
+    .toBuffer();
+
+  const thumbnailFilename = filename.replace(/\.[^.]+$/, '.jpg');
+  const thumbnailFilePath = join(thumbnailsPath, thumbnailFilename);
+
+  await writeFile(thumbnailFilePath, thumbnailBuffer);
+
+  return {
+    filename: thumbnailFilename,
+    path: `thumbnails/${thumbnailFilename}`,
+  };
+}

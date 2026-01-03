@@ -9,7 +9,7 @@ import {
   Text,
 } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
-import { fetchImages, getImageUrl } from '@/features/gallery/api';
+import { fetchImages, getThumbnailUrl } from '@/features/gallery/api';
 
 export function ImageGallery() {
   const { data: images, isLoading, error } = useQuery({
@@ -56,7 +56,7 @@ export function ImageGallery() {
           <Card.Section>
             <AspectRatio ratio={1}>
               <Image
-                src={getImageUrl(image.id)}
+                src={getThumbnailUrl(image.id)}
                 alt={image.filename}
                 fit="cover"
               />
