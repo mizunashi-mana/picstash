@@ -33,6 +33,11 @@
     entry = "./scripts/run-script.mjs --cwd packages/client -- npx eslint --cache --fix FILES";
     files = "^packages/client/.*\.[cm]?(js|ts)x?$";
   };
+  git-hooks.hooks.npx-prisma-lint-pkg-server = {
+    enable = true;
+    entry = "./scripts/run-script.mjs --cwd packages/server -- npx prisma-lint FILES";
+    files = "^packages/server/.*\.prisma$";
+  };
 
   # See full reference at https://devenv.sh/reference/options/
 }

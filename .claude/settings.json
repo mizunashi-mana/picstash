@@ -14,7 +14,7 @@
     "playwright"
   ],
   "hooks": {
-    "PreToolUse": [
+    "PostToolUse": [
       {
         "matcher": "^(Write|MultiEdit|Edit|Update)$",
         "hooks": [

@@ -1,4 +1,6 @@
 {
+  "private": true,
+  "type": "module",
   "name": "@picstash/server",
   "version": "1.0.0",
   "description": "Picstash API server",
@@ -9,14 +11,26 @@
     "build": "tsc",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint:eslint": "git ls-files '*.ts' '*.js' '*.mjs' | xargs eslint --cache --fix"
+    "lint:eslint": "eslint --cache --fix src",
+    "lint:prisma": "prisma-lint",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@picstash/shared": "*"
+    "@picstash/shared": "*",
+    "@prisma/client": "^7.2.0",
+    "js-yaml": "^4.1.1",
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@picstash/eslint-config": "*",
-    "eslint": "^9.39.2"
+    "@types/js-yaml": "^4.0.9",
+    "eslint": "^9.39.2",
+    "prisma": "^7.2.0",
+    "prisma-lint": "^0.13.0"
   },
   "license": "Apache-2.0 OR MPL-2.0"
 }

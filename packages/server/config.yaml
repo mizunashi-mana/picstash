@@ -1,0 +1,9 @@
+# Picstash Server Configuration
+
+database:
+  # SQLite database file path (relative to packages/server/)
+  url: "file:./prisma/data/picstash.db"
+
+storage:
+  # Image storage path (relative to packages/server/)
+  path: "./storage"
