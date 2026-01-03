@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "lint": "pre-commit run --all-files",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -8,13 +8,13 @@
 
 ### TypeScript 設定
 
-1. **ルートに基本設定** (`tsconfig.json`)
+1. **ルートに基本設定** (`tsconfig.base.json`)
    - TypeScript 5.x strict モード
    - ES2022 ターゲット
    - モジュール解決: bundler
    - パス解決の設定 (`@/*`)
 
-2. **各パッケージに継承設定** (未実装)
+2. **各パッケージに継承設定**
    - `packages/client/tsconfig.json` - React + Vite 用
    - `packages/server/tsconfig.json` - Node.js 用
    - `packages/shared/tsconfig.json` - ライブラリ用
@@ -53,10 +53,10 @@
 
 ## 完了条件
 
-- [ ] `npm run typecheck` が全パッケージで成功する
+- [x] `npm run typecheck` が全パッケージで成功する
 - [x] `npm run lint` が動作する
 - [x] `npm run lint:check` が動作する
-- [ ] 各パッケージの tsconfig.json を整備する
+- [x] 各パッケージの tsconfig.json を整備する
 - [ ] エディタ (VSCode) で ESLint が動作する
 
 ## 作業ログ
@@ -67,5 +67,15 @@
 - 参考: https://github.com/mizunashi-mana/typescript-project-template
 - Prettier を使わず `@stylistic/eslint-plugin` でフォーマットを実現
 - ESLint 9.x flat config 形式で設定ファイルをモジュール分割
-- ルートに `eslint.config.mjs` と `tsconfig.json` を作成
+- ルートに `eslint.config.mjs` と `tsconfig.base.json` を作成
 - `npm run lint` / `npm run lint:check` スクリプトを追加
+
+### 2026-01-04
+
+- 各パッケージに tsconfig.json を作成
+  - `packages/client/tsconfig.json` - React + Vite 用 (DOM 型定義を含む)
+  - `packages/server/tsconfig.json` - Node.js 用
+  - `packages/shared/tsconfig.json` - ライブラリ用
+- ルートの package.json に `npm run typecheck` スクリプトを追加
+- 全パッケージで `npm run typecheck` が成功することを確認
+- ルートの tsconfig を `tsconfig.base.json` にリネーム (継承用であることを明確化)

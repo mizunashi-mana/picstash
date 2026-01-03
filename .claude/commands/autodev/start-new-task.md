@@ -1,6 +1,6 @@
 ---
 description: Start new task
-allowed-tools: Bash, Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
+allowed-tools: Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 ---
 
 # 新規タスク開始

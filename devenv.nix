@@ -13,8 +13,8 @@
   };
 
   # https://devenv.sh/scripts/
-  scripts.hello.exec = ''
-    echo hello from $GREET
+  scripts.cc-edit-lint-hook.exec = ''
+    "$DEVENV_ROOT/scripts/cc-edit-lint-hook.mjs"
   '';
 
   # https://devenv.sh/git-hooks/

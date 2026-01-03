@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint:check:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(./scripts/run-script.mjs:*)",
+      "Bash(npm run typecheck:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "playwright"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(Write|MultiEdit|Edit|Update)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-edit-lint-hook"
+          }
+        ]
+      }
+    ]
+  }
+}
