@@ -11,3 +11,6 @@ devenv.local.yaml
 
 # Node.js
 node_modules/
+
+# ESLint
+.eslintcache

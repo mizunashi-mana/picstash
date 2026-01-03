@@ -8,10 +8,15 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint:eslint": "git ls-files '*.ts' '*.js' '*.mjs' | xargs eslint --cache --fix"
   },
   "dependencies": {
     "@picstash/shared": "*"
+  },
+  "devDependencies": {
+    "@picstash/eslint-config": "*",
+    "eslint": "^9.39.2"
   },
   "license": "Apache-2.0 OR MPL-2.0"
 }

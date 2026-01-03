@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "イラスト画像を管理するための Web アプリケーション",
   "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
+    "lint": "pre-commit run --all-files",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -13,5 +13,9 @@
   "dependencies": {
     "@picstash/shared": "*"
   },
+  "devDependencies": {
+    "@picstash/eslint-config": "*",
+    "eslint": "^9.39.2"
+  },
   "license": "Apache-2.0 OR MPL-2.0"
 }

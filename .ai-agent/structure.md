@@ -6,7 +6,8 @@ picstash/
 │   ├── steering/               # ステアリングドキュメント
 │   │   ├── product.md          # プロダクト概要
 │   │   ├── tech.md             # 技術概要
-│   │   └── plan.md             # 実装計画
+│   │   ├── plan.md             # 実装計画
+│   │   └── work.md             # 作業の進め方
 │   ├── tasks/                  # タスクドキュメント
 │   │   └── YYYYMMDD-タスク名/   # 各タスクのディレクトリ
 │   │       └── README.md       # タスク詳細（目的・方針・完了条件・作業ログ）

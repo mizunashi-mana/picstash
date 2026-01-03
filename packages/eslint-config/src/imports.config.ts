@@ -1,0 +1,52 @@
+import { defineConfig } from 'eslint/config';
+import * as importX from 'eslint-plugin-import-x';
+import eslintPluginUnusedImports from 'eslint-plugin-unused-imports';
+
+export function buildImportsConfig(props: {
+  disableFixedRules: boolean;
+}) {
+  return defineConfig([
+    // @ts-expect-error -- Type compatibility issue between eslint-plugin-import-x and eslint/config
+    importX.flatConfigs.recommended,
+    // @ts-expect-error -- Type compatibility issue between eslint-plugin-import-x and eslint/config
+    importX.flatConfigs.typescript,
+    {
+      plugins: {
+        'unused-imports': eslintPluginUnusedImports,
+      },
+    },
+    {
+      rules: {
+        'import-x/export': 'error',
+        'import-x/first': 'error',
+        'import-x/no-duplicates': 'error',
+        'import-x/order': [
+          'error',
+          {
+            'groups': [
+              'builtin',
+              'external',
+              'internal',
+              ['parent', 'sibling', 'index'],
+              'type',
+            ],
+            'pathGroups': [
+              {
+                pattern: 'react',
+                group: 'external',
+                position: 'before',
+              },
+            ],
+            'pathGroupsExcludedImportTypes': ['react'],
+            'alphabetize': {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'never',
+          },
+        ],
+        'unused-imports/no-unused-imports': props.disableFixedRules ? 'off' : 'error',
+      },
+    },
+  ]);
+}
