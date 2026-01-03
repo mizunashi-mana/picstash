@@ -4,6 +4,7 @@ import type { Image } from '@~generated/prisma/client.js';
 export interface CreateImageInput {
   filename: string;
   path: string;
+  thumbnailPath?: string;
   mimeType: string;
   size: number;
   width?: number;

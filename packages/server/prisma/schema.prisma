@@ -11,13 +11,14 @@ datasource db {
 }
 
 model Image {
-  id        String   @id @default(uuid())
-  filename  String
-  path      String
-  mimeType  String   @map("mime_type")
-  size      Int
-  width     Int?
-  height    Int?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid())
+  filename      String
+  path          String
+  thumbnailPath String?  @map("thumbnail_path")
+  mimeType      String   @map("mime_type")
+  size          Int
+  width         Int?
+  height        Int?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 }
