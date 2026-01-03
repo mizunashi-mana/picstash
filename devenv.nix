@@ -2,7 +2,9 @@
 
 {
   # https://devenv.sh/packages/
-  packages = [ ];
+  packages = [
+    pkgs.actionlint
+  ];
 
   # https://devenv.sh/languages/
   languages.javascript = {
@@ -37,6 +39,11 @@
     enable = true;
     entry = "./scripts/run-script.mjs --cwd packages/server -- npx prisma-lint FILES";
     files = "^packages/server/.*\.prisma$";
+  };
+  git-hooks.hooks.actionlint = {
+    enable = true;
+    entry = "actionlint";
+    files = "^.github/workflows/.*\.ya?ml$";
   };
 
   # See full reference at https://devenv.sh/reference/options/

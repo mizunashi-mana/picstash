@@ -7,16 +7,25 @@ on:
     branches: [main]
 
 jobs:
-  pre-commit-all-files:
-    name: pre-commit run
+  build-lint:
+    name: Build and lint
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: ./.github/actions/setup-devenv
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: ./.github/actions/setup-node
         with:
           skip-node-install: true
           use-devenv: true
+
+      - name: Build
+        run: devenv shell npm run build
 
       - name: pre-commit run
         run: devenv shell pre-commit run --all-files
@@ -24,6 +33,10 @@ jobs:
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: ./.github/actions/setup-node
@@ -37,6 +50,10 @@ jobs:
   depcheck:
     name: Dependency Check
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: ./.github/actions/setup-node
