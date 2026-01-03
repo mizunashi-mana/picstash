@@ -16,13 +16,25 @@ picstash/
 ├── packages/                   # ソースコード
 │   ├── client/                 # フロントエンド
 │   │   ├── src/
-│   │   │   ├── components/     # UI コンポーネント
-│   │   │   ├── pages/          # ページコンポーネント
-│   │   │   ├── hooks/          # カスタムフック
-│   │   │   ├── stores/         # 状態管理
-│   │   │   ├── styles/         # スタイル定義
-│   │   │   ├── utils/          # ユーティリティ関数
-│   │   │   └── App.tsx         # アプリケーションエントリ
+│   │   │   ├── main.tsx        # エントリポイント
+│   │   │   ├── App.tsx         # ルートコンポーネント（Providers）
+│   │   │   │
+│   │   │   ├── features/       # 機能ごとのモジュール
+│   │   │   │   └── [feature]/
+│   │   │   │       ├── components/
+│   │   │   │       ├── hooks/
+│   │   │   │       ├── api/
+│   │   │   │       └── pages/
+│   │   │   │
+│   │   │   ├── shared/         # 共通部品
+│   │   │   │   ├── components/
+│   │   │   │   ├── hooks/
+│   │   │   │   └── helpers/
+│   │   │   │
+│   │   │   ├── api/            # 共通 API クライアント
+│   │   │   │
+│   │   │   └── routes/         # React Router 設定
+│   │   │
 │   │   ├── public/             # 静的ファイル
 │   │   ├── tests/              # client のテスト
 │   │   ├── package.json
@@ -81,7 +93,11 @@ picstash/
 ## 主要ディレクトリの説明
 
 ### `packages/client/`
-フロントエンドのパッケージ。コンポーネントベースの設計で、再利用可能な UI 部品を `components/` に、ページ単位のコンポーネントを `pages/` に配置。
+フロントエンドのパッケージ。Feature-based ディレクトリ構造を採用：
+- **features/** - 機能ごとのモジュール（components, hooks, api, pages を含む）
+- **shared/** - 共通 UI コンポーネント、フック、ヘルパー
+- **api/** - 共通 API クライアント
+- **routes/** - React Router 設定
 
 ### `packages/server/`
 バックエンドのパッケージ。レイヤードアーキテクチャを採用：

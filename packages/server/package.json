@@ -32,7 +32,7 @@
     "zod": "^4.3.4"
   },
   "devDependencies": {
-    "@picstash/eslint-config": "*",
+    "@picstash/eslint-config": "^0.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/js-yaml": "^4.0.9",
     "eslint": "^9.39.2",

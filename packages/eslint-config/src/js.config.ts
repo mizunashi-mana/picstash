@@ -1,6 +1,8 @@
 import eslintJs from '@eslint/js';
 import { defineConfig } from 'eslint/config';
 
+// These globals are restricted in Node.js environment to encourage better patterns
+// In browser environment, these are legitimate APIs
 const restrictedGlobals = [
   {
     name: 'window',
@@ -20,7 +22,9 @@ const restrictedGlobals = [
   },
 ];
 
-export function buildJsConfig() {
+export function buildJsConfig(props: {
+  entrypointFiles: string[];
+}) {
   return defineConfig([
     eslintJs.configs.recommended,
     {
@@ -65,7 +69,7 @@ export function buildJsConfig() {
         'no-shadow': 'off', // Use @typescript-eslint/no-shadow instead
 
         // Restricted globals
-        'no-restricted-globals': ['error', ...restrictedGlobals],
+        'no-restricted-globals': ['error', ...restrictedGlobals.filter(item => !['window', 'document'].includes(item.name))],
 
         // Import path restrictions (absolute paths with @)
         'no-restricted-imports': [
@@ -79,6 +83,12 @@ export function buildJsConfig() {
             ],
           },
         ],
+      },
+    },
+    {
+      files: props.entrypointFiles,
+      rules: {
+        'no-restricted-globals': ['error', ...restrictedGlobals],
       },
     },
     // Storybook files can use console and alert

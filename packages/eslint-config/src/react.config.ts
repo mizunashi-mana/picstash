@@ -1,12 +1,12 @@
 import { defineConfig } from 'eslint/config';
 import react from 'eslint-plugin-react';
-import * as reactHooks from 'eslint-plugin-react-hooks';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export function buildReactConfig() {
   return defineConfig([
-    react.configs.flat.recommended,
-    react.configs.flat['jsx-runtime'],
-    reactHooks.configs['recommended-latest'],
+    react.configs.flat.recommended!,
+    react.configs.flat['jsx-runtime']!,
+    reactHooks.configs.flat['recommended-latest'],
     {
       settings: {
         react: {

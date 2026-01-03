@@ -1,6 +1,6 @@
 import { buildConfig } from '@picstash/eslint-config';
 
 export default buildConfig({
-  disableFixedRules: false,
+  environment: 'browser',
   ruleSets: ['common', 'react'],
 });

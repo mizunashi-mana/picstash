@@ -9,16 +9,18 @@ import { buildReactConfig } from './react.config.js';
 import { buildStylisticConfig } from './stylistic.config.js';
 import { buildTsConfig } from './ts.config.js';
 
-export type RuleSet = 'common' | 'react';
+export type RuleSet = 'common' | 'react' | 'node';
 
 export type Env = {
   disableFixedRules?: boolean;
   ruleSets?: RuleSet[];
+  entrypointFiles?: string[];
 };
 
 export function buildConfig(env: Env) {
-  const ruleSets = env.ruleSets ?? ['common'];
+  const ruleSets = env.ruleSets ?? ['common', 'node'];
   const disableFixedRules = env.disableFixedRules ?? process.env.DISABLED_FIXED_RULES === 'true';
+  const entrypointFiles = env.entrypointFiles ?? ['src/index.ts'];
 
   const rules: Parameters<typeof defineConfig>[0] = [
     buildGlobalsConfig(),
@@ -28,15 +30,20 @@ export function buildConfig(env: Env) {
     switch (ruleSet) {
       case 'common':
         rules.push(
-          buildJsConfig(),
+          buildJsConfig({
+            entrypointFiles,
+          }),
           buildTsConfig(),
           buildStylisticConfig(),
           buildImportsConfig({ disableFixedRules }),
           buildPromiseConfig(),
-          buildNodeConfig(),
           buildCommentsConfig(),
         );
         break;
+      case 'node':
+        rules.push(buildNodeConfig());
+        break;
+
       case 'react':
         rules.push(buildReactConfig());
         break;
