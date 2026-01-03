@@ -7,8 +7,9 @@ export function HomePage() {
   const queryClient = useQueryClient();
 
   const handleUploadSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['images'] }).catch(() => {
-      // Ignore invalidation errors
+    queryClient.invalidateQueries({ queryKey: ['images'] }).catch((error: unknown) => {
+      // eslint-disable-next-line no-console -- Log error to help debug cache invalidation failures
+      console.error('Failed to invalidate image queries after upload:', error);
     });
   };
 

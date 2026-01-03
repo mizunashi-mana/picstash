@@ -29,10 +29,15 @@ async function ensureDirectory(dir: string): Promise<void> {
  */
 export async function getImageMetadata(buffer: Buffer): Promise<ImageMetadata> {
   const metadata = await sharp(buffer).metadata();
-  return {
-    width: metadata.width,
-    height: metadata.height,
-  };
+  const { width, height } = metadata;
+
+  // Runtime check: width/height can be undefined for corrupted images
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Sharp returns undefined for corrupted files
+  if (width == null || height == null) {
+    throw new Error('Unable to determine image dimensions from buffer');
+  }
+
+  return { width, height };
 }
 
 /**
@@ -52,7 +57,10 @@ export async function generateThumbnail(
     .jpeg({ quality: 80 })
     .toBuffer();
 
-  const thumbnailFilename = filename.replace(/\.[^.]+$/, '.jpg');
+  let thumbnailFilename = filename.replace(/\.[^.]+$/, '.jpg');
+  if (thumbnailFilename === filename) {
+    thumbnailFilename = `${filename}.jpg`;
+  }
   const thumbnailFilePath = join(thumbnailsPath, thumbnailFilename);
 
   await writeFile(thumbnailFilePath, thumbnailBuffer);
