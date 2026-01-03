@@ -30,12 +30,28 @@ picstash/
 │   │
 │   ├── server/                 # バックエンド
 │   │   ├── src/
-│   │   │   ├── routes/         # API ルート定義
-│   │   │   ├── controllers/    # コントローラー
-│   │   │   ├── services/       # ビジネスロジック
-│   │   │   ├── models/         # データモデル
-│   │   │   ├── middleware/     # ミドルウェア
-│   │   │   └── index.ts        # サーバーエントリ
+│   │   │   ├── index.ts        # サーバーエントリポイント
+│   │   │   ├── app.ts          # Fastify アプリ構成
+│   │   │   ├── config.ts       # 設定読み込み
+│   │   │   │
+│   │   │   ├── application/    # ユースケース層
+│   │   │   │   └── image/      # 画像関連ユースケース
+│   │   │   │
+│   │   │   ├── domain/         # ドメイン層（ビジネスロジック）
+│   │   │   │   ├── image/      # 画像ドメイン
+│   │   │   │   ├── tag/        # タグドメイン
+│   │   │   │   └── collection/ # コレクションドメイン
+│   │   │   │
+│   │   │   ├── infra/          # インフラ層
+│   │   │   │   ├── database/   # Prisma Client、リポジトリ実装
+│   │   │   │   ├── storage/    # ファイルストレージ
+│   │   │   │   └── http/       # Fastify ルート、プラグイン
+│   │   │   │       ├── routes/
+│   │   │   │       └── plugins/
+│   │   │   │
+│   │   │   └── shared/         # 共通ユーティリティ
+│   │   │
+│   │   ├── prisma/             # Prisma スキーマ・マイグレーション
 │   │   ├── tests/              # server のテスト
 │   │   ├── package.json
 │   │   └── tsconfig.json
@@ -68,7 +84,12 @@ picstash/
 フロントエンドのパッケージ。コンポーネントベースの設計で、再利用可能な UI 部品を `components/` に、ページ単位のコンポーネントを `pages/` に配置。
 
 ### `packages/server/`
-バックエンドのパッケージ。MVC パターンに基づき、ルーティング、コントローラー、サービス層を分離。
+バックエンドのパッケージ。レイヤードアーキテクチャを採用：
+- **domain/** - ビジネスロジック、エンティティ（依存なし）
+- **application/** - ユースケース（domain のみ依存）
+- **infra/** - 外部システム連携（Fastify, Prisma, ファイルシステム）
+
+domain 内は `image/`, `tag/`, `collection/` のように領域ごとにモジュール化。
 
 ### `packages/shared/`
 フロントエンドとバックエンドで共有する型定義や定数。API のレスポンス型などを一元管理。

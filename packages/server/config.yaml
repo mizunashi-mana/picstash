@@ -1,5 +1,9 @@
 # Picstash Server Configuration
 
+server:
+  port: 3000
+  host: "0.0.0.0"
+
 database:
   # SQLite database file path (relative to packages/server/)
   url: "file:./prisma/data/picstash.db"
