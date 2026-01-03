@@ -16,7 +16,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:coverage": "npm run test:coverage --workspaces --if-present"
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "db:migrate": "npm run db:migrate -w @picstash/server"
   },
   "license": "Apache-2.0 OR MPL-2.0",
   "devDependencies": {

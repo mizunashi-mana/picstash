@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/api/client.ts","./src/features/home/pages/homepage.tsx","./src/routes/index.tsx","./vite.config.ts"],"version":"5.9.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/api/client.ts","./src/features/home/pages/homepage.tsx","./src/features/upload/api.ts","./src/features/upload/index.ts","./src/features/upload/components/imagedropzone.tsx","./src/routes/index.tsx","./vite.config.ts","./vitest.config.ts","./tests/sample.test.tsx","./tests/setup.ts"],"version":"5.9.3"}
