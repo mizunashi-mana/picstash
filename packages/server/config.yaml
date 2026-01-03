@@ -10,4 +10,4 @@ database:
 
 storage:
   # Image storage path (relative to packages/server/)
-  path: "./storage"
+  path: "../../storage"

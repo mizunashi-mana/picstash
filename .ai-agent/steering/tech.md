@@ -94,13 +94,21 @@ npm run db:migrate
 npm run dev
 ```
 
-### 環境変数
+### 設定ファイル
 
-| 変数名 | 説明 | デフォルト値 |
-|--------|------|-------------|
-| `PORT` | サーバーポート番号 | `3000` |
-| `DATABASE_URL` | SQLite データベースパス | `file:./data/picstash.db` |
-| `STORAGE_PATH` | 画像保存先パス | `./storage` |
+`packages/server/config.yaml` で設定を管理（環境変数は使用しない）:
+
+```yaml
+server:
+  port: 3000
+  host: 0.0.0.0
+
+database:
+  url: file:./prisma/data/picstash.db
+
+storage:
+  path: ../../storage
+```
 
 ## 管理コマンド
 

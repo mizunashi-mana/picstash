@@ -1,3 +1,5 @@
+/storage/
+
 # Devenv
 .devenv*
 devenv.local.nix

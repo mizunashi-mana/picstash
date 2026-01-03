@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@mantine/core": "^8.1.4",
+    "@mantine/dropzone": "^8.3.10",
     "@mantine/hooks": "^8.1.4",
     "@picstash/shared": "*",
     "@tanstack/react-query": "^5.80.7",

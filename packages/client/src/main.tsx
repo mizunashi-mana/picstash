@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router';
 import { App } from '@/App';
 
 import '@mantine/core/styles.css';
+import '@mantine/dropzone/styles.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {

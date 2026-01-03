@@ -12,17 +12,18 @@ export default {
       },
     },
 
-    // features 間の直接依存を禁止（shared 経由のみ）
+    // features 間の内部実装への直接依存を禁止（index.ts 経由のみ許可）
     {
       name: 'no-cross-feature-deps',
       severity: 'error',
-      comment: 'features/ 間の直接依存は禁止（shared/ 経由で共有する）',
+      comment:
+        'features/ 間の内部実装への直接依存は禁止（index.ts 経由で公開 API を利用する）',
       from: {
         path: '^src/features/([^/]+)/',
       },
       to: {
         path: '^src/features/([^/]+)/',
-        pathNot: '^src/features/$1/',
+        pathNot: ['^src/features/$1/', '^src/features/[^/]+/index\\.ts$'],
       },
     },
 
