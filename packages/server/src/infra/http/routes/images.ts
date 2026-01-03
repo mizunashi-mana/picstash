@@ -1,6 +1,14 @@
+import { createReadStream } from 'node:fs';
 import { extname } from 'node:path';
-import { createImage, findAllImages } from '@/infra/database/image-repository.js';
-import { saveOriginal } from '@/infra/storage/file-storage.js';
+import {
+  createImage,
+  findAllImages,
+  findImageById,
+} from '@/infra/database/image-repository.js';
+import {
+  getAbsolutePath,
+  saveOriginal,
+} from '@/infra/storage/file-storage.js';
 import type { FastifyInstance } from 'fastify';
 
 const ALLOWED_MIME_TYPES = [
@@ -67,4 +75,28 @@ export function imageRoutes(app: FastifyInstance): void {
     const images = await findAllImages();
     return reply.send(images);
   });
+
+  // Get image file
+  app.get<{ Params: { id: string } }>(
+    '/api/images/:id/file',
+    async (request, reply) => {
+      const { id } = request.params;
+
+      const image = await findImageById(id);
+      if (!image) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      const absolutePath = getAbsolutePath(image.path);
+      const stream = createReadStream(absolutePath);
+
+      return reply
+        .header('Content-Type', image.mimeType)
+        .header('Cache-Control', 'public, max-age=31536000, immutable')
+        .send(stream);
+    },
+  );
 }

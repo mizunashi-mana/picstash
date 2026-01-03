@@ -1,0 +1,72 @@
+import {
+  Alert,
+  AspectRatio,
+  Card,
+  Image,
+  Loader,
+  SimpleGrid,
+  Stack,
+  Text,
+} from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
+import { fetchImages, getImageUrl } from '@/features/gallery/api';
+
+export function ImageGallery() {
+  const { data: images, isLoading, error } = useQuery({
+    queryKey: ['images'],
+    queryFn: fetchImages,
+  });
+
+  if (isLoading) {
+    return (
+      <Stack align="center" py="xl">
+        <Loader size="lg" />
+        <Text c="dimmed">Loading images...</Text>
+      </Stack>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert color="red" title="Error">
+        Failed to load images:
+        {' '}
+        {error.message}
+      </Alert>
+    );
+  }
+
+  if (!images || images.length === 0) {
+    return (
+      <Stack align="center" py="xl">
+        <Text c="dimmed" size="lg">
+          No images yet
+        </Text>
+        <Text c="dimmed" size="sm">
+          Upload your first image to get started
+        </Text>
+      </Stack>
+    );
+  }
+
+  return (
+    <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
+      {images.map(image => (
+        <Card key={image.id} padding="xs" radius="md" withBorder>
+          <Card.Section>
+            <AspectRatio ratio={1}>
+              <Image
+                src={getImageUrl(image.id)}
+                alt={image.filename}
+                fit="cover"
+              />
+            </AspectRatio>
+          </Card.Section>
+          <Text size="xs" c="dimmed" mt="xs" lineClamp={1}>
+            {image.filename}
+          </Text>
+        </Card>
+      ))}
+    </SimpleGrid>
+  );
+}
