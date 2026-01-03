@@ -175,7 +175,7 @@ Prisma 7.x では Driver Adapter パターンを使用：
 ```typescript
 // packages/server/src/infra/database/prisma.ts
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import { PrismaClient } from '@generated/prisma/client.js';
+import { PrismaClient } from '@~generated/prisma/client.js';
 
 const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
 export const prisma = new PrismaClient({ adapter });

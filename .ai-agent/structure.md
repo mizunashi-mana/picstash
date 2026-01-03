@@ -127,7 +127,7 @@ picstash/
 
 domain 内は `image/`, `tag/`, `collection/` のように領域ごとにモジュール化。
 
-Prisma Client は `generated/prisma/` に出力され、`@generated/prisma` エイリアスでインポート。
+Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エイリアスでインポート。
 
 ### `packages/eslint-config/`
 共有 ESLint 設定パッケージ。`buildConfig()` 関数で環境に応じた設定を生成：
