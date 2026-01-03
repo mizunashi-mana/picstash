@@ -7,9 +7,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@generated/*": ["./generated/*"]
+      "@generated/*": ["./generated/*"],
+      "@~tests/*": ["./tests/*"]
     }
   },
-  "include": ["src/**/*", "*.config.ts"],
+  "include": ["src/**/*", "*.config.ts", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }
