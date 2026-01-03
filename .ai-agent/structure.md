@@ -37,6 +37,7 @@ picstash/
 │   │   │
 │   │   ├── public/             # 静的ファイル
 │   │   ├── tests/              # client のテスト
+│   │   ├── eslint.config.mjs   # ESLint 設定（browser 環境）
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
@@ -63,12 +64,31 @@ picstash/
 │   │   │   │
 │   │   │   └── shared/         # 共通ユーティリティ
 │   │   │
+│   │   ├── generated/          # Prisma 生成ファイル
+│   │   │   └── prisma/         # Prisma Client
 │   │   ├── prisma/             # Prisma スキーマ・マイグレーション
+│   │   │   ├── schema.prisma
+│   │   │   ├── data/           # SQLite データベースファイル
+│   │   │   └── migrations/
 │   │   ├── tests/              # server のテスト
+│   │   ├── eslint.config.mjs   # ESLint 設定（node 環境）
+│   │   ├── prisma.config.ts    # Prisma 設定
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   └── shared/                 # フロントエンド・バックエンド共通
+│   ├── eslint-config/          # 共有 ESLint 設定
+│   │   ├── src/
+│   │   │   ├── index.ts        # メインエクスポート
+│   │   │   ├── js.config.ts    # JavaScript ルール
+│   │   │   ├── ts.config.ts    # TypeScript ルール
+│   │   │   ├── react.config.ts # React ルール
+│   │   │   ├── node.config.ts  # Node.js ルール
+│   │   │   └── ...
+│   │   ├── dist/               # ビルド出力
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   └── shared/                 # フロントエンド・バックエンド共通（未作成）
 │       ├── src/
 │       │   ├── types/          # 型定義
 │       │   └── constants/      # 定数
@@ -107,7 +127,16 @@ picstash/
 
 domain 内は `image/`, `tag/`, `collection/` のように領域ごとにモジュール化。
 
-### `packages/shared/`
+Prisma Client は `generated/prisma/` に出力され、`@generated/prisma` エイリアスでインポート。
+
+### `packages/eslint-config/`
+共有 ESLint 設定パッケージ。`buildConfig()` 関数で環境に応じた設定を生成：
+- `environment: 'node'` - Node.js 環境（サーバー）
+- `environment: 'browser'` - ブラウザ環境（クライアント）
+- `ruleSets: ['common']` - 共通ルール
+- `ruleSets: ['common', 'react']` - React ルール込み
+
+### `packages/shared/`（未作成）
 フロントエンドとバックエンドで共有する型定義や定数。API のレスポンス型などを一元管理。
 
 ### `storage/`

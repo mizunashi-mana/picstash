@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint:eslint": "eslint --cache --fix src"
+    "lint:eslint": "eslint --cache --fix src",
+    "lint:deps": "depcruise src --config .dependency-cruiser.mjs"
   },
   "dependencies": {
     "@mantine/core": "^8.1.4",
@@ -21,10 +22,11 @@
     "react-router": "^7.6.1"
   },
   "devDependencies": {
-    "@picstash/eslint-config": "^0.0.0",
+    "@picstash/eslint-config": "*",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",
+    "dependency-cruiser": "^17.3.6",
     "eslint": "^9.39.2",
     "typescript": "^5.8.3",
     "vite": "^7.0.4"
