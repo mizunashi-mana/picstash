@@ -47,7 +47,11 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   });
 
   // Fetch all labels for the dropdown
-  const { data: labels } = useQuery({
+  const {
+    data: labels,
+    isLoading: labelsLoading,
+    error: labelsError,
+  } = useQuery({
     queryKey: ['labels'],
     queryFn: fetchLabels,
   });
@@ -56,9 +60,12 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (selectedLabelId === null) throw new Error('Label is required');
+      const trimmedKeywords = keywords
+        .map(k => k.trim())
+        .filter(k => k !== '');
       return createImageAttribute(imageId, {
         labelId: selectedLabelId,
-        keywords: keywords.length > 0 ? keywords.join(',') : undefined,
+        keywords: trimmedKeywords.length > 0 ? trimmedKeywords.join(',') : undefined,
       });
     },
     onSuccess: async () => {
@@ -73,8 +80,11 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (editingAttribute === null) throw new Error('No attribute selected');
+      const trimmedKeywords = keywords
+        .map(k => k.trim())
+        .filter(k => k !== '');
       return updateImageAttribute(imageId, editingAttribute.id, {
-        keywords: keywords.length > 0 ? keywords.join(',') : undefined,
+        keywords: trimmedKeywords.length > 0 ? trimmedKeywords.join(',') : undefined,
       });
     },
     onSuccess: async () => {
@@ -110,15 +120,23 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
 
   const openEditModal = (attribute: ImageAttribute) => {
     setEditingAttribute(attribute);
-    setKeywords(attribute.keywords?.split(',').filter(k => k !== '') ?? []);
+    setKeywords(
+      attribute.keywords
+        ?.split(',')
+        .map(k => k.trim())
+        .filter(k => k !== '') ?? [],
+    );
   };
 
   const parseKeywords = (keywordsString: string | null): string[] => {
     if (keywordsString === null || keywordsString === '') return [];
-    return keywordsString.split(',').filter(k => k !== '');
+    return keywordsString
+      .split(',')
+      .map(k => k.trim())
+      .filter(k => k !== '');
   };
 
-  if (attributesLoading) {
+  if (attributesLoading || labelsLoading) {
     return (
       <Card padding="md" withBorder>
         <Stack align="center" py="md">
@@ -128,10 +146,18 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     );
   }
 
-  if (attributesError) {
+  if (attributesError !== null) {
     return (
       <Alert color="red" title="Error">
         Failed to load attributes
+      </Alert>
+    );
+  }
+
+  if (labelsError !== null) {
+    return (
+      <Alert color="red" title="Error">
+        Failed to load labels
       </Alert>
     );
   }
@@ -187,7 +213,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
                       {attrKeywords.length > 0 && (
                         <Group gap={4}>
                           {attrKeywords.map((keyword, idx) => (
-                            <Badge key={idx} size="xs" variant="outline" color="gray">
+                            <Badge key={`${keyword}-${idx}`} size="xs" variant="outline" color="gray">
                               {keyword}
                             </Badge>
                           ))}
@@ -225,7 +251,11 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       {/* Add Attribute Modal */}
       <Modal
         opened={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
+        onClose={() => {
+          setAddModalOpen(false);
+          setSelectedLabelId(null);
+          setKeywords([]);
+        }}
         title="属性を追加"
       >
         <Stack gap="md">
@@ -261,7 +291,10 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       {/* Edit Attribute Modal */}
       <Modal
         opened={editingAttribute !== null}
-        onClose={() => setEditingAttribute(null)}
+        onClose={() => {
+          setEditingAttribute(null);
+          setKeywords([]);
+        }}
         title="属性を編集"
       >
         <Stack gap="md">

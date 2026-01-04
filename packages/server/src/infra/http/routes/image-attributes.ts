@@ -46,6 +46,14 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
       const { imageId } = request.params;
       const { labelId, keywords } = request.body;
 
+      // Validate labelId is present and a non-empty string
+      if (typeof labelId !== 'string' || labelId.trim().length === 0) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'labelId is required and must be a non-empty string',
+        });
+      }
+
       // Validate image exists
       const image = await findImageById(imageId);
       if (image === null) {
@@ -58,8 +66,8 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
       // Validate label exists
       const label = await findLabelById(labelId);
       if (label === null) {
-        return reply.status(400).send({
-          error: 'Bad Request',
+        return reply.status(404).send({
+          error: 'Not Found',
           message: 'Label not found',
         });
       }
@@ -73,10 +81,21 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
         });
       }
 
+      // Normalize keywords: trim each keyword and convert empty to undefined
+      let normalizedKeywords: string | undefined;
+      if (keywords !== undefined) {
+        const trimmed = keywords
+          .split(',')
+          .map(k => k.trim())
+          .filter(k => k.length > 0)
+          .join(',');
+        normalizedKeywords = trimmed.length > 0 ? trimmed : undefined;
+      }
+
       const attribute = await createImageAttribute({
         imageId,
         labelId,
-        keywords: keywords?.trim(),
+        keywords: normalizedKeywords,
       });
 
       return reply.status(201).send(attribute);
@@ -102,17 +121,36 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
         });
       }
 
-      // Validate attribute exists and belongs to the image
+      // Validate attribute exists
       const attribute = await findImageAttributeById(attributeId);
-      if (attribute?.imageId !== imageId) {
+      if (attribute === null) {
         return reply.status(404).send({
           error: 'Not Found',
           message: 'Attribute not found',
         });
       }
 
+      // Validate attribute belongs to this image
+      if (attribute.imageId !== imageId) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Attribute does not belong to this image',
+        });
+      }
+
+      // Normalize keywords: trim each keyword and convert empty to undefined
+      let normalizedKeywords: string | undefined;
+      if (keywords !== undefined) {
+        const trimmed = keywords
+          .split(',')
+          .map(k => k.trim())
+          .filter(k => k.length > 0)
+          .join(',');
+        normalizedKeywords = trimmed.length > 0 ? trimmed : undefined;
+      }
+
       const updatedAttribute = await updateImageAttributeById(attributeId, {
-        keywords: keywords?.trim(),
+        keywords: normalizedKeywords,
       });
 
       return reply.send(updatedAttribute);
@@ -134,12 +172,20 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
         });
       }
 
-      // Validate attribute exists and belongs to the image
+      // Validate attribute exists
       const attribute = await findImageAttributeById(attributeId);
-      if (attribute?.imageId !== imageId) {
+      if (attribute === null) {
         return reply.status(404).send({
           error: 'Not Found',
           message: 'Attribute not found',
+        });
+      }
+
+      // Validate attribute belongs to this image
+      if (attribute.imageId !== imageId) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Attribute does not belong to this image',
         });
       }
 
