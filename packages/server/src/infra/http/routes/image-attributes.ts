@@ -1,0 +1,151 @@
+import {
+  createImageAttribute,
+  deleteImageAttributeById,
+  findAttributesByImageId,
+  findImageAttributeById,
+  findImageAttributeByImageAndLabel,
+  updateImageAttributeById,
+} from '@/infra/database/image-attribute-repository.js';
+import { findImageById } from '@/infra/database/image-repository.js';
+import { findLabelById } from '@/infra/database/label-repository.js';
+import type { FastifyInstance } from 'fastify';
+
+interface CreateAttributeBody {
+  labelId: string;
+  keywords?: string;
+}
+
+interface UpdateAttributeBody {
+  keywords?: string;
+}
+
+export function imageAttributeRoutes(app: FastifyInstance): void {
+  // Get all attributes for an image
+  app.get<{ Params: { imageId: string } }>(
+    '/api/images/:imageId/attributes',
+    async (request, reply) => {
+      const { imageId } = request.params;
+
+      const image = await findImageById(imageId);
+      if (image === null) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      const attributes = await findAttributesByImageId(imageId);
+      return reply.send(attributes);
+    },
+  );
+
+  // Add attribute to image
+  app.post<{ Params: { imageId: string }; Body: CreateAttributeBody }>(
+    '/api/images/:imageId/attributes',
+    async (request, reply) => {
+      const { imageId } = request.params;
+      const { labelId, keywords } = request.body;
+
+      // Validate image exists
+      const image = await findImageById(imageId);
+      if (image === null) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      // Validate label exists
+      const label = await findLabelById(labelId);
+      if (label === null) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Label not found',
+        });
+      }
+
+      // Check if attribute already exists
+      const existing = await findImageAttributeByImageAndLabel(imageId, labelId);
+      if (existing !== null) {
+        return reply.status(409).send({
+          error: 'Conflict',
+          message: 'This label is already assigned to the image',
+        });
+      }
+
+      const attribute = await createImageAttribute({
+        imageId,
+        labelId,
+        keywords: keywords?.trim(),
+      });
+
+      return reply.status(201).send(attribute);
+    },
+  );
+
+  // Update attribute (keywords)
+  app.put<{
+    Params: { imageId: string; attributeId: string };
+    Body: UpdateAttributeBody;
+  }>(
+    '/api/images/:imageId/attributes/:attributeId',
+    async (request, reply) => {
+      const { imageId, attributeId } = request.params;
+      const { keywords } = request.body;
+
+      // Validate image exists
+      const image = await findImageById(imageId);
+      if (image === null) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      // Validate attribute exists and belongs to the image
+      const attribute = await findImageAttributeById(attributeId);
+      if (attribute?.imageId !== imageId) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Attribute not found',
+        });
+      }
+
+      const updatedAttribute = await updateImageAttributeById(attributeId, {
+        keywords: keywords?.trim(),
+      });
+
+      return reply.send(updatedAttribute);
+    },
+  );
+
+  // Delete attribute
+  app.delete<{ Params: { imageId: string; attributeId: string } }>(
+    '/api/images/:imageId/attributes/:attributeId',
+    async (request, reply) => {
+      const { imageId, attributeId } = request.params;
+
+      // Validate image exists
+      const image = await findImageById(imageId);
+      if (image === null) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      // Validate attribute exists and belongs to the image
+      const attribute = await findImageAttributeById(attributeId);
+      if (attribute?.imageId !== imageId) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Attribute not found',
+        });
+      }
+
+      await deleteImageAttributeById(attributeId);
+
+      return reply.status(204).send();
+    },
+  );
+}

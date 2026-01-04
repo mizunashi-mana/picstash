@@ -18,6 +18,7 @@ import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
 import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
+import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -134,8 +135,11 @@ export function ImageDetailPage() {
           />
         </Box>
 
+        <ImageAttributeSection imageId={image.id} />
+
         <Paper p="md" withBorder>
           <Stack gap="xs">
+            <Title order={5}>ファイル情報</Title>
             <Group justify="space-between">
               <Text size="sm" c="dimmed">ファイル名</Text>
               <Text size="sm">{image.filename}</Text>

@@ -1,4 +1,9 @@
 import { apiClient } from '@/api/client';
+import type {
+  CreateImageAttributeInput,
+  ImageAttribute,
+  UpdateImageAttributeInput,
+} from '@picstash/shared';
 
 export interface Image {
   id: string;
@@ -31,4 +36,44 @@ export function getImageUrl(imageId: string): string {
 
 export function getThumbnailUrl(imageId: string): string {
   return `/api/images/${imageId}/thumbnail`;
+}
+
+// Image Attribute APIs
+export async function fetchImageAttributes(
+  imageId: string,
+): Promise<ImageAttribute[]> {
+  return apiClient<ImageAttribute[]>(`/images/${imageId}/attributes`);
+}
+
+export async function createImageAttribute(
+  imageId: string,
+  input: CreateImageAttributeInput,
+): Promise<ImageAttribute> {
+  return apiClient<ImageAttribute>(`/images/${imageId}/attributes`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateImageAttribute(
+  imageId: string,
+  attributeId: string,
+  input: UpdateImageAttributeInput,
+): Promise<ImageAttribute> {
+  return apiClient<ImageAttribute>(
+    `/images/${imageId}/attributes/${attributeId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    },
+  );
+}
+
+export async function deleteImageAttribute(
+  imageId: string,
+  attributeId: string,
+): Promise<void> {
+  await apiClient<void>(`/images/${imageId}/attributes/${attributeId}`, {
+    method: 'DELETE',
+  });
 }
