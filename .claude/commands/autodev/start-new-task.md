@@ -9,24 +9,30 @@ allowed-tools: Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 
 ## 手順
 
-1. **タスクディレクトリ作成**: `.ai-agent/tasks/YYYYMMDD-$ARGUMENTS/README.md` を作成（YYYYMMDD は今日の日付）
+1. **タスク名の決定**:
+   - `$ARGUMENTS` の内容から適切なタスク名（英語、kebab-case）を考える
+   - 例: 「画像詳細表示を実装」→ `image-detail-view`
+   - 例: 「属性管理APIを作成」→ `attribute-management-api`
+   - 簡潔で内容が分かるタスク名にする
 
-2. **README.md に以下を記載**:
+2. **タスクディレクトリ作成**: `.ai-agent/tasks/YYYYMMDD-{タスク名}/README.md` を作成（YYYYMMDD は今日の日付）
+
+3. **README.md に以下を記載**:
    - 目的・ゴール
    - 実装方針
    - 完了条件
    - 作業ログ（空欄で開始）
 
-3. **関連ドキュメント確認**:
+4. **関連ドキュメント確認**:
    - `.ai-agent/steering/plan.md` で該当セグメントを確認
    - `.ai-agent/steering/tech.md` で技術スタックを確認
    - `.ai-agent/structure.md` でディレクトリ構成を確認
 
-4. **ユーザーに方針を提示して確認を取る**
+5. **ユーザーに方針を提示して確認を取る**
 
-5. **TodoWrite でタスクを細分化**
+6. **TodoWrite でタスクを細分化**
 
-6. **実装開始**（ユーザー確認後）
+7. **実装開始**（ユーザー確認後）
 
 ## 実装中の注意
 
