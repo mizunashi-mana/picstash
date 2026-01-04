@@ -30,9 +30,13 @@ allowed-tools: Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 
 5. **ユーザーに方針を提示して確認を取る**
 
-6. **TodoWrite でタスクを細分化**
+6. **ブランチ作成**（ユーザー確認後）:
+   - `git checkout -b {タスク名}` でブランチを作成
+   - 例: `git checkout -b add-image-detail-view`
 
-7. **実装開始**（ユーザー確認後）
+7. **TodoWrite でタスクを細分化**
+
+8. **実装開始**
 
 ## 実装中の注意
 
