@@ -33,12 +33,11 @@ export function imageRoutes(app: FastifyInstance): void {
       });
     }
 
-    const buffer = await file.toBuffer();
     const result = await uploadImage(
       {
         filename: file.filename,
         mimetype: file.mimetype,
-        buffer,
+        stream: file.file,
       },
       { imageRepository, fileStorage, imageProcessor },
     );

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { injectable } from 'inversify';
@@ -23,40 +23,38 @@ export class SharpImageProcessor implements ImageProcessor {
     await mkdir(dir, { recursive: true });
   }
 
-  async getMetadata(buffer: Buffer): Promise<ImageMetadata> {
-    const metadata = await sharp(buffer).metadata();
+  async getMetadata(filePath: string): Promise<ImageMetadata> {
+    const metadata = await sharp(filePath).metadata();
     const { width, height } = metadata;
 
     // Runtime check: width/height can be undefined for corrupted images
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Sharp returns undefined for corrupted files
     if (width == null || height == null) {
-      throw new Error('Unable to determine image dimensions from buffer');
+      throw new Error('Unable to determine image dimensions from file');
     }
 
     return { width, height };
   }
 
   async generateThumbnail(
-    buffer: Buffer,
-    filename: string,
+    inputFilePath: string,
+    outputFilename: string,
   ): Promise<ThumbnailResult> {
     await this.ensureDirectory(thumbnailsPath);
 
-    const thumbnailBuffer = await sharp(buffer)
+    let thumbnailFilename = outputFilename.replace(/\.[^.]+$/, '.jpg');
+    if (thumbnailFilename === outputFilename) {
+      thumbnailFilename = `${outputFilename}.jpg`;
+    }
+    const thumbnailFilePath = join(thumbnailsPath, thumbnailFilename);
+
+    await sharp(inputFilePath)
       .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
         fit: 'cover',
         position: 'center',
       })
       .jpeg({ quality: 80 })
-      .toBuffer();
-
-    let thumbnailFilename = filename.replace(/\.[^.]+$/, '.jpg');
-    if (thumbnailFilename === filename) {
-      thumbnailFilename = `${filename}.jpg`;
-    }
-    const thumbnailFilePath = join(thumbnailsPath, thumbnailFilename);
-
-    await writeFile(thumbnailFilePath, thumbnailBuffer);
+      .toFile(thumbnailFilePath);
 
     return {
       filename: thumbnailFilename,
