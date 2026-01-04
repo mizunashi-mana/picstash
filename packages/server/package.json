@@ -3,7 +3,6 @@
   "type": "module",
   "name": "@picstash/server",
   "version": "1.0.0",
-  "description": "Picstash API server",
   "main": "./src/index.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -37,7 +36,7 @@
     "zod": "^4.3.4"
   },
   "devDependencies": {
-    "@picstash/eslint-config": "^0.0.0",
+    "@picstash/eslint-config": "*",
     "@types/better-sqlite3": "^7.6.13",
     "@types/js-yaml": "^4.0.9",
     "@vitest/coverage-v8": "^4.0.16",
@@ -48,6 +47,5 @@
     "prisma-lint": "^0.13.0",
     "tsx": "^4.21.0",
     "vitest": "^4.0.16"
-  },
-  "license": "Apache-2.0 OR MPL-2.0"
+  }
 }

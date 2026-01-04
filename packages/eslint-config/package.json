@@ -1,6 +1,6 @@
 {
   "name": "@picstash/eslint-config",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -23,6 +23,7 @@
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-storybook": "^10.1.11",
     "eslint-plugin-unused-imports": "^4.1.4",
     "globals": "^16.3.0",
     "typescript-eslint": "^8.39.0"

@@ -14,3 +14,17 @@ declare module 'eslint-plugin-promise' {
   const plugin: PromisePlugin;
   export default plugin;
 }
+
+declare module 'eslint-plugin-storybook' {
+  import type { ESLint, Linter } from 'eslint';
+  interface StorybookPlugin extends ESLint.Plugin {
+    configs: {
+      'flat/recommended': Linter.Config[];
+      'flat/csf': Linter.Config[];
+      'flat/csf-strict': Linter.Config[];
+      'flat/addon-interactions': Linter.Config[];
+    };
+  }
+  const plugin: StorybookPlugin;
+  export default plugin;
+}
