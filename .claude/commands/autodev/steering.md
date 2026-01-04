@@ -83,9 +83,9 @@ git commit -m "Update steering documents to reflect current project state"
 ## 確認ポイント
 
 ### README.md
+- プロダクトの概要・コンセプトが伝わりやすいものになっているか
 - 技術スタックが最新か
 - セットアップ手順が動作するか
-- 主な機能が現状を反映しているか
 
 ### tech.md
 - パッケージ状態（セットアップ済み/未作成）

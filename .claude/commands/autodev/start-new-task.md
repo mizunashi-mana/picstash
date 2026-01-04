@@ -33,6 +33,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 6. **ブランチ作成**（ユーザー確認後）:
    - `git checkout -b {タスク名}` でブランチを作成
    - 例: `git checkout -b add-image-detail-view`
+   - そのままブランチ作成することで、タスク内容を引き継ぐ。main の pull は後で良い
 
 7. **TodoWrite でタスクを細分化**
 
