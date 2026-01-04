@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Background stacked images -->
+  <rect x="30" y="20" width="60" height="45" rx="4" fill="#94a3b8" transform="rotate(-8 60 42.5)"/>
+  <rect x="30" y="20" width="60" height="45" rx="4" fill="#cbd5e1" transform="rotate(4 60 42.5)"/>
+
+  <!-- Main image frame -->
+  <rect x="25" y="25" width="70" height="52" rx="5" fill="#3b82f6"/>
+  <rect x="29" y="29" width="62" height="44" rx="3" fill="#ffffff"/>
+
+  <!-- Mountain scene inside frame -->
+  <polygon points="35,65 50,50 65,65" fill="#22c55e"/>
+  <polygon points="55,65 75,42 85,65" fill="#16a34a"/>
+  <circle cx="78" cy="38" r="6" fill="#facc15"/>
+
+  <!-- Text -->
+  <text x="60" y="100" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="bold" fill="#1e293b">Picstash</text>
+</svg>
