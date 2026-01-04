@@ -30,6 +30,9 @@ picstash/
 │   │   │   │   └── home/       # ホーム画面
 │   │   │   │       └── pages/
 │   │   │   │
+│   │   │   ├── shared/         # 共通部品
+│   │   │   │   └── helpers/    # ヘルパー関数
+│   │   │   │
 │   │   │   ├── api/            # 共通 API クライアント
 │   │   │   │
 │   │   │   └── routes/         # React Router 設定
@@ -100,6 +103,8 @@ picstash/
 フロントエンドのパッケージ。Feature-based ディレクトリ構造を採用：
 - **features/** - 機能ごとのモジュール（gallery, upload, home など）
   - 各機能は components/, pages/, api.ts を含む
+- **shared/** - 共通部品
+  - **helpers/** - ヘルパー関数
 - **api/** - 共通 API クライアント
 - **routes/** - React Router 設定
 
