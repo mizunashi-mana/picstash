@@ -51,9 +51,10 @@ picstash/
 │   │   │   │
 │   │   │   └── infra/          # インフラ層
 │   │   │       ├── database/   # Prisma Client
-│   │   │       └── http/       # Fastify ルート、プラグイン
-│   │   │           ├── routes/
-│   │   │           └── plugins/
+│   │   │       ├── http/       # Fastify ルート、プラグイン
+│   │   │       │   ├── routes/
+│   │   │       │   └── plugins/
+│   │   │       └── storage/    # ファイルストレージ
 │   │   │
 │   │   ├── generated/          # Prisma 生成ファイル
 │   │   │   └── prisma/         # Prisma Client
@@ -81,7 +82,7 @@ picstash/
 │   │
 │   └── shared/                 # フロントエンド・バックエンド共通
 │       ├── src/
-│       │   └── types/          # 型定義
+│       │   └── index.ts        # メインエクスポート
 │       ├── package.json
 │       └── tsconfig.json
 │

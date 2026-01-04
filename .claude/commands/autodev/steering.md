@@ -1,5 +1,5 @@
 ---
-description: Create or update Kiro steering documents intelligently based on project state
+description: Update steering documents to reflect current project state
 allowed-tools: Read, Write, Edit, MultiEdit, Bash, Glob, Grep
 ---
 
