@@ -3,8 +3,10 @@ import {
   deleteAttribute,
   updateAttribute,
 } from '@/application/image-attribute/index.js';
-import { findAttributesByImageId } from '@/infra/database/image-attribute-repository.js';
-import { findImageById } from '@/infra/database/image-repository.js';
+import { container, TYPES } from '@/infra/di/index.js';
+import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface CreateAttributeBody {
@@ -17,13 +19,19 @@ interface UpdateAttributeBody {
 }
 
 export function imageAttributeRoutes(app: FastifyInstance): void {
+  const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
+  const labelRepository = container.get<LabelRepository>(TYPES.LabelRepository);
+  const imageAttributeRepository = container.get<ImageAttributeRepository>(
+    TYPES.ImageAttributeRepository,
+  );
+
   // Get all attributes for an image
   app.get<{ Params: { imageId: string } }>(
     '/api/images/:imageId/attributes',
     async (request, reply) => {
       const { imageId } = request.params;
 
-      const image = await findImageById(imageId);
+      const image = await imageRepository.findById(imageId);
       if (image === null) {
         return reply.status(404).send({
           error: 'Not Found',
@@ -31,7 +39,7 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
         });
       }
 
-      const attributes = await findAttributesByImageId(imageId);
+      const attributes = await imageAttributeRepository.findByImageId(imageId);
       return reply.send(attributes);
     },
   );
@@ -43,7 +51,10 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
       const { imageId } = request.params;
       const { labelId, keywords } = request.body;
 
-      const result = await addAttribute({ imageId, labelId, keywords });
+      const result = await addAttribute(
+        { imageId, labelId, keywords },
+        { imageRepository, labelRepository, imageAttributeRepository },
+      );
 
       if (!result.success) {
         switch (result.error) {
@@ -84,7 +95,10 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
       const { imageId, attributeId } = request.params;
       const { keywords } = request.body;
 
-      const result = await updateAttribute({ imageId, attributeId, keywords });
+      const result = await updateAttribute(
+        { imageId, attributeId, keywords },
+        { imageRepository, imageAttributeRepository },
+      );
 
       if (!result.success) {
         switch (result.error) {
@@ -116,7 +130,10 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
     async (request, reply) => {
       const { imageId, attributeId } = request.params;
 
-      const result = await deleteAttribute({ imageId, attributeId });
+      const result = await deleteAttribute(
+        { imageId, attributeId },
+        { imageRepository, imageAttributeRepository },
+      );
 
       if (!result.success) {
         switch (result.error) {

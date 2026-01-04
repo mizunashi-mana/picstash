@@ -1,9 +1,6 @@
 import { createLabel, updateLabel } from '@/application/label/index.js';
-import {
-  deleteLabelById,
-  findAllLabels,
-  findLabelById,
-} from '@/infra/database/label-repository.js';
+import { container, TYPES } from '@/infra/di/index.js';
+import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface CreateLabelBody {
@@ -17,15 +14,17 @@ interface UpdateLabelBody {
 }
 
 export function labelRoutes(app: FastifyInstance): void {
+  const labelRepository = container.get<LabelRepository>(TYPES.LabelRepository);
+
   // List all labels
   app.get('/api/labels', async (_request, reply) => {
-    const labels = await findAllLabels();
+    const labels = await labelRepository.findAll();
     return reply.send(labels);
   });
 
   // Create label
   app.post<{ Body: CreateLabelBody }>('/api/labels', async (request, reply) => {
-    const result = await createLabel(request.body);
+    const result = await createLabel(request.body, { labelRepository });
 
     if (!result.success) {
       switch (result.error) {
@@ -50,7 +49,7 @@ export function labelRoutes(app: FastifyInstance): void {
     '/api/labels/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const label = await findLabelById(id);
+      const label = await labelRepository.findById(id);
 
       if (label == null) {
         return reply.status(404).send({
@@ -68,7 +67,7 @@ export function labelRoutes(app: FastifyInstance): void {
     '/api/labels/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const result = await updateLabel(id, request.body);
+      const result = await updateLabel(id, request.body, { labelRepository });
 
       if (!result.success) {
         switch (result.error) {
@@ -99,7 +98,7 @@ export function labelRoutes(app: FastifyInstance): void {
     '/api/labels/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const label = await findLabelById(id);
+      const label = await labelRepository.findById(id);
 
       if (label == null) {
         return reply.status(404).send({
@@ -108,7 +107,7 @@ export function labelRoutes(app: FastifyInstance): void {
         });
       }
 
-      await deleteLabelById(id);
+      await labelRepository.deleteById(id);
       return reply.status(204).send();
     },
   );

@@ -1,9 +1,9 @@
-import {
-  findImageAttributeById,
-  updateImageAttributeById,
-} from '@/infra/database/image-attribute-repository.js';
-import { findImageById } from '@/infra/database/image-repository.js';
 import { normalizeKeywords } from '@/shared/normalizers/index.js';
+import type {
+  ImageAttribute,
+  ImageAttributeRepository,
+} from '@/application/ports/image-attribute-repository.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
 
 export interface UpdateAttributeInput {
   imageId: string;
@@ -12,24 +12,31 @@ export interface UpdateAttributeInput {
 }
 
 export type UpdateAttributeResult
-  = | { success: true; attribute: Awaited<ReturnType<typeof updateImageAttributeById>> }
+  = | { success: true; attribute: ImageAttribute }
     | { success: false; error: 'IMAGE_NOT_FOUND' }
     | { success: false; error: 'ATTRIBUTE_NOT_FOUND' }
     | { success: false; error: 'ATTRIBUTE_MISMATCH' };
 
+export interface UpdateAttributeDeps {
+  imageRepository: ImageRepository;
+  imageAttributeRepository: ImageAttributeRepository;
+}
+
 export async function updateAttribute(
   input: UpdateAttributeInput,
+  deps: UpdateAttributeDeps,
 ): Promise<UpdateAttributeResult> {
   const { imageId, attributeId, keywords } = input;
+  const { imageRepository, imageAttributeRepository } = deps;
 
   // Validate image exists
-  const image = await findImageById(imageId);
+  const image = await imageRepository.findById(imageId);
   if (image === null) {
     return { success: false, error: 'IMAGE_NOT_FOUND' };
   }
 
   // Validate attribute exists
-  const attribute = await findImageAttributeById(attributeId);
+  const attribute = await imageAttributeRepository.findById(attributeId);
   if (attribute === null) {
     return { success: false, error: 'ATTRIBUTE_NOT_FOUND' };
   }
@@ -39,9 +46,12 @@ export async function updateAttribute(
     return { success: false, error: 'ATTRIBUTE_MISMATCH' };
   }
 
-  const updatedAttribute = await updateImageAttributeById(attributeId, {
-    keywords: normalizeKeywords(keywords),
-  });
+  const updatedAttribute = await imageAttributeRepository.updateById(
+    attributeId,
+    {
+      keywords: normalizeKeywords(keywords),
+    },
+  );
 
   return { success: true, attribute: updatedAttribute };
 }

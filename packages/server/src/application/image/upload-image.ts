@@ -1,9 +1,6 @@
-import { createImage } from '@/infra/database/image-repository.js';
-import { deleteFile, saveOriginal } from '@/infra/storage/file-storage.js';
-import {
-  generateThumbnail,
-  getImageMetadata,
-} from '@/infra/storage/image-processor.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageProcessor } from '@/application/ports/image-processor.js';
+import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
 
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -21,14 +18,22 @@ export interface UploadImageInput {
 }
 
 export type UploadImageResult
-  = | { success: true; image: Awaited<ReturnType<typeof createImage>> }
+  = | { success: true; image: Image }
     | { success: false; error: 'INVALID_MIME_TYPE'; message: string }
     | { success: false; error: 'FILE_TOO_LARGE'; message: string };
 
+export interface UploadImageDeps {
+  imageRepository: ImageRepository;
+  fileStorage: FileStorage;
+  imageProcessor: ImageProcessor;
+}
+
 export async function uploadImage(
   input: UploadImageInput,
+  deps: UploadImageDeps,
 ): Promise<UploadImageResult> {
   const { filename, mimetype, buffer } = input;
+  const { imageRepository, fileStorage, imageProcessor } = deps;
 
   // Validate MIME type
   if (!ALLOWED_MIME_TYPES.includes(mimetype)) {
@@ -56,25 +61,25 @@ export async function uploadImage(
   const extension = extFromFilename !== '' ? extFromFilename : `.${extFromMime}`;
 
   // Save file to storage
-  const saved = await saveOriginal(buffer, extension);
+  const saved = await fileStorage.saveOriginal(buffer, extension);
 
   // Get image metadata and generate thumbnail
   let metadata;
   let thumbnail;
   try {
-    metadata = await getImageMetadata(buffer);
-    thumbnail = await generateThumbnail(buffer, saved.filename);
+    metadata = await imageProcessor.getMetadata(buffer);
+    thumbnail = await imageProcessor.generateThumbnail(buffer, saved.filename);
   }
   catch (error) {
     // Clean up the saved file if metadata/thumbnail generation fails
-    await deleteFile(saved.path).catch(() => {
+    await fileStorage.deleteFile(saved.path).catch(() => {
       // Ignore cleanup errors
     });
     throw error;
   }
 
   // Create database record
-  const image = await createImage({
+  const image = await imageRepository.create({
     filename: saved.filename,
     path: saved.path,
     thumbnailPath: thumbnail.path,

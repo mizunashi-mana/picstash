@@ -1,11 +1,10 @@
 import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
-import {
-  findAllImages,
-  findImageById,
-} from '@/infra/database/image-repository.js';
-import { getAbsolutePath } from '@/infra/storage/file-storage.js';
+import { container, TYPES } from '@/infra/di/index.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageProcessor } from '@/application/ports/image-processor.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 async function fileExists(path: string): Promise<boolean> {
@@ -19,6 +18,10 @@ async function fileExists(path: string): Promise<boolean> {
 }
 
 export function imageRoutes(app: FastifyInstance): void {
+  const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
+  const fileStorage = container.get<FileStorage>(TYPES.FileStorage);
+  const imageProcessor = container.get<ImageProcessor>(TYPES.ImageProcessor);
+
   // Upload image
   app.post('/api/images', async (request, reply) => {
     const file = await request.file();
@@ -31,11 +34,14 @@ export function imageRoutes(app: FastifyInstance): void {
     }
 
     const buffer = await file.toBuffer();
-    const result = await uploadImage({
-      filename: file.filename,
-      mimetype: file.mimetype,
-      buffer,
-    });
+    const result = await uploadImage(
+      {
+        filename: file.filename,
+        mimetype: file.mimetype,
+        buffer,
+      },
+      { imageRepository, fileStorage, imageProcessor },
+    );
 
     if (!result.success) {
       return reply.status(400).send({
@@ -49,7 +55,7 @@ export function imageRoutes(app: FastifyInstance): void {
 
   // List all images
   app.get('/api/images', async (_request, reply) => {
-    const images = await findAllImages();
+    const images = await imageRepository.findAll();
     return reply.send(images);
   });
 
@@ -58,7 +64,7 @@ export function imageRoutes(app: FastifyInstance): void {
     '/api/images/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const image = await findImageById(id);
+      const image = await imageRepository.findById(id);
 
       if (image == null) {
         return reply.status(404).send({
@@ -76,7 +82,7 @@ export function imageRoutes(app: FastifyInstance): void {
     '/api/images/:id/file',
     async (request, reply) => {
       const { id } = request.params;
-      const image = await findImageById(id);
+      const image = await imageRepository.findById(id);
 
       if (image == null) {
         return reply.status(404).send({
@@ -85,7 +91,7 @@ export function imageRoutes(app: FastifyInstance): void {
         });
       }
 
-      const absolutePath = getAbsolutePath(image.path);
+      const absolutePath = fileStorage.getAbsolutePath(image.path);
       if (!(await fileExists(absolutePath))) {
         return reply.status(404).send({
           error: 'Not Found',
@@ -106,7 +112,7 @@ export function imageRoutes(app: FastifyInstance): void {
     '/api/images/:id/thumbnail',
     async (request, reply) => {
       const { id } = request.params;
-      const image = await findImageById(id);
+      const image = await imageRepository.findById(id);
 
       if (image == null) {
         return reply.status(404).send({
@@ -116,8 +122,9 @@ export function imageRoutes(app: FastifyInstance): void {
       }
 
       const filePath = image.thumbnailPath ?? image.path;
-      const contentType = image.thumbnailPath != null ? 'image/jpeg' : image.mimeType;
-      const absolutePath = getAbsolutePath(filePath);
+      const contentType
+        = image.thumbnailPath != null ? 'image/jpeg' : image.mimeType;
+      const absolutePath = fileStorage.getAbsolutePath(filePath);
 
       if (!(await fileExists(absolutePath))) {
         return reply.status(404).send({
@@ -139,7 +146,7 @@ export function imageRoutes(app: FastifyInstance): void {
     '/api/images/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const result = await deleteImage(id);
+      const result = await deleteImage(id, { imageRepository, fileStorage });
 
       if (!result.success) {
         return reply.status(404).send({
