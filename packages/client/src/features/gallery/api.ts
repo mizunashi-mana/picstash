@@ -17,6 +17,10 @@ export async function fetchImages(): Promise<Image[]> {
   return apiClient<Image[]>('/images');
 }
 
+export async function fetchImage(id: string): Promise<Image> {
+  return apiClient<Image>(`/images/${id}`);
+}
+
 export function getImageUrl(imageId: string): string {
   return `/api/images/${imageId}/file`;
 }
