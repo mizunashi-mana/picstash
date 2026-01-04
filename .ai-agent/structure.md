@@ -24,6 +24,10 @@ picstash/
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
+│   │   │   │   ├── labels/     # 属性ラベル管理機能
+│   │   │   │   │   ├── components/
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   └── api.ts
 │   │   │   │   ├── upload/     # アップロード機能
 │   │   │   │   │   ├── components/
 │   │   │   │   │   └── api.ts
@@ -31,7 +35,9 @@ picstash/
 │   │   │   │       └── pages/
 │   │   │   │
 │   │   │   ├── shared/         # 共通部品
-│   │   │   │   └── helpers/    # ヘルパー関数
+│   │   │   │   ├── components/ # 共通コンポーネント（AppLayout 等）
+│   │   │   │   ├── helpers/    # ヘルパー関数
+│   │   │   │   └── hooks/      # 共通フック
 │   │   │   │
 │   │   │   ├── api/            # 共通 API クライアント
 │   │   │   │
@@ -50,9 +56,9 @@ picstash/
 │   │   │   ├── config.ts       # 設定読み込み
 │   │   │   │
 │   │   │   └── infra/          # インフラ層
-│   │   │       ├── database/   # Prisma Client
+│   │   │       ├── database/   # Prisma Client、リポジトリ
 │   │   │       ├── http/       # Fastify ルート、プラグイン
-│   │   │       │   ├── routes/
+│   │   │       │   ├── routes/ # API ルート（images, labels, image-attributes 等）
 │   │   │       │   └── plugins/
 │   │   │       └── storage/    # ファイルストレージ
 │   │   │
@@ -102,10 +108,13 @@ picstash/
 
 ### `packages/client/`
 フロントエンドのパッケージ。Feature-based ディレクトリ構造を採用：
-- **features/** - 機能ごとのモジュール（gallery, upload, home など）
+- **features/** - 機能ごとのモジュール（gallery, labels, upload, home など）
   - 各機能は components/, pages/, api.ts を含む
+  - 機能間は index.ts 経由でのみ依存可能（dependency-cruiser で検証）
 - **shared/** - 共通部品
+  - **components/** - 共通コンポーネント（AppLayout 等）
   - **helpers/** - ヘルパー関数
+  - **hooks/** - 共通フック
 - **api/** - 共通 API クライアント
 - **routes/** - React Router 設定
 

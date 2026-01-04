@@ -11,22 +11,38 @@ datasource db {
 }
 
 model Image {
-  id            String   @id @default(uuid())
+  id            String           @id @default(uuid())
   filename      String
   path          String
-  thumbnailPath String?  @map("thumbnail_path")
-  mimeType      String   @map("mime_type")
+  thumbnailPath String?          @map("thumbnail_path")
+  mimeType      String           @map("mime_type")
   size          Int
   width         Int?
   height        Int?
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  attributes    ImageAttribute[]
 }
 
 model AttributeLabel {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  color     String?
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id         String           @id @default(uuid())
+  name       String           @unique
+  color      String?
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
+  attributes ImageAttribute[]
+}
+
+model ImageAttribute {
+  id        String         @id @default(uuid())
+  imageId   String         @map("image_id")
+  labelId   String         @map("label_id")
+  keywords  String?
+  image     Image          @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  label     AttributeLabel @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @updatedAt @map("updated_at")
+
+  @@unique([imageId, labelId])
+  @@map("image_attribute")
 }
