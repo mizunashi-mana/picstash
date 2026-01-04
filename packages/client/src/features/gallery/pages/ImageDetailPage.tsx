@@ -2,19 +2,22 @@ import {
   ActionIcon,
   Alert,
   Box,
+  Button,
   Container,
   Group,
   Image,
   Loader,
+  Modal,
   Paper,
   Stack,
   Text,
   Title,
 } from '@mantine/core';
-import { IconArrowLeft } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
-import { Link, useParams } from 'react-router';
-import { fetchImage, getImageUrl } from '@/features/gallery/api';
+import { useDisclosure } from '@mantine/hooks';
+import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate, useParams } from 'react-router';
+import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -42,11 +45,23 @@ function formatDate(dateString: string): string {
 
 export function ImageDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [opened, { open, close }] = useDisclosure(false);
 
   const { data: image, isLoading, error } = useQuery({
     queryKey: ['image', id],
     queryFn: async () => fetchImage(id!),
     enabled: id != null && id !== '',
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => deleteImage(id!),
+    onSuccess: async () => {
+      close();
+      await queryClient.invalidateQueries({ queryKey: ['images'] });
+      await navigate('/');
+    },
   });
 
   if (isLoading) {
@@ -98,6 +113,15 @@ export function ImageDetailPage() {
           <Title order={3} lineClamp={1} style={{ flex: 1 }}>
             {image.id}
           </Title>
+          <ActionIcon
+            variant="subtle"
+            size="lg"
+            color="red"
+            onClick={open}
+            aria-label="画像を削除"
+          >
+            <IconTrash size={20} />
+          </ActionIcon>
         </Group>
 
         <Box>
@@ -145,6 +169,24 @@ export function ImageDetailPage() {
           </Stack>
         </Paper>
       </Stack>
+
+      <Modal opened={opened} onClose={close} title="画像を削除" centered>
+        <Stack>
+          <Text>この画像を削除しますか？この操作は取り消せません。</Text>
+          <Group justify="flex-end">
+            <Button variant="default" onClick={close}>
+              キャンセル
+            </Button>
+            <Button
+              color="red"
+              onClick={() => deleteMutation.mutate()}
+              loading={deleteMutation.isPending}
+            >
+              削除
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 }
