@@ -42,6 +42,20 @@ export function imageRoutes(app: FastifyInstance): void {
       { imageRepository, fileStorage, imageProcessor },
     );
 
+    // Check if file was truncated due to size limit
+    if (file.file.truncated) {
+      // Clean up the partially saved file
+      if (result.success) {
+        await fileStorage.deleteFile(result.image.path).catch(() => {
+          // Ignore cleanup errors
+        });
+      }
+      return reply.status(413).send({
+        error: 'Payload Too Large',
+        message: 'File too large. Maximum size: 50MB',
+      });
+    }
+
     if (!result.success) {
       return reply.status(400).send({
         error: 'Bad Request',

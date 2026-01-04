@@ -38,7 +38,16 @@ export class LocalFileStorage implements FileStorage {
     const filePath = join(originalsPath, filename);
 
     const writeStream = createWriteStream(filePath);
-    await pipeline(stream, writeStream);
+    try {
+      await pipeline(stream, writeStream);
+    }
+    catch (error) {
+      // Clean up partial file on error (e.g., disk full, permission error)
+      await unlink(filePath).catch(() => {
+        // Ignore cleanup errors to avoid masking the original failure
+      });
+      throw error;
+    }
 
     return {
       filename,
