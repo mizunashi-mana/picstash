@@ -28,5 +28,10 @@ export async function apiClient<T>(
     throw new Error(`API Error: ${response.status} ${response.statusText}`);
   }
 
+  // Handle 204 No Content responses
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return response.json() as Promise<T>;
 }
