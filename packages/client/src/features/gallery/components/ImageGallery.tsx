@@ -9,6 +9,7 @@ import {
   Text,
 } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import { fetchImages, getThumbnailUrl } from '@/features/gallery/api';
 
 export function ImageGallery() {
@@ -52,7 +53,15 @@ export function ImageGallery() {
   return (
     <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
       {images.map(image => (
-        <Card key={image.id} padding="xs" radius="md" withBorder>
+        <Card
+          key={image.id}
+          padding="xs"
+          radius="md"
+          withBorder
+          component={Link}
+          to={`/images/${image.id}`}
+          style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+        >
           <Card.Section>
             <AspectRatio ratio={1}>
               <Image

@@ -110,6 +110,24 @@ export function imageRoutes(app: FastifyInstance): void {
     return reply.send(images);
   });
 
+  // Get single image metadata
+  app.get<{ Params: { id: string } }>(
+    '/api/images/:id',
+    async (request, reply) => {
+      const { id } = request.params;
+
+      const image = await findImageById(id);
+      if (!image) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      return reply.send(image);
+    },
+  );
+
   // Get image file
   app.get<{ Params: { id: string } }>(
     '/api/images/:id/file',
