@@ -88,9 +88,17 @@ export function labelRoutes(app: FastifyInstance): void {
         });
       }
 
-      // Check if new name conflicts with another label
-      if (name != null && name.trim() !== '') {
+      // Validate name if provided
+      if (name != null) {
         const trimmedName = name.trim();
+        if (trimmedName === '') {
+          return reply.status(400).send({
+            error: 'Bad Request',
+            message: 'Label name cannot be empty',
+          });
+        }
+
+        // Check if new name conflicts with another label
         if (trimmedName !== existingLabel.name) {
           const conflicting = await findLabelByName(trimmedName);
           if (conflicting) {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   ActionIcon,
+  Button,
   Card,
   Group,
   Modal,
@@ -121,14 +122,13 @@ export function LabelList({
         <Stack>
           <Text>Are you sure you want to delete this label?</Text>
           <Group justify="flex-end">
-            <ActionIcon
+            <Button
               variant="subtle"
-              size="lg"
               onClick={() => setDeletingLabelId(null)}
               disabled={isDeleting}
             >
               Cancel
-            </ActionIcon>
+            </Button>
             <ActionIcon
               variant="filled"
               color="red"

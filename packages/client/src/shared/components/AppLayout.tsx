@@ -70,6 +70,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 label={opened ? item.label : undefined}
                 leftSection={<item.icon size={20} />}
                 active={location.pathname === item.path}
+                aria-label={item.label}
                 style={{
                   borderRadius: 'var(--mantine-radius-sm)',
                 }}
