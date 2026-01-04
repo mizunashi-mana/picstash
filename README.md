@@ -16,14 +16,29 @@ Picstash は、イラストや画像作品を効率的に整理・管理する�
 
 ## 技術スタック
 
-- TypeScript
-- (フロントエンド / バックエンド フレームワークは今後決定)
+- **言語**: TypeScript
+- **フロントエンド**: React 19 + Vite 7, Mantine 8, TanStack Query
+- **バックエンド**: Fastify 5, Prisma 7
+- **データベース**: SQLite (better-sqlite3)
+- **テスト**: Vitest
+- **リンター**: ESLint 9 (Flat Config)
 
 ## セットアップ
 
 ```bash
+# 依存関係のインストール
 npm install
+
+# データベースのセットアップ
+npm run db:migrate
+
+# 開発サーバーの起動（フロント + バック同時）
+npm run dev
 ```
+
+開発サーバー起動後:
+- フロントエンド: http://localhost:5173
+- バックエンド API: http://localhost:3000
 
 ## ライセンス表記
 

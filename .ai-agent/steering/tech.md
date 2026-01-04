@@ -44,7 +44,7 @@
 | `packages/client` | React フロントエンド | セットアップ済み |
 | `packages/server` | Fastify バックエンド API | セットアップ済み |
 | `packages/eslint-config` | 共有 ESLint 設定 | セットアップ済み |
-| `packages/shared` | 共有型定義・定数 | 未作成 |
+| `packages/shared` | 共有型定義・定数 | セットアップ済み |
 
 詳細は [structure.md](../structure.md) を参照。
 
@@ -129,9 +129,6 @@ npm run typecheck
 
 # リンター実行
 npm run lint
-
-# フォーマッター実行
-npm run format
 ```
 
 ### ビルド・本番
