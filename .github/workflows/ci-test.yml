@@ -20,3 +20,21 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  test-storybook:
+    name: Run Storybook tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ./.github/actions/setup-node
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: packages/client
+
+      - name: Run Storybook tests
+        run: npm run test:storybook -w @picstash/client
