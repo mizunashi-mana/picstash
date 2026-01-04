@@ -1,6 +1,6 @@
 ---
 description: Import PR review suggestions
-allowed-tools: Read, Edit, Bash, mcp__github__pull_request_read
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, mcp__github__pull_request_read
 ---
 
 # PRレビュー取り込み
