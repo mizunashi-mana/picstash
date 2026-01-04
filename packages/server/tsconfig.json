@@ -4,6 +4,8 @@
     "lib": ["ES2022"],
     "types": ["node"],
     "jsx": "preserve",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],

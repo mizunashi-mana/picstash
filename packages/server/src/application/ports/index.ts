@@ -1,0 +1,23 @@
+export type { FileStorage, SaveFileResult } from './file-storage.js';
+export type {
+  ImageAttribute,
+  ImageAttributeRepository,
+  CreateImageAttributeInput,
+  UpdateImageAttributeInput,
+} from './image-attribute-repository.js';
+export type {
+  ImageMetadata,
+  ImageProcessor,
+  ThumbnailResult,
+} from './image-processor.js';
+export type {
+  Image,
+  ImageRepository,
+  CreateImageInput,
+} from './image-repository.js';
+export type {
+  Label,
+  LabelRepository,
+  CreateLabelInput,
+  UpdateLabelInput,
+} from './label-repository.js';
