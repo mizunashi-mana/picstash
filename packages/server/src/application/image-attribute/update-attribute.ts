@@ -3,7 +3,6 @@ import type {
   ImageAttribute,
   ImageAttributeRepository,
 } from '@/application/ports/image-attribute-repository.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
 
 export interface UpdateAttributeInput {
   imageId: string;
@@ -13,12 +12,10 @@ export interface UpdateAttributeInput {
 
 export type UpdateAttributeResult
   = | { success: true; attribute: ImageAttribute }
-    | { success: false; error: 'IMAGE_NOT_FOUND' }
     | { success: false; error: 'ATTRIBUTE_NOT_FOUND' }
     | { success: false; error: 'ATTRIBUTE_MISMATCH' };
 
 export interface UpdateAttributeDeps {
-  imageRepository: ImageRepository;
   imageAttributeRepository: ImageAttributeRepository;
 }
 
@@ -27,13 +24,7 @@ export async function updateAttribute(
   deps: UpdateAttributeDeps,
 ): Promise<UpdateAttributeResult> {
   const { imageId, attributeId, keywords } = input;
-  const { imageRepository, imageAttributeRepository } = deps;
-
-  // Validate image exists
-  const image = await imageRepository.findById(imageId);
-  if (image === null) {
-    return { success: false, error: 'IMAGE_NOT_FOUND' };
-  }
+  const { imageAttributeRepository } = deps;
 
   // Validate attribute exists
   const attribute = await imageAttributeRepository.findById(attributeId);

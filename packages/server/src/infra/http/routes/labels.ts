@@ -38,6 +38,10 @@ export function labelRoutes(app: FastifyInstance): void {
             error: 'Conflict',
             message: `Label with name "${result.name}" already exists`,
           });
+        default: {
+          const _exhaustive: never = result;
+          return _exhaustive;
+        }
       }
     }
 
@@ -86,6 +90,10 @@ export function labelRoutes(app: FastifyInstance): void {
               error: 'Conflict',
               message: `Label with name "${result.name}" already exists`,
             });
+          default: {
+            const _exhaustive: never = result;
+            return _exhaustive;
+          }
         }
       }
 

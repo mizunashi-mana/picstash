@@ -1,4 +1,5 @@
 import { normalizeKeywords } from '@/shared/normalizers/index.js';
+import { isNonEmptyString } from '@/shared/validators/index.js';
 import type {
   ImageAttribute,
   ImageAttributeRepository,
@@ -33,7 +34,7 @@ export async function addAttribute(
   const { imageRepository, labelRepository, imageAttributeRepository } = deps;
 
   // Validate labelId
-  if (typeof labelId !== 'string' || labelId.trim().length === 0) {
+  if (!isNonEmptyString(labelId)) {
     return { success: false, error: 'INVALID_LABEL_ID' };
   }
 

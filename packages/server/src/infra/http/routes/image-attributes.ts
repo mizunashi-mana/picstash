@@ -78,6 +78,10 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
               error: 'Conflict',
               message: 'This label is already assigned to the image',
             });
+          default: {
+            const _exhaustive: never = result;
+            return _exhaustive;
+          }
         }
       }
 
@@ -97,16 +101,11 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
 
       const result = await updateAttribute(
         { imageId, attributeId, keywords },
-        { imageRepository, imageAttributeRepository },
+        { imageAttributeRepository },
       );
 
       if (!result.success) {
         switch (result.error) {
-          case 'IMAGE_NOT_FOUND':
-            return reply.status(404).send({
-              error: 'Not Found',
-              message: 'Image not found',
-            });
           case 'ATTRIBUTE_NOT_FOUND':
             return reply.status(404).send({
               error: 'Not Found',
@@ -117,6 +116,10 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
               error: 'Not Found',
               message: 'Attribute does not belong to this image',
             });
+          default: {
+            const _exhaustive: never = result;
+            return _exhaustive;
+          }
         }
       }
 
@@ -132,16 +135,11 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
 
       const result = await deleteAttribute(
         { imageId, attributeId },
-        { imageRepository, imageAttributeRepository },
+        { imageAttributeRepository },
       );
 
       if (!result.success) {
         switch (result.error) {
-          case 'IMAGE_NOT_FOUND':
-            return reply.status(404).send({
-              error: 'Not Found',
-              message: 'Image not found',
-            });
           case 'ATTRIBUTE_NOT_FOUND':
             return reply.status(404).send({
               error: 'Not Found',
@@ -152,6 +150,10 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
               error: 'Not Found',
               message: 'Attribute does not belong to this image',
             });
+          default: {
+            const _exhaustive: never = result;
+            return _exhaustive;
+          }
         }
       }
 

@@ -1,5 +1,4 @@
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
 
 export interface DeleteAttributeInput {
   imageId: string;
@@ -8,12 +7,10 @@ export interface DeleteAttributeInput {
 
 export type DeleteAttributeResult
   = | { success: true }
-    | { success: false; error: 'IMAGE_NOT_FOUND' }
     | { success: false; error: 'ATTRIBUTE_NOT_FOUND' }
     | { success: false; error: 'ATTRIBUTE_MISMATCH' };
 
 export interface DeleteAttributeDeps {
-  imageRepository: ImageRepository;
   imageAttributeRepository: ImageAttributeRepository;
 }
 
@@ -22,13 +19,7 @@ export async function deleteAttribute(
   deps: DeleteAttributeDeps,
 ): Promise<DeleteAttributeResult> {
   const { imageId, attributeId } = input;
-  const { imageRepository, imageAttributeRepository } = deps;
-
-  // Validate image exists
-  const image = await imageRepository.findById(imageId);
-  if (image === null) {
-    return { success: false, error: 'IMAGE_NOT_FOUND' };
-  }
+  const { imageAttributeRepository } = deps;
 
   // Validate attribute exists
   const attribute = await imageAttributeRepository.findById(attributeId);
