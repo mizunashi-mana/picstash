@@ -9,6 +9,9 @@ export interface ThumbnailResult {
 }
 
 export interface ImageProcessor {
-  getMetadata(buffer: Buffer): Promise<ImageMetadata>;
-  generateThumbnail(buffer: Buffer, filename: string): Promise<ThumbnailResult>;
+  getMetadata(filePath: string): Promise<ImageMetadata>;
+  generateThumbnail(
+    inputFilePath: string,
+    outputFilename: string,
+  ): Promise<ThumbnailResult>;
 }
