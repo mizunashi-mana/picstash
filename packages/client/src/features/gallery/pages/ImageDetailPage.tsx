@@ -17,6 +17,9 @@ import { Link, useParams } from 'react-router';
 import { fetchImage, getImageUrl } from '@/features/gallery/api';
 
 function formatFileSize(bytes: number): string {
+  if (!Number.isFinite(bytes) || bytes < 0) {
+    return 'N/A';
+  }
   if (bytes < 1024) {
     return `${bytes} B`;
   }
@@ -83,7 +86,13 @@ export function ImageDetailPage() {
     <Container size="lg" py="md">
       <Stack gap="md">
         <Group>
-          <ActionIcon variant="subtle" size="lg" component={Link} to="/">
+          <ActionIcon
+            variant="subtle"
+            size="lg"
+            component={Link}
+            to="/"
+            aria-label="ギャラリーに戻る"
+          >
             <IconArrowLeft size={20} />
           </ActionIcon>
           <Title order={3} lineClamp={1} style={{ flex: 1 }}>

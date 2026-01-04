@@ -60,7 +60,7 @@ export function ImageGallery() {
           withBorder
           component={Link}
           to={`/images/${image.id}`}
-          style={{ textDecoration: 'none', color: 'inherit' }}
+          style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
         >
           <Card.Section>
             <AspectRatio ratio={1}>
