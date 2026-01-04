@@ -58,6 +58,7 @@ export function ImageDetailPage() {
   const deleteMutation = useMutation({
     mutationFn: async () => deleteImage(id!),
     onSuccess: async () => {
+      close();
       await queryClient.invalidateQueries({ queryKey: ['images'] });
       await navigate('/');
     },

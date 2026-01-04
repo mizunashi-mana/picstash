@@ -210,10 +210,7 @@ export function imageRoutes(app: FastifyInstance): void {
         });
       }
 
-      // Delete database record first
-      await deleteImageById(id);
-
-      // Delete files (ignore errors if files don't exist)
+      // Delete files first (so DB record remains if file deletion fails)
       await deleteFile(image.path).catch(() => {
         // Ignore file deletion errors
       });
@@ -222,6 +219,9 @@ export function imageRoutes(app: FastifyInstance): void {
           // Ignore thumbnail deletion errors
         });
       }
+
+      // Delete database record after files are deleted
+      await deleteImageById(id);
 
       return reply.status(204).send();
     },

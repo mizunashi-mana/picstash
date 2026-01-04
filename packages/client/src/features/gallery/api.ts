@@ -22,10 +22,7 @@ export async function fetchImage(id: string): Promise<Image> {
 }
 
 export async function deleteImage(id: string): Promise<void> {
-  const response = await fetch(`/api/images/${id}`, { method: 'DELETE' });
-  if (!response.ok) {
-    throw new Error('Failed to delete image');
-  }
+  await apiClient<void>(`/images/${id}`, { method: 'DELETE' });
 }
 
 export function getImageUrl(imageId: string): string {
