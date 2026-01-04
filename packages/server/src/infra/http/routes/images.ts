@@ -3,6 +3,7 @@ import { access } from 'node:fs/promises';
 import { extname } from 'node:path';
 import {
   createImage,
+  deleteImageById,
   findAllImages,
   findImageById,
 } from '@/infra/database/image-repository.js';
@@ -192,6 +193,37 @@ export function imageRoutes(app: FastifyInstance): void {
         .header('Content-Type', contentType)
         .header('Cache-Control', 'public, max-age=31536000, immutable')
         .send(stream);
+    },
+  );
+
+  // Delete image
+  app.delete<{ Params: { id: string } }>(
+    '/api/images/:id',
+    async (request, reply) => {
+      const { id } = request.params;
+
+      const image = await findImageById(id);
+      if (!image) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      // Delete database record first
+      await deleteImageById(id);
+
+      // Delete files (ignore errors if files don't exist)
+      await deleteFile(image.path).catch(() => {
+        // Ignore file deletion errors
+      });
+      if (image.thumbnailPath != null) {
+        await deleteFile(image.thumbnailPath).catch(() => {
+          // Ignore thumbnail deletion errors
+        });
+      }
+
+      return reply.status(204).send();
     },
   );
 }

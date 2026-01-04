@@ -31,7 +31,7 @@ export function buildJsConfig(props: {
       rules: {
         // Complexity and maintainability
         'complexity': ['error', { max: 20 }],
-        'max-lines': ['error', { max: 450, skipBlankLines: true, skipComments: true }],
+        'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
         'max-depth': ['error', 5],
         'max-nested-callbacks': ['error', 3],
 
