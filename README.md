@@ -3,7 +3,7 @@
 ![CI Lint](https://github.com/mizunashi-mana/picstash/actions/workflows/ci-lint.yml/badge.svg)
 ![CI Test](https://github.com/mizunashi-mana/picstash/actions/workflows/ci-test.yml/badge.svg)
 
-![Picstash](assets/logo.svg)
+![Picstash ロゴ](assets/logo.svg)
 
 イラストや画像作品を整理・管理するアプリケーションです。AI が画像を自動解析して属性や説明を付けるため、手作業でのタグ付けがほぼ不要です。
 
