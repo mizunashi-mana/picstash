@@ -1,10 +1,8 @@
+import { createLabel, updateLabel } from '@/application/label/index.js';
 import {
-  createLabel,
   deleteLabelById,
   findAllLabels,
   findLabelById,
-  findLabelByName,
-  updateLabelById,
 } from '@/infra/database/label-repository.js';
 import type { FastifyInstance } from 'fastify';
 
@@ -27,32 +25,24 @@ export function labelRoutes(app: FastifyInstance): void {
 
   // Create label
   app.post<{ Body: CreateLabelBody }>('/api/labels', async (request, reply) => {
-    const { name, color } = request.body;
+    const result = await createLabel(request.body);
 
-    if (name.trim() === '') {
-      return reply.status(400).send({
-        error: 'Bad Request',
-        message: 'Label name is required',
-      });
+    if (!result.success) {
+      switch (result.error) {
+        case 'EMPTY_NAME':
+          return reply.status(400).send({
+            error: 'Bad Request',
+            message: 'Label name is required',
+          });
+        case 'DUPLICATE_NAME':
+          return reply.status(409).send({
+            error: 'Conflict',
+            message: `Label with name "${result.name}" already exists`,
+          });
+      }
     }
 
-    const trimmedName = name.trim();
-
-    // Check if label with same name already exists
-    const existing = await findLabelByName(trimmedName);
-    if (existing) {
-      return reply.status(409).send({
-        error: 'Conflict',
-        message: `Label with name "${trimmedName}" already exists`,
-      });
-    }
-
-    const label = await createLabel({
-      name: trimmedName,
-      color,
-    });
-
-    return reply.status(201).send(label);
+    return reply.status(201).send(result.label);
   });
 
   // Get single label
@@ -60,9 +50,9 @@ export function labelRoutes(app: FastifyInstance): void {
     '/api/labels/:id',
     async (request, reply) => {
       const { id } = request.params;
-
       const label = await findLabelById(id);
-      if (!label) {
+
+      if (label == null) {
         return reply.status(404).send({
           error: 'Not Found',
           message: 'Label not found',
@@ -78,44 +68,29 @@ export function labelRoutes(app: FastifyInstance): void {
     '/api/labels/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const { name, color } = request.body;
+      const result = await updateLabel(id, request.body);
 
-      const existingLabel = await findLabelById(id);
-      if (!existingLabel) {
-        return reply.status(404).send({
-          error: 'Not Found',
-          message: 'Label not found',
-        });
-      }
-
-      // Validate name if provided
-      if (name != null) {
-        const trimmedName = name.trim();
-        if (trimmedName === '') {
-          return reply.status(400).send({
-            error: 'Bad Request',
-            message: 'Label name cannot be empty',
-          });
-        }
-
-        // Check if new name conflicts with another label
-        if (trimmedName !== existingLabel.name) {
-          const conflicting = await findLabelByName(trimmedName);
-          if (conflicting) {
+      if (!result.success) {
+        switch (result.error) {
+          case 'NOT_FOUND':
+            return reply.status(404).send({
+              error: 'Not Found',
+              message: 'Label not found',
+            });
+          case 'EMPTY_NAME':
+            return reply.status(400).send({
+              error: 'Bad Request',
+              message: 'Label name cannot be empty',
+            });
+          case 'DUPLICATE_NAME':
             return reply.status(409).send({
               error: 'Conflict',
-              message: `Label with name "${trimmedName}" already exists`,
+              message: `Label with name "${result.name}" already exists`,
             });
-          }
         }
       }
 
-      const updatedLabel = await updateLabelById(id, {
-        name: name?.trim(),
-        color,
-      });
-
-      return reply.send(updatedLabel);
+      return reply.send(result.label);
     },
   );
 
@@ -124,9 +99,9 @@ export function labelRoutes(app: FastifyInstance): void {
     '/api/labels/:id',
     async (request, reply) => {
       const { id } = request.params;
-
       const label = await findLabelById(id);
-      if (!label) {
+
+      if (label == null) {
         return reply.status(404).send({
           error: 'Not Found',
           message: 'Label not found',
@@ -134,7 +109,6 @@ export function labelRoutes(app: FastifyInstance): void {
       }
 
       await deleteLabelById(id);
-
       return reply.status(204).send();
     },
   );
