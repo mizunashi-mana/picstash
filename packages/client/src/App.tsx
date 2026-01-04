@@ -1,5 +1,10 @@
 import { AppRoutes } from '@/routes';
+import { AppLayout } from '@/shared';
 
 export function App() {
-  return <AppRoutes />;
+  return (
+    <AppLayout>
+      <AppRoutes />
+    </AppLayout>
+  );
 }
