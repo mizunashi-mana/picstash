@@ -9,6 +9,6 @@
       "@~tests/*": ["./tests/*"]
     }
   },
-  "include": ["src/**/*", "*.config.ts", "tests/**/*"],
+  "include": ["src/**/*", "*.config.ts", "tests/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

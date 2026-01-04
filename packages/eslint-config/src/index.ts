@@ -6,10 +6,11 @@ import { buildJsConfig } from './js.config.js';
 import { buildNodeConfig } from './node.config.js';
 import { buildPromiseConfig } from './promise.config.js';
 import { buildReactConfig } from './react.config.js';
+import { buildStorybookConfig } from './storybook.config.js';
 import { buildStylisticConfig } from './stylistic.config.js';
 import { buildTsConfig } from './ts.config.js';
 
-export type RuleSet = 'common' | 'react' | 'node';
+export type RuleSet = 'common' | 'react' | 'node' | 'storybook';
 
 export type Env = {
   disableFixedRules?: boolean;
@@ -46,6 +47,10 @@ export function buildConfig(env: Env) {
 
       case 'react':
         rules.push(buildReactConfig());
+        break;
+
+      case 'storybook':
+        rules.push(buildStorybookConfig());
         break;
     }
   }
