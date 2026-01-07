@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
 import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
 import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
+import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -134,6 +135,11 @@ export function ImageDetailPage() {
             radius="md"
           />
         </Box>
+
+        <ImageDescriptionSection
+          imageId={image.id}
+          description={image.description}
+        />
 
         <ImageAttributeSection imageId={image.id} />
 

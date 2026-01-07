@@ -7,6 +7,7 @@ export interface Image {
   size: number;
   width: number | null;
   height: number | null;
+  description: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,9 +22,14 @@ export interface CreateImageInput {
   height?: number;
 }
 
+export interface UpdateImageInput {
+  description?: string | null;
+}
+
 export interface ImageRepository {
   create(input: CreateImageInput): Promise<Image>;
   findById(id: string): Promise<Image | null>;
   findAll(): Promise<Image[]>;
+  update(id: string, input: UpdateImageInput): Promise<Image>;
   deleteById(id: string): Promise<Image>;
 }
