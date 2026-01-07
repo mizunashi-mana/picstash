@@ -28,7 +28,7 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 
-  async update(id: string, input: UpdateImageInput): Promise<Image> {
+  async updateById(id: string, input: UpdateImageInput): Promise<Image> {
     return prisma.image.update({
       where: { id },
       data: input,

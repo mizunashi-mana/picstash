@@ -172,7 +172,7 @@ export function imageRoutes(app: FastifyInstance): void {
         });
       }
 
-      const updated = await imageRepository.update(id, { description });
+      const updated = await imageRepository.updateById(id, { description });
       return reply.send(updated);
     },
   );
