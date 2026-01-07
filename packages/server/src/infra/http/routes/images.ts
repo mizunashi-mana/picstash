@@ -66,11 +66,17 @@ export function imageRoutes(app: FastifyInstance): void {
     return reply.status(201).send(result.image);
   });
 
-  // List all images
-  app.get('/api/images', async (_request, reply) => {
-    const images = await imageRepository.findAll();
-    return reply.send(images);
-  });
+  // List/search images
+  app.get<{ Querystring: { q?: string } }>(
+    '/api/images',
+    async (request, reply) => {
+      const { q } = request.query;
+      const images = q != null && q.trim() !== ''
+        ? await imageRepository.search(q.trim())
+        : await imageRepository.findAll();
+      return reply.send(images);
+    },
+  );
 
   // Get single image metadata
   app.get<{ Params: { id: string } }>(

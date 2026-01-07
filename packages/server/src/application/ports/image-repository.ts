@@ -30,6 +30,7 @@ export interface ImageRepository {
   create(input: CreateImageInput): Promise<Image>;
   findById(id: string): Promise<Image | null>;
   findAll(): Promise<Image[]>;
+  search(query: string): Promise<Image[]>;
   updateById(id: string, input: UpdateImageInput): Promise<Image>;
   deleteById(id: string): Promise<Image>;
 }

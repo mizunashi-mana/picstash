@@ -28,6 +28,28 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 
+  async search(query: string): Promise<Image[]> {
+    return prisma.image.findMany({
+      where: {
+        OR: [
+          { filename: { contains: query } },
+          { description: { contains: query } },
+          {
+            attributes: {
+              some: {
+                OR: [
+                  { keywords: { contains: query } },
+                  { label: { name: { contains: query } } },
+                ],
+              },
+            },
+          },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async updateById(id: string, input: UpdateImageInput): Promise<Image> {
     return prisma.image.update({
       where: { id },
