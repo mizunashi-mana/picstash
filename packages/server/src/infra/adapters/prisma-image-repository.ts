@@ -5,6 +5,7 @@ import type {
   CreateImageInput,
   Image,
   ImageRepository,
+  UpdateImageInput,
 } from '@/application/ports/image-repository.js';
 
 @injectable()
@@ -24,6 +25,13 @@ export class PrismaImageRepository implements ImageRepository {
   async findAll(): Promise<Image[]> {
     return prisma.image.findMany({
       orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async updateById(id: string, input: UpdateImageInput): Promise<Image> {
+    return prisma.image.update({
+      where: { id },
+      data: input,
     });
   }
 

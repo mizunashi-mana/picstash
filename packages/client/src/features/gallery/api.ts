@@ -14,8 +14,13 @@ export interface Image {
   size: number;
   width: number | null;
   height: number | null;
+  description: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UpdateImageInput {
+  description?: string | null;
 }
 
 export async function fetchImages(): Promise<Image[]> {
@@ -28,6 +33,16 @@ export async function fetchImage(id: string): Promise<Image> {
 
 export async function deleteImage(id: string): Promise<void> {
   await apiClient<void>(`/images/${id}`, { method: 'DELETE' });
+}
+
+export async function updateImage(
+  id: string,
+  input: UpdateImageInput,
+): Promise<Image> {
+  return apiClient<Image>(`/images/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  });
 }
 
 export function getImageUrl(imageId: string): string {

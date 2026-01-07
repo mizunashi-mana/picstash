@@ -154,6 +154,29 @@ export function imageRoutes(app: FastifyInstance): void {
     },
   );
 
+  // Update image
+  app.patch<{
+    Params: { id: string };
+    Body: { description?: string | null };
+  }>(
+    '/api/images/:id',
+    async (request, reply) => {
+      const { id } = request.params;
+      const { description } = request.body;
+
+      const existing = await imageRepository.findById(id);
+      if (existing == null) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      const updated = await imageRepository.updateById(id, { description });
+      return reply.send(updated);
+    },
+  );
+
   // Delete image
   app.delete<{ Params: { id: string } }>(
     '/api/images/:id',
