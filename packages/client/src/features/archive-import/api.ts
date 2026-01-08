@@ -1,0 +1,76 @@
+export interface ArchiveSession {
+  sessionId: string;
+  filename: string;
+  archiveType: 'zip' | 'rar';
+  imageCount: number;
+}
+
+export interface ArchiveImage {
+  index: number;
+  filename: string;
+  path: string;
+  size: number;
+}
+
+export interface ArchiveSessionDetail extends ArchiveSession {
+  images: ArchiveImage[];
+}
+
+interface ErrorResponse {
+  message?: string;
+}
+
+export async function uploadArchive(file: File): Promise<ArchiveSession> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/archives', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = (await response.json()) as ErrorResponse;
+    throw new Error(error.message ?? 'Upload failed');
+  }
+
+  return (await response.json()) as ArchiveSession;
+}
+
+export async function getArchiveSession(
+  sessionId: string,
+): Promise<ArchiveSessionDetail> {
+  const response = await fetch(`/api/archives/${sessionId}`);
+
+  if (!response.ok) {
+    const error = (await response.json()) as ErrorResponse;
+    throw new Error(error.message ?? 'Failed to get archive session');
+  }
+
+  return (await response.json()) as ArchiveSessionDetail;
+}
+
+export async function deleteArchiveSession(sessionId: string): Promise<void> {
+  const response = await fetch(`/api/archives/${sessionId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = (await response.json()) as ErrorResponse;
+    throw new Error(error.message ?? 'Failed to delete archive session');
+  }
+}
+
+export function getArchiveThumbnailUrl(
+  sessionId: string,
+  fileIndex: number,
+): string {
+  return `/api/archives/${sessionId}/files/${fileIndex}/thumbnail`;
+}
+
+export function getArchiveImageUrl(
+  sessionId: string,
+  fileIndex: number,
+): string {
+  return `/api/archives/${sessionId}/files/${fileIndex}/file`;
+}

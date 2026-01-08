@@ -7,4 +7,8 @@ export const TYPES = {
   // Storage & Processing
   FileStorage: Symbol.for('FileStorage'),
   ImageProcessor: Symbol.for('ImageProcessor'),
+
+  // Archive
+  ArchiveHandler: Symbol.for('ArchiveHandler'),
+  ArchiveSessionManager: Symbol.for('ArchiveSessionManager'),
 } as const;

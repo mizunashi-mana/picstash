@@ -1,3 +1,4 @@
+import { archiveRoutes } from '@/infra/http/routes/archives.js';
 import { healthRoutes } from '@/infra/http/routes/health.js';
 import { imageAttributeRoutes } from '@/infra/http/routes/image-attributes.js';
 import { imageRoutes } from '@/infra/http/routes/images.js';
@@ -16,4 +17,7 @@ export function registerRoutes(app: FastifyInstance): void {
 
   // Label routes
   app.register(labelRoutes);
+
+  // Archive routes
+  app.register(archiveRoutes);
 }

@@ -21,3 +21,10 @@ export type {
   CreateLabelInput,
   UpdateLabelInput,
 } from './label-repository.js';
+export type { ArchiveEntry, ArchiveHandler } from './archive-handler.js';
+export type {
+  ArchiveSession,
+  ArchiveSessionManager,
+  CreateSessionInput,
+  CreateSessionResult,
+} from './archive-session-manager.js';

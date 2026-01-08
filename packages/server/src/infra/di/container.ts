@@ -1,13 +1,18 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
 import {
+  InMemoryArchiveSessionManager,
   LocalFileStorage,
   PrismaImageAttributeRepository,
   PrismaImageRepository,
   PrismaLabelRepository,
+  RarArchiveHandler,
   SharpImageProcessor,
+  ZipArchiveHandler,
 } from '@/infra/adapters/index.js';
 import { TYPES } from './types.js';
+import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
+import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
@@ -41,6 +46,15 @@ container
 container
   .bind<ImageProcessor>(TYPES.ImageProcessor)
   .to(SharpImageProcessor)
+  .inSingletonScope();
+
+// Bind archive handlers
+container.bind<ArchiveHandler>(TYPES.ArchiveHandler).to(ZipArchiveHandler);
+container.bind<ArchiveHandler>(TYPES.ArchiveHandler).to(RarArchiveHandler);
+
+container
+  .bind<ArchiveSessionManager>(TYPES.ArchiveSessionManager)
+  .to(InMemoryArchiveSessionManager)
   .inSingletonScope();
 
 export { container };

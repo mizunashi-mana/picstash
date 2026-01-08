@@ -14,4 +14,6 @@ export interface ImageProcessor {
     inputFilePath: string,
     outputFilename: string,
   ): Promise<ThumbnailResult>;
+  /** Generate a thumbnail from an in-memory buffer, returns JPEG buffer */
+  generateThumbnailFromBuffer(imageBuffer: Buffer): Promise<Buffer>;
 }
