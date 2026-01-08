@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Badge,
@@ -21,6 +21,23 @@ import { ArchivePreviewGallery } from '@/features/archive-import/components/Arch
 
 export function ArchiveImportPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
+
+  // Keep ref in sync with state for cleanup
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+
+  // Cleanup session on unmount
+  useEffect(() => {
+    return () => {
+      if (sessionIdRef.current != null) {
+        deleteArchiveSession(sessionIdRef.current).catch(() => {
+          // Ignore errors during cleanup
+        });
+      }
+    };
+  }, []);
 
   const uploadMutation = useMutation({
     mutationFn: uploadArchive,

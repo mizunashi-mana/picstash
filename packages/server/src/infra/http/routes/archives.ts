@@ -27,9 +27,24 @@ export function archiveRoutes(app: FastifyInstance): void {
     });
 
     if (!result.success) {
-      const statusCode = result.error === 'EMPTY_ARCHIVE' ? 400 : 415;
+      let statusCode: number;
+      let errorType: string;
+      switch (result.error) {
+        case 'EMPTY_ARCHIVE':
+          statusCode = 400;
+          errorType = 'Bad Request';
+          break;
+        case 'FILE_TOO_LARGE':
+          statusCode = 413;
+          errorType = 'Payload Too Large';
+          break;
+        case 'UNSUPPORTED_FORMAT':
+          statusCode = 415;
+          errorType = 'Unsupported Media Type';
+          break;
+      }
       return reply.status(statusCode).send({
-        error: result.error === 'EMPTY_ARCHIVE' ? 'Bad Request' : 'Unsupported Media Type',
+        error: errorType,
         message: result.message,
       });
     }

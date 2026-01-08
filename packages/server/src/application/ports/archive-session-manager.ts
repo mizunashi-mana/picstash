@@ -24,7 +24,7 @@ export interface CreateSessionInput {
 
 export type CreateSessionResult
   = | { success: true; session: ArchiveSession }
-    | { success: false; error: 'UNSUPPORTED_FORMAT' | 'EMPTY_ARCHIVE'; message: string };
+    | { success: false; error: 'UNSUPPORTED_FORMAT' | 'EMPTY_ARCHIVE' | 'FILE_TOO_LARGE'; message: string };
 
 export interface ArchiveSessionManager {
   /** Create a new session from an uploaded archive */

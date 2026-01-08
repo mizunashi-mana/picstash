@@ -3,7 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
 import { mkdir, unlink } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
-import { pipeline } from 'node:stream/promises';
+import { Transform } from 'node:stream';
+import { pipeline as pipelinePromise } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { injectable, multiInject } from 'inversify';
 import { config } from '@/config.js';
@@ -20,11 +21,34 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const storagePath = resolve(__dirname, '../../..', config.storage.path);
 const tempPath = join(storagePath, 'temp');
 
+// Maximum archive file size: 500MB
+const MAX_ARCHIVE_SIZE = 500 * 1024 * 1024;
+
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
 
 function isImageFile(filename: string): boolean {
   const ext = extname(filename).toLowerCase();
   return IMAGE_EXTENSIONS.includes(ext);
+}
+
+function isSafePath(path: string): boolean {
+  // Reject paths with directory traversal attempts
+  const normalizedPath = path.replace(/\\/g, '/');
+  return !normalizedPath.includes('../') && !normalizedPath.startsWith('/');
+}
+
+function createSizeLimitedStream(maxSize: number): Transform {
+  let totalSize = 0;
+  return new Transform({
+    transform(chunk: Buffer, _encoding, callback) {
+      totalSize += chunk.length;
+      if (totalSize > maxSize) {
+        callback(new Error('FILE_TOO_LARGE'));
+        return;
+      }
+      callback(null, chunk);
+    },
+  });
 }
 
 @injectable()
@@ -46,20 +70,6 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
     return this.handlers.find(h => h.canHandle(filePath, mimeType));
   }
 
-  private getArchiveType(
-    filePath: string,
-    mimeType: string,
-  ): 'zip' | 'rar' | null {
-    const ext = extname(filePath).toLowerCase();
-    if (ext === '.zip' || mimeType.includes('zip')) {
-      return 'zip';
-    }
-    if (ext === '.rar' || mimeType.includes('rar')) {
-      return 'rar';
-    }
-    return null;
-  }
-
   async createSession(input: CreateSessionInput): Promise<CreateSessionResult> {
     const { filename, mimeType, stream } = input;
 
@@ -72,14 +82,7 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
       };
     }
 
-    const archiveType = this.getArchiveType(filename, mimeType);
-    if (archiveType == null) {
-      return {
-        success: false,
-        error: 'UNSUPPORTED_FORMAT',
-        message: `Unsupported archive format: ${mimeType}`,
-      };
-    }
+    const archiveType = handler.archiveType;
 
     await this.ensureTempDirectory();
 
@@ -88,17 +91,26 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
     const archivePath = join(tempPath, `${sessionId}${ext}`);
 
     const writeStream = createWriteStream(archivePath);
+    const sizeLimitedStream = createSizeLimitedStream(MAX_ARCHIVE_SIZE);
     try {
-      await pipeline(stream, writeStream);
+      await pipelinePromise(stream, sizeLimitedStream, writeStream);
     }
     catch (error) {
       await unlink(archivePath).catch(() => {});
+      if (error instanceof Error && error.message === 'FILE_TOO_LARGE') {
+        return {
+          success: false,
+          error: 'FILE_TOO_LARGE',
+          message: `Archive file exceeds maximum size of ${MAX_ARCHIVE_SIZE / 1024 / 1024}MB`,
+        };
+      }
       throw error;
     }
 
     const allEntries = await handler.listEntries(archivePath);
     const imageEntries = allEntries.filter(
-      entry => !entry.isDirectory && isImageFile(entry.filename),
+      entry =>
+        !entry.isDirectory && isImageFile(entry.filename) && isSafePath(entry.path),
     );
 
     if (imageEntries.length === 0) {

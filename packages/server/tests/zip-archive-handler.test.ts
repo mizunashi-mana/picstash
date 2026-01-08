@@ -60,9 +60,12 @@ describe('ZipArchiveHandler', () => {
 
     it('should include correct paths for nested files', async () => {
       const entries = await handler.listEntries(testZipPath);
-      const nestedEntry = entries.find(e => e.filename === 'image3.gif');
+      const nestedEntry = entries.find(e => e.path === 'subfolder/image3.gif');
 
+      expect(nestedEntry).toBeDefined();
       expect(nestedEntry?.path).toBe('subfolder/image3.gif');
+      // Verify basename extraction works correctly
+      expect(nestedEntry?.filename).toBe('image3.gif');
     });
 
     it('should include entry indices', async () => {

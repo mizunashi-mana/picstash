@@ -56,8 +56,13 @@ export async function deleteArchiveSession(sessionId: string): Promise<void> {
   });
 
   if (!response.ok) {
-    const error = (await response.json()) as ErrorResponse;
-    throw new Error(error.message ?? 'Failed to delete archive session');
+    // Only try to parse JSON if there's content
+    const text = await response.text();
+    if (text !== '') {
+      const error = JSON.parse(text) as ErrorResponse;
+      throw new Error(error.message ?? 'Failed to delete archive session');
+    }
+    throw new Error('Failed to delete archive session');
   }
 }
 

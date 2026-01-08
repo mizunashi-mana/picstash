@@ -12,6 +12,9 @@ export interface ArchiveEntry {
 }
 
 export interface ArchiveHandler {
+  /** The type of archive this handler supports */
+  readonly archiveType: 'zip' | 'rar';
+
   /** Check if this handler can process the given file */
   canHandle(filePath: string, mimeType: string): boolean;
 

@@ -25,6 +25,8 @@ interface RarFileHeader {
 
 @injectable()
 export class RarArchiveHandler implements ArchiveHandler {
+  readonly archiveType = 'rar' as const;
+
   canHandle(filePath: string, mimeType: string): boolean {
     const extension = filePath.toLowerCase().slice(filePath.lastIndexOf('.'));
     return (

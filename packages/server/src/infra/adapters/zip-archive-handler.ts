@@ -12,6 +12,8 @@ const ZIP_MIME_TYPES = ['application/zip', 'application/x-zip-compressed'];
 
 @injectable()
 export class ZipArchiveHandler implements ArchiveHandler {
+  readonly archiveType = 'zip' as const;
+
   canHandle(filePath: string, mimeType: string): boolean {
     const extension = filePath.toLowerCase().slice(filePath.lastIndexOf('.'));
     return (
