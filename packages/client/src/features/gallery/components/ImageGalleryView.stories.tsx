@@ -82,8 +82,8 @@ export const Empty: Story = {
     const canvas = within(canvasElement);
 
     // 空状態のメッセージが表示されていることを確認
-    await expect(canvas.getByText('No images yet')).toBeInTheDocument();
-    await expect(canvas.getByText('Upload your first image to get started')).toBeInTheDocument();
+    await expect(canvas.getByText('画像がありません')).toBeInTheDocument();
+    await expect(canvas.getByText('画像をアップロードしてください')).toBeInTheDocument();
   },
 };
 
