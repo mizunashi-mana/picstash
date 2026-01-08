@@ -23,8 +23,11 @@ export interface UpdateImageInput {
   description?: string | null;
 }
 
-export async function fetchImages(): Promise<Image[]> {
-  return apiClient<Image[]>('/images');
+export async function fetchImages(query?: string): Promise<Image[]> {
+  const url = query != null && query.trim() !== ''
+    ? `/images?q=${encodeURIComponent(query.trim())}`
+    : '/images';
+  return apiClient<Image[]>(url);
 }
 
 export async function fetchImage(id: string): Promise<Image> {
