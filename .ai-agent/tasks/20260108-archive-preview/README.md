@@ -93,4 +93,14 @@ ZIP/RAR アーカイブファイルを開いて、中身の画像ファイルを
 - API 動作確認（curl）: ZIP アップロード、セッション取得、サムネイル/フルサイズ取得、削除
 - UI 動作確認: ページ表示、ナビゲーション
 - 型チェック・Lint 通過
+- PR #21 作成
+- PR レビューコメント対応:
+  - DELETE リクエストの JSON 解析エラー修正
+  - パストラバーサル攻撃の検証追加
+  - サーバー側ファイルサイズ制限（500MB）追加
+  - getArchiveType の重複排除（handler.archiveType 使用）
+  - ページアンマウント時のセッション削除追加
+  - RarArchiveHandler のユニットテスト追加
+  - InMemoryArchiveSessionManager のユニットテスト追加
+  - ZipArchiveHandler のテスト改善
 
