@@ -68,10 +68,10 @@ export function ImageGalleryView({
       return (
         <Stack align="center" py="xl">
           <Text c="dimmed" size="lg">
-            No images yet
+            画像がありません
           </Text>
           <Text c="dimmed" size="sm">
-            Upload your first image to get started
+            画像をアップロードしてください
           </Text>
         </Stack>
       );

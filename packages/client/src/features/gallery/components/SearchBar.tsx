@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { TextInput } from '@mantine/core';
+import { ActionIcon, TextInput } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { IconSearch, IconX } from '@tabler/icons-react';
 
@@ -21,7 +21,8 @@ export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
     if (debouncedValue !== value) {
       onChange(debouncedValue);
     }
-  }, [debouncedValue, onChange, value]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- onChange is stable from parent
+  }, [debouncedValue, value]);
 
   const handleClear = () => {
     setInputValue('');
@@ -37,11 +38,14 @@ export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
       rightSection={
         inputValue !== ''
           ? (
-              <IconX
-                size={16}
-                style={{ cursor: 'pointer' }}
+              <ActionIcon
+                size="sm"
+                variant="subtle"
                 onClick={handleClear}
-              />
+                aria-label="検索をクリア"
+              >
+                <IconX size={16} />
+              </ActionIcon>
             )
           : null
       }
