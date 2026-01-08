@@ -26,15 +26,13 @@ class MockZipHandler implements ArchiveHandler {
     }>
   > {
     const zip = new AdmZip(archivePath);
-    return Promise.resolve(
-      zip.getEntries().map((entry, index) => ({
-        index,
-        filename: entry.name,
-        path: entry.entryName,
-        size: entry.header.size,
-        isDirectory: entry.isDirectory,
-      })),
-    );
+    return zip.getEntries().map((entry, index) => ({
+      index,
+      filename: entry.name,
+      path: entry.entryName,
+      size: entry.header.size,
+      isDirectory: entry.isDirectory,
+    }));
   }
 
   async extractEntry(archivePath: string, entryIndex: number): Promise<Buffer> {
@@ -42,9 +40,9 @@ class MockZipHandler implements ArchiveHandler {
     const entries = zip.getEntries();
     const entry = entries[entryIndex];
     if (entry == null) {
-      return Promise.reject(new Error(`Entry ${entryIndex} not found`));
+      throw new Error(`Entry ${entryIndex} not found`);
     }
-    return Promise.resolve(entry.getData());
+    return entry.getData();
   }
 }
 
