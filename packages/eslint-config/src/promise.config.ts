@@ -9,6 +9,7 @@ export function buildPromiseConfig() {
       rules: {
         'promise/always-return': ['error', { ignoreLastCallback: true }],
         'promise/no-promise-in-callback': 'error',
+        '@typescript-eslint/require-await': 'off',
       },
     },
   ]);

@@ -61,4 +61,14 @@ export class SharpImageProcessor implements ImageProcessor {
       path: `thumbnails/${thumbnailFilename}`,
     };
   }
+
+  async generateThumbnailFromBuffer(imageBuffer: Buffer): Promise<Buffer> {
+    return sharp(imageBuffer)
+      .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
+        fit: 'cover',
+        position: 'center',
+      })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+  }
 }

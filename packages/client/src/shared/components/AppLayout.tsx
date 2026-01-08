@@ -9,6 +9,7 @@ import {
   Title,
 } from '@mantine/core';
 import {
+  IconArchive,
   IconHome,
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
@@ -23,6 +24,7 @@ interface AppLayoutProps {
 const navItems = [
   { label: 'Home', path: '/', icon: IconHome },
   { label: 'Labels', path: '/labels', icon: IconTags },
+  { label: 'Archive', path: '/archive-import', icon: IconArchive },
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
