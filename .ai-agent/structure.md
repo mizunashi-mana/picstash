@@ -59,11 +59,18 @@ picstash/
 │   │   │   ├── app.ts          # Fastify アプリ構成
 │   │   │   ├── config.ts       # 設定読み込み
 │   │   │   │
+│   │   │   ├── cli/            # CLI コマンド
+│   │   │   │   └── generate-embeddings.ts # 埋め込み生成コマンド
+│   │   │   │
 │   │   │   ├── domain/         # ドメイン層
-│   │   │   │   └── image/      # 画像ドメインモデル
+│   │   │   │   ├── archive/    # アーカイブドメインモデル
+│   │   │   │   ├── image/      # 画像ドメインモデル
+│   │   │   │   ├── image-attribute/ # 画像属性ドメインモデル
+│   │   │   │   └── label/      # ラベルドメインモデル
 │   │   │   │
 │   │   │   ├── application/    # アプリケーション層
 │   │   │   │   ├── archive/    # アーカイブ処理
+│   │   │   │   ├── embedding/  # 埋め込み生成
 │   │   │   │   ├── image/      # 画像ユースケース
 │   │   │   │   ├── image-attribute/ # 画像属性ユースケース
 │   │   │   │   ├── label/      # ラベルユースケース
@@ -71,8 +78,9 @@ picstash/
 │   │   │   │
 │   │   │   ├── infra/          # インフラ層
 │   │   │   │   ├── adapters/   # 外部アダプター実装
-│   │   │   │   ├── database/   # Prisma Client、リポジトリ
+│   │   │   │   ├── database/   # Prisma Client、sqlite-vec
 │   │   │   │   ├── di/         # 依存性注入コンテナ
+│   │   │   │   ├── embedding/  # CLIP 埋め込みサービス
 │   │   │   │   ├── http/       # Fastify ルート、プラグイン
 │   │   │   │   │   ├── routes/ # API ルート（images, labels, image-attributes, archives 等）
 │   │   │   │   │   └── plugins/
@@ -140,12 +148,14 @@ picstash/
 
 ### `packages/server/`
 バックエンドのパッケージ。クリーンアーキテクチャを採用：
-- **domain/** - ドメイン層（ビジネスルール、エンティティ）
+- **cli/** - CLI コマンド（埋め込み生成等）
+- **domain/** - ドメイン層（ビジネスルール、エンティティ、バリューオブジェクト）
 - **application/** - アプリケーション層（ユースケース、ポート定義）
 - **infra/** - インフラ層（外部システム連携）
   - **adapters/** - 外部アダプター実装
-  - **database/** - Prisma Client、リポジトリ
+  - **database/** - Prisma Client、sqlite-vec
   - **di/** - 依存性注入コンテナ
+  - **embedding/** - CLIP 埋め込みサービス
   - **http/** - Fastify ルート、プラグイン
   - **storage/** - ファイルストレージ
 

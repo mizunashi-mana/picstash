@@ -12,9 +12,9 @@
 | バックエンド | Fastify | 5.x | 高速な Node.js フレームワーク |
 | ORM | Prisma | 7.x | Driver Adapter パターン使用 |
 | データベース | SQLite | - | better-sqlite3 アダプター経由 |
-| ベクトル検索 | sqlite-vec | - | SQLite 拡張で類似検索（未実装） |
+| ベクトル検索 | sqlite-vec | 0.1.x | SQLite 拡張で kNN 検索 |
 | 画像ストレージ | ローカルファイル | - | サーバーのディスクに保存 |
-| AI/ML | 未定 | - | CLIP モデルでタグ推薦・類似検索 |
+| AI/埋め込み | @huggingface/transformers | 3.x | CLIP モデルで画像ベクトル生成 |
 | テスト | Vitest | 4.x | Vite ネイティブで高速 |
 | リンター | ESLint | 9.x | Flat Config 形式 |
 
@@ -32,8 +32,8 @@
                                                         │
                                                         ▼
                                                 ┌─────────────────┐
-                                                │   AI サービス    │
-                                                │   CLIP (未定)   │
+                                                │   埋め込み生成    │
+                                                │   CLIP (ONNX)   │
                                                 └─────────────────┘
 ```
 
@@ -165,6 +165,22 @@ npm run db:push -w @picstash/server
 
 # Prisma Studio（DB GUI）
 npm run db:studio -w @picstash/server
+```
+
+### 埋め込み生成
+
+```bash
+# 埋め込み未生成の画像を処理
+npm run embedding:generate -w @picstash/server
+
+# Prisma から sqlite-vec へ同期
+npm run embedding:sync -w @picstash/server
+
+# 全画像の埋め込みを再生成
+npm run embedding:regenerate -w @picstash/server
+
+# 埋め込み状況の確認
+npm run embedding:status -w @picstash/server
 ```
 
 #### Prisma 7.x Driver Adapter

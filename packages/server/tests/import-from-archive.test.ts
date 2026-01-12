@@ -58,6 +58,13 @@ function createMockDeps() {
     search: vi.fn(),
     updateById: vi.fn(),
     deleteById: vi.fn(),
+    // Embedding-related methods
+    findIdsWithoutEmbedding: vi.fn(),
+    findWithEmbedding: vi.fn(),
+    updateEmbedding: vi.fn(),
+    clearAllEmbeddings: vi.fn(),
+    count: vi.fn(),
+    countWithEmbedding: vi.fn(),
   };
 
   const mockFileStorage: FileStorage = {

@@ -28,3 +28,12 @@ export type {
   CreateSessionInput,
   CreateSessionResult,
 } from './archive-session-manager.js';
+export type {
+  EmbeddingResult,
+  EmbeddingService,
+} from './embedding-service.js';
+export type {
+  EmbeddingRepository,
+  SimilarityResult,
+} from './embedding-repository.js';
+export { EMBEDDING_DIMENSION } from './embedding-repository.js';
