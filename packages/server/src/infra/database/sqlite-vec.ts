@@ -32,6 +32,13 @@ export function getVectorDb(): Database.Database {
   // Load sqlite-vec extension
   sqliteVec.load(db);
 
+  // Improve concurrent access with Prisma connection:
+  // - Use WAL mode for better read/write concurrency
+  // - Set a busy timeout so we wait briefly instead of failing with "database is locked"
+  db.pragma('journal_mode = WAL');
+  db.pragma('synchronous = NORMAL');
+  db.pragma('busy_timeout = 5000');
+
   // Initialize the vector search virtual table if it doesn't exist
   initializeVectorTable(db);
 
@@ -82,7 +89,12 @@ export function upsertEmbedding(
 
   // Insert new embedding
   // sqlite-vec expects embedding as a Buffer (raw bytes of Float32Array)
-  const embeddingBuffer = Buffer.from(embedding.buffer);
+  // Use byteOffset and byteLength to handle views into larger ArrayBuffers
+  const embeddingBuffer = Buffer.from(
+    embedding.buffer,
+    embedding.byteOffset,
+    embedding.byteLength,
+  );
   database
     .prepare('INSERT INTO vec_images (image_id, embedding) VALUES (?, ?)')
     .run(imageId, embeddingBuffer);
@@ -125,7 +137,12 @@ export function findSimilarImages(
     );
   }
 
-  const embeddingBuffer = Buffer.from(queryEmbedding.buffer);
+  // Use byteOffset and byteLength to handle views into larger ArrayBuffers
+  const embeddingBuffer = Buffer.from(
+    queryEmbedding.buffer,
+    queryEmbedding.byteOffset,
+    queryEmbedding.byteLength,
+  );
 
   // sqlite-vec uses MATCH for k-NN search with ORDER BY distance
   // We fetch extra results to account for exclusions

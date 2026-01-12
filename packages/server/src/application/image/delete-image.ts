@@ -38,7 +38,13 @@ export async function deleteImage(
   await imageRepository.deleteById(imageId);
 
   // Remove embedding from vector database
-  removeEmbedding(imageId, { embeddingRepository });
+  // Ignore errors since embeddings can be regenerated later
+  try {
+    removeEmbedding(imageId, { embeddingRepository });
+  }
+  catch {
+    // Embedding deletion errors are non-critical
+  }
 
   return { success: true };
 }
