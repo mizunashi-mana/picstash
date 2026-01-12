@@ -1,4 +1,4 @@
-import { LabelName } from '@/domain/label/index.js';
+import { LabelName, LABEL_NAME_MAX_LENGTH } from '@/domain/label/index.js';
 import type { Label, LabelRepository } from '@/application/ports/label-repository.js';
 
 export interface CreateLabelInput {
@@ -9,6 +9,7 @@ export interface CreateLabelInput {
 export type CreateLabelResult
   = | { success: true; label: Label }
     | { success: false; error: 'EMPTY_NAME' }
+    | { success: false; error: 'NAME_TOO_LONG'; maxLength: number }
     | { success: false; error: 'DUPLICATE_NAME'; name: string };
 
 export interface CreateLabelDeps {
@@ -23,11 +24,14 @@ export async function createLabel(
   const { labelRepository } = deps;
 
   // Validate name using domain value object
-  const labelName = LabelName.create(name);
-  if (labelName === null) {
+  const validationError = LabelName.validate(name);
+  if (validationError === 'EMPTY') {
     return { success: false, error: 'EMPTY_NAME' };
   }
-  const trimmedName = labelName.value;
+  if (validationError === 'TOO_LONG') {
+    return { success: false, error: 'NAME_TOO_LONG', maxLength: LABEL_NAME_MAX_LENGTH };
+  }
+  const trimmedName = name.trim();
 
   // Check for duplicate
   const existing = await labelRepository.findByName(trimmedName);

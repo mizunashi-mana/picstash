@@ -33,6 +33,11 @@ export function labelRoutes(app: FastifyInstance): void {
             error: 'Bad Request',
             message: 'Label name is required',
           });
+        case 'NAME_TOO_LONG':
+          return reply.status(400).send({
+            error: 'Bad Request',
+            message: `Label name must be ${result.maxLength} characters or less`,
+          });
         case 'DUPLICATE_NAME':
           return reply.status(409).send({
             error: 'Conflict',
@@ -84,6 +89,11 @@ export function labelRoutes(app: FastifyInstance): void {
             return reply.status(400).send({
               error: 'Bad Request',
               message: 'Label name cannot be empty',
+            });
+          case 'NAME_TOO_LONG':
+            return reply.status(400).send({
+              error: 'Bad Request',
+              message: `Label name must be ${result.maxLength} characters or less`,
             });
           case 'DUPLICATE_NAME':
             return reply.status(409).send({

@@ -4,6 +4,7 @@ export {
   MAX_ARCHIVE_SIZE,
   SUPPORTED_IMAGE_EXTENSIONS,
   IMAGE_EXTENSION_MIME_MAP,
+  isSupportedImageExtension,
   getMimeTypeFromExtension,
   type SupportedImageExtension,
 } from './ArchiveConfig.js';

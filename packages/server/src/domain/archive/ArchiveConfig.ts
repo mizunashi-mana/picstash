@@ -30,10 +30,20 @@ export const IMAGE_EXTENSION_MIME_MAP: Record<SupportedImageExtension, string> =
 };
 
 /**
+ * Type guard to check if a string is a supported image extension
+ */
+export function isSupportedImageExtension(extension: string): extension is SupportedImageExtension {
+  const ext = extension.toLowerCase();
+  return SUPPORTED_IMAGE_EXTENSIONS.includes(ext as SupportedImageExtension);
+}
+
+/**
  * Get MIME type from file extension
  */
 export function getMimeTypeFromExtension(extension: string): string {
-  const ext = extension.toLowerCase() as SupportedImageExtension;
-  const mimeType = IMAGE_EXTENSION_MIME_MAP[ext] as string | undefined;
-  return mimeType ?? 'application/octet-stream';
+  const lowerExt = extension.toLowerCase();
+  if (!isSupportedImageExtension(lowerExt)) {
+    return 'application/octet-stream';
+  }
+  return IMAGE_EXTENSION_MIME_MAP[lowerExt];
 }
