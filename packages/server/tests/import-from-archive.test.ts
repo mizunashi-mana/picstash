@@ -18,8 +18,8 @@ function createMockSession(overrides: Partial<ArchiveSession> = {}): ArchiveSess
     archiveType: 'zip',
     archivePath: '/tmp/test.zip',
     imageEntries: [
-      { index: 0, filename: 'image1.png', path: 'image1.png', size: 1000 },
-      { index: 1, filename: 'image2.jpg', path: 'image2.jpg', size: 2000 },
+      { index: 0, filename: 'image1.png', path: 'image1.png', size: 1000, isDirectory: false },
+      { index: 1, filename: 'image2.jpg', path: 'image2.jpg', size: 2000, isDirectory: false },
     ],
     createdAt: new Date(),
     ...overrides,
@@ -36,6 +36,7 @@ function createMockImage(overrides: Partial<Image> = {}): Image {
     size: 1000,
     width: 100,
     height: 100,
+    description: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -54,8 +55,9 @@ function createMockDeps() {
     create: vi.fn(),
     findById: vi.fn(),
     findAll: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
+    search: vi.fn(),
+    updateById: vi.fn(),
+    deleteById: vi.fn(),
   };
 
   const mockFileStorage: FileStorage = {
@@ -112,8 +114,8 @@ describe('importFromArchive', () => {
       expect(result.totalRequested).toBe(1);
       expect(result.successCount).toBe(0);
       expect(result.failedCount).toBe(1);
-      expect(result.results[0].success).toBe(false);
-      expect(result.results[0].error).toBe('Entry 999 not found in archive');
+      expect(result.results[0]?.success).toBe(false);
+      expect(result.results[0]?.error).toBe('Entry 999 not found in archive');
     });
   });
 
@@ -145,8 +147,8 @@ describe('importFromArchive', () => {
       expect(result.totalRequested).toBe(1);
       expect(result.successCount).toBe(1);
       expect(result.failedCount).toBe(0);
-      expect(result.results[0].success).toBe(true);
-      expect(result.results[0].image).toBe(mockImage);
+      expect(result.results[0]?.success).toBe(true);
+      expect(result.results[0]?.image).toBe(mockImage);
     });
 
     it('should handle multiple indices', async () => {
@@ -201,8 +203,8 @@ describe('importFromArchive', () => {
 
       expect(result.successCount).toBe(0);
       expect(result.failedCount).toBe(1);
-      expect(result.results[0].success).toBe(false);
-      expect(result.results[0].error).toBe('Invalid image');
+      expect(result.results[0]?.success).toBe(false);
+      expect(result.results[0]?.error).toBe('Invalid image');
       expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/saved.png');
     });
   });
@@ -234,8 +236,8 @@ describe('importFromArchive', () => {
 
       expect(result.successCount).toBe(0);
       expect(result.failedCount).toBe(1);
-      expect(result.results[0].success).toBe(false);
-      expect(result.results[0].error).toBe('Database error');
+      expect(result.results[0]?.success).toBe(false);
+      expect(result.results[0]?.error).toBe('Database error');
       expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/saved.png');
       expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('thumbnails/saved.jpg');
     });
@@ -271,9 +273,9 @@ describe('importFromArchive', () => {
       expect(result.totalRequested).toBe(2);
       expect(result.successCount).toBe(1);
       expect(result.failedCount).toBe(1);
-      expect(result.results[0].success).toBe(true);
-      expect(result.results[1].success).toBe(false);
-      expect(result.results[1].error).toBe('Extraction failed');
+      expect(result.results[0]?.success).toBe(true);
+      expect(result.results[1]?.success).toBe(false);
+      expect(result.results[1]?.error).toBe('Extraction failed');
     });
   });
 });
