@@ -95,3 +95,37 @@ export async function deleteImageAttribute(
     method: 'DELETE',
   });
 }
+
+// Suggested Attributes API
+export interface SuggestedKeyword {
+  keyword: string;
+  count: number;
+}
+
+export interface AttributeSuggestion {
+  labelId: string;
+  labelName: string;
+  score: number;
+  suggestedKeywords: SuggestedKeyword[];
+}
+
+export interface SuggestedAttributesResponse {
+  imageId: string;
+  suggestions: AttributeSuggestion[];
+}
+
+export async function fetchSuggestedAttributes(
+  imageId: string,
+  options?: { threshold?: number; limit?: number },
+): Promise<SuggestedAttributesResponse> {
+  const params = new URLSearchParams();
+  if (options?.threshold != null) {
+    params.set('threshold', options.threshold.toString());
+  }
+  if (options?.limit != null) {
+    params.set('limit', options.limit.toString());
+  }
+  const queryString = params.toString();
+  const url = `/images/${imageId}/suggested-attributes${queryString !== '' ? `?${queryString}` : ''}`;
+  return apiClient<SuggestedAttributesResponse>(url);
+}

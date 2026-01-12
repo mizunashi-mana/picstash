@@ -31,6 +31,8 @@ model AttributeLabel {
   id         String           @id @default(uuid())
   name       String           @unique
   color      String?
+  embedding  Bytes?           /// CLIP text embedding vector (512 dimensions, Float32Array)
+  embeddedAt DateTime?        @map("embedded_at") /// When embedding was generated
   createdAt  DateTime         @default(now()) @map("created_at")
   updatedAt  DateTime         @updatedAt @map("updated_at")
   attributes ImageAttribute[]

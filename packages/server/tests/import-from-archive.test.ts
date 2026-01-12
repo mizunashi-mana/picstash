@@ -60,6 +60,7 @@ function createMockDeps() {
     deleteById: vi.fn(),
     // Embedding-related methods
     findIdsWithoutEmbedding: vi.fn(),
+    findByIdWithEmbedding: vi.fn(),
     findWithEmbedding: vi.fn(),
     updateEmbedding: vi.fn(),
     clearAllEmbeddings: vi.fn(),

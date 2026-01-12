@@ -23,7 +23,10 @@
     "embedding:generate": "tsx src/cli/generate-embeddings.ts generate",
     "embedding:sync": "tsx src/cli/generate-embeddings.ts sync",
     "embedding:regenerate": "tsx src/cli/generate-embeddings.ts regenerate",
-    "embedding:status": "tsx src/cli/generate-embeddings.ts status"
+    "embedding:status": "tsx src/cli/generate-embeddings.ts status",
+    "label:embedding:generate": "tsx src/cli/generate-label-embeddings.ts generate",
+    "label:embedding:regenerate": "tsx src/cli/generate-label-embeddings.ts regenerate",
+    "label:embedding:status": "tsx src/cli/generate-label-embeddings.ts status"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

@@ -18,7 +18,12 @@
       "Bash(npm run db:migrate:*)",
       "Bash(npm run db:generate:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm run test:storybook:*)"
+      "Bash(npm run test:storybook:*)",
+      "Bash(npm test:*)",
+      "Bash(npm run embedding:status:*)",
+      "Bash(npm run label:embedding:status)",
+      "Bash(npm run embedding:generate:*)",
+      "Bash(npm run label:embedding:generate:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

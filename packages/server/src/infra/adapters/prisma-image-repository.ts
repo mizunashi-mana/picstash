@@ -73,6 +73,13 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 
+  async findByIdWithEmbedding(id: string): Promise<ImageWithEmbedding | null> {
+    return prisma.image.findUnique({
+      where: { id },
+      select: { id: true, path: true, embedding: true },
+    });
+  }
+
   async findWithEmbedding(): Promise<ImageWithEmbedding[]> {
     return prisma.image.findMany({
       where: { embedding: { not: null } },

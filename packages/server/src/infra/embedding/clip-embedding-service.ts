@@ -28,8 +28,14 @@ interface TransformersModule {
   AutoProcessor: {
     from_pretrained: (modelId: string) => Promise<ProcessorInstance>;
   };
+  AutoTokenizer: {
+    from_pretrained: (modelId: string) => Promise<TokenizerInstance>;
+  };
   CLIPVisionModelWithProjection: {
-    from_pretrained: (modelId: string) => Promise<ModelInstance>;
+    from_pretrained: (modelId: string) => Promise<VisionModelInstance>;
+  };
+  CLIPTextModelWithProjection: {
+    from_pretrained: (modelId: string) => Promise<TextModelInstance>;
   };
 }
 
@@ -38,12 +44,26 @@ interface ProcessorInstance {
   (image: unknown): Promise<unknown>;
 }
 
-interface ModelInstance {
-  (inputs: unknown): Promise<ModelOutput>;
+interface TokenizerInstance {
+  (text: string, options?: { padding?: boolean; truncation?: boolean }): unknown;
 }
 
-interface ModelOutput {
+interface VisionModelInstance {
+  (inputs: unknown): Promise<VisionModelOutput>;
+}
+
+interface TextModelInstance {
+  (inputs: unknown): Promise<TextModelOutput>;
+}
+
+interface VisionModelOutput {
   image_embeds: {
+    data: Float32Array;
+  };
+}
+
+interface TextModelOutput {
+  text_embeds: {
     data: Float32Array;
   };
 }
@@ -51,7 +71,9 @@ interface ModelOutput {
 // Module and model instances (lazy loaded)
 let transformers: TransformersModule | null = null;
 let processor: ProcessorInstance | null = null;
-let model: ModelInstance | null = null;
+let tokenizer: TokenizerInstance | null = null;
+let visionModel: VisionModelInstance | null = null;
+let textModel: TextModelInstance | null = null;
 
 @injectable()
 export class ClipEmbeddingService implements EmbeddingService {
@@ -67,8 +89,8 @@ export class ClipEmbeddingService implements EmbeddingService {
   async generateFromBuffer(imageData: Buffer): Promise<EmbeddingResult> {
     await this.initialize();
 
-    if (transformers === null || processor === null || model === null) {
-      throw new Error('CLIP model not initialized');
+    if (transformers === null || processor === null || visionModel === null) {
+      throw new Error('CLIP vision model not initialized');
     }
 
     // Load image using RawImage
@@ -79,11 +101,38 @@ export class ClipEmbeddingService implements EmbeddingService {
     const inputs = await processor(image);
 
     // Generate embedding
-    const output = await model(inputs);
+    const output = await visionModel(inputs);
 
     // Extract the embedding vector
     // image_embeds is a Tensor with shape [1, 512]
     const embedding = output.image_embeds.data;
+
+    // Normalize the embedding (L2 normalization)
+    const normalized = this.normalizeEmbedding(embedding);
+
+    return {
+      embedding: normalized,
+      dimension: EMBEDDING_DIMENSION,
+      model: MODEL_ID,
+    };
+  }
+
+  async generateFromText(text: string): Promise<EmbeddingResult> {
+    await this.initialize();
+
+    if (tokenizer === null || textModel === null) {
+      throw new Error('CLIP text model not initialized');
+    }
+
+    // Tokenize the text
+    const inputs = tokenizer(text, { padding: true, truncation: true });
+
+    // Generate embedding
+    const output = await textModel(inputs);
+
+    // Extract the embedding vector
+    // text_embeds is a Tensor with shape [1, 512]
+    const embedding = output.text_embeds.data;
 
     // Normalize the embedding (L2 normalization)
     const normalized = this.normalizeEmbedding(embedding);
@@ -104,7 +153,12 @@ export class ClipEmbeddingService implements EmbeddingService {
   }
 
   isReady(): boolean {
-    return processor !== null && model !== null;
+    return (
+      processor !== null
+      && tokenizer !== null
+      && visionModel !== null
+      && textModel !== null
+    );
   }
 
   async initialize(): Promise<void> {
@@ -117,13 +171,13 @@ export class ClipEmbeddingService implements EmbeddingService {
       return this.initPromise;
     }
 
-    this.initPromise = this.loadModel();
+    this.initPromise = this.loadModels();
     await this.initPromise;
   }
 
-  private async loadModel(): Promise<void> {
+  private async loadModels(): Promise<void> {
     // eslint-disable-next-line no-console -- Model loading status
-    console.log(`Loading CLIP model: ${MODEL_ID}...`);
+    console.log(`Loading CLIP models: ${MODEL_ID}...`);
     const startTime = Date.now();
 
     // Dynamic import of transformers.js
@@ -131,18 +185,23 @@ export class ClipEmbeddingService implements EmbeddingService {
       '@huggingface/transformers',
     )) as unknown as TransformersModule;
 
-    // Load processor and model
-    const [loadedProcessor, loadedModel] = await Promise.all([
-      transformers.AutoProcessor.from_pretrained(MODEL_ID),
-      transformers.CLIPVisionModelWithProjection.from_pretrained(MODEL_ID),
-    ]);
+    // Load all components in parallel
+    const [loadedProcessor, loadedTokenizer, loadedVisionModel, loadedTextModel]
+      = await Promise.all([
+        transformers.AutoProcessor.from_pretrained(MODEL_ID),
+        transformers.AutoTokenizer.from_pretrained(MODEL_ID),
+        transformers.CLIPVisionModelWithProjection.from_pretrained(MODEL_ID),
+        transformers.CLIPTextModelWithProjection.from_pretrained(MODEL_ID),
+      ]);
 
     processor = loadedProcessor;
-    model = loadedModel;
+    tokenizer = loadedTokenizer;
+    visionModel = loadedVisionModel;
+    textModel = loadedTextModel;
 
     const elapsed = Date.now() - startTime;
     // eslint-disable-next-line no-console -- Model loading status
-    console.log(`CLIP model loaded in ${elapsed}ms`);
+    console.log(`CLIP models loaded in ${elapsed}ms`);
   }
 
   /**

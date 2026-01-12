@@ -31,6 +31,8 @@ export interface ImageRepository {
   // Embedding-related methods
   /** Find IDs of images without embedding */
   findIdsWithoutEmbedding(): Promise<Array<{ id: string }>>;
+  /** Find a specific image with its embedding */
+  findByIdWithEmbedding(id: string): Promise<ImageWithEmbedding | null>;
   /** Find images with embeddings (for sync) */
   findWithEmbedding(): Promise<ImageWithEmbedding[]>;
   /** Update embedding for an image */

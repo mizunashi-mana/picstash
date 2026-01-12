@@ -1,12 +1,15 @@
 import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
+import { suggestAttributes } from '@/application/attribute-suggestion/suggest-attributes.js';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { container, TYPES } from '@/infra/di/index.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 async function fileExists(path: string): Promise<boolean> {
@@ -21,6 +24,8 @@ async function fileExists(path: string): Promise<boolean> {
 
 export function imageRoutes(app: FastifyInstance): void {
   const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
+  const labelRepository = container.get<LabelRepository>(TYPES.LabelRepository);
+  const imageAttributeRepository = container.get<ImageAttributeRepository>(TYPES.ImageAttributeRepository);
   const fileStorage = container.get<FileStorage>(TYPES.FileStorage);
   const imageProcessor = container.get<ImageProcessor>(TYPES.ImageProcessor);
   const embeddingService = container.get<EmbeddingService>(TYPES.EmbeddingService);
@@ -184,6 +189,54 @@ export function imageRoutes(app: FastifyInstance): void {
 
       const updated = await imageRepository.updateById(id, { description });
       return reply.send(updated);
+    },
+  );
+
+  // Get suggested attributes for image
+  app.get<{
+    Params: { id: string };
+    Querystring: { threshold?: string; limit?: string };
+  }>(
+    '/api/images/:id/suggested-attributes',
+    async (request, reply) => {
+      const { id } = request.params;
+      const { threshold, limit } = request.query;
+
+      const input = {
+        imageId: id,
+        threshold: threshold != null ? Number.parseFloat(threshold) : undefined,
+        limit: limit != null ? Number.parseInt(limit, 10) : undefined,
+      };
+
+      const result = await suggestAttributes(input, {
+        imageRepository,
+        labelRepository,
+        embeddingRepository,
+        imageAttributeRepository,
+      });
+
+      if (result === 'IMAGE_NOT_FOUND') {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      if (result === 'IMAGE_NOT_EMBEDDED') {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Image does not have an embedding. Please wait for embedding generation.',
+        });
+      }
+
+      if (result === 'NO_LABELS_WITH_EMBEDDING') {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'No labels have embeddings. Please generate label embeddings first.',
+        });
+      }
+
+      return reply.send(result);
     },
   );
 

@@ -4,7 +4,9 @@ import {
   createImageAttribute,
   deleteImageAttribute,
   fetchImageAttributes,
+  fetchSuggestedAttributes,
   updateImageAttribute,
+  type AttributeSuggestion,
 } from '@/features/gallery/api';
 import { fetchLabels } from '@/features/labels';
 import { ImageAttributeSectionView } from './ImageAttributeSectionView';
@@ -21,6 +23,8 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [addingSuggestionId, setAddingSuggestionId] = useState<string | null>(null);
 
   // Fetch attributes for this image
   const {
@@ -40,6 +44,18 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   } = useQuery({
     queryKey: ['labels'],
     queryFn: fetchLabels,
+  });
+
+  // Fetch suggested attributes (only when panel is open)
+  const {
+    data: suggestions,
+    isLoading: suggestionsLoading,
+    error: suggestionsError,
+    refetch: refetchSuggestions,
+  } = useQuery({
+    queryKey: ['suggestedAttributes', imageId],
+    queryFn: async () => fetchSuggestedAttributes(imageId, { limit: 10 }),
+    enabled: showSuggestions,
   });
 
   // Create mutation
@@ -95,6 +111,24 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     },
   });
 
+  // Add suggestion mutation
+  const addSuggestionMutation = useMutation({
+    mutationFn: async (suggestion: AttributeSuggestion) => {
+      setAddingSuggestionId(suggestion.labelId);
+      return createImageAttribute(imageId, {
+        labelId: suggestion.labelId,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['imageAttributes', imageId] });
+      await refetchSuggestions();
+      setAddingSuggestionId(null);
+    },
+    onError: () => {
+      setAddingSuggestionId(null);
+    },
+  });
+
   // Get labels that are not already assigned
   const availableLabels = labels?.filter(
     label => !attributes?.some(attr => attr.labelId === label.id),
@@ -104,6 +138,11 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     value: label.id,
     label: label.name,
   }));
+
+  // Filter suggestions to exclude already assigned labels
+  const filteredSuggestions = suggestions?.suggestions.filter(
+    s => !attributes?.some(attr => attr.labelId === s.labelId),
+  ) ?? [];
 
   const openAddModal = () => {
     setSelectedLabelId(null);
@@ -156,6 +195,14 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       onCreate={() => createMutation.mutate()}
       onUpdate={() => updateMutation.mutate()}
       onDelete={attributeId => deleteMutation.mutate(attributeId)}
+      // Suggestion props
+      showSuggestions={showSuggestions}
+      suggestions={filteredSuggestions}
+      suggestionsLoading={suggestionsLoading}
+      suggestionsError={suggestionsError}
+      addingSuggestionId={addingSuggestionId}
+      onToggleSuggestions={() => setShowSuggestions(!showSuggestions)}
+      onAddSuggestion={suggestion => addSuggestionMutation.mutate(suggestion)}
     />
   );
 }

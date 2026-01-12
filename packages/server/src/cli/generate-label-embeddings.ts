@@ -1,0 +1,135 @@
+/* eslint-disable no-console, n/no-process-exit -- CLI command */
+/**
+ * CLI command for generating embeddings for labels.
+ *
+ * Usage:
+ *   npm run label:embedding:generate     # Generate for all labels without embeddings
+ *   npm run label:embedding:regenerate   # Regenerate all label embeddings
+ *   npm run label:embedding:status       # Show embedding status
+ */
+
+import {
+  generateMissingLabelEmbeddings,
+  regenerateAllLabelEmbeddings,
+  type GenerateLabelEmbeddingDeps,
+} from '@/application/attribute-suggestion/generate-label-embeddings.js';
+import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
+import { container } from '@/infra/di/container.js';
+import { TYPES } from '@/infra/di/types.js';
+import type { EmbeddingService } from '@/application/ports/embedding-service.js';
+import type { LabelRepository } from '@/application/ports/label-repository.js';
+
+function getDeps(): GenerateLabelEmbeddingDeps {
+  return {
+    labelRepository: container.get<LabelRepository>(TYPES.LabelRepository),
+    embeddingService: container.get<EmbeddingService>(TYPES.EmbeddingService),
+  };
+}
+
+async function main(): Promise<void> {
+  const command = process.argv[2] ?? 'generate';
+
+  console.log('Connecting to database...');
+  await connectDatabase();
+
+  const deps = getDeps();
+
+  try {
+    switch (command) {
+      case 'generate':
+        await runGenerate(deps);
+        break;
+      case 'regenerate':
+        await runRegenerate(deps);
+        break;
+      case 'status':
+        await runStatus(deps);
+        break;
+      default:
+        console.error(`Unknown command: ${command}`);
+        console.error('Available commands: generate, regenerate, status');
+        process.exit(1);
+    }
+  }
+  finally {
+    await disconnectDatabase();
+  }
+}
+
+async function runGenerate(deps: GenerateLabelEmbeddingDeps): Promise<void> {
+  console.log('Generating embeddings for labels without embeddings...');
+
+  // Warm up the model
+  console.log('Loading CLIP model (this may take a moment on first run)...');
+  await deps.embeddingService.initialize();
+  console.log('Model ready.');
+
+  const result = await generateMissingLabelEmbeddings(deps, {
+    onProgress: (current, total, labelName) => {
+      process.stdout.write(`\rProgress: ${current}/${total} - ${labelName}`);
+    },
+  });
+
+  console.log('\n');
+  console.log('=== Generation Complete ===');
+  console.log(`Total labels: ${result.total}`);
+  console.log(`Successful: ${result.success}`);
+  console.log(`Failed: ${result.failed}`);
+
+  if (result.errors.length > 0) {
+    console.log('\nErrors:');
+    for (const error of result.errors) {
+      console.log(`  - ${error.labelName} (${error.labelId}): ${error.error}`);
+    }
+  }
+}
+
+async function runRegenerate(deps: GenerateLabelEmbeddingDeps): Promise<void> {
+  console.log('Regenerating all label embeddings...');
+  console.log('This will clear existing embeddings and regenerate from scratch.');
+
+  // Warm up the model
+  console.log('Loading CLIP model (this may take a moment on first run)...');
+  await deps.embeddingService.initialize();
+  console.log('Model ready.');
+
+  const result = await regenerateAllLabelEmbeddings(deps, {
+    onProgress: (current, total, labelName) => {
+      process.stdout.write(`\rProgress: ${current}/${total} - ${labelName}`);
+    },
+  });
+
+  console.log('\n');
+  console.log('=== Regeneration Complete ===');
+  console.log(`Total labels: ${result.total}`);
+  console.log(`Successful: ${result.success}`);
+  console.log(`Failed: ${result.failed}`);
+
+  if (result.errors.length > 0) {
+    console.log('\nErrors:');
+    for (const error of result.errors) {
+      console.log(`  - ${error.labelName} (${error.labelId}): ${error.error}`);
+    }
+  }
+}
+
+async function runStatus(deps: GenerateLabelEmbeddingDeps): Promise<void> {
+  const labelRepository = deps.labelRepository;
+
+  const allLabels = await labelRepository.findAll();
+  const labelsWithEmbedding = await labelRepository.countWithEmbedding();
+
+  console.log('=== Label Embedding Status ===');
+  console.log(`Total labels: ${allLabels.length}`);
+  console.log(`Labels with embedding: ${labelsWithEmbedding}`);
+  console.log(`Labels without embedding: ${allLabels.length - labelsWithEmbedding}`);
+
+  if (labelsWithEmbedding < allLabels.length) {
+    console.log('\n[Info] Run "generate" to create embeddings for remaining labels.');
+  }
+}
+
+main().catch((error) => {
+  console.error('Error:', error);
+  process.exit(1);
+});

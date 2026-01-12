@@ -1,6 +1,6 @@
 /**
- * Port for image embedding generation service.
- * This interface defines the contract for generating embeddings from images.
+ * Port for embedding generation service.
+ * This interface defines the contract for generating embeddings from images and text.
  */
 
 /** Result of embedding generation */
@@ -14,7 +14,7 @@ export interface EmbeddingResult {
 }
 
 /**
- * Service for generating image embeddings.
+ * Service for generating embeddings.
  * Implementations may use different models (CLIP, DINOv2, etc.)
  */
 export interface EmbeddingService {
@@ -31,6 +31,13 @@ export interface EmbeddingService {
    * @returns The embedding result
    */
   generateFromBuffer(imageData: Buffer): Promise<EmbeddingResult>;
+
+  /**
+   * Generate an embedding from text.
+   * @param text - The text to embed
+   * @returns The embedding result
+   */
+  generateFromText(text: string): Promise<EmbeddingResult>;
 
   /**
    * Get the dimension of embeddings produced by this service.

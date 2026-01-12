@@ -8,4 +8,7 @@
 
 # SQLite database files
 /prisma/data/*.db
-/prisma/data/*.db-journal
+/prisma/data/*.db-wal
+/prisma/data/*.db-shm
+/prisma/data/*.sqlite
+/prisma/data/*.sqlite-journal

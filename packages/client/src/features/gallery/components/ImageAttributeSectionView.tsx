@@ -4,16 +4,20 @@ import {
   Badge,
   Button,
   Card,
+  Collapse,
   Group,
   Loader,
   Modal,
+  Progress,
   Select,
   Stack,
   TagsInput,
   Text,
   Title,
+  Tooltip,
 } from '@mantine/core';
-import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconEdit, IconPlus, IconSparkles, IconTrash } from '@tabler/icons-react';
+import type { AttributeSuggestion } from '@/features/gallery/api';
 import type { ImageAttribute } from '@picstash/shared';
 
 export interface ImageAttributeSectionViewProps {
@@ -39,6 +43,14 @@ export interface ImageAttributeSectionViewProps {
   onCreate: () => void;
   onUpdate: () => void;
   onDelete: (attributeId: string) => void;
+  // Suggestion props
+  showSuggestions: boolean;
+  suggestions: AttributeSuggestion[];
+  suggestionsLoading: boolean;
+  suggestionsError: Error | null;
+  addingSuggestionId: string | null;
+  onToggleSuggestions: () => void;
+  onAddSuggestion: (suggestion: AttributeSuggestion) => void;
 }
 
 function parseKeywords(keywordsString: string | null): string[] {
@@ -72,6 +84,13 @@ export function ImageAttributeSectionView({
   onCreate,
   onUpdate,
   onDelete,
+  showSuggestions,
+  suggestions,
+  suggestionsLoading,
+  suggestionsError,
+  addingSuggestionId,
+  onToggleSuggestions,
+  onAddSuggestion,
 }: ImageAttributeSectionViewProps) {
   if (isLoading) {
     return (
@@ -105,16 +124,102 @@ export function ImageAttributeSectionView({
         <Stack gap="md">
           <Group justify="space-between">
             <Title order={5}>属性</Title>
-            <Button
-              size="xs"
-              variant="light"
-              leftSection={<IconPlus size={14} />}
-              onClick={onOpenAddModal}
-              disabled={!hasAvailableLabels}
-            >
-              追加
-            </Button>
+            <Group gap="xs">
+              <Button
+                size="xs"
+                variant="light"
+                color="grape"
+                leftSection={<IconSparkles size={14} />}
+                onClick={onToggleSuggestions}
+              >
+                {showSuggestions ? '閉じる' : 'AI提案'}
+              </Button>
+              <Button
+                size="xs"
+                variant="light"
+                leftSection={<IconPlus size={14} />}
+                onClick={onOpenAddModal}
+                disabled={!hasAvailableLabels}
+              >
+                追加
+              </Button>
+            </Group>
           </Group>
+
+          {/* AI Suggestions Section */}
+          <Collapse in={showSuggestions}>
+            <Card padding="sm" withBorder bg="grape.0">
+              <Stack gap="xs">
+                <Text size="sm" fw={500} c="grape.7">
+                  AI推薦ラベル
+                </Text>
+                {suggestionsLoading && (
+                  <Group justify="center" py="xs">
+                    <Loader size="sm" color="grape" />
+                  </Group>
+                )}
+                {suggestionsError != null && (
+                  <Text size="xs" c="red">
+                    提案の取得に失敗しました
+                  </Text>
+                )}
+                {!suggestionsLoading && suggestionsError == null && suggestions.length === 0 && (
+                  <Text size="xs" c="dimmed">
+                    推薦できるラベルがありません
+                  </Text>
+                )}
+                {!suggestionsLoading && suggestions.length > 0 && (
+                  <Stack gap={4}>
+                    {suggestions.map(suggestion => (
+                      <Card key={suggestion.labelId} padding="xs" withBorder>
+                        <Stack gap={4}>
+                          <Group justify="space-between" wrap="nowrap">
+                            <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+                              <Group gap="xs">
+                                <Badge size="sm" color="grape" variant="light">
+                                  {suggestion.labelName}
+                                </Badge>
+                                <Tooltip label={`類似度: ${(suggestion.score * 100).toFixed(1)}%`}>
+                                  <Progress
+                                    value={suggestion.score * 100}
+                                    size="xs"
+                                    color="grape"
+                                    style={{ width: 60 }}
+                                  />
+                                </Tooltip>
+                              </Group>
+                            </Stack>
+                            <Button
+                              size="xs"
+                              variant="light"
+                              color="grape"
+                              leftSection={<IconPlus size={12} />}
+                              loading={addingSuggestionId === suggestion.labelId}
+                              onClick={() => onAddSuggestion(suggestion)}
+                            >
+                              追加
+                            </Button>
+                          </Group>
+                          {suggestion.suggestedKeywords.length > 0 && (
+                            <Group gap={4}>
+                              <Text size="xs" c="dimmed">推薦キーワード:</Text>
+                              {suggestion.suggestedKeywords.map(kw => (
+                                <Tooltip key={kw.keyword} label={`${kw.count}件の類似画像で使用`}>
+                                  <Badge size="xs" variant="outline" color="grape">
+                                    {kw.keyword}
+                                  </Badge>
+                                </Tooltip>
+                              ))}
+                            </Group>
+                          )}
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Stack>
+                )}
+              </Stack>
+            </Card>
+          </Collapse>
 
           {attributes?.length === 0 && (
             <Text size="sm" c="dimmed" ta="center">
