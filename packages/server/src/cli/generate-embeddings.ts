@@ -11,12 +11,24 @@
 import {
   generateMissingEmbeddings,
   syncEmbeddingsToVectorDb,
+  type GenerateEmbeddingDeps,
 } from '@/application/embedding/generate-embedding.js';
-import { connectDatabase, disconnectDatabase, prisma } from '@/infra/database/prisma.js';
-import { closeVectorDb, getEmbeddingCount } from '@/infra/database/sqlite-vec.js';
+import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { container } from '@/infra/di/container.js';
 import { TYPES } from '@/infra/di/types.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
+
+function getDeps(): GenerateEmbeddingDeps {
+  return {
+    imageRepository: container.get<ImageRepository>(TYPES.ImageRepository),
+    fileStorage: container.get<FileStorage>(TYPES.FileStorage),
+    embeddingService: container.get<EmbeddingService>(TYPES.EmbeddingService),
+    embeddingRepository: container.get<EmbeddingRepository>(TYPES.EmbeddingRepository),
+  };
+}
 
 async function main(): Promise<void> {
   const command = process.argv[2] ?? 'generate';
@@ -24,19 +36,21 @@ async function main(): Promise<void> {
   console.log('Connecting to database...');
   await connectDatabase();
 
+  const deps = getDeps();
+
   try {
     switch (command) {
       case 'generate':
-        await runGenerate();
+        await runGenerate(deps);
         break;
       case 'sync':
-        await runSync();
+        await runSync(deps);
         break;
       case 'regenerate':
-        await runRegenerate();
+        await runRegenerate(deps);
         break;
       case 'status':
-        await runStatus();
+        await runStatus(deps);
         break;
       default:
         console.error(`Unknown command: ${command}`);
@@ -45,21 +59,20 @@ async function main(): Promise<void> {
     }
   }
   finally {
-    closeVectorDb();
+    deps.embeddingRepository.close();
     await disconnectDatabase();
   }
 }
 
-async function runGenerate(): Promise<void> {
+async function runGenerate(deps: GenerateEmbeddingDeps): Promise<void> {
   console.log('Generating embeddings for images without embeddings...');
 
   // Warm up the model
-  const embeddingService = container.get<EmbeddingService>(TYPES.EmbeddingService);
   console.log('Loading CLIP model (this may take a moment on first run)...');
-  await embeddingService.initialize();
+  await deps.embeddingService.initialize();
   console.log('Model ready.');
 
-  const result = await generateMissingEmbeddings({
+  const result = await generateMissingEmbeddings(deps, {
     onProgress: (current, total) => {
       process.stdout.write(`\rProgress: ${current}/${total}`);
     },
@@ -79,37 +92,33 @@ async function runGenerate(): Promise<void> {
   }
 }
 
-async function runSync(): Promise<void> {
+async function runSync(deps: GenerateEmbeddingDeps): Promise<void> {
   console.log('Syncing embeddings from Prisma to vector database...');
 
-  const result = await syncEmbeddingsToVectorDb();
+  const result = await syncEmbeddingsToVectorDb({
+    imageRepository: deps.imageRepository,
+    embeddingRepository: deps.embeddingRepository,
+  });
 
   console.log('=== Sync Complete ===');
   console.log(`Synced: ${result.synced}`);
   console.log(`Skipped: ${result.skipped}`);
 }
 
-async function runRegenerate(): Promise<void> {
+async function runRegenerate(deps: GenerateEmbeddingDeps): Promise<void> {
   console.log('Regenerating all embeddings...');
   console.log('This will clear existing embeddings and regenerate from scratch.');
 
-  // Clear all embeddedAt to force regeneration
-  await prisma.image.updateMany({
-    data: {
-      embedding: null,
-      embeddedAt: null,
-    },
-  });
+  // Clear all embeddings
+  await deps.imageRepository.clearAllEmbeddings();
 
-  await runGenerate();
+  await runGenerate(deps);
 }
 
-async function runStatus(): Promise<void> {
-  const totalImages = await prisma.image.count();
-  const imagesWithEmbedding = await prisma.image.count({
-    where: { embedding: { not: null } },
-  });
-  const vectorDbCount = getEmbeddingCount();
+async function runStatus(deps: GenerateEmbeddingDeps): Promise<void> {
+  const totalImages = await deps.imageRepository.count();
+  const imagesWithEmbedding = await deps.imageRepository.countWithEmbedding();
+  const vectorDbCount = deps.embeddingRepository.count();
 
   console.log('=== Embedding Status ===');
   console.log(`Total images: ${totalImages}`);

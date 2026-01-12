@@ -8,12 +8,14 @@ import {
   PrismaLabelRepository,
   RarArchiveHandler,
   SharpImageProcessor,
+  SqliteVecEmbeddingRepository,
   ZipArchiveHandler,
 } from '@/infra/adapters/index.js';
 import { ClipEmbeddingService } from '@/infra/embedding/clip-embedding-service.js';
 import { TYPES } from './types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
@@ -63,6 +65,11 @@ container
 container
   .bind<EmbeddingService>(TYPES.EmbeddingService)
   .to(ClipEmbeddingService)
+  .inSingletonScope();
+
+container
+  .bind<EmbeddingRepository>(TYPES.EmbeddingRepository)
+  .to(SqliteVecEmbeddingRepository)
   .inSingletonScope();
 
 export { container };

@@ -8,16 +8,11 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { prisma } from '@/infra/database/prisma.js';
-import {
-  upsertEmbedding,
-  deleteEmbedding,
-  EMBEDDING_DIMENSION,
-} from '@/infra/database/sqlite-vec.js';
-import { container } from '@/infra/di/container.js';
-import { TYPES } from '@/infra/di/types.js';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
 
 export interface GenerateEmbeddingInput {
   imageId: string;
@@ -32,26 +27,30 @@ export interface GenerateEmbeddingResult {
 
 export type GenerateEmbeddingError = 'IMAGE_NOT_FOUND' | 'EMBEDDING_FAILED';
 
+export interface GenerateEmbeddingDeps {
+  imageRepository: ImageRepository;
+  fileStorage: FileStorage;
+  embeddingService: EmbeddingService;
+  embeddingRepository: EmbeddingRepository;
+}
+
 /**
  * Generate embedding for a single image.
  *
  * @param input - The image ID to generate embedding for
+ * @param deps - Dependencies
  * @returns Result with embedding details or error
  */
 export async function generateEmbedding(
   input: GenerateEmbeddingInput,
+  deps: GenerateEmbeddingDeps,
 ): Promise<GenerateEmbeddingResult | GenerateEmbeddingError> {
-  const embeddingService = container.get<EmbeddingService>(
-    TYPES.EmbeddingService,
-  );
-  const fileStorage = container.get<FileStorage>(TYPES.FileStorage);
+  const { imageRepository, fileStorage, embeddingService, embeddingRepository } = deps;
 
   // Get image from database
-  const image = await prisma.image.findUnique({
-    where: { id: input.imageId },
-  });
+  const image = await imageRepository.findById(input.imageId);
 
-  if (!image) {
+  if (image === null) {
     return 'IMAGE_NOT_FOUND';
   }
 
@@ -71,19 +70,16 @@ export async function generateEmbedding(
       result.embedding.buffer,
       result.embedding.byteOffset,
       result.embedding.byteLength,
-    ) as unknown as Uint8Array<ArrayBuffer>;
+    );
     const generatedAt = new Date();
 
-    await prisma.image.update({
-      where: { id: input.imageId },
-      data: {
-        embedding: embeddingBytes,
-        embeddedAt: generatedAt,
-      },
+    await imageRepository.updateEmbedding(input.imageId, {
+      embedding: embeddingBytes,
+      embeddedAt: generatedAt,
     });
 
     // Store in sqlite-vec for fast vector search
-    upsertEmbedding(input.imageId, result.embedding);
+    embeddingRepository.upsert(input.imageId, result.embedding);
 
     return {
       imageId: input.imageId,
@@ -106,23 +102,27 @@ export interface BatchGenerateResult {
   errors: Array<{ imageId: string; error: string }>;
 }
 
+export interface GenerateMissingEmbeddingsOptions {
+  onProgress?: (current: number, total: number) => void;
+  // batchSize is reserved for future parallel processing implementation
+  batchSize?: number;
+}
+
 /**
  * Generate embeddings for all images that don't have one yet.
  *
+ * @param deps - Dependencies
  * @param options - Options for batch generation
  * @returns Summary of batch generation
  */
-export async function generateMissingEmbeddings(options?: {
-  onProgress?: (current: number, total: number) => void;
-  // batchSize is reserved for future parallel processing implementation
+export async function generateMissingEmbeddings(
+  deps: GenerateEmbeddingDeps,
+  options?: GenerateMissingEmbeddingsOptions,
+): Promise<BatchGenerateResult> {
+  const { imageRepository } = deps;
 
-  batchSize?: number;
-}): Promise<BatchGenerateResult> {
   // Find all images without embeddings
-  const imagesWithoutEmbedding = await prisma.image.findMany({
-    where: { embedding: null },
-    select: { id: true },
-  });
+  const imagesWithoutEmbedding = await imageRepository.findIdsWithoutEmbedding();
 
   const total = imagesWithoutEmbedding.length;
   let success = 0;
@@ -133,7 +133,7 @@ export async function generateMissingEmbeddings(options?: {
   for (let i = 0; i < total; i++) {
     const image = imagesWithoutEmbedding[i]!;
 
-    const result = await generateEmbedding({ imageId: image.id });
+    const result = await generateEmbedding({ imageId: image.id }, deps);
 
     if (typeof result === 'string') {
       failed++;
@@ -153,28 +153,34 @@ export async function generateMissingEmbeddings(options?: {
  * Remove embedding for an image.
  * Called when an image is deleted.
  */
-export function removeEmbedding(imageId: string): void {
-  deleteEmbedding(imageId);
+export function removeEmbedding(
+  imageId: string,
+  deps: { embeddingRepository: EmbeddingRepository },
+): void {
+  deps.embeddingRepository.remove(imageId);
+}
+
+export interface SyncEmbeddingsResult {
+  synced: number;
+  skipped: number;
 }
 
 /**
  * Sync embeddings from Prisma to sqlite-vec.
  * Useful for rebuilding the vector index.
  */
-export async function syncEmbeddingsToVectorDb(): Promise<{
-  synced: number;
-  skipped: number;
-}> {
-  const imagesWithEmbedding = await prisma.image.findMany({
-    where: { embedding: { not: null } },
-    select: { id: true, embedding: true },
-  });
+export async function syncEmbeddingsToVectorDb(
+  deps: { imageRepository: ImageRepository; embeddingRepository: EmbeddingRepository },
+): Promise<SyncEmbeddingsResult> {
+  const { imageRepository, embeddingRepository } = deps;
+
+  const imagesWithEmbedding = await imageRepository.findWithEmbedding();
 
   let synced = 0;
   let skipped = 0;
 
   for (const image of imagesWithEmbedding) {
-    if (!image.embedding) {
+    if (image.embedding === null) {
       skipped++;
       continue;
     }
@@ -195,7 +201,7 @@ export async function syncEmbeddingsToVectorDb(): Promise<{
       continue;
     }
 
-    upsertEmbedding(image.id, embedding);
+    embeddingRepository.upsert(image.id, embedding);
     synced++;
   }
 

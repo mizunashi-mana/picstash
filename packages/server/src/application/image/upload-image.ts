@@ -1,6 +1,8 @@
 import { stat } from 'node:fs/promises';
-import { generateEmbedding } from '@/application/embedding/generate-embedding.js';
+import { generateEmbedding, type GenerateEmbeddingDeps } from '@/application/embedding/generate-embedding.js';
 import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES } from '@/domain/image/index.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
@@ -20,6 +22,8 @@ export interface UploadImageDeps {
   imageRepository: ImageRepository;
   fileStorage: FileStorage;
   imageProcessor: ImageProcessor;
+  embeddingService: EmbeddingService;
+  embeddingRepository: EmbeddingRepository;
 }
 
 export async function uploadImage(
@@ -27,7 +31,7 @@ export async function uploadImage(
   deps: UploadImageDeps,
 ): Promise<UploadImageResult> {
   const { filename, mimetype, stream } = input;
-  const { imageRepository, fileStorage, imageProcessor } = deps;
+  const { imageRepository, fileStorage, imageProcessor, embeddingService, embeddingRepository } = deps;
 
   // Validate MIME type using domain value object
   if (!ImageMimeType.isValid(mimetype)) {
@@ -84,7 +88,13 @@ export async function uploadImage(
 
   // Generate embedding in background (non-blocking)
   // This allows the upload to complete quickly while embedding is generated async
-  generateEmbedding({ imageId: image.id }).catch((error: unknown) => {
+  const embeddingDeps: GenerateEmbeddingDeps = {
+    imageRepository,
+    fileStorage,
+    embeddingService,
+    embeddingRepository,
+  };
+  generateEmbedding({ imageId: image.id }, embeddingDeps).catch((error: unknown) => {
     // eslint-disable-next-line no-console -- Background task error logging
     console.error(`Background embedding generation failed for ${image.id}:`, error);
   });

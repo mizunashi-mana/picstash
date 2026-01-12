@@ -2,6 +2,8 @@ import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { container, TYPES } from '@/infra/di/index.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
@@ -21,6 +23,8 @@ export function imageRoutes(app: FastifyInstance): void {
   const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
   const fileStorage = container.get<FileStorage>(TYPES.FileStorage);
   const imageProcessor = container.get<ImageProcessor>(TYPES.ImageProcessor);
+  const embeddingService = container.get<EmbeddingService>(TYPES.EmbeddingService);
+  const embeddingRepository = container.get<EmbeddingRepository>(TYPES.EmbeddingRepository);
 
   // Upload image
   app.post('/api/images', async (request, reply) => {
@@ -39,7 +43,7 @@ export function imageRoutes(app: FastifyInstance): void {
         mimetype: file.mimetype,
         stream: file.file,
       },
-      { imageRepository, fileStorage, imageProcessor },
+      { imageRepository, fileStorage, imageProcessor, embeddingService, embeddingRepository },
     );
 
     // Check if file was truncated due to size limit
@@ -188,7 +192,7 @@ export function imageRoutes(app: FastifyInstance): void {
     '/api/images/:id',
     async (request, reply) => {
       const { id } = request.params;
-      const result = await deleteImage(id, { imageRepository, fileStorage });
+      const result = await deleteImage(id, { imageRepository, fileStorage, embeddingRepository });
 
       if (!result.success) {
         return reply.status(404).send({

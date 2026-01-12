@@ -1,4 +1,5 @@
 import { removeEmbedding } from '@/application/embedding/generate-embedding.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 
@@ -9,13 +10,14 @@ export type DeleteImageResult
 export interface DeleteImageDeps {
   imageRepository: ImageRepository;
   fileStorage: FileStorage;
+  embeddingRepository: EmbeddingRepository;
 }
 
 export async function deleteImage(
   imageId: string,
   deps: DeleteImageDeps,
 ): Promise<DeleteImageResult> {
-  const { imageRepository, fileStorage } = deps;
+  const { imageRepository, fileStorage, embeddingRepository } = deps;
 
   const image = await imageRepository.findById(imageId);
   if (image === null) {
@@ -36,7 +38,7 @@ export async function deleteImage(
   await imageRepository.deleteById(imageId);
 
   // Remove embedding from vector database
-  removeEmbedding(imageId);
+  removeEmbedding(imageId, { embeddingRepository });
 
   return { success: true };
 }
