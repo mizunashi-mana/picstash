@@ -20,6 +20,10 @@ picstash/
 │   │   │   ├── App.tsx         # ルートコンポーネント（Providers）
 │   │   │   │
 │   │   │   ├── features/       # 機能ごとのモジュール
+│   │   │   │   ├── archive-import/ # アーカイブインポート機能
+│   │   │   │   │   ├── components/
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   └── api.ts
 │   │   │   │   ├── gallery/    # ギャラリー機能
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
@@ -55,12 +59,26 @@ picstash/
 │   │   │   ├── app.ts          # Fastify アプリ構成
 │   │   │   ├── config.ts       # 設定読み込み
 │   │   │   │
-│   │   │   └── infra/          # インフラ層
-│   │   │       ├── database/   # Prisma Client、リポジトリ
-│   │   │       ├── http/       # Fastify ルート、プラグイン
-│   │   │       │   ├── routes/ # API ルート（images, labels, image-attributes 等）
-│   │   │       │   └── plugins/
-│   │   │       └── storage/    # ファイルストレージ
+│   │   │   ├── domain/         # ドメイン層
+│   │   │   │   └── image/      # 画像ドメインモデル
+│   │   │   │
+│   │   │   ├── application/    # アプリケーション層
+│   │   │   │   ├── archive/    # アーカイブ処理
+│   │   │   │   ├── image/      # 画像ユースケース
+│   │   │   │   ├── image-attribute/ # 画像属性ユースケース
+│   │   │   │   ├── label/      # ラベルユースケース
+│   │   │   │   └── ports/      # ポート定義（インターフェース）
+│   │   │   │
+│   │   │   ├── infra/          # インフラ層
+│   │   │   │   ├── adapters/   # 外部アダプター実装
+│   │   │   │   ├── database/   # Prisma Client、リポジトリ
+│   │   │   │   ├── di/         # 依存性注入コンテナ
+│   │   │   │   ├── http/       # Fastify ルート、プラグイン
+│   │   │   │   │   ├── routes/ # API ルート（images, labels, image-attributes, archives 等）
+│   │   │   │   │   └── plugins/
+│   │   │   │   └── storage/    # ファイルストレージ
+│   │   │   │
+│   │   │   └── shared/         # サーバー内共通
 │   │   │
 │   │   ├── generated/          # Prisma 生成ファイル
 │   │   │   └── prisma/         # Prisma Client
@@ -88,7 +106,9 @@ picstash/
 │   │
 │   └── shared/                 # フロントエンド・バックエンド共通
 │       ├── src/
-│       │   └── index.ts        # メインエクスポート
+│       │   ├── index.ts        # メインエクスポート
+│       │   ├── image-attributes.ts # 画像属性の型定義
+│       │   └── labels.ts       # ラベルの型定義
 │       ├── package.json
 │       └── tsconfig.json
 │
@@ -119,10 +139,15 @@ picstash/
 - **routes/** - React Router 設定
 
 ### `packages/server/`
-バックエンドのパッケージ：
-- **infra/** - 外部システム連携（Fastify, Prisma）
-  - **database/** - Prisma Client
+バックエンドのパッケージ。クリーンアーキテクチャを採用：
+- **domain/** - ドメイン層（ビジネスルール、エンティティ）
+- **application/** - アプリケーション層（ユースケース、ポート定義）
+- **infra/** - インフラ層（外部システム連携）
+  - **adapters/** - 外部アダプター実装
+  - **database/** - Prisma Client、リポジトリ
+  - **di/** - 依存性注入コンテナ
   - **http/** - Fastify ルート、プラグイン
+  - **storage/** - ファイルストレージ
 
 Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エイリアスでインポート。
 
