@@ -131,14 +131,11 @@ npm run typecheck
 npm run lint
 ```
 
-### ビルド・本番
+### ビルド
 
 ```bash
 # 本番用ビルド
 npm run build
-
-# 本番サーバー起動
-npm run start
 ```
 
 ### テスト
@@ -146,9 +143,6 @@ npm run start
 ```bash
 # テスト実行
 npm run test
-
-# ウォッチモード
-npm run test:watch
 
 # カバレッジ付きテスト
 npm run test:coverage
