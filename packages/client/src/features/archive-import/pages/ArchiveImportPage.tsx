@@ -11,16 +11,21 @@ import {
   Title,
 } from '@mantine/core';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import {
   deleteArchiveSession,
   getArchiveSession,
+  importFromArchive,
   uploadArchive,
 } from '@/features/archive-import/api';
 import { ArchiveDropzone } from '@/features/archive-import/components/ArchiveDropzone';
 import { ArchivePreviewGallery } from '@/features/archive-import/components/ArchivePreviewGallery';
+import type { ImportResult } from '@/features/archive-import/api';
 
 export function ArchiveImportPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
   // Keep ref in sync with state for cleanup
@@ -43,6 +48,8 @@ export function ArchiveImportPage() {
     mutationFn: uploadArchive,
     onSuccess: (data) => {
       setSessionId(data.sessionId);
+      setSelectedIndices(new Set());
+      setImportResult(null);
     },
   });
 
@@ -56,6 +63,28 @@ export function ArchiveImportPage() {
     mutationFn: deleteArchiveSession,
     onSuccess: () => {
       setSessionId(null);
+      setSelectedIndices(new Set());
+      setImportResult(null);
+    },
+  });
+
+  const importMutation = useMutation({
+    mutationFn: async (indices: number[]) => {
+      if (sessionId == null) {
+        throw new Error('No session');
+      }
+      return importFromArchive(sessionId, indices);
+    },
+    onSuccess: (result) => {
+      setImportResult(result);
+      // Clear selection after successful import
+      if (result.successCount > 0) {
+        // Remove successfully imported indices from selection
+        const failedIndices = new Set(
+          result.results.filter(r => !r.success).map(r => r.index),
+        );
+        setSelectedIndices(failedIndices);
+      }
     },
   });
 
@@ -72,6 +101,22 @@ export function ArchiveImportPage() {
     }
   };
 
+  const handleSelectAll = () => {
+    if (session != null) {
+      setSelectedIndices(new Set(session.images.map(img => img.index)));
+    }
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedIndices(new Set());
+  };
+
+  const handleImport = () => {
+    if (selectedIndices.size > 0) {
+      importMutation.mutate(Array.from(selectedIndices));
+    }
+  };
+
   const session = sessionQuery.data;
 
   return (
@@ -79,7 +124,7 @@ export function ArchiveImportPage() {
       <Stack gap="xl">
         <Stack align="center" gap="md">
           <Title order={1}>Archive Import</Title>
-          <Text c="dimmed">ZIP/RAR ファイルから画像をプレビュー</Text>
+          <Text c="dimmed">ZIP/RAR ファイルから画像をインポート</Text>
         </Stack>
 
         {sessionId == null
@@ -100,15 +145,16 @@ export function ArchiveImportPage() {
                         <Text c="dimmed">Loading archive contents...</Text>
                       </Stack>
                     )
-                  : sessionQuery.error
+                  : sessionQuery.error != null
                     ? (
                         <Alert color="red" title="Error">
                           {sessionQuery.error.message}
                         </Alert>
                       )
-                    : session
+                    : session != null
                       ? (
                           <>
+                            {/* Header with file info and close button */}
                             <Group justify="space-between" align="center">
                               <Group gap="sm">
                                 <Text fw={500}>{session.filename}</Text>
@@ -130,9 +176,84 @@ export function ArchiveImportPage() {
                                 Close
                               </Button>
                             </Group>
+
+                            {/* Import result alert */}
+                            {importResult != null && (
+                              <Alert
+                                color={importResult.failedCount === 0 ? 'green' : 'yellow'}
+                                title="Import Complete"
+                                withCloseButton
+                                onClose={() => setImportResult(null)}
+                              >
+                                <Stack gap="xs">
+                                  <Text>
+                                    {importResult.successCount}
+                                    {' '}
+                                    件インポート成功
+                                    {importResult.failedCount > 0 && (
+                                      <>
+                                        、
+                                        {importResult.failedCount}
+                                        {' '}
+                                        件失敗
+                                      </>
+                                    )}
+                                  </Text>
+                                  {importResult.successCount > 0 && (
+                                    <Button
+                                      variant="light"
+                                      size="sm"
+                                      component={Link}
+                                      to="/"
+                                    >
+                                      ギャラリーを見る
+                                    </Button>
+                                  )}
+                                </Stack>
+                              </Alert>
+                            )}
+
+                            {/* Selection controls */}
+                            <Group justify="space-between" align="center">
+                              <Group gap="sm">
+                                <Button
+                                  variant="light"
+                                  size="sm"
+                                  onClick={handleSelectAll}
+                                >
+                                  全選択
+                                </Button>
+                                <Button
+                                  variant="light"
+                                  size="sm"
+                                  onClick={handleDeselectAll}
+                                  disabled={selectedIndices.size === 0}
+                                >
+                                  全解除
+                                </Button>
+                                <Text size="sm" c="dimmed">
+                                  {selectedIndices.size}
+                                  {' '}
+                                  件選択中
+                                </Text>
+                              </Group>
+                              <Button
+                                onClick={handleImport}
+                                disabled={selectedIndices.size === 0}
+                                loading={importMutation.isPending}
+                              >
+                                インポート (
+                                {selectedIndices.size}
+                                )
+                              </Button>
+                            </Group>
+
+                            {/* Gallery */}
                             <ArchivePreviewGallery
                               sessionId={session.sessionId}
                               images={session.images}
+                              selectedIndices={selectedIndices}
+                              onSelectionChange={setSelectedIndices}
                             />
                           </>
                         )
