@@ -10,9 +10,11 @@ import {
   SharpImageProcessor,
   ZipArchiveHandler,
 } from '@/infra/adapters/index.js';
+import { ClipEmbeddingService } from '@/infra/embedding/clip-embedding-service.js';
 import { TYPES } from './types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
+import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
@@ -55,6 +57,12 @@ container.bind<ArchiveHandler>(TYPES.ArchiveHandler).to(RarArchiveHandler);
 container
   .bind<ArchiveSessionManager>(TYPES.ArchiveSessionManager)
   .to(InMemoryArchiveSessionManager)
+  .inSingletonScope();
+
+// Bind AI/Embedding services
+container
+  .bind<EmbeddingService>(TYPES.EmbeddingService)
+  .to(ClipEmbeddingService)
   .inSingletonScope();
 
 export { container };

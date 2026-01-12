@@ -11,4 +11,7 @@ export const TYPES = {
   // Archive
   ArchiveHandler: Symbol.for('ArchiveHandler'),
   ArchiveSessionManager: Symbol.for('ArchiveSessionManager'),
+
+  // AI/Embedding
+  EmbeddingService: Symbol.for('EmbeddingService'),
 } as const;

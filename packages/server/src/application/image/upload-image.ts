@@ -1,4 +1,5 @@
 import { stat } from 'node:fs/promises';
+import { generateEmbedding } from '@/application/embedding/generate-embedding.js';
 import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES } from '@/domain/image/index.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
@@ -79,6 +80,13 @@ export async function uploadImage(
     size: fileSize,
     width: metadata.width,
     height: metadata.height,
+  });
+
+  // Generate embedding in background (non-blocking)
+  // This allows the upload to complete quickly while embedding is generated async
+  generateEmbedding({ imageId: image.id }).catch((error: unknown) => {
+    // eslint-disable-next-line no-console -- Background task error logging
+    console.error(`Background embedding generation failed for ${image.id}:`, error);
   });
 
   return { success: true, image };

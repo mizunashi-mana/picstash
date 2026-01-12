@@ -1,3 +1,4 @@
+import { removeEmbedding } from '@/application/embedding/generate-embedding.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 
@@ -33,6 +34,9 @@ export async function deleteImage(
 
   // Delete database record after files are deleted
   await imageRepository.deleteById(imageId);
+
+  // Remove embedding from vector database
+  removeEmbedding(imageId);
 
   return { success: true };
 }
