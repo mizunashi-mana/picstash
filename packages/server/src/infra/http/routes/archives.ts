@@ -216,11 +216,11 @@ export function archiveRoutes(app: FastifyInstance): void {
         });
       }
 
-      // Validate all indices are numbers
-      if (!indices.every(i => typeof i === 'number' && Number.isInteger(i))) {
+      // Validate all indices are non-negative integers
+      if (!indices.every(i => typeof i === 'number' && Number.isInteger(i) && i >= 0)) {
         return reply.status(400).send({
           error: 'Bad Request',
-          message: 'All indices must be integers',
+          message: 'All indices must be non-negative integers',
         });
       }
 

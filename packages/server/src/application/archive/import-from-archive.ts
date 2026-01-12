@@ -109,15 +109,24 @@ export async function importFromArchive(
       }
 
       // Create database record
-      const image = await imageRepository.create({
-        filename: saved.filename,
-        path: saved.path,
-        thumbnailPath: thumbnail.path,
-        mimeType,
-        size: fileSize,
-        width: metadata.width,
-        height: metadata.height,
-      });
+      let image;
+      try {
+        image = await imageRepository.create({
+          filename: saved.filename,
+          path: saved.path,
+          thumbnailPath: thumbnail.path,
+          mimeType,
+          size: fileSize,
+          width: metadata.width,
+          height: metadata.height,
+        });
+      }
+      catch (error) {
+        // Clean up saved file and thumbnail if database creation fails
+        await fileStorage.deleteFile(saved.path).catch(() => {});
+        await fileStorage.deleteFile(thumbnail.path).catch(() => {});
+        throw error;
+      }
 
       results.push({
         index,
