@@ -1,3 +1,4 @@
+import { LabelName, LABEL_NAME_MAX_LENGTH } from '@/domain/label/index.js';
 import type { Label, LabelRepository } from '@/application/ports/label-repository.js';
 
 export interface UpdateLabelInput {
@@ -9,6 +10,7 @@ export type UpdateLabelResult
   = | { success: true; label: Label }
     | { success: false; error: 'NOT_FOUND' }
     | { success: false; error: 'EMPTY_NAME' }
+    | { success: false; error: 'NAME_TOO_LONG'; maxLength: number }
     | { success: false; error: 'DUPLICATE_NAME'; name: string };
 
 export interface UpdateLabelDeps {
@@ -32,10 +34,14 @@ export async function updateLabel(
   // Validate and check for duplicate name if provided
   let trimmedName: string | undefined;
   if (name !== undefined) {
-    trimmedName = name.trim();
-    if (trimmedName.length === 0) {
+    const validationError = LabelName.validate(name);
+    if (validationError === 'EMPTY') {
       return { success: false, error: 'EMPTY_NAME' };
     }
+    if (validationError === 'TOO_LONG') {
+      return { success: false, error: 'NAME_TOO_LONG', maxLength: LABEL_NAME_MAX_LENGTH };
+    }
+    trimmedName = name.trim();
 
     // Check for duplicate (excluding self)
     const duplicate = await labelRepository.findByName(trimmedName);

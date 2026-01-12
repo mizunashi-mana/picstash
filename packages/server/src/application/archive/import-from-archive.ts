@@ -1,19 +1,11 @@
 import { stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { Readable } from 'node:stream';
+import { getMimeTypeFromExtension } from '@/domain/archive/index.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
-
-const MIME_TYPE_MAP: Record<string, string> = {
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-  '.bmp': 'image/bmp',
-};
 
 export interface ImportFromArchiveInput {
   sessionId: string;
@@ -82,9 +74,9 @@ export async function importFromArchive(
       // Extract image from archive
       const imageBuffer = await archiveSessionManager.extractImage(sessionId, index);
 
-      // Get extension and MIME type
+      // Get extension and MIME type using domain function
       const extension = extname(entry.filename).toLowerCase();
-      const mimeType = MIME_TYPE_MAP[extension] ?? 'application/octet-stream';
+      const mimeType = getMimeTypeFromExtension(extension);
 
       // Convert buffer to stream and save to storage
       const stream = Readable.from(imageBuffer);

@@ -1,30 +1,11 @@
-export interface Image {
-  id: string;
-  filename: string;
-  path: string;
-  thumbnailPath: string | null;
-  mimeType: string;
-  size: number;
-  width: number | null;
-  height: number | null;
-  description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type {
+  Image,
+  CreateImageInput,
+  UpdateImageInput,
+} from '@/domain/image/index.js';
 
-export interface CreateImageInput {
-  filename: string;
-  path: string;
-  thumbnailPath?: string;
-  mimeType: string;
-  size: number;
-  width?: number;
-  height?: number;
-}
-
-export interface UpdateImageInput {
-  description?: string | null;
-}
+// Re-export domain types for backward compatibility
+export type { Image, CreateImageInput, UpdateImageInput };
 
 export interface ImageRepository {
   create(input: CreateImageInput): Promise<Image>;

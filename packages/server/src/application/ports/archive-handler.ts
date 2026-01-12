@@ -1,19 +1,11 @@
-export interface ArchiveEntry {
-  /** Index of the entry in the archive */
-  index: number;
-  /** File name (without path) */
-  filename: string;
-  /** Full path within the archive */
-  path: string;
-  /** File size in bytes */
-  size: number;
-  /** Whether this entry is a directory */
-  isDirectory: boolean;
-}
+import type { ArchiveEntry, ArchiveType } from '@/domain/archive/index.js';
+
+// Re-export domain types for backward compatibility
+export type { ArchiveEntry };
 
 export interface ArchiveHandler {
   /** The type of archive this handler supports */
-  readonly archiveType: 'zip' | 'rar';
+  readonly archiveType: ArchiveType;
 
   /** Check if this handler can process the given file */
   canHandle(filePath: string, mimeType: string): boolean;

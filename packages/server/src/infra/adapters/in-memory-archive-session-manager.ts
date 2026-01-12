@@ -8,6 +8,10 @@ import { pipeline as pipelinePromise } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { injectable, multiInject } from 'inversify';
 import { config } from '@/config.js';
+import {
+  MAX_ARCHIVE_SIZE,
+  filterImageEntries,
+} from '@/domain/archive/index.js';
 import { TYPES } from '@/infra/di/types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type {
@@ -20,22 +24,6 @@ import type {
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const storagePath = resolve(__dirname, '../../..', config.storage.path);
 const tempPath = join(storagePath, 'temp');
-
-// Maximum archive file size: 500MB
-const MAX_ARCHIVE_SIZE = 500 * 1024 * 1024;
-
-const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
-
-function isImageFile(filename: string): boolean {
-  const ext = extname(filename).toLowerCase();
-  return IMAGE_EXTENSIONS.includes(ext);
-}
-
-function isSafePath(path: string): boolean {
-  // Reject paths with directory traversal attempts
-  const normalizedPath = path.replace(/\\/g, '/');
-  return !normalizedPath.includes('../') && !normalizedPath.startsWith('/');
-}
 
 function createSizeLimitedStream(maxSize: number): Transform {
   let totalSize = 0;
@@ -108,10 +96,8 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
     }
 
     const allEntries = await handler.listEntries(archivePath);
-    const imageEntries = allEntries.filter(
-      entry =>
-        !entry.isDirectory && isImageFile(entry.filename) && isSafePath(entry.path),
-    );
+    // Use domain function to filter image entries
+    const imageEntries = filterImageEntries(allEntries);
 
     if (imageEntries.length === 0) {
       await unlink(archivePath).catch(() => {});
