@@ -1,20 +1,11 @@
-export interface Label {
-  id: string;
-  name: string;
-  color: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type {
+  Label,
+  CreateLabelInput,
+  UpdateLabelInput,
+} from '@/domain/label/index.js';
 
-export interface CreateLabelInput {
-  name: string;
-  color?: string;
-}
-
-export interface UpdateLabelInput {
-  name?: string;
-  color?: string;
-}
+// Re-export domain types for backward compatibility
+export type { Label, CreateLabelInput, UpdateLabelInput };
 
 export interface LabelRepository {
   create(input: CreateLabelInput): Promise<Label>;

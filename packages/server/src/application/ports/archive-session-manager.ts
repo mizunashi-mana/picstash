@@ -1,20 +1,8 @@
-import type { ArchiveEntry } from './archive-handler.js';
+import type { ArchiveSession } from '@/domain/archive/index.js';
 import type { Readable } from 'node:stream';
 
-export interface ArchiveSession {
-  /** Unique session ID */
-  id: string;
-  /** Original filename of the archive */
-  filename: string;
-  /** Path to the temporary archive file */
-  archivePath: string;
-  /** Archive type (zip, rar) */
-  archiveType: 'zip' | 'rar';
-  /** List of image entries in the archive */
-  imageEntries: ArchiveEntry[];
-  /** Creation timestamp */
-  createdAt: Date;
-}
+// Re-export domain type for backward compatibility
+export type { ArchiveSession };
 
 export interface CreateSessionInput {
   filename: string;

@@ -1,24 +1,11 @@
-import type { Label } from './label-repository.js';
+import type {
+  ImageAttribute,
+  CreateImageAttributeInput,
+  UpdateImageAttributeInput,
+} from '@/domain/image-attribute/index.js';
 
-export interface ImageAttribute {
-  id: string;
-  imageId: string;
-  labelId: string;
-  keywords: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  label: Label;
-}
-
-export interface CreateImageAttributeInput {
-  imageId: string;
-  labelId: string;
-  keywords?: string;
-}
-
-export interface UpdateImageAttributeInput {
-  keywords?: string;
-}
+// Re-export domain types for backward compatibility
+export type { ImageAttribute, CreateImageAttributeInput, UpdateImageAttributeInput };
 
 export interface ImageAttributeRepository {
   findById(id: string): Promise<ImageAttribute | null>;

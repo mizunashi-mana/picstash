@@ -1,3 +1,4 @@
+import { LabelName } from '@/domain/label/index.js';
 import type { Label, LabelRepository } from '@/application/ports/label-repository.js';
 
 export interface CreateLabelInput {
@@ -21,11 +22,12 @@ export async function createLabel(
   const { name, color } = input;
   const { labelRepository } = deps;
 
-  // Validate name
-  const trimmedName = name.trim();
-  if (trimmedName.length === 0) {
+  // Validate name using domain value object
+  const labelName = LabelName.create(name);
+  if (labelName === null) {
     return { success: false, error: 'EMPTY_NAME' };
   }
+  const trimmedName = labelName.value;
 
   // Check for duplicate
   const existing = await labelRepository.findByName(trimmedName);

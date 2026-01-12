@@ -1,15 +1,9 @@
 import { stat } from 'node:fs/promises';
+import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES } from '@/domain/image/index.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
 import type { Readable } from 'node:stream';
-
-const ALLOWED_MIME_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-];
 
 export interface UploadImageInput {
   filename: string;
@@ -34,12 +28,12 @@ export async function uploadImage(
   const { filename, mimetype, stream } = input;
   const { imageRepository, fileStorage, imageProcessor } = deps;
 
-  // Validate MIME type
-  if (!ALLOWED_MIME_TYPES.includes(mimetype)) {
+  // Validate MIME type using domain value object
+  if (!ImageMimeType.isValid(mimetype)) {
     return {
       success: false,
       error: 'INVALID_MIME_TYPE',
-      message: `Invalid file type: ${mimetype}. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`,
+      message: `Invalid file type: ${mimetype}. Allowed types: ${ALLOWED_IMAGE_MIME_TYPES.join(', ')}`,
     };
   }
 
