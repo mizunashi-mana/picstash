@@ -52,11 +52,7 @@ export async function generateLabelEmbedding(
     const result = await embeddingService.generateFromText(label.name);
 
     // Store embedding in database
-    const embeddingBytes = Buffer.from(
-      result.embedding.buffer,
-      result.embedding.byteOffset,
-      result.embedding.byteLength,
-    );
+    const embeddingBytes = Buffer.from(result.embedding);
     const generatedAt = new Date();
 
     await labelRepository.updateEmbedding(input.labelId, {

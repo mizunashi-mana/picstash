@@ -18,6 +18,7 @@ function createMockImageRepository(): ImageRepository {
     updateById: vi.fn(),
     deleteById: vi.fn(),
     findIdsWithoutEmbedding: vi.fn(),
+    findByIdWithEmbedding: vi.fn(),
     findWithEmbedding: vi.fn(),
     updateEmbedding: vi.fn(),
     clearAllEmbeddings: vi.fn(),
@@ -128,7 +129,7 @@ describe('suggestAttributes', () => {
         { id: 'label-2', name: 'Less Similar', embedding: label2Embedding },
       ];
 
-      vi.mocked(mockImageRepository.findWithEmbedding).mockResolvedValue([mockImageWithEmbedding]);
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(mockImageWithEmbedding);
       vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue(mockLabelsWithEmbedding);
 
       const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1 }, deps);
@@ -162,9 +163,9 @@ describe('suggestAttributes', () => {
       lowSimValues[1] = 1;
       const lowSimEmbedding = createNormalizedEmbedding(lowSimValues);
 
-      vi.mocked(mockImageRepository.findWithEmbedding).mockResolvedValue([
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(
         { id: 'img-1', path: 'originals/test.png', embedding: imageEmbedding },
-      ]);
+      );
       vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue([
         { id: 'label-high', name: 'High', embedding: highSimEmbedding },
         { id: 'label-low', name: 'Low', embedding: lowSimEmbedding },
@@ -196,9 +197,9 @@ describe('suggestAttributes', () => {
         });
       }
 
-      vi.mocked(mockImageRepository.findWithEmbedding).mockResolvedValue([
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(
         { id: 'img-1', path: 'originals/test.png', embedding: imageEmbedding },
-      ]);
+      );
       vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue(labels);
 
       const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1, limit: 3 }, deps);
@@ -211,8 +212,7 @@ describe('suggestAttributes', () => {
 
   describe('error cases', () => {
     it('should return IMAGE_NOT_FOUND when image does not exist', async () => {
-      vi.mocked(mockImageRepository.findWithEmbedding).mockResolvedValue([]);
-      vi.mocked(mockImageRepository.findById).mockResolvedValue(null);
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(null);
 
       const result = await suggestAttributes({ imageId: 'non-existent' }, deps);
 
@@ -220,19 +220,10 @@ describe('suggestAttributes', () => {
     });
 
     it('should return IMAGE_NOT_EMBEDDED when image exists but has no embedding', async () => {
-      vi.mocked(mockImageRepository.findWithEmbedding).mockResolvedValue([]);
-      vi.mocked(mockImageRepository.findById).mockResolvedValue({
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue({
         id: 'img-1',
-        filename: 'test.png',
         path: 'originals/test.png',
-        thumbnailPath: null,
-        mimeType: 'image/png',
-        size: 1000,
-        width: 100,
-        height: 100,
-        description: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        embedding: null,
       });
 
       const result = await suggestAttributes({ imageId: 'img-1' }, deps);
@@ -245,9 +236,9 @@ describe('suggestAttributes', () => {
       imageEmbValues[0] = 1;
       const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
 
-      vi.mocked(mockImageRepository.findWithEmbedding).mockResolvedValue([
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(
         { id: 'img-1', path: 'originals/test.png', embedding: imageEmbedding },
-      ]);
+      );
       vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue([]);
 
       const result = await suggestAttributes({ imageId: 'img-1' }, deps);

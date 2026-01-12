@@ -62,20 +62,19 @@ export async function suggestAttributes(
   const { imageId, threshold = 0.2, limit = 10 } = input;
   const { imageRepository, labelRepository, embeddingRepository, imageAttributeRepository } = deps;
 
-  // Get image with embedding
-  const images = await imageRepository.findWithEmbedding();
-  const image = images.find(img => img.id === imageId);
+  // Get image with embedding using a targeted query
+  const image = await imageRepository.findByIdWithEmbedding(imageId);
 
-  if (image === undefined) {
-    // Check if image exists at all
-    const exists = await imageRepository.findById(imageId);
-    if (exists === null) {
-      return 'IMAGE_NOT_FOUND';
-    }
-    return 'IMAGE_NOT_EMBEDDED';
+  if (image === null) {
+    return 'IMAGE_NOT_FOUND';
   }
 
   if (image.embedding === null) {
+    return 'IMAGE_NOT_EMBEDDED';
+  }
+
+  // Validate that the embedding has the expected size in bytes
+  if (image.embedding.byteLength !== EMBEDDING_DIMENSION * 4) {
     return 'IMAGE_NOT_EMBEDDED';
   }
 
@@ -83,12 +82,8 @@ export async function suggestAttributes(
   const imageEmbedding = new Float32Array(
     image.embedding.buffer,
     image.embedding.byteOffset,
-    image.embedding.byteLength / 4,
+    EMBEDDING_DIMENSION,
   );
-
-  if (imageEmbedding.length !== EMBEDDING_DIMENSION) {
-    return 'IMAGE_NOT_EMBEDDED';
-  }
 
   // Get all labels with embeddings
   const labels = await labelRepository.findAllWithEmbedding();
