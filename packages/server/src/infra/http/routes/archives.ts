@@ -1,6 +1,9 @@
+import { importFromArchive } from '@/application/archive/index.js';
 import { container, TYPES } from '@/infra/di/index.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 export function archiveRoutes(app: FastifyInstance): void {
@@ -8,6 +11,8 @@ export function archiveRoutes(app: FastifyInstance): void {
     TYPES.ArchiveSessionManager,
   );
   const imageProcessor = container.get<ImageProcessor>(TYPES.ImageProcessor);
+  const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
+  const fileStorage = container.get<FileStorage>(TYPES.FileStorage);
 
   // Upload archive and create session
   app.post('/api/archives', async (request, reply) => {
@@ -189,6 +194,72 @@ export function archiveRoutes(app: FastifyInstance): void {
         return reply.status(500).send({
           error: 'Internal Server Error',
           message: 'Failed to extract image from archive',
+        });
+      }
+    },
+  );
+
+  // Import selected images from archive to library
+  app.post<{
+    Params: { sessionId: string };
+    Body: { indices: number[] };
+  }>(
+    '/api/archives/:sessionId/import',
+    async (request, reply) => {
+      const { sessionId } = request.params;
+      const { indices } = request.body;
+
+      if (!Array.isArray(indices) || indices.length === 0) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'indices must be a non-empty array of numbers',
+        });
+      }
+
+      // Validate all indices are non-negative integers
+      if (!indices.every(i => typeof i === 'number' && Number.isInteger(i) && i >= 0)) {
+        return reply.status(400).send({
+          error: 'Bad Request',
+          message: 'All indices must be non-negative integers',
+        });
+      }
+
+      const session = sessionManager.getSession(sessionId);
+      if (session == null) {
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Archive session not found',
+        });
+      }
+
+      try {
+        const result = await importFromArchive(
+          { sessionId, indices },
+          {
+            archiveSessionManager: sessionManager,
+            imageRepository,
+            fileStorage,
+            imageProcessor,
+          },
+        );
+
+        return reply.send({
+          totalRequested: result.totalRequested,
+          successCount: result.successCount,
+          failedCount: result.failedCount,
+          results: result.results.map(r => ({
+            index: r.index,
+            success: r.success,
+            imageId: r.image?.id,
+            error: r.error,
+          })),
+        });
+      }
+      catch (error) {
+        request.log.error(error, 'Failed to import images from archive');
+        return reply.status(500).send({
+          error: 'Internal Server Error',
+          message: 'Failed to import images from archive',
         });
       }
     },

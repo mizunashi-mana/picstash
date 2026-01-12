@@ -79,3 +79,37 @@ export function getArchiveImageUrl(
 ): string {
   return `/api/archives/${sessionId}/files/${fileIndex}/file`;
 }
+
+export interface ImportResultItem {
+  index: number;
+  success: boolean;
+  imageId?: string;
+  error?: string;
+}
+
+export interface ImportResult {
+  totalRequested: number;
+  successCount: number;
+  failedCount: number;
+  results: ImportResultItem[];
+}
+
+export async function importFromArchive(
+  sessionId: string,
+  indices: number[],
+): Promise<ImportResult> {
+  const response = await fetch(`/api/archives/${sessionId}/import`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ indices }),
+  });
+
+  if (!response.ok) {
+    const error = (await response.json()) as ErrorResponse;
+    throw new Error(error.message ?? 'Failed to import images');
+  }
+
+  return (await response.json()) as ImportResult;
+}
