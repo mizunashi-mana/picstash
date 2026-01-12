@@ -15,6 +15,14 @@ const meta = {
     onCreate: fn(),
     onUpdate: fn(),
     onDelete: fn(),
+    // Suggestion defaults
+    showSuggestions: false,
+    suggestions: [],
+    suggestionsLoading: false,
+    suggestionsError: null,
+    addingSuggestionId: null,
+    onToggleSuggestions: fn(),
+    onAddSuggestion: fn(),
   },
 } satisfies Meta<typeof ImageAttributeSectionView>;
 
@@ -326,5 +334,67 @@ export const DeleteAttributeInteraction: Story = {
 
     // onDelete が呼ばれていることを確認
     await expect(args.onDelete).toHaveBeenCalledWith('attr-1');
+  },
+};
+
+// Suggestion Stories
+const mockSuggestions = [
+  { labelId: 'label-5', labelName: '自然', score: 0.85, suggestedKeywords: [{ keyword: '森林', count: 3 }, { keyword: '山', count: 2 }] },
+  { labelId: 'label-6', labelName: '動物', score: 0.72, suggestedKeywords: [{ keyword: '猫', count: 5 }] },
+  { labelId: 'label-7', labelName: '水彩', score: 0.58, suggestedKeywords: [] },
+];
+
+export const WithSuggestions: Story = {
+  args: {
+    attributes: mockAttributes,
+    labelOptions: mockLabelOptions,
+    isLoading: false,
+    attributesError: null,
+    labelsError: null,
+    addModalOpen: false,
+    editingAttribute: null,
+    selectedLabelId: null,
+    keywords: [],
+    isCreating: false,
+    isUpdating: false,
+    isDeletingId: null,
+    hasAvailableLabels: true,
+    showSuggestions: true,
+    suggestions: mockSuggestions,
+    suggestionsLoading: false,
+    suggestionsError: null,
+    addingSuggestionId: null,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // AI提案セクションが表示されていることを確認
+    await expect(canvas.getByText('AI推薦ラベル')).toBeInTheDocument();
+    await expect(canvas.getByText('自然')).toBeInTheDocument();
+    await expect(canvas.getByText('動物')).toBeInTheDocument();
+    await expect(canvas.getByText('水彩')).toBeInTheDocument();
+  },
+};
+
+export const SuggestionsLoading: Story = {
+  args: {
+    attributes: mockAttributes,
+    labelOptions: mockLabelOptions,
+    isLoading: false,
+    attributesError: null,
+    labelsError: null,
+    addModalOpen: false,
+    editingAttribute: null,
+    selectedLabelId: null,
+    keywords: [],
+    isCreating: false,
+    isUpdating: false,
+    isDeletingId: null,
+    hasAvailableLabels: true,
+    showSuggestions: true,
+    suggestions: [],
+    suggestionsLoading: true,
+    suggestionsError: null,
+    addingSuggestionId: null,
   },
 };

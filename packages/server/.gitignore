@@ -7,5 +7,4 @@
 /generated/prisma
 
 # SQLite database files
-/prisma/data/*.db
-/prisma/data/*.db-journal
+/prisma/data/

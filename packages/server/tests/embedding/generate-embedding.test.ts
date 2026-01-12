@@ -66,6 +66,7 @@ function createMockDeps(): GenerateEmbeddingDeps {
   const mockEmbeddingService: EmbeddingService = {
     generateFromFile: vi.fn(),
     generateFromBuffer: vi.fn(),
+    generateFromText: vi.fn(),
     getDimension: vi.fn().mockReturnValue(512),
     getModel: vi.fn().mockReturnValue('openai/clip-vit-base-patch16'),
     isReady: vi.fn().mockReturnValue(true),
