@@ -44,6 +44,7 @@ allowed-tools: Read, Write, Edit, MultiEdit, Update, WebSearch, WebFetch
 - 各ステップで動作確認を行う
 - API 実装後は curl で動作確認
 - UI 実装後は Playwright MCP でブラウザ動作確認
+- テンポラリディレクトリとして、`./tmp` が使えます
 - 必要に応じてユーザーにフィードバックをもらう
 
 ## 完了時

@@ -97,9 +97,12 @@ export function ArchivePreviewGallery({
                   checked={selectedIndices.has(image.index)}
                   onChange={() => handleSelectionToggle(image.index)}
                   size="md"
+                  color="blue"
                   styles={{
                     input: {
-                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      backgroundColor: selectedIndices.has(image.index)
+                        ? undefined
+                        : 'rgba(255, 255, 255, 0.9)',
                     },
                   }}
                 />
