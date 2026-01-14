@@ -20,6 +20,7 @@ export function buildImportsConfig(props: {
         'import-x/export': 'error',
         'import-x/first': 'error',
         'import-x/no-duplicates': 'error',
+        'import-x/no-named-as-default-member': 'off',
         'import-x/order': [
           'error',
           {
