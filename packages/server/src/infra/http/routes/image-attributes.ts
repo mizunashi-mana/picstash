@@ -33,14 +33,14 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
 
       const image = await imageRepository.findById(imageId);
       if (image === null) {
-        return reply.status(404).send({
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found',
         });
       }
 
       const attributes = await imageAttributeRepository.findByImageId(imageId);
-      return reply.send(attributes);
+      return await reply.send(attributes);
     },
   );
 
@@ -59,33 +59,29 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
       if (!result.success) {
         switch (result.error) {
           case 'INVALID_LABEL_ID':
-            return reply.status(400).send({
+            return await reply.status(400).send({
               error: 'Bad Request',
               message: 'labelId is required and must be a non-empty string',
             });
           case 'IMAGE_NOT_FOUND':
-            return reply.status(404).send({
+            return await reply.status(404).send({
               error: 'Not Found',
               message: 'Image not found',
             });
           case 'LABEL_NOT_FOUND':
-            return reply.status(404).send({
+            return await reply.status(404).send({
               error: 'Not Found',
               message: 'Label not found',
             });
           case 'ALREADY_EXISTS':
-            return reply.status(409).send({
+            return await reply.status(409).send({
               error: 'Conflict',
               message: 'This label is already assigned to the image',
             });
-          default: {
-            const _exhaustive: never = result;
-            return _exhaustive;
-          }
         }
       }
 
-      return reply.status(201).send(result.attribute);
+      return await reply.status(201).send(result.attribute);
     },
   );
 
@@ -107,23 +103,19 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
       if (!result.success) {
         switch (result.error) {
           case 'ATTRIBUTE_NOT_FOUND':
-            return reply.status(404).send({
+            return await reply.status(404).send({
               error: 'Not Found',
               message: 'Attribute not found',
             });
           case 'ATTRIBUTE_MISMATCH':
-            return reply.status(404).send({
+            return await reply.status(404).send({
               error: 'Not Found',
               message: 'Attribute does not belong to this image',
             });
-          default: {
-            const _exhaustive: never = result;
-            return _exhaustive;
-          }
         }
       }
 
-      return reply.send(result.attribute);
+      return await reply.send(result.attribute);
     },
   );
 
@@ -141,23 +133,19 @@ export function imageAttributeRoutes(app: FastifyInstance): void {
       if (!result.success) {
         switch (result.error) {
           case 'ATTRIBUTE_NOT_FOUND':
-            return reply.status(404).send({
+            return await reply.status(404).send({
               error: 'Not Found',
               message: 'Attribute not found',
             });
           case 'ATTRIBUTE_MISMATCH':
-            return reply.status(404).send({
+            return await reply.status(404).send({
               error: 'Not Found',
               message: 'Attribute does not belong to this image',
             });
-          default: {
-            const _exhaustive: never = result;
-            return _exhaustive;
-          }
         }
       }
 
-      return reply.status(204).send();
+      return await reply.status(204).send();
     },
   );
 }

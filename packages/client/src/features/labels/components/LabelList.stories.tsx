@@ -6,8 +6,8 @@ const meta = {
   title: 'Features/Labels/LabelList',
   component: LabelList,
   args: {
-    onUpdate: fn(async () => Promise.resolve()),
-    onDelete: fn(async () => Promise.resolve()),
+    onUpdate: fn(async () => { await Promise.resolve(); }),
+    onDelete: fn(async () => { await Promise.resolve(); }),
   },
 } satisfies Meta<typeof LabelList>;
 
@@ -70,6 +70,7 @@ export const Empty: Story = {
 
 export const SingleLabel: Story = {
   args: {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test data is defined
     labels: [mockLabels[0]!],
   },
   play: async ({ canvasElement }) => {
@@ -89,7 +90,10 @@ export const OpenEditModal: Story = {
 
     // 編集ボタンをクリック
     const editButtons = canvas.getAllByRole('button', { name: /Edit/ });
-    await userEvent.click(editButtons[0]!);
+    const firstEditButton = editButtons[0];
+    if (firstEditButton !== undefined) {
+      await userEvent.click(firstEditButton);
+    }
 
     // モーダルが開いていることを確認（ドキュメント全体を検索）
     const modal = within(document.body);
@@ -108,7 +112,10 @@ export const OpenDeleteModal: Story = {
 
     // 削除ボタンをクリック
     const deleteButtons = canvas.getAllByRole('button', { name: /Delete/ });
-    await userEvent.click(deleteButtons[0]!);
+    const firstDeleteButton = deleteButtons[0];
+    if (firstDeleteButton !== undefined) {
+      await userEvent.click(firstDeleteButton);
+    }
 
     // 削除確認モーダルが開いていることを確認（ドキュメント全体を検索）
     const modal = within(document.body);

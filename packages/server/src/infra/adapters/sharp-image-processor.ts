@@ -11,8 +11,8 @@ import type {
   ThumbnailResult,
 } from '@/application/ports/image-processor.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(__dirname, '../../..', config.storage.path);
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const storagePath = resolve(currentDir, '../../..', config.storage.path);
 const thumbnailsPath = join(storagePath, 'thumbnails');
 
 const THUMBNAIL_SIZE = 300;
@@ -29,7 +29,7 @@ export class SharpImageProcessor implements ImageProcessor {
 
     // Runtime check: width/height can be undefined for corrupted images
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Sharp returns undefined for corrupted files
-    if (width == null || height == null) {
+    if (width === undefined || height === undefined) {
       throw new Error('Unable to determine image dimensions from file');
     }
 
@@ -63,7 +63,7 @@ export class SharpImageProcessor implements ImageProcessor {
   }
 
   async generateThumbnailFromBuffer(imageBuffer: Buffer): Promise<Buffer> {
-    return sharp(imageBuffer)
+    return await sharp(imageBuffer)
       .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
         fit: 'cover',
         position: 'center',

@@ -39,7 +39,7 @@ class MockZipHandler implements ArchiveHandler {
     const zip = new AdmZip(archivePath);
     const entries = zip.getEntries();
     const entry = entries[entryIndex];
-    if (entry == null) {
+    if (entry === undefined) {
       throw new Error(`Entry ${entryIndex} not found`);
     }
     return entry.getData();

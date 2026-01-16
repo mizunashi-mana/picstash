@@ -1,7 +1,7 @@
 import { prisma } from './prisma.js';
 
 export async function findAttributesByImageId(imageId: string) {
-  return prisma.imageAttribute.findMany({
+  return await prisma.imageAttribute.findMany({
     where: { imageId },
     include: { label: true },
     orderBy: { createdAt: 'asc' },
@@ -9,7 +9,7 @@ export async function findAttributesByImageId(imageId: string) {
 }
 
 export async function findImageAttributeById(id: string) {
-  return prisma.imageAttribute.findUnique({
+  return await prisma.imageAttribute.findUnique({
     where: { id },
     include: { label: true },
   });
@@ -19,7 +19,7 @@ export async function findImageAttributeByImageAndLabel(
   imageId: string,
   labelId: string,
 ) {
-  return prisma.imageAttribute.findUnique({
+  return await prisma.imageAttribute.findUnique({
     where: { imageId_labelId: { imageId, labelId } },
     include: { label: true },
   });
@@ -30,7 +30,7 @@ export async function createImageAttribute(data: {
   labelId: string;
   keywords?: string;
 }) {
-  return prisma.imageAttribute.create({
+  return await prisma.imageAttribute.create({
     data: {
       imageId: data.imageId,
       labelId: data.labelId,
@@ -44,7 +44,7 @@ export async function updateImageAttributeById(
   id: string,
   data: { keywords?: string },
 ) {
-  return prisma.imageAttribute.update({
+  return await prisma.imageAttribute.update({
     where: { id },
     data: { keywords: data.keywords },
     include: { label: true },
@@ -52,7 +52,7 @@ export async function updateImageAttributeById(
 }
 
 export async function deleteImageAttributeById(id: string) {
-  return prisma.imageAttribute.delete({
+  return await prisma.imageAttribute.delete({
     where: { id },
   });
 }

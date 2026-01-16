@@ -23,40 +23,40 @@ export interface EmbeddingService {
    * @param imagePath - Path to the image file
    * @returns The embedding result
    */
-  generateFromFile(imagePath: string): Promise<EmbeddingResult>;
+  generateFromFile: (imagePath: string) => Promise<EmbeddingResult>;
 
   /**
    * Generate an embedding from image data.
    * @param imageData - Raw image data as Buffer
    * @returns The embedding result
    */
-  generateFromBuffer(imageData: Buffer): Promise<EmbeddingResult>;
+  generateFromBuffer: (imageData: Buffer) => Promise<EmbeddingResult>;
 
   /**
    * Generate an embedding from text.
    * @param text - The text to embed
    * @returns The embedding result
    */
-  generateFromText(text: string): Promise<EmbeddingResult>;
+  generateFromText: (text: string) => Promise<EmbeddingResult>;
 
   /**
    * Get the dimension of embeddings produced by this service.
    */
-  getDimension(): number;
+  getDimension: () => number;
 
   /**
    * Get the model identifier used by this service.
    */
-  getModel(): string;
+  getModel: () => string;
 
   /**
    * Check if the model is loaded and ready.
    */
-  isReady(): boolean;
+  isReady: () => boolean;
 
   /**
    * Initialize/load the model.
    * Called automatically on first use, but can be called explicitly for warm-up.
    */
-  initialize(): Promise<void>;
+  initialize: () => Promise<void>;
 }

@@ -66,7 +66,7 @@ export class RarArchiveHandler implements ArchiveHandler {
     }
 
     const targetHeader = fileHeaders[entryIndex];
-    if (targetHeader == null) {
+    if (targetHeader === undefined) {
       throw new Error(`Entry at index ${entryIndex} not found`);
     }
 
@@ -78,7 +78,7 @@ export class RarArchiveHandler implements ArchiveHandler {
     const files = [...extracted.files];
 
     const file = files[0];
-    if (file?.extraction == null) {
+    if (file?.extraction === undefined) {
       throw new Error(`Failed to extract entry at index ${entryIndex}`);
     }
 

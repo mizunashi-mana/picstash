@@ -75,7 +75,7 @@ export function ArchivePreviewGallery({
                 ? '2px solid var(--mantine-color-blue-6)'
                 : 'none',
             }}
-            onClick={() => handleSelectionToggle(image.index)}
+            onClick={() => { handleSelectionToggle(image.index); }}
           >
             <Card.Section pos="relative">
               <AspectRatio ratio={1}>
@@ -84,18 +84,18 @@ export function ArchivePreviewGallery({
                   alt={image.filename}
                   fit="cover"
                   fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23dee2e6' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23868e96' font-size='12'%3ELoading%3C/text%3E%3C/svg%3E"
-                  onClick={e => handlePreviewClick(image, e)}
+                  onClick={(e) => { handlePreviewClick(image, e); }}
                 />
               </AspectRatio>
               <Box
                 pos="absolute"
                 top={8}
                 left={8}
-                onClick={e => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); }}
               >
                 <Checkbox
                   checked={selectedIndices.has(image.index)}
-                  onChange={() => handleSelectionToggle(image.index)}
+                  onChange={() => { handleSelectionToggle(image.index); }}
                   size="md"
                   color="blue"
                   styles={{
@@ -122,7 +122,7 @@ export function ArchivePreviewGallery({
         title={previewImage?.filename}
         centered
       >
-        {previewImage != null && (
+        {previewImage !== null && (
           <Image
             src={getArchiveImageUrl(sessionId, previewImage.index)}
             alt={previewImage.filename}

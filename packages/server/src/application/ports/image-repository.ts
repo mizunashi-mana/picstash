@@ -21,26 +21,26 @@ export interface UpdateEmbeddingInput {
 }
 
 export interface ImageRepository {
-  create(input: CreateImageInput): Promise<Image>;
-  findById(id: string): Promise<Image | null>;
-  findAll(): Promise<Image[]>;
-  search(query: string): Promise<Image[]>;
-  updateById(id: string, input: UpdateImageInput): Promise<Image>;
-  deleteById(id: string): Promise<Image>;
+  create: (input: CreateImageInput) => Promise<Image>;
+  findById: (id: string) => Promise<Image | null>;
+  findAll: () => Promise<Image[]>;
+  search: (query: string) => Promise<Image[]>;
+  updateById: (id: string, input: UpdateImageInput) => Promise<Image>;
+  deleteById: (id: string) => Promise<Image>;
 
   // Embedding-related methods
   /** Find IDs of images without embedding */
-  findIdsWithoutEmbedding(): Promise<Array<{ id: string }>>;
+  findIdsWithoutEmbedding: () => Promise<Array<{ id: string }>>;
   /** Find a specific image with its embedding */
-  findByIdWithEmbedding(id: string): Promise<ImageWithEmbedding | null>;
+  findByIdWithEmbedding: (id: string) => Promise<ImageWithEmbedding | null>;
   /** Find images with embeddings (for sync) */
-  findWithEmbedding(): Promise<ImageWithEmbedding[]>;
+  findWithEmbedding: () => Promise<ImageWithEmbedding[]>;
   /** Update embedding for an image */
-  updateEmbedding(id: string, input: UpdateEmbeddingInput): Promise<void>;
+  updateEmbedding: (id: string, input: UpdateEmbeddingInput) => Promise<void>;
   /** Clear all embeddings (for regeneration) */
-  clearAllEmbeddings(): Promise<void>;
+  clearAllEmbeddings: () => Promise<void>;
   /** Count total images */
-  count(): Promise<number>;
+  count: () => Promise<number>;
   /** Count images with embedding */
-  countWithEmbedding(): Promise<number>;
+  countWithEmbedding: () => Promise<number>;
 }

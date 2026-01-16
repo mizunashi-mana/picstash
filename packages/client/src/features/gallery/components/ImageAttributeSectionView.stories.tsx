@@ -248,6 +248,7 @@ export const EditModalOpen: Story = {
     attributesError: null,
     labelsError: null,
     addModalOpen: false,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test data is defined
     editingAttribute: mockAttributes[0]!,
     selectedLabelId: null,
     keywords: ['キーワード1', 'キーワード2'],
@@ -330,7 +331,10 @@ export const DeleteAttributeInteraction: Story = {
 
     // 削除ボタンをクリック
     const deleteButtons = canvas.getAllByRole('button', { name: '削除' });
-    await userEvent.click(deleteButtons[0]!);
+    const firstDeleteButton = deleteButtons[0];
+    if (firstDeleteButton !== undefined) {
+      await userEvent.click(firstDeleteButton);
+    }
 
     // onDelete が呼ばれていることを確認
     await expect(args.onDelete).toHaveBeenCalledWith('attr-1');

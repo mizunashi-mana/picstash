@@ -21,8 +21,8 @@ import type {
   CreateSessionResult,
 } from '@/application/ports/archive-session-manager.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(__dirname, '../../..', config.storage.path);
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const storagePath = resolve(currentDir, '../../..', config.storage.path);
 const tempPath = join(storagePath, 'temp');
 
 function createSizeLimitedStream(maxSize: number): Transform {
@@ -41,10 +41,10 @@ function createSizeLimitedStream(maxSize: number): Transform {
 
 @injectable()
 export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
-  private sessions = new Map<string, ArchiveSession>();
+  private readonly sessions = new Map<string, ArchiveSession>();
 
   constructor(
-    @multiInject(TYPES.ArchiveHandler) private handlers: ArchiveHandler[],
+    @multiInject(TYPES.ArchiveHandler) private readonly handlers: ArchiveHandler[],
   ) {}
 
   private async ensureTempDirectory(): Promise<void> {
@@ -62,7 +62,7 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
     const { filename, mimeType, stream } = input;
 
     const handler = this.findHandler(filename, mimeType);
-    if (handler == null) {
+    if (handler === undefined) {
       return {
         success: false,
         error: 'UNSUPPORTED_FORMAT',
@@ -128,26 +128,26 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
 
   async extractImage(sessionId: string, entryIndex: number): Promise<Buffer> {
     const session = this.sessions.get(sessionId);
-    if (session == null) {
+    if (session === undefined) {
       throw new Error(`Session ${sessionId} not found`);
     }
 
     const entry = session.imageEntries.find(e => e.index === entryIndex);
-    if (entry == null) {
+    if (entry === undefined) {
       throw new Error(`Entry ${entryIndex} not found in session ${sessionId}`);
     }
 
     const handler = this.findHandler(session.archivePath, '');
-    if (handler == null) {
+    if (handler === undefined) {
       throw new Error(`No handler found for session ${sessionId}`);
     }
 
-    return handler.extractEntry(session.archivePath, entryIndex);
+    return await handler.extractEntry(session.archivePath, entryIndex);
   }
 
   async deleteSession(sessionId: string): Promise<void> {
     const session = this.sessions.get(sessionId);
-    if (session == null) {
+    if (session === undefined) {
       return;
     }
 

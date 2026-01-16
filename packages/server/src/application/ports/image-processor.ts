@@ -9,11 +9,11 @@ export interface ThumbnailResult {
 }
 
 export interface ImageProcessor {
-  getMetadata(filePath: string): Promise<ImageMetadata>;
-  generateThumbnail(
+  getMetadata: (filePath: string) => Promise<ImageMetadata>;
+  generateThumbnail: (
     inputFilePath: string,
     outputFilename: string,
-  ): Promise<ThumbnailResult>;
+  ) => Promise<ThumbnailResult>;
   /** Generate a thumbnail from an in-memory buffer, returns JPEG buffer */
-  generateThumbnailFromBuffer(imageBuffer: Buffer): Promise<Buffer>;
+  generateThumbnailFromBuffer: (imageBuffer: Buffer) => Promise<Buffer>;
 }

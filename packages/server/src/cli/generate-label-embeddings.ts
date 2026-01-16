@@ -129,7 +129,7 @@ async function runStatus(deps: GenerateLabelEmbeddingDeps): Promise<void> {
   }
 }
 
-main().catch((error) => {
+main().catch((error: unknown) => {
   console.error('Error:', error);
   process.exit(1);
 });

@@ -110,7 +110,7 @@ export function ImageGalleryView({
 
   return (
     <Stack gap="md">
-      {onSearchChange != null && (
+      {onSearchChange !== undefined && (
         <Group justify="space-between" align="center">
           <Box style={{ flex: 1, maxWidth: 400 }}>
             <SearchBar
@@ -119,7 +119,7 @@ export function ImageGalleryView({
               isLoading={isLoading}
             />
           </Box>
-          {images != null && images.length > 0 && (
+          {images !== undefined && images.length > 0 && (
             <Text size="sm" c="dimmed">
               {images.length}
               件

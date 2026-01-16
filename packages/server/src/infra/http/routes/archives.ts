@@ -18,8 +18,8 @@ export function archiveRoutes(app: FastifyInstance): void {
   app.post('/api/archives', async (request, reply) => {
     const file = await request.file();
 
-    if (file == null) {
-      return reply.status(400).send({
+    if (file === undefined) {
+      return await reply.status(400).send({
         error: 'Bad Request',
         message: 'No file uploaded',
       });
@@ -48,13 +48,13 @@ export function archiveRoutes(app: FastifyInstance): void {
           errorType = 'Unsupported Media Type';
           break;
       }
-      return reply.status(statusCode).send({
+      return await reply.status(statusCode).send({
         error: errorType,
         message: result.message,
       });
     }
 
-    return reply.status(201).send({
+    return await reply.status(201).send({
       sessionId: result.session.id,
       filename: result.session.filename,
       archiveType: result.session.archiveType,
@@ -69,14 +69,14 @@ export function archiveRoutes(app: FastifyInstance): void {
       const { sessionId } = request.params;
       const session = sessionManager.getSession(sessionId);
 
-      if (session == null) {
-        return reply.status(404).send({
+      if (session === undefined) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Archive session not found',
         });
       }
 
-      return reply.send({
+      return await reply.send({
         sessionId: session.id,
         filename: session.filename,
         archiveType: session.archiveType,
@@ -99,23 +99,23 @@ export function archiveRoutes(app: FastifyInstance): void {
       const entryIndex = parseInt(fileIndex, 10);
 
       if (Number.isNaN(entryIndex)) {
-        return reply.status(400).send({
+        return await reply.status(400).send({
           error: 'Bad Request',
           message: 'Invalid file index',
         });
       }
 
       const session = sessionManager.getSession(sessionId);
-      if (session == null) {
-        return reply.status(404).send({
+      if (session === undefined) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Archive session not found',
         });
       }
 
       const entry = session.imageEntries.find(e => e.index === entryIndex);
-      if (entry == null) {
-        return reply.status(404).send({
+      if (entry === undefined) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found in archive',
         });
@@ -131,14 +131,14 @@ export function archiveRoutes(app: FastifyInstance): void {
           imageBuffer,
         );
 
-        return reply
+        return await reply
           .header('Content-Type', 'image/jpeg')
           .header('Cache-Control', 'private, max-age=3600')
           .send(thumbnail);
       }
       catch (error) {
         request.log.error(error, 'Failed to extract thumbnail');
-        return reply.status(500).send({
+        return await reply.status(500).send({
           error: 'Internal Server Error',
           message: 'Failed to extract image from archive',
         });
@@ -154,23 +154,23 @@ export function archiveRoutes(app: FastifyInstance): void {
       const entryIndex = parseInt(fileIndex, 10);
 
       if (Number.isNaN(entryIndex)) {
-        return reply.status(400).send({
+        return await reply.status(400).send({
           error: 'Bad Request',
           message: 'Invalid file index',
         });
       }
 
       const session = sessionManager.getSession(sessionId);
-      if (session == null) {
-        return reply.status(404).send({
+      if (session === undefined) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Archive session not found',
         });
       }
 
       const entry = session.imageEntries.find(e => e.index === entryIndex);
-      if (entry == null) {
-        return reply.status(404).send({
+      if (entry === undefined) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found in archive',
         });
@@ -184,14 +184,14 @@ export function archiveRoutes(app: FastifyInstance): void {
 
         const mimeType = getMimeType(entry.filename);
 
-        return reply
+        return await reply
           .header('Content-Type', mimeType)
           .header('Cache-Control', 'private, max-age=3600')
           .send(imageBuffer);
       }
       catch (error) {
         request.log.error(error, 'Failed to extract image');
-        return reply.status(500).send({
+        return await reply.status(500).send({
           error: 'Internal Server Error',
           message: 'Failed to extract image from archive',
         });
@@ -210,7 +210,7 @@ export function archiveRoutes(app: FastifyInstance): void {
       const { indices } = request.body;
 
       if (!Array.isArray(indices) || indices.length === 0) {
-        return reply.status(400).send({
+        return await reply.status(400).send({
           error: 'Bad Request',
           message: 'indices must be a non-empty array of numbers',
         });
@@ -218,15 +218,15 @@ export function archiveRoutes(app: FastifyInstance): void {
 
       // Validate all indices are non-negative integers
       if (!indices.every(i => typeof i === 'number' && Number.isInteger(i) && i >= 0)) {
-        return reply.status(400).send({
+        return await reply.status(400).send({
           error: 'Bad Request',
           message: 'All indices must be non-negative integers',
         });
       }
 
       const session = sessionManager.getSession(sessionId);
-      if (session == null) {
-        return reply.status(404).send({
+      if (session === undefined) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Archive session not found',
         });
@@ -243,7 +243,7 @@ export function archiveRoutes(app: FastifyInstance): void {
           },
         );
 
-        return reply.send({
+        return await reply.send({
           totalRequested: result.totalRequested,
           successCount: result.successCount,
           failedCount: result.failedCount,
@@ -257,7 +257,7 @@ export function archiveRoutes(app: FastifyInstance): void {
       }
       catch (error) {
         request.log.error(error, 'Failed to import images from archive');
-        return reply.status(500).send({
+        return await reply.status(500).send({
           error: 'Internal Server Error',
           message: 'Failed to import images from archive',
         });
@@ -273,7 +273,7 @@ export function archiveRoutes(app: FastifyInstance): void {
 
       await sessionManager.deleteSession(sessionId);
 
-      return reply.status(204).send();
+      return await reply.status(204).send();
     },
   );
 }

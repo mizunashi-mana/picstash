@@ -6,6 +6,6 @@
     "declarationMap": true,
     "noEmit": false
   },
-  "include": ["src/**/*", "*.config.ts"],
+  "include": ["src/**/*", "*.config.ts", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }

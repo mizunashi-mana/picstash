@@ -76,7 +76,7 @@ export function LabelList({
                 <ActionIcon
                   variant="subtle"
                   color="gray"
-                  onClick={() => setEditingLabel(label)}
+                  onClick={() => { setEditingLabel(label); }}
                   aria-label={`Edit ${label.name}`}
                 >
                   <IconEdit size={18} />
@@ -84,7 +84,7 @@ export function LabelList({
                 <ActionIcon
                   variant="subtle"
                   color="red"
-                  onClick={() => setDeletingLabelId(label.id)}
+                  onClick={() => { setDeletingLabelId(label.id); }}
                   aria-label={`Delete ${label.name}`}
                 >
                   <IconTrash size={18} />
@@ -98,7 +98,7 @@ export function LabelList({
       {/* Edit Modal */}
       <Modal
         opened={editingLabel !== null}
-        onClose={() => setEditingLabel(null)}
+        onClose={() => { setEditingLabel(null); }}
         title="Edit Label"
       >
         {editingLabel && (
@@ -107,7 +107,7 @@ export function LabelList({
             label={editingLabel}
             existingColors={existingColors.filter(c => c !== editingLabel.color)}
             onSubmit={handleUpdate}
-            onCancel={() => setEditingLabel(null)}
+            onCancel={() => { setEditingLabel(null); }}
             isSubmitting={isUpdating}
           />
         )}
@@ -116,7 +116,7 @@ export function LabelList({
       {/* Delete Confirmation Modal */}
       <Modal
         opened={deletingLabelId !== null}
-        onClose={() => setDeletingLabelId(null)}
+        onClose={() => { setDeletingLabelId(null); }}
         title="Delete Label"
       >
         <Stack>
@@ -124,7 +124,7 @@ export function LabelList({
           <Group justify="flex-end">
             <Button
               variant="subtle"
-              onClick={() => setDeletingLabelId(null)}
+              onClick={() => { setDeletingLabelId(null); }}
               disabled={isDeleting}
             >
               Cancel

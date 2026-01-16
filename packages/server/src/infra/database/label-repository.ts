@@ -15,7 +15,7 @@ export interface UpdateLabelInput {
  * Create a new attribute label
  */
 export async function createLabel(input: CreateLabelInput): Promise<AttributeLabel> {
-  return prisma.attributeLabel.create({
+  return await prisma.attributeLabel.create({
     data: input,
   });
 }
@@ -24,7 +24,7 @@ export async function createLabel(input: CreateLabelInput): Promise<AttributeLab
  * Find a label by ID
  */
 export async function findLabelById(id: string): Promise<AttributeLabel | null> {
-  return prisma.attributeLabel.findUnique({
+  return await prisma.attributeLabel.findUnique({
     where: { id },
   });
 }
@@ -33,7 +33,7 @@ export async function findLabelById(id: string): Promise<AttributeLabel | null> 
  * Find a label by name
  */
 export async function findLabelByName(name: string): Promise<AttributeLabel | null> {
-  return prisma.attributeLabel.findUnique({
+  return await prisma.attributeLabel.findUnique({
     where: { name },
   });
 }
@@ -42,7 +42,7 @@ export async function findLabelByName(name: string): Promise<AttributeLabel | nu
  * Find all labels
  */
 export async function findAllLabels(): Promise<AttributeLabel[]> {
-  return prisma.attributeLabel.findMany({
+  return await prisma.attributeLabel.findMany({
     orderBy: { name: 'asc' },
   });
 }
@@ -54,7 +54,7 @@ export async function updateLabelById(
   id: string,
   input: UpdateLabelInput,
 ): Promise<AttributeLabel> {
-  return prisma.attributeLabel.update({
+  return await prisma.attributeLabel.update({
     where: { id },
     data: input,
   });
@@ -64,7 +64,7 @@ export async function updateLabelById(
  * Delete a label by ID
  */
 export async function deleteLabelById(id: string): Promise<AttributeLabel> {
-  return prisma.attributeLabel.delete({
+  return await prisma.attributeLabel.delete({
     where: { id },
   });
 }

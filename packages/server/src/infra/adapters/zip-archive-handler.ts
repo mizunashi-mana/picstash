@@ -43,7 +43,7 @@ export class ZipArchiveHandler implements ArchiveHandler {
     }
 
     const entry = zipEntries[entryIndex];
-    if (entry == null) {
+    if (entry === undefined) {
       throw new Error(`Entry at index ${entryIndex} not found`);
     }
 

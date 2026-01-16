@@ -33,7 +33,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     error: attributesError,
   } = useQuery({
     queryKey: ['imageAttributes', imageId],
-    queryFn: async () => fetchImageAttributes(imageId),
+    queryFn: async () => await fetchImageAttributes(imageId),
   });
 
   // Fetch all labels for the dropdown
@@ -54,7 +54,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     refetch: refetchSuggestions,
   } = useQuery({
     queryKey: ['suggestedAttributes', imageId],
-    queryFn: async () => fetchSuggestedAttributes(imageId, { limit: 10 }),
+    queryFn: async () => await fetchSuggestedAttributes(imageId, { limit: 10 }),
     enabled: showSuggestions,
   });
 
@@ -65,7 +65,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       const trimmedKeywords = keywords
         .map(k => k.trim())
         .filter(k => k !== '');
-      return createImageAttribute(imageId, {
+      return await createImageAttribute(imageId, {
         labelId: selectedLabelId,
         keywords: trimmedKeywords.length > 0 ? trimmedKeywords.join(',') : undefined,
       });
@@ -85,7 +85,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       const trimmedKeywords = keywords
         .map(k => k.trim())
         .filter(k => k !== '');
-      return updateImageAttribute(imageId, editingAttribute.id, {
+      return await updateImageAttribute(imageId, editingAttribute.id, {
         keywords: trimmedKeywords.length > 0 ? trimmedKeywords.join(',') : undefined,
       });
     },
@@ -100,7 +100,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const deleteMutation = useMutation({
     mutationFn: async (attributeId: string) => {
       setDeletingId(attributeId);
-      return deleteImageAttribute(imageId, attributeId);
+      await deleteImageAttribute(imageId, attributeId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['imageAttributes', imageId] });
@@ -115,7 +115,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const addSuggestionMutation = useMutation({
     mutationFn: async (suggestion: AttributeSuggestion) => {
       setAddingSuggestionId(suggestion.labelId);
-      return createImageAttribute(imageId, {
+      return await createImageAttribute(imageId, {
         labelId: suggestion.labelId,
       });
     },
@@ -131,7 +131,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
 
   // Get labels that are not already assigned
   const availableLabels = labels?.filter(
-    label => !attributes?.some(attr => attr.labelId === label.id),
+    label => attributes?.some(attr => attr.labelId === label.id) !== true,
   ) ?? [];
 
   const labelOptions = availableLabels.map(label => ({
@@ -141,7 +141,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
 
   // Filter suggestions to exclude already assigned labels
   const filteredSuggestions = suggestions?.suggestions.filter(
-    s => !attributes?.some(attr => attr.labelId === s.labelId),
+    s => attributes?.some(attr => attr.labelId === s.labelId) !== true,
   ) ?? [];
 
   const openAddModal = () => {
@@ -192,17 +192,17 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       onCloseEditModal={closeEditModal}
       onSelectedLabelIdChange={setSelectedLabelId}
       onKeywordsChange={setKeywords}
-      onCreate={() => createMutation.mutate()}
-      onUpdate={() => updateMutation.mutate()}
-      onDelete={attributeId => deleteMutation.mutate(attributeId)}
+      onCreate={() => { createMutation.mutate(); }}
+      onUpdate={() => { updateMutation.mutate(); }}
+      onDelete={(attributeId) => { deleteMutation.mutate(attributeId); }}
       // Suggestion props
       showSuggestions={showSuggestions}
       suggestions={filteredSuggestions}
       suggestionsLoading={suggestionsLoading}
       suggestionsError={suggestionsError}
       addingSuggestionId={addingSuggestionId}
-      onToggleSuggestions={() => setShowSuggestions(!showSuggestions)}
-      onAddSuggestion={suggestion => addSuggestionMutation.mutate(suggestion)}
+      onToggleSuggestions={() => { setShowSuggestions(!showSuggestions); }}
+      onAddSuggestion={(suggestion) => { addSuggestionMutation.mutate(suggestion); }}
     />
   );
 }

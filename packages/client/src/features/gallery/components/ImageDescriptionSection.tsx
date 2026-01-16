@@ -19,7 +19,7 @@ export function ImageDescriptionSection({
   const updateMutation = useMutation({
     mutationFn: async (newDescription: string) => {
       const trimmed = newDescription.trim();
-      return updateImage(imageId, {
+      return await updateImage(imageId, {
         description: trimmed === '' ? null : trimmed,
       });
     },

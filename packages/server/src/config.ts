@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
 import { z } from 'zod';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const configPath = resolve(__dirname, '../config.yaml');
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const configPath = resolve(currentDir, '../config.yaml');
 
 const configSchema = z.object({
   server: z.object({

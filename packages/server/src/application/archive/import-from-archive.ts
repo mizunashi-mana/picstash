@@ -41,7 +41,7 @@ export async function importFromArchive(
   const { archiveSessionManager, imageRepository, fileStorage, imageProcessor } = deps;
 
   const session = archiveSessionManager.getSession(sessionId);
-  if (session == null) {
+  if (session === undefined) {
     return {
       totalRequested: indices.length,
       successCount: 0,
@@ -60,7 +60,7 @@ export async function importFromArchive(
 
   for (const index of indices) {
     const entry = session.imageEntries.find(e => e.index === index);
-    if (entry == null) {
+    if (entry === undefined) {
       results.push({
         index,
         success: false,

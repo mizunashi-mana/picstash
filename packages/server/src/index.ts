@@ -16,8 +16,8 @@ async function main(): Promise<void> {
   const shutdown = () => {
     app.log.info('Shutting down...');
     app.close()
-      .then(async () => disconnectDatabase())
-      .catch((err: unknown) => app.log.error(err));
+      .then(async () => { await disconnectDatabase(); })
+      .catch((err: unknown) => { app.log.error(err); });
   };
 
   process.on('SIGINT', shutdown);

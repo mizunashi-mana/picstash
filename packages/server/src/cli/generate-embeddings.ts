@@ -131,7 +131,7 @@ async function runStatus(deps: GenerateEmbeddingDeps): Promise<void> {
   }
 }
 
-main().catch((error) => {
+main().catch((error: unknown) => {
   console.error('Error:', error);
   process.exit(1);
 });

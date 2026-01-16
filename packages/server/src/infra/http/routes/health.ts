@@ -7,14 +7,14 @@ export function healthRoutes(app: FastifyInstance): void {
       // Check database connection
       await prisma.$queryRaw`SELECT 1`;
 
-      return reply.send({
+      return await reply.send({
         status: 'ok',
         timestamp: new Date().toISOString(),
         database: 'connected',
       });
     }
     catch (error) {
-      return reply.status(503).send({
+      return await reply.status(503).send({
         status: 'error',
         timestamp: new Date().toISOString(),
         database: 'disconnected',

@@ -7,6 +7,7 @@ import type { ArchiveEntry } from './ArchiveEntry.js';
  */
 export function isImageFile(filename: string): boolean {
   const ext = extname(filename).toLowerCase();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Type guard pattern
   return SUPPORTED_IMAGE_EXTENSIONS.includes(ext as typeof SUPPORTED_IMAGE_EXTENSIONS[number]);
 }
 

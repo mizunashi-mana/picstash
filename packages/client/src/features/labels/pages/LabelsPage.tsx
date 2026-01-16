@@ -31,7 +31,7 @@ export function LabelsPage() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (input: CreateLabelInput) => createLabel(input),
+    mutationFn: async (input: CreateLabelInput) => await createLabel(input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },
@@ -39,20 +39,21 @@ export function LabelsPage() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, input }: { id: string; input: UpdateLabelInput }) =>
-      updateLabel(id, input),
+      await updateLabel(id, input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => deleteLabel(id),
+    mutationFn: async (id: string) => { await deleteLabel(id); },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },
   });
 
   const handleCreate = (input: CreateLabelInput | UpdateLabelInput) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- form only passes CreateLabelInput for create
     createMutation.mutate(input as CreateLabelInput);
   };
 

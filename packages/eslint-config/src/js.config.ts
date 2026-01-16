@@ -29,66 +29,178 @@ export function buildJsConfig(props: {
     eslintJs.configs.recommended,
     {
       rules: {
-        // Complexity and maintainability
-        'complexity': ['error', { max: 20 }],
-        'max-lines': ['error', { max: 400, skipBlankLines: true, skipComments: true }],
-        'max-depth': ['error', 5],
-        'max-nested-callbacks': ['error', 3],
-
-        // Best practices
-        'eqeqeq': ['error', 'always', { null: 'ignore' }],
-        'no-console': 'error',
-        'no-alert': 'error',
-        'no-eval': 'error',
-        'no-implied-eval': 'error',
-        'no-extend-native': 'error',
-        'no-extra-bind': 'error',
-        'no-iterator': 'error',
-        'no-labels': 'error',
-        'no-lone-blocks': 'error',
-        'no-multi-str': 'error',
-        'no-new': 'error',
-        'no-new-func': 'error',
-        'no-new-wrappers': 'error',
-        'no-octal-escape': 'error',
-        'no-proto': 'error',
-        'no-return-assign': 'error',
-        'no-self-compare': 'error',
-        'no-sequences': 'error',
-        'no-throw-literal': 'error',
-        'no-useless-call': 'error',
-        'no-useless-concat': 'error',
-        'no-void': 'error',
-        'prefer-promise-reject-errors': 'error',
-        'radix': 'error',
-        'yoda': 'error',
-
-        // Variable declarations
-        'no-var': 'error',
-        'prefer-const': 'error',
-        'no-shadow': 'off', // Use @typescript-eslint/no-shadow instead
-
-        // Restricted globals
-        'no-restricted-globals': ['error', ...restrictedGlobals.filter(item => !['window', 'document'].includes(item.name))],
-
-        // Import path restrictions (absolute paths with @)
+        'complexity': [
+          'error',
+          {
+            variant: 'modified',
+            max: 20,
+          },
+        ],
+        'eqeqeq': ['error', 'always'],
+        'no-cond-assign': ['error', 'always'],
+        'no-inner-declarations': [
+          'error',
+          'both',
+          {
+            blockScopedFunctions: 'disallow',
+          },
+        ],
+        'no-restricted-globals': ['error', ...buildNoRestrictedRule(['window', 'document', 'crypto', 'navigator'])],
+        'accessor-pairs': [
+          'error',
+          {
+            setWithoutGet: true,
+            getWithoutSet: false,
+            enforceForClassMembers: true,
+          },
+        ],
+        'array-callback-return': [
+          'error',
+          {
+            allowImplicit: false,
+            allowVoid: false,
+            checkForEach: false,
+          },
+        ],
+        'consistent-this': ['error', 'that'],
+        'constructor-super': ['error'],
+        'curly': ['error', 'multi-line'],
+        'default-case-last': ['error'],
+        'for-direction': ['error'],
+        'grouped-accessor-pairs': ['error', 'getBeforeSet'],
+        'guard-for-in': ['error'],
+        'max-depth': ['error', { max: 5 }],
+        'max-lines': [
+          'error',
+          { max: 450, skipBlankLines: true, skipComments: true },
+        ],
+        'max-nested-callbacks': [
+          'error',
+          { max: 3 },
+        ],
+        'new-cap': ['error', { newIsCap: true, capIsNew: false, properties: true }],
+        'no-alert': ['error'],
+        'no-async-promise-executor': ['error'],
+        'no-caller': ['error'],
+        'no-case-declarations': ['error'],
+        'no-class-assign': ['error'],
+        'no-compare-neg-zero': ['error'],
+        'no-console': ['error'],
+        'no-const-assign': ['error'],
+        'no-constant-binary-expression': ['error'],
+        'no-constant-condition': ['error', { checkLoops: false }],
+        'no-constructor-return': ['error'],
+        'no-control-regex': ['error'],
+        'no-debugger': ['error'],
+        'no-delete-var': ['error'],
+        'no-dupe-args': ['error'],
+        'no-dupe-else-if': ['error'],
+        'no-dupe-keys': ['error'],
+        'no-duplicate-case': ['error'],
+        'no-empty': ['error', { allowEmptyCatch: true }],
+        'no-empty-character-class': ['error'],
+        'no-empty-pattern': ['error'],
+        'no-empty-static-block': ['error'],
+        'no-eval': ['error'],
+        'no-ex-assign': ['error'],
+        'no-extend-native': ['error'],
+        'no-extra-bind': ['error'],
+        'no-extra-boolean-cast': ['error'],
+        'no-fallthrough': ['error'],
+        'no-func-assign': ['error'],
+        'no-global-assign': ['error'],
+        'no-implicit-globals': ['error'],
+        'no-import-assign': ['error'],
+        'no-invalid-regexp': ['error'],
+        'no-irregular-whitespace': ['error'],
+        'no-iterator': ['error'],
+        'no-labels': ['error', { allowLoop: false, allowSwitch: false }],
+        'no-lone-blocks': ['error'],
+        'no-loss-of-precision': ['error'],
+        'no-misleading-character-class': ['error'],
+        'no-multi-str': ['error'],
+        'no-new': ['error'],
+        'no-new-func': ['error'],
+        'no-new-native-nonconstructor': ['error'],
+        'no-new-wrappers': ['error'],
+        'no-obj-calls': ['error'],
+        'no-object-constructor': ['error'],
+        'no-octal': ['error'],
+        'no-octal-escape': ['error'],
+        'no-proto': ['error'],
+        'no-prototype-builtins': ['error'],
+        'no-regex-spaces': ['error'],
         'no-restricted-imports': [
           'error',
           {
             patterns: [
               {
-                group: ['../*'],
-                message: 'Use absolute imports with @ prefix instead of relative paths.',
+                group: ['../'],
+                message:
+                'Use absolute paths starting with @',
               },
             ],
           },
         ],
+        'no-return-assign': ['error', 'always'],
+        'no-self-assign': ['error', { props: true }],
+        'no-self-compare': ['error'],
+        'no-sequences': [
+          'error',
+          {
+            allowInParentheses: false,
+          },
+        ],
+        'no-shadow-restricted-names': ['error'],
+        'no-sparse-arrays': ['error'],
+        'no-template-curly-in-string': ['error'],
+        'no-this-before-super': ['error'],
+        'no-unexpected-multiline': ['error'],
+        'no-unmodified-loop-condition': ['error'],
+        'no-unneeded-ternary': ['error', { defaultAssignment: false }],
+        'no-unreachable': ['error'],
+        'no-unreachable-loop': ['error'],
+        'no-unsafe-finally': ['error'],
+        'no-unsafe-negation': ['error'],
+        'no-useless-backreference': ['error'],
+        'no-useless-call': ['error'],
+        'no-useless-catch': ['error'],
+        'no-useless-computed-key': ['error'],
+        'no-useless-escape': ['error'],
+        'no-useless-rename': ['error'],
+        'no-var': ['error'],
+        'no-void': ['error', { allowAsStatement: true }],
+        'no-with': ['error'],
+        'object-shorthand': [
+          'error',
+          'properties',
+          {
+            avoidQuotes: true,
+          },
+        ],
+        'one-var': ['error', { initialized: 'never' }],
+        'prefer-const': [
+          'error',
+          { destructuring: 'all', ignoreReadBeforeAssign: false },
+        ],
+        'prefer-regex-literals': ['error', { disallowRedundantWrapping: true }],
+        'symbol-description': ['error'],
+        'unicode-bom': ['error', 'never'],
+        'use-isnan': [
+          'error',
+          {
+            enforceForSwitchCase: true,
+            enforceForIndexOf: true,
+          },
+        ],
+        'valid-typeof': ['error', { requireStringLiterals: true }],
+        'yoda': ['error', 'never'],
       },
     },
     {
       files: props.entrypointFiles,
       rules: {
-        'no-restricted-globals': ['error', ...restrictedGlobals],
+        'no-restricted-globals': ['error', ...buildNoRestrictedRule(['crypto', 'navigator'])],
       },
     },
     // Storybook files can use console and alert
@@ -114,4 +226,15 @@ export function buildJsConfig(props: {
       },
     },
   ]);
+}
+
+function buildNoRestrictedRule(keys: string[]) {
+  return Object.entries(restrictedGlobals)
+    .filter(([key]) => keys.includes(key))
+    .map(([key, restrictedGlobal]) => {
+      return {
+        name: key,
+        message: restrictedGlobal.message,
+      };
+    });
 }

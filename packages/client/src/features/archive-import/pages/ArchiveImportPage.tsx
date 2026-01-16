@@ -36,7 +36,7 @@ export function ArchiveImportPage() {
   // Cleanup session on unmount
   useEffect(() => {
     return () => {
-      if (sessionIdRef.current != null) {
+      if (sessionIdRef.current !== null) {
         deleteArchiveSession(sessionIdRef.current).catch(() => {
           // Ignore errors during cleanup
         });
@@ -55,9 +55,12 @@ export function ArchiveImportPage() {
 
   const sessionQuery = useQuery({
     queryKey: ['archive-session', sessionId],
-    queryFn: async () => getArchiveSession(sessionId!),
-    enabled: sessionId != null,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures sessionId is not null
+    queryFn: async () => await getArchiveSession(sessionId!),
+    enabled: sessionId !== null,
   });
+
+  const session = sessionQuery.data;
 
   const deleteMutation = useMutation({
     mutationFn: deleteArchiveSession,
@@ -70,10 +73,10 @@ export function ArchiveImportPage() {
 
   const importMutation = useMutation({
     mutationFn: async (indices: number[]) => {
-      if (sessionId == null) {
+      if (sessionId === null) {
         throw new Error('No session');
       }
-      return importFromArchive(sessionId, indices);
+      return await importFromArchive(sessionId, indices);
     },
     onSuccess: (result) => {
       setImportResult(result);
@@ -90,19 +93,19 @@ export function ArchiveImportPage() {
 
   const handleDrop = (files: File[]) => {
     const file = files[0];
-    if (file != null) {
+    if (file !== undefined) {
       uploadMutation.mutate(file);
     }
   };
 
   const handleClose = () => {
-    if (sessionId != null) {
+    if (sessionId !== null) {
       deleteMutation.mutate(sessionId);
     }
   };
 
   const handleSelectAll = () => {
-    if (session != null) {
+    if (session !== undefined) {
       setSelectedIndices(new Set(session.images.map(img => img.index)));
     }
   };
@@ -117,8 +120,6 @@ export function ArchiveImportPage() {
     }
   };
 
-  const session = sessionQuery.data;
-
   return (
     <Container size="lg" py="xl">
       <Stack gap="xl">
@@ -127,7 +128,7 @@ export function ArchiveImportPage() {
           <Text c="dimmed">ZIP/RAR ファイルから画像をインポート</Text>
         </Stack>
 
-        {sessionId == null
+        {sessionId === null
           ? (
               <ArchiveDropzone
                 onDrop={handleDrop}
@@ -145,13 +146,13 @@ export function ArchiveImportPage() {
                         <Text c="dimmed">Loading archive contents...</Text>
                       </Stack>
                     )
-                  : sessionQuery.error != null
+                  : sessionQuery.error !== null
                     ? (
                         <Alert color="red" title="Error">
                           {sessionQuery.error.message}
                         </Alert>
                       )
-                    : session != null
+                    : session !== undefined
                       ? (
                           <>
                             {/* Header with file info and close button */}
@@ -178,12 +179,12 @@ export function ArchiveImportPage() {
                             </Group>
 
                             {/* Import result alert */}
-                            {importResult != null && (
+                            {importResult !== null && (
                               <Alert
                                 color={importResult.failedCount === 0 ? 'green' : 'yellow'}
                                 title="Import Complete"
                                 withCloseButton
-                                onClose={() => setImportResult(null)}
+                                onClose={() => { setImportResult(null); }}
                               >
                                 <Stack gap="xs">
                                   <Text>
