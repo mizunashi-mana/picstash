@@ -6,10 +6,10 @@ export interface SaveFileResult {
 }
 
 export interface FileStorage {
-  saveOriginalFromStream(
+  saveOriginalFromStream: (
     stream: Readable,
     extension: string,
-  ): Promise<SaveFileResult>;
-  deleteFile(relativePath: string): Promise<void>;
-  getAbsolutePath(relativePath: string): string;
+  ) => Promise<SaveFileResult>;
+  deleteFile: (relativePath: string) => Promise<void>;
+  getAbsolutePath: (relativePath: string) => string;
 }

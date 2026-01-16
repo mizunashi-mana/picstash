@@ -10,7 +10,7 @@ export function ImageGallery() {
 
   const { data: images, isLoading, error } = useQuery({
     queryKey: ['images', query],
-    queryFn: async () => fetchImages(query),
+    queryFn: async () => await fetchImages(query),
   });
 
   const handleSearchChange = useCallback((value: string) => {

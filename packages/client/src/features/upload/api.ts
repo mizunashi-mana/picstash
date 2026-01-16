@@ -24,9 +24,11 @@ export async function uploadImage(file: File): Promise<Image> {
   });
 
   if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
     const error = (await response.json()) as ErrorResponse;
     throw new Error(error.message ?? 'Upload failed');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response
   return (await response.json()) as Image;
 }

@@ -50,7 +50,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             )}
             <ActionIcon
               variant="subtle"
-              onClick={() => setOpened(!opened)}
+              onClick={() => { setOpened(!opened); }}
               aria-label={opened ? 'Collapse sidebar' : 'Expand sidebar'}
             >
               {opened

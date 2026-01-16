@@ -103,7 +103,7 @@ export function LabelForm({
           label="Label Name"
           placeholder="Enter label name"
           value={name}
-          onChange={e => handleNameChange(e.currentTarget.value)}
+          onChange={(e) => { handleNameChange(e.currentTarget.value); }}
           required={mode === 'create'}
           disabled={isSubmitting}
         />

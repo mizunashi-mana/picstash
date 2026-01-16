@@ -22,7 +22,7 @@ import type { ImageAttribute } from '@picstash/shared';
 
 export interface ImageAttributeSectionViewProps {
   attributes: ImageAttribute[] | undefined;
-  labelOptions: { value: string; label: string }[];
+  labelOptions: Array<{ value: string; label: string }>;
   isLoading: boolean;
   attributesError: Error | null;
   labelsError: Error | null;
@@ -158,12 +158,12 @@ export function ImageAttributeSectionView({
                     <Loader size="sm" color="grape" />
                   </Group>
                 )}
-                {suggestionsError != null && (
+                {suggestionsError !== null && (
                   <Text size="xs" c="red">
                     提案の取得に失敗しました
                   </Text>
                 )}
-                {!suggestionsLoading && suggestionsError == null && suggestions.length === 0 && (
+                {!suggestionsLoading && suggestionsError === null && suggestions.length === 0 && (
                   <Text size="xs" c="dimmed">
                     推薦できるラベルがありません
                   </Text>
@@ -195,7 +195,7 @@ export function ImageAttributeSectionView({
                               color="grape"
                               leftSection={<IconPlus size={12} />}
                               loading={addingSuggestionId === suggestion.labelId}
-                              onClick={() => onAddSuggestion(suggestion)}
+                              onClick={() => { onAddSuggestion(suggestion); }}
                             >
                               追加
                             </Button>
@@ -266,7 +266,7 @@ export function ImageAttributeSectionView({
                       <ActionIcon
                         size="sm"
                         variant="subtle"
-                        onClick={() => onOpenEditModal(attr)}
+                        onClick={() => { onOpenEditModal(attr); }}
                         aria-label="編集"
                       >
                         <IconEdit size={14} />
@@ -275,7 +275,7 @@ export function ImageAttributeSectionView({
                         size="sm"
                         variant="subtle"
                         color="red"
-                        onClick={() => onDelete(attr.id)}
+                        onClick={() => { onDelete(attr.id); }}
                         loading={isDeletingId === attr.id}
                         aria-label="削除"
                       >

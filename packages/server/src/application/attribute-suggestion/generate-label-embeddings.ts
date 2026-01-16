@@ -108,6 +108,7 @@ export async function generateMissingLabelEmbeddings(
   const errors: Array<{ labelId: string; labelName: string; error: string }> = [];
 
   for (let i = 0; i < total; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- loop bounds ensure valid index
     const label = labelsWithoutEmbedding[i]!;
 
     options?.onProgress?.(i + 1, total, label.name);
@@ -139,5 +140,5 @@ export async function regenerateAllLabelEmbeddings(
   await labelRepository.clearAllEmbeddings();
 
   // Then generate new ones
-  return generateMissingLabelEmbeddings(deps, options);
+  return await generateMissingLabelEmbeddings(deps, options);
 }

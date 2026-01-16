@@ -15,7 +15,7 @@ export interface CreateImageInput {
  * Create a new image record
  */
 export async function createImage(input: CreateImageInput): Promise<Image> {
-  return prisma.image.create({
+  return await prisma.image.create({
     data: input,
   });
 }
@@ -24,7 +24,7 @@ export async function createImage(input: CreateImageInput): Promise<Image> {
  * Find an image by ID
  */
 export async function findImageById(id: string): Promise<Image | null> {
-  return prisma.image.findUnique({
+  return await prisma.image.findUnique({
     where: { id },
   });
 }
@@ -33,7 +33,7 @@ export async function findImageById(id: string): Promise<Image | null> {
  * Find all images
  */
 export async function findAllImages(): Promise<Image[]> {
-  return prisma.image.findMany({
+  return await prisma.image.findMany({
     orderBy: { createdAt: 'desc' },
   });
 }
@@ -42,7 +42,7 @@ export async function findAllImages(): Promise<Image[]> {
  * Delete an image by ID
  */
 export async function deleteImageById(id: string): Promise<Image> {
-  return prisma.image.delete({
+  return await prisma.image.delete({
     where: { id },
   });
 }

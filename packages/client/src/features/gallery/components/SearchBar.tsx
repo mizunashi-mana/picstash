@@ -33,7 +33,7 @@ export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
     <TextInput
       placeholder="検索..."
       value={inputValue}
-      onChange={e => setInputValue(e.currentTarget.value)}
+      onChange={(e) => { setInputValue(e.currentTarget.value); }}
       leftSection={<IconSearch size={16} />}
       rightSection={
         inputValue !== ''

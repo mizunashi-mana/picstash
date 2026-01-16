@@ -53,12 +53,14 @@ export function ImageDetailPage() {
 
   const { data: image, isLoading, error } = useQuery({
     queryKey: ['image', id],
-    queryFn: async () => fetchImage(id!),
-    enabled: id != null && id !== '',
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures id is defined
+    queryFn: async () => await fetchImage(id!),
+    enabled: id !== undefined && id !== '',
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async () => deleteImage(id!),
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- button is disabled when id is undefined
+    mutationFn: async () => { await deleteImage(id!); },
     onSuccess: async () => {
       close();
       await queryClient.invalidateQueries({ queryKey: ['images'] });
@@ -150,7 +152,7 @@ export function ImageDetailPage() {
               <Text size="sm" c="dimmed">ファイル名</Text>
               <Text size="sm">{image.filename}</Text>
             </Group>
-            {image.width != null && image.height != null && (
+            {image.width !== null && image.height !== null && (
               <Group justify="space-between">
                 <Text size="sm" c="dimmed">サイズ</Text>
                 <Text size="sm">
@@ -189,7 +191,7 @@ export function ImageDetailPage() {
             </Button>
             <Button
               color="red"
-              onClick={() => deleteMutation.mutate()}
+              onClick={() => { deleteMutation.mutate(); }}
               loading={deleteMutation.isPending}
             >
               削除

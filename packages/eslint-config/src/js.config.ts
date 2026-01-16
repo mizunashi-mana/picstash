@@ -228,7 +228,7 @@ export function buildJsConfig(props: {
   ]);
 }
 
-function buildNoRestrictedRule(keys) {
+function buildNoRestrictedRule(keys: string[]) {
   return Object.entries(restrictedGlobals)
     .filter(([key]) => keys.includes(key))
     .map(([key, restrictedGlobal]) => {

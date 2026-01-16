@@ -13,8 +13,8 @@ import type {
 } from '@/application/ports/file-storage.js';
 import type { Readable } from 'node:stream';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(__dirname, '../../..', config.storage.path);
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const storagePath = resolve(currentDir, '../../..', config.storage.path);
 const originalsPath = join(storagePath, 'originals');
 
 @injectable()

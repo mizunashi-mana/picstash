@@ -97,7 +97,7 @@ export async function suggestAttributes(
 
   // Get attributes from similar images
   const similarImageAttributes = await Promise.all(
-    similarImages.map(async sim => imageAttributeRepository.findByImageId(sim.imageId)),
+    similarImages.map(async sim => await imageAttributeRepository.findByImageId(sim.imageId)),
   );
 
   // Build keyword map per label: { labelId -> { keyword -> count } }
@@ -130,7 +130,7 @@ export async function suggestAttributes(
       const labelKeywords = keywordsByLabel.get(label.id);
       const suggestedKeywords: SuggestedKeyword[] = [];
 
-      if (labelKeywords != null) {
+      if (labelKeywords !== undefined) {
         for (const [keyword, count] of labelKeywords) {
           suggestedKeywords.push({ keyword, count });
         }
@@ -164,6 +164,7 @@ export async function suggestAttributes(
 function cosineSimilarity(a: Float32Array, b: Float32Array): number {
   let dot = 0;
   for (let i = 0; i < a.length; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- loop bounds ensure valid index
     dot += a[i]! * b[i]!;
   }
   return dot;
@@ -184,7 +185,7 @@ function buildKeywordsByLabel(
 
   for (const attributes of similarImageAttributes) {
     for (const attr of attributes) {
-      if (attr.keywords == null || attr.keywords === '') {
+      if (attr.keywords === null || attr.keywords === '') {
         continue;
       }
 
@@ -192,6 +193,7 @@ function buildKeywordsByLabel(
         keywordsByLabel.set(attr.labelId, new Map());
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- just set above if not exists
       const keywordMap = keywordsByLabel.get(attr.labelId)!;
       const keywords = attr.keywords.split(',').map(k => k.trim()).filter(k => k !== '');
 

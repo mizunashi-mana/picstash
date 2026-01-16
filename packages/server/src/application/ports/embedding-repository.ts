@@ -21,13 +21,13 @@ export interface EmbeddingRepository {
    * @param imageId - The image ID
    * @param embedding - The embedding vector (Float32Array of EMBEDDING_DIMENSION)
    */
-  upsert(imageId: string, embedding: Float32Array): void;
+  upsert: (imageId: string, embedding: Float32Array) => void;
 
   /**
    * Remove an embedding for an image.
    * @param imageId - The image ID
    */
-  remove(imageId: string): void;
+  remove: (imageId: string) => void;
 
   /**
    * Find images similar to a query embedding.
@@ -36,19 +36,19 @@ export interface EmbeddingRepository {
    * @param excludeImageIds - Image IDs to exclude from results
    * @returns Array of similarity results sorted by distance (ascending)
    */
-  findSimilar(
+  findSimilar: (
     queryEmbedding: Float32Array,
     limit?: number,
     excludeImageIds?: string[],
-  ): SimilarityResult[];
+  ) => SimilarityResult[];
 
   /**
    * Get the number of stored embeddings.
    */
-  count(): number;
+  count: () => number;
 
   /**
    * Close the repository and release resources.
    */
-  close(): void;
+  close: () => void;
 }

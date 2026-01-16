@@ -8,11 +8,11 @@ export interface ArchiveHandler {
   readonly archiveType: ArchiveType;
 
   /** Check if this handler can process the given file */
-  canHandle(filePath: string, mimeType: string): boolean;
+  canHandle: (filePath: string, mimeType: string) => boolean;
 
   /** List all entries in the archive */
-  listEntries(archivePath: string): Promise<ArchiveEntry[]>;
+  listEntries: (archivePath: string) => Promise<ArchiveEntry[]>;
 
   /** Extract a specific entry's data as Buffer */
-  extractEntry(archivePath: string, entryIndex: number): Promise<Buffer>;
+  extractEntry: (archivePath: string, entryIndex: number) => Promise<Buffer>;
 }

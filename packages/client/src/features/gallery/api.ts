@@ -24,25 +24,25 @@ export interface UpdateImageInput {
 }
 
 export async function fetchImages(query?: string): Promise<Image[]> {
-  const url = query != null && query.trim() !== ''
+  const url = query !== undefined && query.trim() !== ''
     ? `/images?q=${encodeURIComponent(query.trim())}`
     : '/images';
-  return apiClient<Image[]>(url);
+  return await apiClient<Image[]>(url);
 }
 
 export async function fetchImage(id: string): Promise<Image> {
-  return apiClient<Image>(`/images/${id}`);
+  return await apiClient<Image>(`/images/${id}`);
 }
 
 export async function deleteImage(id: string): Promise<void> {
-  await apiClient<void>(`/images/${id}`, { method: 'DELETE' });
+  await apiClient<undefined>(`/images/${id}`, { method: 'DELETE' });
 }
 
 export async function updateImage(
   id: string,
   input: UpdateImageInput,
 ): Promise<Image> {
-  return apiClient<Image>(`/images/${id}`, {
+  return await apiClient<Image>(`/images/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(input),
   });
@@ -60,14 +60,14 @@ export function getThumbnailUrl(imageId: string): string {
 export async function fetchImageAttributes(
   imageId: string,
 ): Promise<ImageAttribute[]> {
-  return apiClient<ImageAttribute[]>(`/images/${imageId}/attributes`);
+  return await apiClient<ImageAttribute[]>(`/images/${imageId}/attributes`);
 }
 
 export async function createImageAttribute(
   imageId: string,
   input: CreateImageAttributeInput,
 ): Promise<ImageAttribute> {
-  return apiClient<ImageAttribute>(`/images/${imageId}/attributes`, {
+  return await apiClient<ImageAttribute>(`/images/${imageId}/attributes`, {
     method: 'POST',
     body: JSON.stringify(input),
   });
@@ -78,7 +78,7 @@ export async function updateImageAttribute(
   attributeId: string,
   input: UpdateImageAttributeInput,
 ): Promise<ImageAttribute> {
-  return apiClient<ImageAttribute>(
+  return await apiClient<ImageAttribute>(
     `/images/${imageId}/attributes/${attributeId}`,
     {
       method: 'PUT',
@@ -91,7 +91,7 @@ export async function deleteImageAttribute(
   imageId: string,
   attributeId: string,
 ): Promise<void> {
-  await apiClient<void>(`/images/${imageId}/attributes/${attributeId}`, {
+  await apiClient<undefined>(`/images/${imageId}/attributes/${attributeId}`, {
     method: 'DELETE',
   });
 }
@@ -119,13 +119,13 @@ export async function fetchSuggestedAttributes(
   options?: { threshold?: number; limit?: number },
 ): Promise<SuggestedAttributesResponse> {
   const params = new URLSearchParams();
-  if (options?.threshold != null) {
+  if (options?.threshold !== undefined) {
     params.set('threshold', options.threshold.toString());
   }
-  if (options?.limit != null) {
+  if (options?.limit !== undefined) {
     params.set('limit', options.limit.toString());
   }
   const queryString = params.toString();
   const url = `/images/${imageId}/suggested-attributes${queryString !== '' ? `?${queryString}` : ''}`;
-  return apiClient<SuggestedAttributesResponse>(url);
+  return await apiClient<SuggestedAttributesResponse>(url);
 }

@@ -102,18 +102,18 @@ describe('suggestAttributes', () => {
     it('should return suggestions sorted by score', async () => {
       // Create embeddings that will produce predictable similarity scores
       // Image embedding: normalized [1, 0, 0, ..., 0] (512 dims)
-      const imageEmbValues: number[] = new Array(512).fill(0) as number[];
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
       imageEmbValues[0] = 1;
       const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
 
       // Label 1: similar to image [0.9, 0.1, 0, ..., 0]
-      const label1EmbValues: number[] = new Array(512).fill(0) as number[];
+      const label1EmbValues: number[] = new Array<number>(512).fill(0);
       label1EmbValues[0] = 0.9;
       label1EmbValues[1] = 0.1;
       const label1Embedding = createNormalizedEmbedding(label1EmbValues);
 
       // Label 2: less similar [0.5, 0.5, 0, ..., 0]
-      const label2EmbValues: number[] = new Array(512).fill(0) as number[];
+      const label2EmbValues: number[] = new Array<number>(512).fill(0);
       label2EmbValues[0] = 0.5;
       label2EmbValues[1] = 0.5;
       const label2Embedding = createNormalizedEmbedding(label2EmbValues);
@@ -149,17 +149,17 @@ describe('suggestAttributes', () => {
     });
 
     it('should filter by threshold', async () => {
-      const imageEmbValues: number[] = new Array(512).fill(0) as number[];
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
       imageEmbValues[0] = 1;
       const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
 
       // High similarity label
-      const highSimValues: number[] = new Array(512).fill(0) as number[];
+      const highSimValues: number[] = new Array<number>(512).fill(0);
       highSimValues[0] = 1;
       const highSimEmbedding = createNormalizedEmbedding(highSimValues);
 
       // Low similarity label (orthogonal)
-      const lowSimValues: number[] = new Array(512).fill(0) as number[];
+      const lowSimValues: number[] = new Array<number>(512).fill(0);
       lowSimValues[1] = 1;
       const lowSimEmbedding = createNormalizedEmbedding(lowSimValues);
 
@@ -181,14 +181,14 @@ describe('suggestAttributes', () => {
     });
 
     it('should respect limit parameter', async () => {
-      const imageEmbValues: number[] = new Array(512).fill(0) as number[];
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
       imageEmbValues[0] = 1;
       const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
 
       // Create 5 similar labels
       const labels: LabelWithEmbedding[] = [];
       for (let i = 0; i < 5; i++) {
-        const values: number[] = new Array(512).fill(0) as number[];
+        const values: number[] = new Array<number>(512).fill(0);
         values[0] = 1 - i * 0.1;
         labels.push({
           id: `label-${i}`,
@@ -232,7 +232,7 @@ describe('suggestAttributes', () => {
     });
 
     it('should return NO_LABELS_WITH_EMBEDDING when no labels have embeddings', async () => {
-      const imageEmbValues: number[] = new Array(512).fill(0) as number[];
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
       imageEmbValues[0] = 1;
       const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
 

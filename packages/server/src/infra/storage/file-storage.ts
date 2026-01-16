@@ -4,8 +4,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from '@/config.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(__dirname, '../../..', config.storage.path);
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const storagePath = resolve(currentDir, '../../..', config.storage.path);
 const originalsPath = join(storagePath, 'originals');
 
 export interface SaveFileResult {

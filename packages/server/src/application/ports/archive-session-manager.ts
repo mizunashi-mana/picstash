@@ -16,14 +16,14 @@ export type CreateSessionResult
 
 export interface ArchiveSessionManager {
   /** Create a new session from an uploaded archive */
-  createSession(input: CreateSessionInput): Promise<CreateSessionResult>;
+  createSession: (input: CreateSessionInput) => Promise<CreateSessionResult>;
 
   /** Get a session by ID */
-  getSession(sessionId: string): ArchiveSession | undefined;
+  getSession: (sessionId: string) => ArchiveSession | undefined;
 
   /** Extract an image from an archive session */
-  extractImage(sessionId: string, entryIndex: number): Promise<Buffer>;
+  extractImage: (sessionId: string, entryIndex: number) => Promise<Buffer>;
 
   /** Delete a session and clean up temporary files */
-  deleteSession(sessionId: string): Promise<void>;
+  deleteSession: (sessionId: string) => Promise<void>;
 }

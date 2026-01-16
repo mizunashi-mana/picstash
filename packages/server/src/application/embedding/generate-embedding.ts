@@ -131,6 +131,7 @@ export async function generateMissingEmbeddings(
 
   // Process in batches
   for (let i = 0; i < total; i++) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- loop bounds ensure valid index
     const image = imagesWithoutEmbedding[i]!;
 
     const result = await generateEmbedding({ imageId: image.id }, deps);

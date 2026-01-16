@@ -19,7 +19,7 @@ export function labelRoutes(app: FastifyInstance): void {
   // List all labels
   app.get('/api/labels', async (_request, reply) => {
     const labels = await labelRepository.findAll();
-    return reply.send(labels);
+    return await reply.send(labels);
   });
 
   // Create label
@@ -29,28 +29,24 @@ export function labelRoutes(app: FastifyInstance): void {
     if (!result.success) {
       switch (result.error) {
         case 'EMPTY_NAME':
-          return reply.status(400).send({
+          return await reply.status(400).send({
             error: 'Bad Request',
             message: 'Label name is required',
           });
         case 'NAME_TOO_LONG':
-          return reply.status(400).send({
+          return await reply.status(400).send({
             error: 'Bad Request',
             message: `Label name must be ${result.maxLength} characters or less`,
           });
         case 'DUPLICATE_NAME':
-          return reply.status(409).send({
+          return await reply.status(409).send({
             error: 'Conflict',
             message: `Label with name "${result.name}" already exists`,
           });
-        default: {
-          const _exhaustive: never = result;
-          return _exhaustive;
-        }
       }
     }
 
-    return reply.status(201).send(result.label);
+    return await reply.status(201).send(result.label);
   });
 
   // Get single label
@@ -60,14 +56,14 @@ export function labelRoutes(app: FastifyInstance): void {
       const { id } = request.params;
       const label = await labelRepository.findById(id);
 
-      if (label == null) {
-        return reply.status(404).send({
+      if (label === null) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Label not found',
         });
       }
 
-      return reply.send(label);
+      return await reply.send(label);
     },
   );
 
@@ -81,33 +77,29 @@ export function labelRoutes(app: FastifyInstance): void {
       if (!result.success) {
         switch (result.error) {
           case 'NOT_FOUND':
-            return reply.status(404).send({
+            return await reply.status(404).send({
               error: 'Not Found',
               message: 'Label not found',
             });
           case 'EMPTY_NAME':
-            return reply.status(400).send({
+            return await reply.status(400).send({
               error: 'Bad Request',
               message: 'Label name cannot be empty',
             });
           case 'NAME_TOO_LONG':
-            return reply.status(400).send({
+            return await reply.status(400).send({
               error: 'Bad Request',
               message: `Label name must be ${result.maxLength} characters or less`,
             });
           case 'DUPLICATE_NAME':
-            return reply.status(409).send({
+            return await reply.status(409).send({
               error: 'Conflict',
               message: `Label with name "${result.name}" already exists`,
             });
-          default: {
-            const _exhaustive: never = result;
-            return _exhaustive;
-          }
         }
       }
 
-      return reply.send(result.label);
+      return await reply.send(result.label);
     },
   );
 
@@ -118,15 +110,15 @@ export function labelRoutes(app: FastifyInstance): void {
       const { id } = request.params;
       const label = await labelRepository.findById(id);
 
-      if (label == null) {
-        return reply.status(404).send({
+      if (label === null) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Label not found',
         });
       }
 
       await labelRepository.deleteById(id);
-      return reply.status(204).send();
+      return await reply.status(204).send();
     },
   );
 }

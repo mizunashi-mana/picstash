@@ -25,6 +25,7 @@ export class ImageMimeType {
   }
 
   static isValid(mimeType: string): mimeType is AllowedImageMimeType {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Type guard pattern
     return ALLOWED_IMAGE_MIME_TYPES.includes(mimeType as AllowedImageMimeType);
   }
 

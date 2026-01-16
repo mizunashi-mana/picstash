@@ -30,10 +30,12 @@ export async function uploadArchive(file: File): Promise<ArchiveSession> {
   });
 
   if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
     const error = (await response.json()) as ErrorResponse;
     throw new Error(error.message ?? 'Upload failed');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response
   return (await response.json()) as ArchiveSession;
 }
 
@@ -43,10 +45,12 @@ export async function getArchiveSession(
   const response = await fetch(`/api/archives/${sessionId}`);
 
   if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
     const error = (await response.json()) as ErrorResponse;
     throw new Error(error.message ?? 'Failed to get archive session');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response
   return (await response.json()) as ArchiveSessionDetail;
 }
 
@@ -59,6 +63,7 @@ export async function deleteArchiveSession(sessionId: string): Promise<void> {
     // Only try to parse JSON if there's content
     const text = await response.text();
     if (text !== '') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
       const error = JSON.parse(text) as ErrorResponse;
       throw new Error(error.message ?? 'Failed to delete archive session');
     }
@@ -107,9 +112,11 @@ export async function importFromArchive(
   });
 
   if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
     const error = (await response.json()) as ErrorResponse;
     throw new Error(error.message ?? 'Failed to import images');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response
   return (await response.json()) as ImportResult;
 }

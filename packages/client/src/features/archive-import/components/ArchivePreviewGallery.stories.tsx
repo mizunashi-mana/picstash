@@ -120,7 +120,10 @@ export const ToggleSelection: Story = {
 
     // 最初のチェックボックスをクリック
     const checkboxes = canvas.getAllByRole('checkbox');
-    await userEvent.click(checkboxes[0]!);
+    const firstCheckbox = checkboxes[0];
+    if (firstCheckbox !== undefined) {
+      await userEvent.click(firstCheckbox);
+    }
 
     // onSelectionChange が呼ばれていることを確認
     await expect(args.onSelectionChange).toHaveBeenCalledWith(new Set([0]));
@@ -130,6 +133,7 @@ export const ToggleSelection: Story = {
 export const SingleImage: Story = {
   args: {
     sessionId: 'test-session-id',
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- mockImages is defined with elements
     images: [mockImages[0]!],
     selectedIndices: new Set<number>(),
   },

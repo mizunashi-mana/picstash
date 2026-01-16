@@ -34,6 +34,7 @@ export const IMAGE_EXTENSION_MIME_MAP: Record<SupportedImageExtension, string> =
  */
 export function isSupportedImageExtension(extension: string): extension is SupportedImageExtension {
   const ext = extension.toLowerCase();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Type guard pattern
   return SUPPORTED_IMAGE_EXTENSIONS.includes(ext as SupportedImageExtension);
 }
 

@@ -35,8 +35,8 @@ export function imageRoutes(app: FastifyInstance): void {
   app.post('/api/images', async (request, reply) => {
     const file = await request.file();
 
-    if (file == null) {
-      return reply.status(400).send({
+    if (file === undefined) {
+      return await reply.status(400).send({
         error: 'Bad Request',
         message: 'No file uploaded',
       });
@@ -59,20 +59,20 @@ export function imageRoutes(app: FastifyInstance): void {
           // Ignore cleanup errors
         });
       }
-      return reply.status(413).send({
+      return await reply.status(413).send({
         error: 'Payload Too Large',
         message: 'File too large. Maximum size: 50MB',
       });
     }
 
     if (!result.success) {
-      return reply.status(400).send({
+      return await reply.status(400).send({
         error: 'Bad Request',
         message: result.message,
       });
     }
 
-    return reply.status(201).send(result.image);
+    return await reply.status(201).send(result.image);
   });
 
   // List/search images
@@ -80,10 +80,10 @@ export function imageRoutes(app: FastifyInstance): void {
     '/api/images',
     async (request, reply) => {
       const { q } = request.query;
-      const images = q != null && q.trim() !== ''
+      const images = q !== undefined && q.trim() !== ''
         ? await imageRepository.search(q.trim())
         : await imageRepository.findAll();
-      return reply.send(images);
+      return await reply.send(images);
     },
   );
 
@@ -94,14 +94,14 @@ export function imageRoutes(app: FastifyInstance): void {
       const { id } = request.params;
       const image = await imageRepository.findById(id);
 
-      if (image == null) {
-        return reply.status(404).send({
+      if (image === null) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found',
         });
       }
 
-      return reply.send(image);
+      return await reply.send(image);
     },
   );
 
@@ -112,8 +112,8 @@ export function imageRoutes(app: FastifyInstance): void {
       const { id } = request.params;
       const image = await imageRepository.findById(id);
 
-      if (image == null) {
-        return reply.status(404).send({
+      if (image === null) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found',
         });
@@ -121,14 +121,14 @@ export function imageRoutes(app: FastifyInstance): void {
 
       const absolutePath = fileStorage.getAbsolutePath(image.path);
       if (!(await fileExists(absolutePath))) {
-        return reply.status(404).send({
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image file not found on disk',
         });
       }
 
       const stream = createReadStream(absolutePath);
-      return reply
+      return await reply
         .header('Content-Type', image.mimeType)
         .header('Cache-Control', 'public, max-age=31536000, immutable')
         .send(stream);
@@ -142,8 +142,8 @@ export function imageRoutes(app: FastifyInstance): void {
       const { id } = request.params;
       const image = await imageRepository.findById(id);
 
-      if (image == null) {
-        return reply.status(404).send({
+      if (image === null) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found',
         });
@@ -151,18 +151,18 @@ export function imageRoutes(app: FastifyInstance): void {
 
       const filePath = image.thumbnailPath ?? image.path;
       const contentType
-        = image.thumbnailPath != null ? 'image/jpeg' : image.mimeType;
+        = image.thumbnailPath !== null ? 'image/jpeg' : image.mimeType;
       const absolutePath = fileStorage.getAbsolutePath(filePath);
 
       if (!(await fileExists(absolutePath))) {
-        return reply.status(404).send({
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Thumbnail file not found on disk',
         });
       }
 
       const stream = createReadStream(absolutePath);
-      return reply
+      return await reply
         .header('Content-Type', contentType)
         .header('Cache-Control', 'public, max-age=31536000, immutable')
         .send(stream);
@@ -180,15 +180,15 @@ export function imageRoutes(app: FastifyInstance): void {
       const { description } = request.body;
 
       const existing = await imageRepository.findById(id);
-      if (existing == null) {
-        return reply.status(404).send({
+      if (existing === null) {
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found',
         });
       }
 
       const updated = await imageRepository.updateById(id, { description });
-      return reply.send(updated);
+      return await reply.send(updated);
     },
   );
 
@@ -204,8 +204,8 @@ export function imageRoutes(app: FastifyInstance): void {
 
       const input = {
         imageId: id,
-        threshold: threshold != null ? Number.parseFloat(threshold) : undefined,
-        limit: limit != null ? Number.parseInt(limit, 10) : undefined,
+        threshold: threshold !== undefined ? Number.parseFloat(threshold) : undefined,
+        limit: limit !== undefined ? Number.parseInt(limit, 10) : undefined,
       };
 
       const result = await suggestAttributes(input, {
@@ -216,27 +216,27 @@ export function imageRoutes(app: FastifyInstance): void {
       });
 
       if (result === 'IMAGE_NOT_FOUND') {
-        return reply.status(404).send({
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found',
         });
       }
 
       if (result === 'IMAGE_NOT_EMBEDDED') {
-        return reply.status(400).send({
+        return await reply.status(400).send({
           error: 'Bad Request',
           message: 'Image does not have an embedding. Please wait for embedding generation.',
         });
       }
 
       if (result === 'NO_LABELS_WITH_EMBEDDING') {
-        return reply.status(400).send({
+        return await reply.status(400).send({
           error: 'Bad Request',
           message: 'No labels have embeddings. Please generate label embeddings first.',
         });
       }
 
-      return reply.send(result);
+      return await reply.send(result);
     },
   );
 
@@ -248,13 +248,13 @@ export function imageRoutes(app: FastifyInstance): void {
       const result = await deleteImage(id, { imageRepository, fileStorage, embeddingRepository });
 
       if (!result.success) {
-        return reply.status(404).send({
+        return await reply.status(404).send({
           error: 'Not Found',
           message: 'Image not found',
         });
       }
 
-      return reply.status(204).send();
+      return await reply.status(204).send();
     },
   );
 }

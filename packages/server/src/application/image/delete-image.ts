@@ -28,7 +28,7 @@ export async function deleteImage(
   await fileStorage.deleteFile(image.path).catch(() => {
     // Ignore file deletion errors
   });
-  if (image.thumbnailPath != null) {
+  if (image.thumbnailPath !== null) {
     await fileStorage.deleteFile(image.thumbnailPath).catch(() => {
       // Ignore thumbnail deletion errors
     });

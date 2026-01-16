@@ -16,22 +16,23 @@ type ConfigItem = {
  * Focuses on rules, files, ignores, and settings - the parts we want to track for changes.
  */
 function extractSnapshotData(config: ReturnType<typeof buildConfig>) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESLint config structure is known
   return (config as ConfigItem[]).map((item) => {
     const result: Record<string, unknown> = {};
 
-    if (item.name != null && item.name !== '') result.name = item.name;
-    if (item.files != null) result.files = item.files;
-    if (item.ignores != null) result.ignores = item.ignores;
-    if (item.rules != null) result.rules = item.rules;
-    if (item.settings != null) result.settings = item.settings;
+    if (item.name !== undefined && item.name !== '') result.name = item.name;
+    if (item.files !== undefined) result.files = item.files;
+    if (item.ignores !== undefined) result.ignores = item.ignores;
+    if (item.rules !== undefined) result.rules = item.rules;
+    if (item.settings !== undefined) result.settings = item.settings;
 
     // Extract plugin names without the actual plugin objects (which have circular refs)
-    if (item.plugins != null) {
+    if (item.plugins !== undefined) {
       result.plugins = Object.keys(item.plugins);
     }
 
     // Extract language options without parser objects
-    if (item.languageOptions != null) {
+    if (item.languageOptions !== undefined) {
       const langOpts: Record<string, unknown> = {};
       const lo = item.languageOptions;
 

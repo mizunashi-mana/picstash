@@ -55,7 +55,7 @@ export function ImageDescriptionSectionView({
               <Stack gap="sm">
                 <Textarea
                   value={editValue}
-                  onChange={e => onEditValueChange(e.currentTarget.value)}
+                  onChange={(e) => { onEditValueChange(e.currentTarget.value); }}
                   placeholder="画像の説明を入力..."
                   autosize
                   minRows={3}

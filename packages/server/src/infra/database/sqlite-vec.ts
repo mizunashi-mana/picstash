@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import Database from 'better-sqlite3';
 import * as sqliteVec from 'sqlite-vec';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const currentDir = dirname(fileURLToPath(import.meta.url));
 
 /** CLIP embedding dimension (ViT-B/16 model) */
 export const EMBEDDING_DIMENSION = 512;
@@ -26,7 +26,7 @@ export function getVectorDb(): Database.Database {
     return db;
   }
 
-  const dbPath = resolve(__dirname, '../../..', 'prisma/data/picstash.db');
+  const dbPath = resolve(currentDir, '../../..', 'prisma/data/picstash.db');
   db = new Database(dbPath);
 
   // Load sqlite-vec extension
@@ -148,6 +148,7 @@ export function findSimilarImages(
   // We fetch extra results to account for exclusions
   const fetchLimit = limit + excludeImageIds.length;
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- better-sqlite3 returns unknown type
   const results = database
     .prepare(
       `
@@ -190,6 +191,7 @@ export function closeVectorDb(): void {
  */
 export function getEmbeddingCount(): number {
   const database = getVectorDb();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- better-sqlite3 returns unknown type
   const result = database
     .prepare('SELECT COUNT(*) as count FROM vec_images')
     .get() as { count: number };

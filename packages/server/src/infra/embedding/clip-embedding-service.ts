@@ -40,21 +40,13 @@ interface TransformersModule {
 }
 
 // Processor and model instance types
-interface ProcessorInstance {
-  (image: unknown): Promise<unknown>;
-}
+type ProcessorInstance = (image: unknown) => Promise<unknown>;
 
-interface TokenizerInstance {
-  (text: string, options?: { padding?: boolean; truncation?: boolean }): unknown;
-}
+type TokenizerInstance = (text: string, options?: { padding?: boolean; truncation?: boolean }) => unknown;
 
-interface VisionModelInstance {
-  (inputs: unknown): Promise<VisionModelOutput>;
-}
+type VisionModelInstance = (inputs: unknown) => Promise<VisionModelOutput>;
 
-interface TextModelInstance {
-  (inputs: unknown): Promise<TextModelOutput>;
-}
+type TextModelInstance = (inputs: unknown) => Promise<TextModelOutput>;
 
 interface VisionModelOutput {
   image_embeds: {
@@ -83,7 +75,7 @@ export class ClipEmbeddingService implements EmbeddingService {
     await this.initialize();
 
     const imageData = await readFile(imagePath);
-    return this.generateFromBuffer(imageData);
+    return await this.generateFromBuffer(imageData);
   }
 
   async generateFromBuffer(imageData: Buffer): Promise<EmbeddingResult> {
@@ -168,7 +160,8 @@ export class ClipEmbeddingService implements EmbeddingService {
 
     // Prevent multiple simultaneous initialization
     if (this.initPromise !== null) {
-      return this.initPromise;
+      await this.initPromise;
+      return;
     }
 
     this.initPromise = this.loadModels();
@@ -181,6 +174,7 @@ export class ClipEmbeddingService implements EmbeddingService {
     const startTime = Date.now();
 
     // Dynamic import of transformers.js
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Dynamic import has unknown type
     transformers = (await import(
       '@huggingface/transformers',
     )) as unknown as TransformersModule;
@@ -210,8 +204,8 @@ export class ClipEmbeddingService implements EmbeddingService {
    */
   private normalizeEmbedding(embedding: Float32Array): Float32Array {
     let norm = 0;
-    for (let i = 0; i < embedding.length; i++) {
-      norm += embedding[i]! * embedding[i]!;
+    for (const value of embedding) {
+      norm += value * value;
     }
     norm = Math.sqrt(norm);
 
@@ -220,8 +214,10 @@ export class ClipEmbeddingService implements EmbeddingService {
     }
 
     const normalized = new Float32Array(embedding.length);
-    for (let i = 0; i < embedding.length; i++) {
-      normalized[i] = embedding[i]! / norm;
+    let i = 0;
+    for (const value of embedding) {
+      normalized[i] = value / norm;
+      i++;
     }
 
     return normalized;

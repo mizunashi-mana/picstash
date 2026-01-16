@@ -25,5 +25,5 @@ export async function buildApp(): Promise<FastifyInstance> {
   // Register routes
   registerRoutes(app);
 
-  return app;
+  return await app;
 }

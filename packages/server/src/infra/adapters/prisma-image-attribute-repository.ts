@@ -12,14 +12,14 @@ import type {
 export class PrismaImageAttributeRepository
 implements ImageAttributeRepository {
   async findById(id: string): Promise<ImageAttribute | null> {
-    return prisma.imageAttribute.findUnique({
+    return await prisma.imageAttribute.findUnique({
       where: { id },
       include: { label: true },
     });
   }
 
   async findByImageId(imageId: string): Promise<ImageAttribute[]> {
-    return prisma.imageAttribute.findMany({
+    return await prisma.imageAttribute.findMany({
       where: { imageId },
       include: { label: true },
       orderBy: { createdAt: 'asc' },
@@ -30,14 +30,14 @@ implements ImageAttributeRepository {
     imageId: string,
     labelId: string,
   ): Promise<ImageAttribute | null> {
-    return prisma.imageAttribute.findUnique({
+    return await prisma.imageAttribute.findUnique({
       where: { imageId_labelId: { imageId, labelId } },
       include: { label: true },
     });
   }
 
   async create(input: CreateImageAttributeInput): Promise<ImageAttribute> {
-    return prisma.imageAttribute.create({
+    return await prisma.imageAttribute.create({
       data: {
         imageId: input.imageId,
         labelId: input.labelId,
@@ -51,7 +51,7 @@ implements ImageAttributeRepository {
     id: string,
     input: UpdateImageAttributeInput,
   ): Promise<ImageAttribute> {
-    return prisma.imageAttribute.update({
+    return await prisma.imageAttribute.update({
       where: { id },
       data: { keywords: input.keywords },
       include: { label: true },
