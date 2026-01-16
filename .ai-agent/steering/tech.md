@@ -15,6 +15,8 @@
 | ベクトル検索 | sqlite-vec | 0.1.x | SQLite 拡張で kNN 検索 |
 | 画像ストレージ | ローカルファイル | - | サーバーのディスクに保存 |
 | AI/埋め込み | @huggingface/transformers | 3.x | CLIP モデルで画像ベクトル生成 |
+| AI/キャプション | @huggingface/transformers | 3.x | ViT-GPT2 でキャプション生成 |
+| AI/翻訳 | @huggingface/transformers | 3.x | NLLB-200 で日本語翻訳 |
 | テスト | Vitest | 4.x | Vite ネイティブで高速 |
 | リンター | ESLint | 9.x | Flat Config 形式 |
 

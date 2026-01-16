@@ -80,6 +80,7 @@ picstash/
 │   │   │   │
 │   │   │   ├── infra/          # インフラ層
 │   │   │   │   ├── adapters/   # 外部アダプター実装
+│   │   │   │   ├── caption/    # キャプション生成サービス
 │   │   │   │   ├── database/   # Prisma Client、sqlite-vec
 │   │   │   │   ├── di/         # 依存性注入コンテナ
 │   │   │   │   ├── embedding/  # CLIP 埋め込みサービス
@@ -157,6 +158,7 @@ picstash/
   - **adapters/** - 外部アダプター実装
   - **database/** - Prisma Client、sqlite-vec
   - **di/** - 依存性注入コンテナ
+  - **caption/** - キャプション生成サービス（ViT-GPT2 + NLLB翻訳）
   - **embedding/** - CLIP 埋め込みサービス
   - **http/** - Fastify ルート、プラグイン
   - **storage/** - ファイルストレージ
