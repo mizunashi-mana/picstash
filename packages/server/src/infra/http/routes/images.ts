@@ -282,6 +282,70 @@ export function imageRoutes(app: FastifyInstance): void {
     },
   );
 
+  // Get similar images
+  app.get<{
+    Params: { id: string };
+    Querystring: { limit?: string };
+  }>(
+    '/api/images/:id/similar',
+    async (request, reply) => {
+      const { id } = request.params;
+      const { limit: limitStr } = request.query;
+      const limit = limitStr !== undefined ? Number.parseInt(limitStr, 10) : 10;
+
+      // Get the image with its embedding
+      const imageWithEmbedding = await imageRepository.findByIdWithEmbedding(id);
+      if (imageWithEmbedding === null) {
+        return await reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      if (imageWithEmbedding.embedding === null) {
+        return await reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Image does not have an embedding. Please wait for embedding generation.',
+        });
+      }
+
+      // Convert Uint8Array to Float32Array for similarity search
+      // The embedding is stored as bytes (Uint8Array), which is the raw buffer of Float32Array
+      const embedding = new Float32Array(
+        imageWithEmbedding.embedding.buffer,
+        imageWithEmbedding.embedding.byteOffset,
+        imageWithEmbedding.embedding.byteLength / 4,
+      );
+
+      // Find similar images, excluding the current image
+      const similarResults = embeddingRepository.findSimilar(embedding, limit, [id]);
+
+      // Get image details for each similar image
+      const similarImages = await Promise.all(
+        similarResults.map(async (result) => {
+          const image = await imageRepository.findById(result.imageId);
+          if (image === null) {
+            return null;
+          }
+          return {
+            id: image.id,
+            filename: image.filename,
+            thumbnailPath: image.thumbnailPath,
+            distance: result.distance,
+          };
+        }),
+      );
+
+      // Filter out null values (images that were deleted)
+      const validSimilarImages = similarImages.filter(img => img !== null);
+
+      return await reply.send({
+        imageId: id,
+        similarImages: validSimilarImages,
+      });
+    },
+  );
+
   // Delete image
   app.delete<{ Params: { id: string } }>(
     '/api/images/:id',
