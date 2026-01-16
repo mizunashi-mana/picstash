@@ -8,17 +8,20 @@ import {
   Textarea,
   Title,
 } from '@mantine/core';
-import { IconEdit, IconPlus } from '@tabler/icons-react';
+import { IconEdit, IconPlus, IconSparkles } from '@tabler/icons-react';
 
 export interface ImageDescriptionSectionViewProps {
   description: string | null;
   isEditing: boolean;
   editValue: string;
   isPending: boolean;
+  isGenerating: boolean;
+  generateError?: string | null;
   onStartEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
   onEditValueChange: (value: string) => void;
+  onGenerate: () => void;
 }
 
 export function ImageDescriptionSectionView({
@@ -26,10 +29,13 @@ export function ImageDescriptionSectionView({
   isEditing,
   editValue,
   isPending,
+  isGenerating,
+  generateError,
   onStartEdit,
   onCancel,
   onSave,
   onEditValueChange,
+  onGenerate,
 }: ImageDescriptionSectionViewProps) {
   const hasDescription = description !== null && description.trim() !== '';
 
@@ -60,23 +66,42 @@ export function ImageDescriptionSectionView({
                   autosize
                   minRows={3}
                   maxRows={10}
+                  disabled={isGenerating}
                 />
-                <Group justify="flex-end">
+                {generateError !== undefined && generateError !== null && (
+                  <Text size="xs" c="red">
+                    {generateError}
+                  </Text>
+                )}
+                <Group justify="space-between">
                   <Button
-                    variant="subtle"
+                    variant="light"
                     size="xs"
-                    onClick={onCancel}
+                    leftSection={<IconSparkles size={14} />}
+                    onClick={onGenerate}
+                    loading={isGenerating}
                     disabled={isPending}
                   >
-                    キャンセル
+                    AI で生成
                   </Button>
-                  <Button
-                    size="xs"
-                    onClick={onSave}
-                    loading={isPending}
-                  >
-                    保存
-                  </Button>
+                  <Group>
+                    <Button
+                      variant="subtle"
+                      size="xs"
+                      onClick={onCancel}
+                      disabled={isPending || isGenerating}
+                    >
+                      キャンセル
+                    </Button>
+                    <Button
+                      size="xs"
+                      onClick={onSave}
+                      loading={isPending}
+                      disabled={isGenerating}
+                    >
+                      保存
+                    </Button>
+                  </Group>
                 </Group>
               </Stack>
             )

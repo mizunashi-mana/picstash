@@ -11,10 +11,12 @@ import {
   SqliteVecEmbeddingRepository,
   ZipArchiveHandler,
 } from '@/infra/adapters/index.js';
+import { TransformersCaptionService } from '@/infra/caption/index.js';
 import { ClipEmbeddingService } from '@/infra/embedding/clip-embedding-service.js';
 import { TYPES } from './types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
+import type { CaptionService } from '@/application/ports/caption-service.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
@@ -70,6 +72,11 @@ container
 container
   .bind<EmbeddingRepository>(TYPES.EmbeddingRepository)
   .to(SqliteVecEmbeddingRepository)
+  .inSingletonScope();
+
+container
+  .bind<CaptionService>(TYPES.CaptionService)
+  .to(TransformersCaptionService)
   .inSingletonScope();
 
 export { container };

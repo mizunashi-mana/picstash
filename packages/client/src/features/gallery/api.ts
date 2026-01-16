@@ -129,3 +129,19 @@ export async function fetchSuggestedAttributes(
   const url = `/images/${imageId}/suggested-attributes${queryString !== '' ? `?${queryString}` : ''}`;
   return await apiClient<SuggestedAttributesResponse>(url);
 }
+
+// Generate Description API
+export interface GeneratedDescriptionResponse {
+  imageId: string;
+  description: string;
+  model: string;
+}
+
+export async function generateDescription(
+  imageId: string,
+): Promise<GeneratedDescriptionResponse> {
+  return await apiClient<GeneratedDescriptionResponse>(
+    `/images/${imageId}/generate-description`,
+    { method: 'POST', body: JSON.stringify({}) },
+  );
+}

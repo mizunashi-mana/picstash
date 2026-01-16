@@ -37,3 +37,7 @@ export type {
   SimilarityResult,
 } from './embedding-repository.js';
 export { EMBEDDING_DIMENSION } from './embedding-repository.js';
+export type {
+  CaptionResult,
+  CaptionService,
+} from './caption-service.js';

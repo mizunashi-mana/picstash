@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateImage } from '@/features/gallery/api';
+import { generateDescription, updateImage } from '@/features/gallery/api';
 import { ImageDescriptionSectionView } from './ImageDescriptionSectionView';
 
 interface ImageDescriptionSectionProps {
@@ -29,6 +29,19 @@ export function ImageDescriptionSection({
     },
   });
 
+  const generateMutation = useMutation({
+    mutationFn: async () => {
+      return await generateDescription(imageId);
+    },
+    onSuccess: (result) => {
+      setEditValue(result.description);
+    },
+    onError: (error) => {
+      // eslint-disable-next-line no-console -- Log error for debugging
+      console.error('Failed to generate description:', error);
+    },
+  });
+
   const handleStartEdit = () => {
     setEditValue(description ?? '');
     setIsEditing(true);
@@ -43,16 +56,23 @@ export function ImageDescriptionSection({
     updateMutation.mutate(editValue);
   };
 
+  const handleGenerate = () => {
+    generateMutation.mutate();
+  };
+
   return (
     <ImageDescriptionSectionView
       description={description}
       isEditing={isEditing}
       editValue={editValue}
       isPending={updateMutation.isPending}
+      isGenerating={generateMutation.isPending}
+      generateError={generateMutation.isError ? '説明の生成に失敗しました' : null}
       onStartEdit={handleStartEdit}
       onCancel={handleCancel}
       onSave={handleSave}
       onEditValueChange={setEditValue}
+      onGenerate={handleGenerate}
     />
   );
 }

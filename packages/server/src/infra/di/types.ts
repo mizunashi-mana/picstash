@@ -15,4 +15,5 @@ export const TYPES = {
   // AI/Embedding
   EmbeddingService: Symbol.for('EmbeddingService'),
   EmbeddingRepository: Symbol.for('EmbeddingRepository'),
+  CaptionService: Symbol.for('CaptionService'),
 } as const;
