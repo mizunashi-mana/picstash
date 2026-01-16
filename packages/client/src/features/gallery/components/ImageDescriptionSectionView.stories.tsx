@@ -238,3 +238,20 @@ export const GenerateInteraction: Story = {
     await expect(args.onGenerate).toHaveBeenCalled();
   },
 };
+
+export const GenerateError: Story = {
+  args: {
+    description: null,
+    isEditing: true,
+    editValue: '',
+    isPending: false,
+    isGenerating: false,
+    generateError: '説明の生成に失敗しました',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // エラーメッセージが表示されていることを確認
+    await expect(canvas.getByText('説明の生成に失敗しました')).toBeInTheDocument();
+  },
+};

@@ -120,8 +120,15 @@ export class TransformersCaptionService implements CaptionService {
       return;
     }
 
-    this.initPromise = this.loadModels();
-    await this.initPromise;
+    const initPromise = this.loadModels();
+    this.initPromise = initPromise;
+    try {
+      await initPromise;
+    }
+    finally {
+      // Clear the promise after initialization completes to free memory
+      this.initPromise = null;
+    }
   }
 
   private async loadModels(): Promise<void> {

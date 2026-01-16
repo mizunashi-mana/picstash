@@ -16,6 +16,7 @@ export interface ImageDescriptionSectionViewProps {
   editValue: string;
   isPending: boolean;
   isGenerating: boolean;
+  generateError?: string | null;
   onStartEdit: () => void;
   onCancel: () => void;
   onSave: () => void;
@@ -29,6 +30,7 @@ export function ImageDescriptionSectionView({
   editValue,
   isPending,
   isGenerating,
+  generateError,
   onStartEdit,
   onCancel,
   onSave,
@@ -66,6 +68,11 @@ export function ImageDescriptionSectionView({
                   maxRows={10}
                   disabled={isGenerating}
                 />
+                {generateError !== undefined && generateError !== null && (
+                  <Text size="xs" c="red">
+                    {generateError}
+                  </Text>
+                )}
                 <Group justify="space-between">
                   <Button
                     variant="light"

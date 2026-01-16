@@ -36,6 +36,10 @@ export function ImageDescriptionSection({
     onSuccess: (result) => {
       setEditValue(result.description);
     },
+    onError: (error) => {
+      // eslint-disable-next-line no-console -- Log error for debugging
+      console.error('Failed to generate description:', error);
+    },
   });
 
   const handleStartEdit = () => {
@@ -63,6 +67,7 @@ export function ImageDescriptionSection({
       editValue={editValue}
       isPending={updateMutation.isPending}
       isGenerating={generateMutation.isPending}
+      generateError={generateMutation.isError ? '説明の生成に失敗しました' : null}
       onStartEdit={handleStartEdit}
       onCancel={handleCancel}
       onSave={handleSave}
