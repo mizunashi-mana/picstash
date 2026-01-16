@@ -10,6 +10,8 @@ const meta = {
     onCancel: fn(),
     onSave: fn(),
     onEditValueChange: fn(),
+    onGenerate: fn(),
+    isGenerating: false,
   },
 } satisfies Meta<typeof ImageDescriptionSectionView>;
 
@@ -178,5 +180,61 @@ export const TypeDescriptionInteraction: Story = {
 
     // onEditValueChange が呼ばれていることを確認
     await expect(args.onEditValueChange).toHaveBeenCalled();
+  },
+};
+
+export const EditingWithAIButton: Story = {
+  args: {
+    description: null,
+    isEditing: true,
+    editValue: '',
+    isPending: false,
+    isGenerating: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // AI生成ボタンが表示されていることを確認
+    await expect(canvas.getByRole('button', { name: 'AI で生成' })).toBeInTheDocument();
+  },
+};
+
+export const Generating: Story = {
+  args: {
+    description: null,
+    isEditing: true,
+    editValue: '',
+    isPending: false,
+    isGenerating: true,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // テキストエリアが無効化されていることを確認
+    await expect(canvas.getByPlaceholderText('画像の説明を入力...')).toBeDisabled();
+
+    // キャンセル・保存ボタンが無効化されていることを確認
+    await expect(canvas.getByRole('button', { name: 'キャンセル' })).toBeDisabled();
+    await expect(canvas.getByRole('button', { name: '保存' })).toBeDisabled();
+  },
+};
+
+export const GenerateInteraction: Story = {
+  args: {
+    description: null,
+    isEditing: true,
+    editValue: '',
+    isPending: false,
+    isGenerating: false,
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // AI生成ボタンをクリック
+    const generateButton = canvas.getByRole('button', { name: 'AI で生成' });
+    await userEvent.click(generateButton);
+
+    // onGenerate が呼ばれていることを確認
+    await expect(args.onGenerate).toHaveBeenCalled();
   },
 };

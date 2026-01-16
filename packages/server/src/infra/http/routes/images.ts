@@ -3,6 +3,7 @@ import { access } from 'node:fs/promises';
 import { suggestAttributes } from '@/application/attribute-suggestion/suggest-attributes.js';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { container, TYPES } from '@/infra/di/index.js';
+import type { CaptionService } from '@/application/ports/caption-service.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
@@ -30,6 +31,7 @@ export function imageRoutes(app: FastifyInstance): void {
   const imageProcessor = container.get<ImageProcessor>(TYPES.ImageProcessor);
   const embeddingService = container.get<EmbeddingService>(TYPES.EmbeddingService);
   const embeddingRepository = container.get<EmbeddingRepository>(TYPES.EmbeddingRepository);
+  const captionService = container.get<CaptionService>(TYPES.CaptionService);
 
   // Upload image
   app.post('/api/images', async (request, reply) => {
@@ -237,6 +239,46 @@ export function imageRoutes(app: FastifyInstance): void {
       }
 
       return await reply.send(result);
+    },
+  );
+
+  // Generate description for image using AI
+  app.post<{ Params: { id: string } }>(
+    '/api/images/:id/generate-description',
+    async (request, reply) => {
+      const { id } = request.params;
+
+      const image = await imageRepository.findById(id);
+      if (image === null) {
+        return await reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      const absolutePath = fileStorage.getAbsolutePath(image.path);
+      if (!(await fileExists(absolutePath))) {
+        return await reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image file not found on disk',
+        });
+      }
+
+      try {
+        const result = await captionService.generateFromFile(absolutePath);
+        return await reply.send({
+          imageId: id,
+          description: result.caption,
+          model: result.model,
+        });
+      }
+      catch (error) {
+        request.log.error(error, 'Failed to generate description');
+        return await reply.status(500).send({
+          error: 'Internal Server Error',
+          message: 'Failed to generate description',
+        });
+      }
     },
   );
 
