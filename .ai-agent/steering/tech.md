@@ -183,6 +183,19 @@ npm run embedding:regenerate -w @picstash/server
 npm run embedding:status -w @picstash/server
 ```
 
+### ラベル埋め込み生成
+
+```bash
+# ラベル埋め込み未生成のラベルを処理
+npm run label:embedding:generate -w @picstash/server
+
+# 全ラベルの埋め込みを再生成
+npm run label:embedding:regenerate -w @picstash/server
+
+# ラベル埋め込み状況の確認
+npm run label:embedding:status -w @picstash/server
+```
+
 #### Prisma 7.x Driver Adapter
 
 Prisma 7.x では Driver Adapter パターンを使用：

@@ -60,7 +60,8 @@ picstash/
 │   │   │   ├── config.ts       # 設定読み込み
 │   │   │   │
 │   │   │   ├── cli/            # CLI コマンド
-│   │   │   │   └── generate-embeddings.ts # 埋め込み生成コマンド
+│   │   │   │   ├── generate-embeddings.ts       # 画像埋め込み生成コマンド
+│   │   │   │   └── generate-label-embeddings.ts # ラベル埋め込み生成コマンド
 │   │   │   │
 │   │   │   ├── domain/         # ドメイン層
 │   │   │   │   ├── archive/    # アーカイブドメインモデル
@@ -70,6 +71,7 @@ picstash/
 │   │   │   │
 │   │   │   ├── application/    # アプリケーション層
 │   │   │   │   ├── archive/    # アーカイブ処理
+│   │   │   │   ├── attribute-suggestion/ # 属性推薦
 │   │   │   │   ├── embedding/  # 埋め込み生成
 │   │   │   │   ├── image/      # 画像ユースケース
 │   │   │   │   ├── image-attribute/ # 画像属性ユースケース
