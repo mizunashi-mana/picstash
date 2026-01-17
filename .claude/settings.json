@@ -29,7 +29,8 @@
     ],
     "deny": [
       "Bash(pnpm:*)",
-      "Bash(yarn:*)"
+      "Bash(yarn:*)",
+      "Bash(pkill:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

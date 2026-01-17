@@ -1,6 +1,7 @@
 import { Container, Divider, Stack, Text, Title } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { ImageGallery } from '@/features/gallery';
+import { RecommendationSection } from '@/features/recommendations';
 import { ImageDropzone } from '@/features/upload';
 
 export function HomePage() {
@@ -22,6 +23,7 @@ export function HomePage() {
         </Stack>
         <ImageDropzone onUploadSuccess={handleUploadSuccess} />
         <Divider />
+        <RecommendationSection />
         <ImageGallery />
       </Stack>
     </Container>
