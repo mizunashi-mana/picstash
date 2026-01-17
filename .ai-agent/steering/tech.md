@@ -39,6 +39,40 @@
                                                 └─────────────────┘
 ```
 
+### DI コンテナ
+
+inversify を使用した DI コンテナで依存性を管理。`AppContainer` クラスで型安全なラッパーを提供：
+
+```typescript
+// main (index.ts)
+import { buildAppContainer } from '@/infra/di/index.js';
+
+const container = buildAppContainer();
+const app = await buildApp(container);
+
+// routes
+export function imageRoutes(app: FastifyInstance, container: AppContainer): void {
+  const imageRepository = container.getImageRepository();
+  const fileStorage = container.getFileStorage();
+  // ...
+}
+```
+
+**ファイル構成:**
+```
+packages/server/src/infra/di/
+├── index.ts           # エクスポート（buildAppContainer, AppContainer）
+├── container.ts       # createContainer() - inversify Container 設定
+├── types.ts           # TYPES 定義（内部使用）
+└── app-container.ts   # AppContainer クラス + buildAppContainer()
+```
+
+**登録サービス:**
+- ImageRepository, LabelRepository, ImageAttributeRepository
+- FileStorage, ImageProcessor
+- ArchiveHandler（複数）, ArchiveSessionManager
+- EmbeddingService, EmbeddingRepository, CaptionService
+
 ### パッケージ構成
 
 | パッケージ | 説明 | 状態 |
