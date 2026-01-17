@@ -111,7 +111,7 @@ export default buildConfig({
 
 ```bash
 # リポジトリをクローン
-git clone <repository-url>
+git clone https://github.com/mizunashi-mana/picstash
 cd picstash
 
 # 依存関係のインストール
