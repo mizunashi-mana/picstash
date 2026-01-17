@@ -2,9 +2,12 @@ import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { suggestAttributes } from '@/application/attribute-suggestion/suggest-attributes.js';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
+import {
+  EMBEDDING_DIMENSION,
+  type EmbeddingRepository,
+} from '@/application/ports/embedding-repository.js';
 import { container, TYPES } from '@/infra/di/index.js';
 import type { CaptionService } from '@/application/ports/caption-service.js';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
@@ -291,7 +294,24 @@ export function imageRoutes(app: FastifyInstance): void {
     async (request, reply) => {
       const { id } = request.params;
       const { limit: limitStr } = request.query;
-      const limit = limitStr !== undefined ? Number.parseInt(limitStr, 10) : 10;
+
+      // Validate limit parameter
+      const defaultLimit = 10;
+      const maxLimit = 100;
+      let limit: number;
+      if (limitStr === undefined) {
+        limit = defaultLimit;
+      }
+      else {
+        const parsedLimit = Number.parseInt(limitStr, 10);
+        if (Number.isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > maxLimit) {
+          return await reply.status(400).send({
+            error: 'Bad Request',
+            message: `"limit" must be an integer between 1 and ${maxLimit}.`,
+          });
+        }
+        limit = parsedLimit;
+      }
 
       // Get the image with its embedding
       const imageWithEmbedding = await imageRepository.findByIdWithEmbedding(id);
@@ -306,6 +326,18 @@ export function imageRoutes(app: FastifyInstance): void {
         return await reply.status(400).send({
           error: 'Bad Request',
           message: 'Image does not have an embedding. Please wait for embedding generation.',
+        });
+      }
+
+      // Validate embedding dimension
+      const expectedByteLength = EMBEDDING_DIMENSION * 4;
+      if (imageWithEmbedding.embedding.byteLength !== expectedByteLength) {
+        request.log.error(
+          `Embedding dimension mismatch for image ${id}: expected ${expectedByteLength} bytes, got ${imageWithEmbedding.embedding.byteLength}`,
+        );
+        return await reply.status(500).send({
+          error: 'Internal Server Error',
+          message: 'Corrupted embedding data',
         });
       }
 

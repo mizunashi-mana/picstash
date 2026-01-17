@@ -22,8 +22,8 @@ export interface SimilarImagesSectionViewProps {
 }
 
 function SimilarityScore({ distance }: { distance: number }) {
-  // Convert distance to similarity percentage (lower distance = higher similarity)
-  // Distance ranges from 0 (identical) to ~2 (very different)
+  // Distance is cosine distance between L2-normalized embeddings, which ranges
+  // from 0 (identical) to 2 (opposite), hence the normalization by 2 below.
   const similarity = Math.max(0, Math.round((1 - distance / 2) * 100));
   return (
     <Text size="xs" c="dimmed" ta="center">
@@ -54,9 +54,7 @@ export function SimilarImagesSectionView({
 
         {error !== null && (
           <Alert color="yellow" variant="light">
-            {error.message.includes('embedding')
-              ? '埋め込みが生成されていないため、類似画像を検索できません。'
-              : '類似画像の取得に失敗しました。'}
+            類似画像の取得に失敗しました。
           </Alert>
         )}
 
