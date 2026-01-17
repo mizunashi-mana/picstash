@@ -51,3 +51,25 @@ model ImageAttribute {
   @@unique([imageId, labelId])
   @@map("image_attribute")
 }
+
+model Collection {
+  id           String            @id @default(uuid())
+  name         String
+  description  String?
+  coverImageId String?           @map("cover_image_id")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  images       CollectionImage[]
+}
+
+model CollectionImage {
+  id           String     @id @default(uuid())
+  collectionId String     @map("collection_id")
+  imageId      String     @map("image_id")
+  order        Int        @default(0)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@unique([collectionId, imageId])
+  @@map("collection_image")
+}

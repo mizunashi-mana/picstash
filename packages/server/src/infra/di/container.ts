@@ -3,6 +3,7 @@ import { Container } from 'inversify';
 import {
   InMemoryArchiveSessionManager,
   LocalFileStorage,
+  PrismaCollectionRepository,
   PrismaImageAttributeRepository,
   PrismaImageRepository,
   PrismaLabelRepository,
@@ -17,6 +18,7 @@ import { TYPES } from './types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
 import type { CaptionService } from '@/application/ports/caption-service.js';
+import type { CollectionRepository } from '@/application/ports/collection-repository.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
@@ -45,6 +47,11 @@ export function createContainer(): Container {
   container
     .bind<ImageAttributeRepository>(TYPES.ImageAttributeRepository)
     .to(PrismaImageAttributeRepository)
+    .inSingletonScope();
+
+  container
+    .bind<CollectionRepository>(TYPES.CollectionRepository)
+    .to(PrismaCollectionRepository)
     .inSingletonScope();
 
   // Bind storage & processing as singletons

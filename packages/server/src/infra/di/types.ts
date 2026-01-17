@@ -3,6 +3,7 @@ export const TYPES = {
   ImageRepository: Symbol.for('ImageRepository'),
   LabelRepository: Symbol.for('LabelRepository'),
   ImageAttributeRepository: Symbol.for('ImageAttributeRepository'),
+  CollectionRepository: Symbol.for('CollectionRepository'),
 
   // Storage & Processing
   FileStorage: Symbol.for('FileStorage'),

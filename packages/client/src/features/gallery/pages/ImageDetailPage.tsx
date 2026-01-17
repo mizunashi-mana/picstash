@@ -19,6 +19,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
 import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
 import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
+import { ImageCollectionsSection } from '@/features/gallery/components/ImageCollectionsSection';
 import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
 import { SimilarImagesSection } from '@/features/gallery/components/SimilarImagesSection';
 
@@ -145,6 +146,8 @@ export function ImageDetailPage() {
         />
 
         <ImageAttributeSection imageId={image.id} />
+
+        <ImageCollectionsSection imageId={image.id} />
 
         <SimilarImagesSection imageId={image.id} />
 
