@@ -76,25 +76,17 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
   }
 
   async getImageStats(imageId: string): Promise<ImageViewStats> {
-    const [stats] = await prisma.$queryRaw<
-      Array<{
-        viewCount: bigint;
-        totalDuration: bigint | null;
-        lastViewedAt: Date | null;
-      }>
-    >`
-      SELECT
-        COUNT(*) as viewCount,
-        SUM(duration) as totalDuration,
-        MAX(viewed_at) as lastViewedAt
-      FROM view_history
-      WHERE image_id = ${imageId}
-    `;
+    const stats = await prisma.viewHistory.aggregate({
+      where: { imageId },
+      _count: { _all: true },
+      _sum: { duration: true },
+      _max: { viewedAt: true },
+    });
 
     return {
-      viewCount: Number(stats?.viewCount ?? 0),
-      totalDuration: Number(stats?.totalDuration ?? 0),
-      lastViewedAt: stats?.lastViewedAt ?? null,
+      viewCount: stats._count._all,
+      totalDuration: stats._sum.duration ?? 0,
+      lastViewedAt: stats._max.viewedAt ?? null,
     };
   }
 

@@ -67,11 +67,13 @@ export function useViewHistory(
     const handleBeforeUnload = () => {
       if (viewHistoryIdRef.current !== null && startTimeRef.current !== null) {
         const duration = Date.now() - startTimeRef.current;
-        // Use sendBeacon for reliable delivery during page unload
-        navigator.sendBeacon(
-          `/api/view-history/${viewHistoryIdRef.current}`,
-          JSON.stringify({ duration }),
-        );
+        // Use fetch with keepalive for reliable delivery during page unload
+        void fetch(`/api/view-history/${viewHistoryIdRef.current}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration }),
+          keepalive: true,
+        });
       }
     };
 

@@ -3,6 +3,7 @@ export interface ViewHistory {
   id: string;
   imageId: string;
   viewedAt: Date;
+  /** Viewing duration in milliseconds */
   duration: number | null;
   createdAt: Date;
   updatedAt: Date;
@@ -15,6 +16,7 @@ export interface CreateViewHistoryInput {
 
 /** Input for updating view history duration */
 export interface UpdateViewHistoryDurationInput {
+  /** Duration in milliseconds */
   duration: number;
 }
 
