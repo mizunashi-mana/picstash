@@ -94,10 +94,8 @@ export function searchRoutes(app: FastifyInstance, _container: AppContainer): vo
         return a.value.localeCompare(b.value, 'ja');
       });
 
-      // Limit to max suggestions
-      const limitedSuggestions = suggestions.slice(0, MAX_SUGGESTIONS);
-
-      return await reply.send({ suggestions: limitedSuggestions });
+      // Suggestions are already limited during collection
+      return await reply.send({ suggestions });
     },
   );
 }
