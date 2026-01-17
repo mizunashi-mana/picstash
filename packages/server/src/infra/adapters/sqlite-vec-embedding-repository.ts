@@ -9,6 +9,7 @@ import {
   deleteEmbedding,
   findSimilarImages,
   getEmbeddingCount,
+  getAllImageIds,
   closeVectorDb,
 } from '@/infra/database/sqlite-vec.js';
 import type { EmbeddingRepository, SimilarityResult } from '@/application/ports/embedding-repository.js';
@@ -38,6 +39,10 @@ export class SqliteVecEmbeddingRepository implements EmbeddingRepository {
 
   count(): number {
     return getEmbeddingCount();
+  }
+
+  getAllImageIds(): string[] {
+    return getAllImageIds();
   }
 
   close(): void {

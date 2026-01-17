@@ -1,6 +1,7 @@
 import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { suggestAttributes } from '@/application/attribute-suggestion/suggest-attributes.js';
+import { findDuplicates, DEFAULT_DUPLICATE_THRESHOLD } from '@/application/duplicate-detection/index.js';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
 import type { AppContainer } from '@/infra/di/index.js';
@@ -272,6 +273,39 @@ export function imageRoutes(app: FastifyInstance, container: AppContainer): void
           message: 'Failed to generate description',
         });
       }
+    },
+  );
+
+  // Get duplicate image groups
+  app.get<{
+    Querystring: { threshold?: string };
+  }>(
+    '/api/images/duplicates',
+    async (request, reply) => {
+      const { threshold: thresholdStr } = request.query;
+
+      // Validate threshold parameter
+      let threshold: number;
+      if (thresholdStr === undefined) {
+        threshold = DEFAULT_DUPLICATE_THRESHOLD;
+      }
+      else {
+        const parsedThreshold = Number.parseFloat(thresholdStr);
+        if (Number.isNaN(parsedThreshold) || parsedThreshold <= 0 || parsedThreshold > 1) {
+          return await reply.status(400).send({
+            error: 'Bad Request',
+            message: '"threshold" must be a number greater than 0 and at most 1.',
+          });
+        }
+        threshold = parsedThreshold;
+      }
+
+      const result = await findDuplicates(
+        { threshold },
+        { imageRepository, embeddingRepository },
+      );
+
+      return await reply.send(result);
     },
   );
 

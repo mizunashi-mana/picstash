@@ -49,6 +49,7 @@ function createMockEmbeddingRepository(): EmbeddingRepository {
     remove: vi.fn(),
     findSimilar: vi.fn().mockReturnValue([]),
     count: vi.fn(),
+    getAllImageIds: vi.fn().mockReturnValue([]),
     close: vi.fn(),
   };
 }
