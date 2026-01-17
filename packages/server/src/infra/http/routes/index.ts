@@ -4,6 +4,7 @@ import { healthRoutes } from '@/infra/http/routes/health.js';
 import { imageAttributeRoutes } from '@/infra/http/routes/image-attributes.js';
 import { imageRoutes } from '@/infra/http/routes/images.js';
 import { labelRoutes } from '@/infra/http/routes/labels.js';
+import { viewHistoryRoutes } from '@/infra/http/routes/view-history.js';
 import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
 
@@ -25,4 +26,7 @@ export function registerRoutes(app: FastifyInstance, container: AppContainer): v
 
   // Archive routes
   archiveRoutes(app, container);
+
+  // View history routes
+  viewHistoryRoutes(app, container);
 }

@@ -7,6 +7,7 @@ import {
   PrismaImageAttributeRepository,
   PrismaImageRepository,
   PrismaLabelRepository,
+  PrismaViewHistoryRepository,
   RarArchiveHandler,
   SharpImageProcessor,
   SqliteVecEmbeddingRepository,
@@ -26,6 +27,7 @@ import type { ImageAttributeRepository } from '@/application/ports/image-attribu
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
+import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 
 /**
  * Creates and configures a new inversify Container with all dependencies.
@@ -52,6 +54,11 @@ export function createContainer(): Container {
   container
     .bind<CollectionRepository>(TYPES.CollectionRepository)
     .to(PrismaCollectionRepository)
+    .inSingletonScope();
+
+  container
+    .bind<ViewHistoryRepository>(TYPES.ViewHistoryRepository)
+    .to(PrismaViewHistoryRepository)
     .inSingletonScope();
 
   // Bind storage & processing as singletons
