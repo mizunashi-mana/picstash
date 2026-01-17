@@ -2,11 +2,17 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config } from '@/config.js';
+import { getConfig } from '@/config.js';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(currentDir, '../../..', config.storage.path);
-const originalsPath = join(storagePath, 'originals');
+
+function getStorageBasePath(): string {
+  return resolve(currentDir, '../../..', getConfig().storage.path);
+}
+
+function getOriginalsPath(): string {
+  return join(getStorageBasePath(), 'originals');
+}
 
 export interface SaveFileResult {
   filename: string;
@@ -35,10 +41,10 @@ export async function saveOriginal(
   buffer: Buffer,
   extension: string,
 ): Promise<SaveFileResult> {
-  await ensureDirectory(originalsPath);
+  await ensureDirectory(getOriginalsPath());
 
   const filename = generateFilename(extension);
-  const filePath = join(originalsPath, filename);
+  const filePath = join(getOriginalsPath(), filename);
 
   await writeFile(filePath, buffer);
 
@@ -52,7 +58,7 @@ export async function saveOriginal(
  * Delete a file from storage
  */
 export async function deleteFile(relativePath: string): Promise<void> {
-  const filePath = join(storagePath, relativePath);
+  const filePath = join(getStorageBasePath(), relativePath);
   await unlink(filePath);
 }
 
@@ -60,12 +66,12 @@ export async function deleteFile(relativePath: string): Promise<void> {
  * Get the absolute path for a relative storage path
  */
 export function getAbsolutePath(relativePath: string): string {
-  return join(storagePath, relativePath);
+  return join(getStorageBasePath(), relativePath);
 }
 
 /**
  * Get the storage base path
  */
-export function getStoragePath(): string {
-  return storagePath;
+export function getStoragePathFunc(): string {
+  return getStorageBasePath();
 }

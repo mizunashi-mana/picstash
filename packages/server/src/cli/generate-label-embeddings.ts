@@ -6,6 +6,9 @@
  *   npm run label:embedding:generate     # Generate for all labels without embeddings
  *   npm run label:embedding:regenerate   # Regenerate all label embeddings
  *   npm run label:embedding:status       # Show embedding status
+ *
+ * Options:
+ *   --config <path>                      # Specify config file path
  */
 
 import {
@@ -13,8 +16,25 @@ import {
   regenerateAllLabelEmbeddings,
   type GenerateLabelEmbeddingDeps,
 } from '@/application/attribute-suggestion/generate-label-embeddings.js';
+import { initConfig, parseConfigArg } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
+
+/**
+ * Parse CLI arguments, extracting command and filtering out --config option.
+ */
+function parseArgs(args: string[]): { command: string; configPath: string | undefined } {
+  const configPath = parseConfigArg(args);
+  // Filter out --config and its value from args to get the command
+  const filteredArgs = args.slice(2).filter((arg, i, arr) => {
+    if (arg === '--config') return false;
+    if (i > 0 && arr[i - 1] === '--config') return false;
+    if (arg.startsWith('--config=')) return false;
+    return true;
+  });
+  const command = filteredArgs[0] ?? 'generate';
+  return { command, configPath };
+}
 
 function getDeps(): GenerateLabelEmbeddingDeps {
   const container = buildAppContainer();
@@ -25,7 +45,10 @@ function getDeps(): GenerateLabelEmbeddingDeps {
 }
 
 async function main(): Promise<void> {
-  const command = process.argv[2] ?? 'generate';
+  const { command, configPath } = parseArgs(process.argv);
+
+  // Initialize configuration
+  initConfig(configPath);
 
   console.log('Connecting to database...');
   await connectDatabase();

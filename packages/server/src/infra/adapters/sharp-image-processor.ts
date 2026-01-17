@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { injectable } from 'inversify';
 import sharp from 'sharp';
-import { config } from '@/config.js';
+import { getConfig } from '@/config.js';
 import type {
   ImageMetadata,
   ImageProcessor,
@@ -12,8 +12,14 @@ import type {
 } from '@/application/ports/image-processor.js';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(currentDir, '../../..', config.storage.path);
-const thumbnailsPath = join(storagePath, 'thumbnails');
+
+function getStoragePath(): string {
+  return resolve(currentDir, '../../..', getConfig().storage.path);
+}
+
+function getThumbnailsPath(): string {
+  return join(getStoragePath(), 'thumbnails');
+}
 
 const THUMBNAIL_SIZE = 300;
 
@@ -40,13 +46,13 @@ export class SharpImageProcessor implements ImageProcessor {
     inputFilePath: string,
     outputFilename: string,
   ): Promise<ThumbnailResult> {
-    await this.ensureDirectory(thumbnailsPath);
+    await this.ensureDirectory(getThumbnailsPath());
 
     let thumbnailFilename = outputFilename.replace(/\.[^.]+$/, '.jpg');
     if (thumbnailFilename === outputFilename) {
       thumbnailFilename = `${outputFilename}.jpg`;
     }
-    const thumbnailFilePath = join(thumbnailsPath, thumbnailFilename);
+    const thumbnailFilePath = join(getThumbnailsPath(), thumbnailFilename);
 
     await sharp(inputFilePath)
       .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {
