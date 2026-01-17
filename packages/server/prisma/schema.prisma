@@ -11,20 +11,21 @@ datasource db {
 }
 
 model Image {
-  id            String           @id @default(uuid())
+  id            String            @id @default(uuid())
   filename      String
   path          String
-  thumbnailPath String?          @map("thumbnail_path")
-  mimeType      String           @map("mime_type")
+  thumbnailPath String?           @map("thumbnail_path")
+  mimeType      String            @map("mime_type")
   size          Int
   width         Int?
   height        Int?
   description   String?
-  embedding     Bytes?           /// CLIP embedding vector (512 dimensions, Float32Array)
-  embeddedAt    DateTime?        @map("embedded_at") /// When embedding was generated
-  createdAt     DateTime         @default(now()) @map("created_at")
-  updatedAt     DateTime         @updatedAt @map("updated_at")
+  embedding     Bytes?            /// CLIP embedding vector (512 dimensions, Float32Array)
+  embeddedAt    DateTime?         @map("embedded_at") /// When embedding was generated
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
   attributes    ImageAttribute[]
+  collections   CollectionImage[]
 }
 
 model AttributeLabel {
@@ -50,4 +51,27 @@ model ImageAttribute {
 
   @@unique([imageId, labelId])
   @@map("image_attribute")
+}
+
+model Collection {
+  id           String            @id @default(uuid())
+  name         String
+  description  String?
+  coverImageId String?           @map("cover_image_id")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  images       CollectionImage[]
+}
+
+model CollectionImage {
+  id           String     @id @default(uuid())
+  collectionId String     @map("collection_id")
+  imageId      String     @map("image_id")
+  order        Int        @default(0)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  image        Image      @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  @@unique([collectionId, imageId])
+  @@map("collection_image")
 }
