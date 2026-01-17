@@ -6,6 +6,9 @@
  *   npm run label:embedding:generate     # Generate for all labels without embeddings
  *   npm run label:embedding:regenerate   # Regenerate all label embeddings
  *   npm run label:embedding:status       # Show embedding status
+ *
+ * Options:
+ *   --config <path>                      # Specify config file path
  */
 
 import {
@@ -13,6 +16,7 @@ import {
   regenerateAllLabelEmbeddings,
   type GenerateLabelEmbeddingDeps,
 } from '@/application/attribute-suggestion/generate-label-embeddings.js';
+import { initConfig, parseCliArgs } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 
@@ -25,7 +29,10 @@ function getDeps(): GenerateLabelEmbeddingDeps {
 }
 
 async function main(): Promise<void> {
-  const command = process.argv[2] ?? 'generate';
+  const { command, configPath } = parseCliArgs(process.argv);
+
+  // Initialize configuration
+  initConfig(configPath);
 
   console.log('Connecting to database...');
   await connectDatabase();

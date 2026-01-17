@@ -2,11 +2,16 @@
 // API サーバーのエントリポイント
 
 import { buildApp } from '@/app.js';
-import { config } from '@/config.js';
+import { getConfig, initConfig, parseConfigArg } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 
 async function main(): Promise<void> {
+  // Parse --config argument and initialize configuration
+  const configPath = parseConfigArg(process.argv);
+  initConfig(configPath);
+  const config = getConfig();
+
   const container = buildAppContainer();
   const app = await buildApp(container);
 

@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { injectable } from 'inversify';
-import { config } from '@/config.js';
+import { getConfig } from '@/config.js';
 import type {
   FileStorage,
   SaveFileResult,
@@ -14,8 +14,14 @@ import type {
 import type { Readable } from 'node:stream';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(currentDir, '../../..', config.storage.path);
-const originalsPath = join(storagePath, 'originals');
+
+function getStoragePath(): string {
+  return resolve(currentDir, '../../..', getConfig().storage.path);
+}
+
+function getOriginalsPath(): string {
+  return join(getStoragePath(), 'originals');
+}
 
 @injectable()
 export class LocalFileStorage implements FileStorage {
@@ -32,10 +38,10 @@ export class LocalFileStorage implements FileStorage {
     stream: Readable,
     extension: string,
   ): Promise<SaveFileResult> {
-    await this.ensureDirectory(originalsPath);
+    await this.ensureDirectory(getOriginalsPath());
 
     const filename = this.generateFilename(extension);
-    const filePath = join(originalsPath, filename);
+    const filePath = join(getOriginalsPath(), filename);
 
     const writeStream = createWriteStream(filePath);
     try {
@@ -56,11 +62,11 @@ export class LocalFileStorage implements FileStorage {
   }
 
   async deleteFile(relativePath: string): Promise<void> {
-    const filePath = join(storagePath, relativePath);
+    const filePath = join(getStoragePath(), relativePath);
     await unlink(filePath);
   }
 
   getAbsolutePath(relativePath: string): string {
-    return join(storagePath, relativePath);
+    return join(getStoragePath(), relativePath);
   }
 }

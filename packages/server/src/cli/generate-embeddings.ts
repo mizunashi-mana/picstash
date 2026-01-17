@@ -6,6 +6,10 @@
  *   npm run embedding:generate        # Generate for all images without embeddings
  *   npm run embedding:sync            # Sync embeddings from Prisma to vector DB
  *   npm run embedding:regenerate      # Regenerate all embeddings
+ *   npm run embedding:status          # Show embedding status
+ *
+ * Options:
+ *   --config <path>                   # Specify config file path
  */
 
 import {
@@ -13,6 +17,7 @@ import {
   syncEmbeddingsToVectorDb,
   type GenerateEmbeddingDeps,
 } from '@/application/embedding/generate-embedding.js';
+import { initConfig, parseCliArgs } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 
@@ -27,7 +32,10 @@ function getDeps(): GenerateEmbeddingDeps {
 }
 
 async function main(): Promise<void> {
-  const command = process.argv[2] ?? 'generate';
+  const { command, configPath } = parseCliArgs(process.argv);
+
+  // Initialize configuration
+  initConfig(configPath);
 
   console.log('Connecting to database...');
   await connectDatabase();

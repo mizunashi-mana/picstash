@@ -7,7 +7,7 @@ import { Transform } from 'node:stream';
 import { pipeline as pipelinePromise } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { injectable, multiInject } from 'inversify';
-import { config } from '@/config.js';
+import { getConfig } from '@/config.js';
 import {
   MAX_ARCHIVE_SIZE,
   filterImageEntries,
@@ -22,8 +22,14 @@ import type {
 } from '@/application/ports/archive-session-manager.js';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const storagePath = resolve(currentDir, '../../..', config.storage.path);
-const tempPath = join(storagePath, 'temp');
+
+function getStoragePath(): string {
+  return resolve(currentDir, '../../..', getConfig().storage.path);
+}
+
+function getTempPath(): string {
+  return join(getStoragePath(), 'temp');
+}
 
 function createSizeLimitedStream(maxSize: number): Transform {
   let totalSize = 0;
@@ -48,7 +54,7 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
   ) {}
 
   private async ensureTempDirectory(): Promise<void> {
-    await mkdir(tempPath, { recursive: true });
+    await mkdir(getTempPath(), { recursive: true });
   }
 
   private findHandler(
@@ -76,7 +82,7 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
 
     const sessionId = randomUUID();
     const ext = extname(filename);
-    const archivePath = join(tempPath, `${sessionId}${ext}`);
+    const archivePath = join(getTempPath(), `${sessionId}${ext}`);
 
     const writeStream = createWriteStream(archivePath);
     const sizeLimitedStream = createSizeLimitedStream(MAX_ARCHIVE_SIZE);
