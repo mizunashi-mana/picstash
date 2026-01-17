@@ -19,7 +19,7 @@ export function HomePage() {
       <Stack gap="xl">
         <Stack align="center" gap="md">
           <Title order={1}>Picstash</Title>
-          <Text c="dimmed">Your personal image library</Text>
+          <Text c="dimmed">あなたの画像ライブラリ</Text>
         </Stack>
         <ImageDropzone onUploadSuccess={handleUploadSuccess} />
         <Divider />

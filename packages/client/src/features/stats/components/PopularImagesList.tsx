@@ -34,12 +34,12 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Text fw={500} mb="md">
-        Most Viewed Images
+        よく閲覧された画像
       </Text>
       {images.length === 0
         ? (
             <Text c="dimmed" ta="center" py="xl">
-              No view data available
+              閲覧データがありません
             </Text>
           )
         : (
@@ -71,16 +71,14 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
                     <Group gap="md">
                       <Text size="xs" c="dimmed">
                         {image.viewCount}
-                        {' '}
-                        views
+                        回閲覧
                       </Text>
                       <Text size="xs" c="dimmed">
+                        合計
                         {formatDuration(image.totalDuration)}
-                        {' '}
-                        total
                       </Text>
                       <Text size="xs" c="dimmed">
-                        Last:
+                        最終:
                         {' '}
                         {formatDate(image.lastViewedAt)}
                       </Text>

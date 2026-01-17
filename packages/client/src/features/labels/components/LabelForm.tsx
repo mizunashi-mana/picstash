@@ -100,8 +100,8 @@ export function LabelForm({
     <form onSubmit={handleSubmit}>
       <Stack gap="sm">
         <TextInput
-          label="Label Name"
-          placeholder="Enter label name"
+          label="ラベル名"
+          placeholder="ラベル名を入力"
           value={name}
           onChange={(e) => { handleNameChange(e.currentTarget.value); }}
           required={mode === 'create'}
@@ -109,8 +109,8 @@ export function LabelForm({
         />
 
         <ColorInput
-          label="Color"
-          placeholder="Select a color"
+          label="カラー"
+          placeholder="色を選択"
           value={color}
           onChange={handleColorChange}
           swatches={COLOR_PALETTE}
@@ -125,7 +125,7 @@ export function LabelForm({
               onClick={onCancel}
               disabled={isSubmitting}
             >
-              Cancel
+              キャンセル
             </Button>
           )}
           <Button
@@ -133,7 +133,7 @@ export function LabelForm({
             disabled={!isValid}
             loading={isSubmitting}
           >
-            {mode === 'create' ? 'Create Label' : 'Update Label'}
+            {mode === 'create' ? 'ラベルを作成' : 'ラベルを更新'}
           </Button>
         </Group>
       </Stack>

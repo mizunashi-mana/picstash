@@ -25,12 +25,12 @@ interface AppLayoutProps {
 }
 
 const navItems = [
-  { label: 'Home', path: '/', icon: IconHome },
-  { label: 'Collections', path: '/collections', icon: IconFolder },
-  { label: 'Labels', path: '/labels', icon: IconTags },
-  { label: 'Duplicates', path: '/duplicates', icon: IconCopy },
-  { label: 'Archive', path: '/archive-import', icon: IconArchive },
-  { label: 'Stats', path: '/stats', icon: IconChartBar },
+  { label: 'ホーム', path: '/', icon: IconHome },
+  { label: 'コレクション', path: '/collections', icon: IconFolder },
+  { label: 'ラベル', path: '/labels', icon: IconTags },
+  { label: '重複検出', path: '/duplicates', icon: IconCopy },
+  { label: 'アーカイブ', path: '/archive-import', icon: IconArchive },
+  { label: '統計', path: '/stats', icon: IconChartBar },
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -57,7 +57,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <ActionIcon
               variant="subtle"
               onClick={() => { setOpened(!opened); }}
-              aria-label={opened ? 'Collapse sidebar' : 'Expand sidebar'}
+              aria-label={opened ? 'サイドバーを折りたたむ' : 'サイドバーを展開'}
             >
               {opened
                 ? (
@@ -90,7 +90,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {opened && (
             <Text size="xs" c="dimmed" ta="center" pb="xs">
-              Image Library
+              画像ライブラリ
             </Text>
           )}
         </Stack>

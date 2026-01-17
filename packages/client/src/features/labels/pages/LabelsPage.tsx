@@ -72,16 +72,16 @@ export function LabelsPage() {
     <Container size="md" py="xl">
       <Stack gap="xl">
         <Stack gap="xs">
-          <Title order={2}>Label Management</Title>
+          <Title order={2}>ラベル管理</Title>
           <Text c="dimmed">
-            Create and manage labels to organize your images
+            画像を整理するためのラベルを作成・管理します
           </Text>
         </Stack>
 
         {/* Create Form */}
         <Card padding="lg" withBorder>
           <Stack gap="md">
-            <Title order={4}>Create New Label</Title>
+            <Title order={4}>新しいラベルを作成</Title>
             <LabelForm
               mode="create"
               existingColors={existingColors}
@@ -94,18 +94,18 @@ export function LabelsPage() {
         {createMutation.isError && (
           <Alert
             icon={<IconAlertCircle size={16} />}
-            title="Error creating label"
+            title="ラベルの作成エラー"
             color="red"
           >
             {createMutation.error instanceof Error
               ? createMutation.error.message
-              : 'Failed to create label'}
+              : 'ラベルの作成に失敗しました'}
           </Alert>
         )}
 
         {/* Label List */}
         <Stack gap="sm">
-          <Title order={4}>Labels</Title>
+          <Title order={4}>ラベル一覧</Title>
 
           {isLoading && (
             <Stack align="center" py="xl">
@@ -116,10 +116,10 @@ export function LabelsPage() {
           {error && (
             <Alert
               icon={<IconAlertCircle size={16} />}
-              title="Error loading labels"
+              title="ラベルの読み込みエラー"
               color="red"
             >
-              {error instanceof Error ? error.message : 'Failed to load labels'}
+              {error instanceof Error ? error.message : 'ラベルの読み込みに失敗しました'}
             </Alert>
           )}
 

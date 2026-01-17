@@ -27,7 +27,7 @@ export function StatsOverviewCards({ stats }: StatsOverviewCardsProps) {
     <SimpleGrid cols={{ base: 2, sm: 3, lg: 5 }}>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Text size="sm" c="dimmed">
-          Total Images
+          総画像数
         </Text>
         <Text size="xl" fw={700}>
           {stats.totalImages.toLocaleString()}
@@ -36,7 +36,7 @@ export function StatsOverviewCards({ stats }: StatsOverviewCardsProps) {
 
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Text size="sm" c="dimmed">
-          Total Views
+          総閲覧数
         </Text>
         <Text size="xl" fw={700}>
           {stats.totalViews.toLocaleString()}
@@ -45,7 +45,7 @@ export function StatsOverviewCards({ stats }: StatsOverviewCardsProps) {
 
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Text size="sm" c="dimmed">
-          Total View Time
+          総閲覧時間
         </Text>
         <Text size="xl" fw={700}>
           {formatDuration(stats.totalViewDuration)}
@@ -54,7 +54,7 @@ export function StatsOverviewCards({ stats }: StatsOverviewCardsProps) {
 
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Text size="sm" c="dimmed">
-          Avg View Duration
+          平均閲覧時間
         </Text>
         <Text size="xl" fw={700}>
           {formatDuration(stats.avgViewDuration)}
@@ -63,7 +63,7 @@ export function StatsOverviewCards({ stats }: StatsOverviewCardsProps) {
 
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Text size="sm" c="dimmed">
-          Conversion Rate
+          コンバージョン率
         </Text>
         <Group gap="xs" align="baseline">
           <Text size="xl" fw={700}>

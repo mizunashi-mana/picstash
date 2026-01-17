@@ -37,15 +37,15 @@ export function ImageGalleryView({
       return (
         <Stack align="center" py="xl">
           <Loader size="lg" />
-          <Text c="dimmed">Loading images...</Text>
+          <Text c="dimmed">画像を読み込み中...</Text>
         </Stack>
       );
     }
 
     if (error) {
       return (
-        <Alert color="red" title="Error">
-          Failed to load images:
+        <Alert color="red" title="エラー">
+          画像の読み込みに失敗しました:
           {' '}
           {error.message}
         </Alert>

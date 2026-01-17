@@ -19,12 +19,12 @@ export function RecommendationTrendsChart({
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Text fw={500} mb="md">
-        Daily Recommendation Performance
+        日別レコメンド実績
       </Text>
       {data.length === 0
         ? (
             <Text c="dimmed" ta="center" py="xl">
-              No recommendation data available
+              レコメンドデータがありません
             </Text>
           )
         : (
@@ -33,8 +33,8 @@ export function RecommendationTrendsChart({
               data={chartData}
               dataKey="date"
               series={[
-                { name: 'impressions', color: 'gray.5', label: 'Impressions' },
-                { name: 'clicks', color: 'teal.6', label: 'Clicks' },
+                { name: 'impressions', color: 'gray.5', label: '表示回数' },
+                { name: 'clicks', color: 'teal.6', label: 'クリック数' },
               ]}
               withLegend
               legendProps={{ verticalAlign: 'bottom', height: 50 }}

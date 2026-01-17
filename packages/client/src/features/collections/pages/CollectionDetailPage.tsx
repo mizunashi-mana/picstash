@@ -127,8 +127,8 @@ export function CollectionDetailPage(): React.JSX.Element {
   if (error !== null || collection === undefined) {
     return (
       <Container>
-        <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
-          {error instanceof Error ? error.message : 'Collection not found'}
+        <Alert icon={<IconAlertCircle size={16} />} title="エラー" color="red">
+          {error instanceof Error ? error.message : 'コレクションが見つかりません'}
         </Alert>
       </Container>
     );
@@ -162,7 +162,7 @@ export function CollectionDetailPage(): React.JSX.Element {
                 component={Link}
                 to={`/collections/${id}/view`}
               >
-                View
+                表示
               </Button>
             )}
             <Button
@@ -170,7 +170,7 @@ export function CollectionDetailPage(): React.JSX.Element {
               leftSection={<IconEdit size={16} />}
               onClick={handleOpenEdit}
             >
-              Edit
+              編集
             </Button>
             <Button
               variant="light"
@@ -178,7 +178,7 @@ export function CollectionDetailPage(): React.JSX.Element {
               leftSection={<IconTrash size={16} />}
               onClick={() => { setDeleteModalOpen(true); }}
             >
-              Delete
+              削除
             </Button>
           </Group>
         </Group>
@@ -186,9 +186,7 @@ export function CollectionDetailPage(): React.JSX.Element {
         {/* Image count */}
         <Text c="dimmed">
           {collection.images.length}
-          {' '}
-          image
-          {collection.images.length !== 1 ? 's' : ''}
+          件の画像
         </Text>
 
         {/* Images */}
@@ -197,9 +195,9 @@ export function CollectionDetailPage(): React.JSX.Element {
               <Card padding="xl" withBorder>
                 <Stack align="center" gap="md">
                   <IconPhoto size={48} color="gray" />
-                  <Text c="dimmed">No images in this collection</Text>
+                  <Text c="dimmed">このコレクションには画像がありません</Text>
                   <Text size="sm" c="dimmed">
-                    Add images from the image detail page
+                    画像の詳細ページから追加してください
                   </Text>
                 </Stack>
               </Card>
@@ -243,19 +241,19 @@ export function CollectionDetailPage(): React.JSX.Element {
       <Modal
         opened={editModalOpen}
         onClose={() => { setEditModalOpen(false); }}
-        title="Edit Collection"
+        title="コレクションを編集"
       >
         <Stack>
           <TextInput
-            label="Name"
-            placeholder="Enter collection name"
+            label="名前"
+            placeholder="コレクション名を入力"
             value={editName}
             onChange={(e) => { setEditName(e.target.value); }}
             required
           />
           <Textarea
-            label="Description"
-            placeholder="Enter collection description (optional)"
+            label="説明"
+            placeholder="説明を入力（オプション）"
             value={editDescription}
             onChange={(e) => { setEditDescription(e.target.value); }}
             rows={3}
@@ -264,19 +262,19 @@ export function CollectionDetailPage(): React.JSX.Element {
             <Alert icon={<IconAlertCircle size={16} />} color="red">
               {updateMutation.error instanceof Error
                 ? updateMutation.error.message
-                : 'Failed to update collection'}
+                : 'コレクションの更新に失敗しました'}
             </Alert>
           )}
           <Group justify="flex-end">
             <Button variant="light" onClick={() => { setEditModalOpen(false); }}>
-              Cancel
+              キャンセル
             </Button>
             <Button
               onClick={handleUpdate}
               loading={updateMutation.isPending}
               disabled={editName.trim() === ''}
             >
-              Save
+              保存
             </Button>
           </Group>
         </Stack>
@@ -286,24 +284,24 @@ export function CollectionDetailPage(): React.JSX.Element {
       <Modal
         opened={deleteModalOpen}
         onClose={() => { setDeleteModalOpen(false); }}
-        title="Delete Collection"
+        title="コレクションを削除"
       >
         <Stack>
           <Text>
-            Are you sure you want to delete &quot;
+            「
             {collection.name}
-            &quot;? This will not delete the images themselves.
+            」を削除しますか？画像自体は削除されません。
           </Text>
           <Group justify="flex-end">
             <Button variant="light" onClick={() => { setDeleteModalOpen(false); }}>
-              Cancel
+              キャンセル
             </Button>
             <Button
               color="red"
               onClick={handleDelete}
               loading={deleteMutation.isPending}
             >
-              Delete
+              削除
             </Button>
           </Group>
         </Stack>

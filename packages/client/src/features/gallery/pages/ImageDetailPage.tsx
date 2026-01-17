@@ -82,7 +82,7 @@ export function ImageDetailPage() {
       <Container size="lg" py="xl">
         <Stack align="center" py="xl">
           <Loader size="lg" />
-          <Text c="dimmed">Loading image...</Text>
+          <Text c="dimmed">画像を読み込み中...</Text>
         </Stack>
       </Container>
     );
@@ -91,8 +91,8 @@ export function ImageDetailPage() {
   if (error) {
     return (
       <Container size="lg" py="xl">
-        <Alert color="red" title="Error">
-          Failed to load image:
+        <Alert color="red" title="エラー">
+          画像の読み込みに失敗しました:
           {' '}
           {error.message}
         </Alert>
@@ -103,8 +103,8 @@ export function ImageDetailPage() {
   if (!image) {
     return (
       <Container size="lg" py="xl">
-        <Alert color="yellow" title="Not Found">
-          Image not found
+        <Alert color="yellow" title="見つかりません">
+          画像が見つかりません
         </Alert>
       </Container>
     );

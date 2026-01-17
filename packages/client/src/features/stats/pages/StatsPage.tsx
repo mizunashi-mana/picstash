@@ -13,9 +13,9 @@ import { StatsOverviewCards } from '@/features/stats/components/StatsOverviewCar
 import { ViewTrendsChart } from '@/features/stats/components/ViewTrendsChart';
 
 const PERIOD_OPTIONS = [
-  { label: '7 Days', value: '7' },
-  { label: '30 Days', value: '30' },
-  { label: '90 Days', value: '90' },
+  { label: '7日間', value: '7' },
+  { label: '30日間', value: '30' },
+  { label: '90日間', value: '90' },
 ];
 
 export function StatsPage() {
@@ -58,7 +58,7 @@ export function StatsPage() {
     <Container size="xl" py="md">
       <Stack gap="lg">
         <Group justify="space-between" align="center">
-          <Title order={2}>Statistics Dashboard</Title>
+          <Title order={2}>統計ダッシュボード</Title>
           <SegmentedControl
             value={days}
             onChange={setDays}
@@ -67,12 +67,12 @@ export function StatsPage() {
         </Group>
 
         {hasError && (
-          <Text c="red">Failed to load statistics. Please try again.</Text>
+          <Text c="red">統計の読み込みに失敗しました。再度お試しください。</Text>
         )}
 
         {isLoading
           ? (
-              <Text c="dimmed">Loading statistics...</Text>
+              <Text c="dimmed">統計を読み込み中...</Text>
             )
           : (
               <>

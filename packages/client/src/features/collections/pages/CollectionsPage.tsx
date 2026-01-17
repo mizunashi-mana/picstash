@@ -71,14 +71,12 @@ function CollectionCard({ collection, onDelete, isDeleting }: CollectionCardProp
             {collection.name}
           </Text>
           <Text size="sm" c="dimmed" lineClamp={2}>
-            {collection.description ?? 'No description'}
+            {collection.description ?? '説明なし'}
           </Text>
           <Group justify="space-between">
             <Text size="sm" c="dimmed">
               {collection.imageCount}
-              {' '}
-              image
-              {collection.imageCount !== 1 ? 's' : ''}
+              件の画像
             </Text>
             <Button
               variant="subtle"
@@ -86,7 +84,7 @@ function CollectionCard({ collection, onDelete, isDeleting }: CollectionCardProp
               size="xs"
               onClick={() => { setDeleteModalOpen(true); }}
             >
-              Delete
+              削除
             </Button>
           </Group>
         </Stack>
@@ -95,20 +93,20 @@ function CollectionCard({ collection, onDelete, isDeleting }: CollectionCardProp
       <Modal
         opened={deleteModalOpen}
         onClose={() => { setDeleteModalOpen(false); }}
-        title="Delete Collection"
+        title="コレクションを削除"
       >
         <Stack>
           <Text>
-            Are you sure you want to delete &quot;
+            「
             {collection.name}
-            &quot;? This action cannot be undone.
+            」を削除しますか？この操作は取り消せません。
           </Text>
           <Group justify="flex-end">
             <Button variant="light" onClick={() => { setDeleteModalOpen(false); }}>
-              Cancel
+              キャンセル
             </Button>
             <Button color="red" onClick={handleDelete} loading={isDeleting}>
-              Delete
+              削除
             </Button>
           </Group>
         </Stack>
@@ -168,8 +166,8 @@ export function CollectionsPage(): React.JSX.Element {
   if (error) {
     return (
       <Container>
-        <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
-          Failed to load collections
+        <Alert icon={<IconAlertCircle size={16} />} title="エラー" color="red">
+          コレクションの読み込みに失敗しました
         </Alert>
       </Container>
     );
@@ -180,14 +178,14 @@ export function CollectionsPage(): React.JSX.Element {
       <Stack gap="lg">
         <Group justify="space-between" align="center">
           <Stack gap={4}>
-            <Title order={2}>Collections</Title>
-            <Text c="dimmed">Organize your images into collections</Text>
+            <Title order={2}>コレクション</Title>
+            <Text c="dimmed">画像をコレクションに整理します</Text>
           </Stack>
           <Button
             leftSection={<IconPlus size={16} />}
             onClick={() => { setCreateModalOpen(true); }}
           >
-            New Collection
+            新規コレクション
           </Button>
         </Group>
 
@@ -196,13 +194,13 @@ export function CollectionsPage(): React.JSX.Element {
               <Card padding="xl" withBorder>
                 <Stack align="center" gap="md">
                   <IconFolder size={48} color="gray" />
-                  <Text c="dimmed">No collections yet</Text>
+                  <Text c="dimmed">コレクションがまだありません</Text>
                   <Button
                     variant="light"
                     leftSection={<IconPlus size={16} />}
                     onClick={() => { setCreateModalOpen(true); }}
                   >
-                    Create your first collection
+                    最初のコレクションを作成
                   </Button>
                 </Stack>
               </Card>
@@ -224,19 +222,19 @@ export function CollectionsPage(): React.JSX.Element {
       <Modal
         opened={createModalOpen}
         onClose={() => { setCreateModalOpen(false); }}
-        title="Create New Collection"
+        title="新しいコレクションを作成"
       >
         <Stack>
           <TextInput
-            label="Name"
-            placeholder="Enter collection name"
+            label="名前"
+            placeholder="コレクション名を入力"
             value={newName}
             onChange={(e) => { setNewName(e.target.value); }}
             required
           />
           <Textarea
-            label="Description"
-            placeholder="Enter collection description (optional)"
+            label="説明"
+            placeholder="説明を入力（オプション）"
             value={newDescription}
             onChange={(e) => { setNewDescription(e.target.value); }}
             rows={3}
@@ -245,19 +243,19 @@ export function CollectionsPage(): React.JSX.Element {
             <Alert icon={<IconAlertCircle size={16} />} color="red">
               {createMutation.error instanceof Error
                 ? createMutation.error.message
-                : 'Failed to create collection'}
+                : 'コレクションの作成に失敗しました'}
             </Alert>
           )}
           <Group justify="flex-end">
             <Button variant="light" onClick={() => { setCreateModalOpen(false); }}>
-              Cancel
+              キャンセル
             </Button>
             <Button
               onClick={handleCreate}
               loading={createMutation.isPending}
               disabled={newName.trim() === ''}
             >
-              Create
+              作成
             </Button>
           </Group>
         </Stack>
