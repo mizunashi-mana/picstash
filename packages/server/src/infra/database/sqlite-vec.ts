@@ -208,3 +208,15 @@ export function hasEmbedding(imageId: string): boolean {
     .get(imageId);
   return result !== undefined;
 }
+
+/**
+ * Get all image IDs that have embeddings.
+ */
+export function getAllImageIds(): string[] {
+  const database = getVectorDb();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- better-sqlite3 returns unknown type
+  const results = database
+    .prepare('SELECT image_id FROM vec_images')
+    .all() as Array<{ image_id: string }>;
+  return results.map(r => r.image_id);
+}

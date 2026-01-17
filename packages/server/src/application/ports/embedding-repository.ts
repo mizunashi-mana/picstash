@@ -48,6 +48,12 @@ export interface EmbeddingRepository {
   count: () => number;
 
   /**
+   * Get all image IDs that have embeddings.
+   * @returns Array of image IDs
+   */
+  getAllImageIds: () => string[];
+
+  /**
    * Close the repository and release resources.
    */
   close: () => void;
