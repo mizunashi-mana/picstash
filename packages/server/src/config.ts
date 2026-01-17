@@ -78,3 +78,25 @@ export function parseConfigArg(args: string[]): string | undefined {
   }
   return undefined;
 }
+
+/**
+ * Parse CLI arguments, extracting command and config path.
+ * Filters out --config option from args to get the command.
+ * @param args - process.argv
+ * @param defaultCommand - Default command if none specified (default: 'generate')
+ */
+export function parseCliArgs(
+  args: string[],
+  defaultCommand = 'generate',
+): { command: string; configPath: string | undefined } {
+  const configPath = parseConfigArg(args);
+  // Filter out --config and its value from args to get the command
+  const filteredArgs = args.slice(2).filter((arg, i, arr) => {
+    if (arg === '--config') return false;
+    if (i > 0 && arr[i - 1] === '--config') return false;
+    if (arg.startsWith('--config=')) return false;
+    return true;
+  });
+  const command = filteredArgs[0] ?? defaultCommand;
+  return { command, configPath };
+}

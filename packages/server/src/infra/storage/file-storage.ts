@@ -72,6 +72,6 @@ export function getAbsolutePath(relativePath: string): string {
 /**
  * Get the storage base path
  */
-export function getStoragePathFunc(): string {
+export function getStoragePath(): string {
   return getStorageBasePath();
 }
