@@ -20,6 +20,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
 import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
 import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
+import { SimilarImagesSection } from '@/features/gallery/components/SimilarImagesSection';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -144,6 +145,8 @@ export function ImageDetailPage() {
         />
 
         <ImageAttributeSection imageId={image.id} />
+
+        <SimilarImagesSection imageId={image.id} />
 
         <Paper p="md" withBorder>
           <Stack gap="xs">

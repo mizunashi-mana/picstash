@@ -24,6 +24,10 @@
       "Bash(npm run label:embedding:status)",
       "Bash(npm run embedding:generate:*)",
       "Bash(npm run label:embedding:generate:*)"
+    ],
+    "deny": [
+      "Bash(pnpm:*)",
+      "Bash(yarn:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -145,3 +145,29 @@ export async function generateDescription(
     { method: 'POST', body: JSON.stringify({}) },
   );
 }
+
+// Similar Images API
+export interface SimilarImage {
+  id: string;
+  filename: string;
+  thumbnailPath: string | null;
+  distance: number;
+}
+
+export interface SimilarImagesResponse {
+  imageId: string;
+  similarImages: SimilarImage[];
+}
+
+export async function fetchSimilarImages(
+  imageId: string,
+  options?: { limit?: number },
+): Promise<SimilarImagesResponse> {
+  const params = new URLSearchParams();
+  if (options?.limit !== undefined) {
+    params.set('limit', options.limit.toString());
+  }
+  const queryString = params.toString();
+  const url = `/images/${imageId}/similar${queryString !== '' ? `?${queryString}` : ''}`;
+  return await apiClient<SimilarImagesResponse>(url);
+}

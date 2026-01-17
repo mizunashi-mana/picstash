@@ -2,9 +2,12 @@ import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { suggestAttributes } from '@/application/attribute-suggestion/suggest-attributes.js';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
+import {
+  EMBEDDING_DIMENSION,
+  type EmbeddingRepository,
+} from '@/application/ports/embedding-repository.js';
 import { container, TYPES } from '@/infra/di/index.js';
 import type { CaptionService } from '@/application/ports/caption-service.js';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
@@ -279,6 +282,99 @@ export function imageRoutes(app: FastifyInstance): void {
           message: 'Failed to generate description',
         });
       }
+    },
+  );
+
+  // Get similar images
+  app.get<{
+    Params: { id: string };
+    Querystring: { limit?: string };
+  }>(
+    '/api/images/:id/similar',
+    async (request, reply) => {
+      const { id } = request.params;
+      const { limit: limitStr } = request.query;
+
+      // Validate limit parameter
+      const defaultLimit = 10;
+      const maxLimit = 100;
+      let limit: number;
+      if (limitStr === undefined) {
+        limit = defaultLimit;
+      }
+      else {
+        const parsedLimit = Number.parseInt(limitStr, 10);
+        if (Number.isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > maxLimit) {
+          return await reply.status(400).send({
+            error: 'Bad Request',
+            message: `"limit" must be an integer between 1 and ${maxLimit}.`,
+          });
+        }
+        limit = parsedLimit;
+      }
+
+      // Get the image with its embedding
+      const imageWithEmbedding = await imageRepository.findByIdWithEmbedding(id);
+      if (imageWithEmbedding === null) {
+        return await reply.status(404).send({
+          error: 'Not Found',
+          message: 'Image not found',
+        });
+      }
+
+      if (imageWithEmbedding.embedding === null) {
+        return await reply.status(400).send({
+          error: 'Bad Request',
+          message: 'Image does not have an embedding. Please wait for embedding generation.',
+        });
+      }
+
+      // Validate embedding dimension
+      const expectedByteLength = EMBEDDING_DIMENSION * 4;
+      if (imageWithEmbedding.embedding.byteLength !== expectedByteLength) {
+        request.log.error(
+          `Embedding dimension mismatch for image ${id}: expected ${expectedByteLength} bytes, got ${imageWithEmbedding.embedding.byteLength}`,
+        );
+        return await reply.status(500).send({
+          error: 'Internal Server Error',
+          message: 'Corrupted embedding data',
+        });
+      }
+
+      // Convert Uint8Array to Float32Array for similarity search
+      // The embedding is stored as bytes (Uint8Array), which is the raw buffer of Float32Array
+      const embedding = new Float32Array(
+        imageWithEmbedding.embedding.buffer,
+        imageWithEmbedding.embedding.byteOffset,
+        imageWithEmbedding.embedding.byteLength / 4,
+      );
+
+      // Find similar images, excluding the current image
+      const similarResults = embeddingRepository.findSimilar(embedding, limit, [id]);
+
+      // Get image details for each similar image
+      const similarImages = await Promise.all(
+        similarResults.map(async (result) => {
+          const image = await imageRepository.findById(result.imageId);
+          if (image === null) {
+            return null;
+          }
+          return {
+            id: image.id,
+            filename: image.filename,
+            thumbnailPath: image.thumbnailPath,
+            distance: result.distance,
+          };
+        }),
+      );
+
+      // Filter out null values (images that were deleted)
+      const validSimilarImages = similarImages.filter(img => img !== null);
+
+      return await reply.send({
+        imageId: id,
+        similarImages: validSimilarImages,
+      });
     },
   );
 
