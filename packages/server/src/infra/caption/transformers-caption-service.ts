@@ -22,23 +22,36 @@ const TRANSLATION_MODEL_ID = 'Xenova/nllb-200-distilled-600M';
 /** Florence-2 task for detailed captioning */
 const FLORENCE_TASK = '<MORE_DETAILED_CAPTION>';
 
+/** Maximum number of tokens to generate for captions */
+const MAX_NEW_TOKENS = 256;
+
+/** Generated token IDs type (nested array of token IDs) */
+type GeneratedTokenIds = number[][];
+
+/** Pixel values tensor type (nested array for image data) */
+type PixelValues = number[][][];
+
 // Type for Florence-2 model
 interface Florence2Model {
   generate: (options: {
-    input_ids: unknown;
-    pixel_values: unknown;
+    input_ids: GeneratedTokenIds;
+    pixel_values: PixelValues;
     max_new_tokens: number;
-  }) => Promise<unknown>;
+  }) => Promise<GeneratedTokenIds>;
 }
 
-// Type for Florence-2 processor
+/**
+ * Type for Florence-2 processor.
+ * The processor is a callable object that preprocesses images and text,
+ * while also having methods for prompt construction, decoding, and post-processing.
+ */
 interface Florence2Processor {
   construct_prompts: (task: string) => string;
   (image: RawImageInstance, prompts: string): Promise<{
-    input_ids: unknown;
-    pixel_values: unknown;
+    input_ids: GeneratedTokenIds;
+    pixel_values: PixelValues;
   }>;
-  batch_decode: (ids: unknown, options: { skip_special_tokens: boolean }) => string[];
+  batch_decode: (ids: GeneratedTokenIds, options: { skip_special_tokens: boolean }) => string[];
   post_process_generation: (
     text: string,
     task: string,
@@ -125,7 +138,7 @@ export class TransformersCaptionService implements CaptionService {
     // Generate caption with Florence-2
     const generatedIds = await florence2Model.generate({
       ...inputs,
-      max_new_tokens: 256,
+      max_new_tokens: MAX_NEW_TOKENS,
     });
 
     // Decode generated text
@@ -194,13 +207,14 @@ export class TransformersCaptionService implements CaptionService {
     )) as unknown as TransformersModule;
 
     // Load Florence-2 model
+    // Using fp32 for maximum compatibility and accuracy. Lower precision (fp16) may cause
+    // issues on some systems and the memory savings are minimal for this model size.
     florence2Model = await transformers.Florence2ForConditionalGeneration.from_pretrained(
       CAPTION_MODEL_ID,
       { dtype: 'fp32' },
     );
 
     // Load Florence-2 processor
-
     florence2Processor = await transformers.AutoProcessor.from_pretrained(CAPTION_MODEL_ID);
 
     const captionElapsed = Date.now() - startTime;
