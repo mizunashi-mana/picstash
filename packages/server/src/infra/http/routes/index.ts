@@ -6,6 +6,7 @@ import { imageRoutes } from '@/infra/http/routes/images.js';
 import { labelRoutes } from '@/infra/http/routes/labels.js';
 import { recommendationConversionRoutes } from '@/infra/http/routes/recommendation-conversions.js';
 import { recommendationRoutes } from '@/infra/http/routes/recommendations.js';
+import { searchRoutes } from '@/infra/http/routes/search.js';
 import { statsRoutes } from '@/infra/http/routes/stats.js';
 import { viewHistoryRoutes } from '@/infra/http/routes/view-history.js';
 import type { AppContainer } from '@/infra/di/index.js';
@@ -41,4 +42,7 @@ export function registerRoutes(app: FastifyInstance, container: AppContainer): v
 
   // Stats routes
   statsRoutes(app, container);
+
+  // Search routes
+  searchRoutes(app, container);
 }
