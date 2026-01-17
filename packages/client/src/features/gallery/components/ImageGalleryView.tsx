@@ -116,7 +116,6 @@ export function ImageGalleryView({
             <SearchBar
               value={searchQuery}
               onChange={onSearchChange}
-              isLoading={isLoading}
             />
           </Box>
           {images !== undefined && images.length > 0 && (

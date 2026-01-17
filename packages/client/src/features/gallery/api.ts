@@ -171,3 +171,24 @@ export async function fetchSimilarImages(
   const url = `/images/${imageId}/similar${queryString !== '' ? `?${queryString}` : ''}`;
   return await apiClient<SimilarImagesResponse>(url);
 }
+
+// Search Suggestions API
+export interface SearchSuggestion {
+  type: 'label' | 'keyword';
+  value: string;
+}
+
+export interface SearchSuggestionsResponse {
+  suggestions: SearchSuggestion[];
+}
+
+export async function fetchSearchSuggestions(
+  query: string,
+): Promise<SearchSuggestionsResponse> {
+  if (query.trim() === '') {
+    return { suggestions: [] };
+  }
+  return await apiClient<SearchSuggestionsResponse>(
+    `/search/suggestions?q=${encodeURIComponent(query.trim())}`,
+  );
+}

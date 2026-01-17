@@ -16,7 +16,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     value: '',
-    isLoading: false,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -33,7 +32,6 @@ export const Default: Story = {
 export const WithValue: Story = {
   args: {
     value: 'サンプル検索',
-    isLoading: false,
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
@@ -47,24 +45,9 @@ export const WithValue: Story = {
   },
 };
 
-export const Loading: Story = {
-  args: {
-    value: '',
-    isLoading: true,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-
-    // 検索ボックスが無効化されていることを確認
-    const input = canvas.getByPlaceholderText('検索...');
-    await expect(input).toBeDisabled();
-  },
-};
-
 export const TypeAndClear: Story = {
   args: {
     value: '',
-    isLoading: false,
   },
   play: async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
