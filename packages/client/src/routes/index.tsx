@@ -9,6 +9,7 @@ import { DuplicatesPage } from '@/features/duplicates';
 import { ImageDetailPage } from '@/features/gallery/pages/ImageDetailPage';
 import { HomePage } from '@/features/home/pages/HomePage';
 import { LabelsPage } from '@/features/labels';
+import { StatsPage } from '@/features/stats';
 
 export function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export function AppRoutes() {
       <Route path="/collections/:id/view/:imageId" element={<CollectionViewerPage />} />
       <Route path="/duplicates" element={<DuplicatesPage />} />
       <Route path="/archive-import" element={<ArchiveImportPage />} />
+      <Route path="/stats" element={<StatsPage />} />
     </Routes>
   );
 }

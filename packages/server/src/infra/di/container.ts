@@ -8,6 +8,7 @@ import {
   PrismaImageRepository,
   PrismaLabelRepository,
   PrismaRecommendationConversionRepository,
+  PrismaStatsRepository,
   PrismaViewHistoryRepository,
   RarArchiveHandler,
   SharpImageProcessor,
@@ -29,6 +30,7 @@ import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
+import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 
 /**
@@ -68,6 +70,11 @@ export function createContainer(): Container {
       TYPES.RecommendationConversionRepository,
     )
     .to(PrismaRecommendationConversionRepository)
+    .inSingletonScope();
+
+  container
+    .bind<StatsRepository>(TYPES.StatsRepository)
+    .to(PrismaStatsRepository)
     .inSingletonScope();
 
   // Bind storage & processing as singletons

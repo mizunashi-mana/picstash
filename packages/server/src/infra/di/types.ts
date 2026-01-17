@@ -8,6 +8,7 @@ export const TYPES = {
   RecommendationConversionRepository: Symbol.for(
     'RecommendationConversionRepository',
   ),
+  StatsRepository: Symbol.for('StatsRepository'),
 
   // Storage & Processing
   FileStorage: Symbol.for('FileStorage'),
