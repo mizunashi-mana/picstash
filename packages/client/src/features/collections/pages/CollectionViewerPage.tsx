@@ -61,16 +61,27 @@ export function CollectionViewerPage(): React.JSX.Element {
   const canGoNext = collection !== undefined && currentIndex < collection.images.length - 1;
 
   const goToPrev = useCallback(() => {
-    if (canGoPrev) {
-      setCurrentIndex(prev => prev - 1);
+    if (canGoPrev && collection !== undefined) {
+      const newIndex = currentIndex - 1;
+      const newImageId = collection.images[newIndex]?.imageId;
+      setCurrentIndex(newIndex);
+      if (newImageId !== undefined) {
+        void navigate(`/collections/${id}/view/${newImageId}`, { replace: true });
+      }
     }
-  }, [canGoPrev]);
+  }, [canGoPrev, collection, currentIndex, id, navigate]);
 
   const goToNext = useCallback(() => {
+    // canGoNext guarantees collection is defined
     if (canGoNext) {
-      setCurrentIndex(prev => prev + 1);
+      const newIndex = currentIndex + 1;
+      const newImageId = collection.images[newIndex]?.imageId;
+      setCurrentIndex(newIndex);
+      if (newImageId !== undefined) {
+        void navigate(`/collections/${id}/view/${newImageId}`, { replace: true });
+      }
     }
-  }, [canGoNext]);
+  }, [canGoNext, collection, currentIndex, id, navigate]);
 
   const handleClose = useCallback(() => {
     void navigate(`/collections/${id}`);
@@ -81,9 +92,11 @@ export function CollectionViewerPage(): React.JSX.Element {
     const handleKeyDown = (e: KeyboardEvent): void => {
       switch (e.key) {
         case 'ArrowLeft':
+          e.preventDefault();
           goToPrev();
           break;
         case 'ArrowRight':
+          e.preventDefault();
           goToNext();
           break;
         case 'Escape':
@@ -205,9 +218,10 @@ export function CollectionViewerPage(): React.JSX.Element {
           {currentImage !== null && (
             <Image
               src={getImageUrl(currentImage.imageId)}
-              alt={currentImage.filename}
+              alt={`Image ${currentIndex + 1} of ${collection.images.length}: ${currentImage.filename}`}
               fit="contain"
               style={{ maxHeight: '100%', maxWidth: '100%' }}
+              fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23333' width='100' height='100'/%3E%3C/svg%3E"
             />
           )}
         </Center>
