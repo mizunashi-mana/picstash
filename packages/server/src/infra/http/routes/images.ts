@@ -294,7 +294,7 @@ export function imageRoutes(app: FastifyInstance, container: AppContainer): void
         if (Number.isNaN(parsedThreshold) || parsedThreshold <= 0 || parsedThreshold > 1) {
           return await reply.status(400).send({
             error: 'Bad Request',
-            message: '"threshold" must be a number between 0 and 1.',
+            message: '"threshold" must be a number greater than 0 and at most 1.',
           });
         }
         threshold = parsedThreshold;

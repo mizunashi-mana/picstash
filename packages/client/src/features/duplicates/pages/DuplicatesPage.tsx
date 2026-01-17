@@ -17,10 +17,16 @@ import { deleteDuplicateImage, fetchDuplicates } from '@/features/duplicates/api
 import { DuplicateGroupCard } from '@/features/duplicates/components/DuplicateGroupCard';
 import type { DuplicateGroup } from '@/features/duplicates/api';
 
+interface DeleteResult {
+  successIds: string[];
+  failedIds: string[];
+}
+
 export function DuplicatesPage(): React.JSX.Element {
   const [threshold, setThreshold] = useState(0.1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
@@ -29,15 +35,46 @@ export function DuplicatesPage(): React.JSX.Element {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (imageIds: string[]) => {
-      const deletePromises = imageIds.map(async (id) => {
-        await deleteDuplicateImage(id);
+    mutationFn: async (imageIds: string[]): Promise<DeleteResult> => {
+      const results = await Promise.allSettled(
+        imageIds.map(async id => await deleteDuplicateImage(id).then(() => id)),
+      );
+
+      const successIds: string[] = [];
+      const failedIds: string[] = [];
+
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          successIds.push(result.value);
+        }
+        else {
+          failedIds.push(imageIds[index] ?? '');
+        }
       });
-      await Promise.all(deletePromises);
+
+      return { successIds, failedIds };
     },
-    onSuccess: async () => {
-      setSelectedIds(new Set());
+    onSuccess: async (result) => {
+      // Remove only successfully deleted IDs from selection
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const id of result.successIds) {
+          next.delete(id);
+        }
+        return next;
+      });
+
       setDeleteModalOpen(false);
+
+      if (result.failedIds.length > 0) {
+        setDeleteError(
+          `Failed to delete ${result.failedIds.length.toString()} image(s). Successfully deleted ${result.successIds.length.toString()}.`,
+        );
+      }
+      else {
+        setDeleteError(null);
+      }
+
       await queryClient.invalidateQueries({ queryKey: ['duplicates'] });
       await queryClient.invalidateQueries({ queryKey: ['images'] });
     },
@@ -129,6 +166,17 @@ export function DuplicatesPage(): React.JSX.Element {
             </Stack>
           </Group>
         </Group>
+
+        {deleteError !== null && (
+          <Alert
+            color="orange"
+            title="Partial Delete"
+            withCloseButton
+            onClose={() => { setDeleteError(null); }}
+          >
+            {deleteError}
+          </Alert>
+        )}
 
         {data !== undefined && data.totalGroups > 0 && (
           <Group justify="space-between">

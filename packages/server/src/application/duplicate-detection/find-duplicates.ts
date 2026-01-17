@@ -241,7 +241,7 @@ export async function findDuplicates(
       const distanceKey = makeDistanceKey(original.id, dup.id);
       return {
         ...dup,
-        distance: distances.get(distanceKey) ?? 0,
+        distance: distances.get(distanceKey),
       };
     });
 
