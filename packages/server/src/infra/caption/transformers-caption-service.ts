@@ -1,8 +1,8 @@
 /**
  * Caption Service using @huggingface/transformers
  *
- * Uses the ViT-GPT2 model to generate image captions,
- * then translates to Japanese using opus-mt-en-jap.
+ * Uses the Florence-2 model to generate detailed image captions,
+ * then translates to Japanese using NLLB-200.
  */
 
 import 'reflect-metadata';
@@ -13,18 +13,54 @@ import type {
   CaptionService,
 } from '@/application/ports/caption-service.js';
 
-/** Caption model identifier */
-const CAPTION_MODEL_ID = 'Xenova/vit-gpt2-image-captioning';
+/** Caption model identifier (Florence-2 for detailed captioning) */
+const CAPTION_MODEL_ID = 'onnx-community/Florence-2-base-ft';
 
 /** Translation model identifier (NLLB multilingual model) */
 const TRANSLATION_MODEL_ID = 'Xenova/nllb-200-distilled-600M';
 
+/** Florence-2 task for detailed captioning */
+const FLORENCE_TASK = '<MORE_DETAILED_CAPTION>';
+
+// Type for Florence-2 model
+interface Florence2Model {
+  generate: (options: {
+    input_ids: unknown;
+    pixel_values: unknown;
+    max_new_tokens: number;
+  }) => Promise<unknown>;
+}
+
+// Type for Florence-2 processor
+interface Florence2Processor {
+  construct_prompts: (task: string) => string;
+  (image: RawImageInstance, prompts: string): Promise<{
+    input_ids: unknown;
+    pixel_values: unknown;
+  }>;
+  batch_decode: (ids: unknown, options: { skip_special_tokens: boolean }) => string[];
+  post_process_generation: (
+    text: string,
+    task: string,
+    imageSize: { width: number; height: number },
+  ) => Record<string, string>;
+}
+
 // Type for the transformers module
 interface TransformersModule {
+  Florence2ForConditionalGeneration: {
+    from_pretrained: (
+      model: string,
+      options: { dtype: string },
+    ) => Promise<Florence2Model>;
+  };
+  AutoProcessor: {
+    from_pretrained: (model: string) => Promise<Florence2Processor>;
+  };
   pipeline: (
     task: string,
     model: string,
-  ) => Promise<ImageToTextPipeline | TranslationPipeline>;
+  ) => Promise<TranslationPipeline>;
   RawImage: {
     // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in Node.js 18+
     fromBlob: (blob: Blob) => Promise<RawImageInstance>;
@@ -39,10 +75,6 @@ interface RawImageInstance {
 }
 
 // Pipeline result types
-interface ImageToTextResult {
-  generated_text: string;
-}
-
 interface TranslationResult {
   translation_text: string;
 }
@@ -54,12 +86,12 @@ interface TranslationOptions {
 }
 
 // Pipeline function types
-type ImageToTextPipeline = (image: RawImageInstance) => Promise<ImageToTextResult[]>;
 type TranslationPipeline = (text: string, options: TranslationOptions) => Promise<TranslationResult[]>;
 
-// Module and pipeline instances (lazy loaded)
+// Module and model instances (lazy loaded)
 let transformers: TransformersModule | null = null;
-let captionPipeline: ImageToTextPipeline | null = null;
+let florence2Model: Florence2Model | null = null;
+let florence2Processor: Florence2Processor | null = null;
 let translationPipeline: TranslationPipeline | null = null;
 
 @injectable()
@@ -76,7 +108,7 @@ export class TransformersCaptionService implements CaptionService {
   async generateFromBuffer(imageData: Buffer): Promise<CaptionResult> {
     await this.initialize();
 
-    if (transformers === null || captionPipeline === null || translationPipeline === null) {
+    if (transformers === null || florence2Model === null || florence2Processor === null || translationPipeline === null) {
       throw new Error('Caption model not initialized');
     }
 
@@ -84,9 +116,28 @@ export class TransformersCaptionService implements CaptionService {
     // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in Node.js 18+
     const image = await transformers.RawImage.fromBlob(new Blob([imageData]));
 
-    // Generate English caption
-    const captionResults = await captionPipeline(image);
-    const englishCaption = captionResults[0]?.generated_text ?? '';
+    // Construct prompts for Florence-2
+    const prompts = florence2Processor.construct_prompts(FLORENCE_TASK);
+
+    // Pre-process the image and text inputs
+    const inputs = await florence2Processor(image, prompts);
+
+    // Generate caption with Florence-2
+    const generatedIds = await florence2Model.generate({
+      ...inputs,
+      max_new_tokens: 256,
+    });
+
+    // Decode generated text
+    const generatedText = florence2Processor.batch_decode(generatedIds, { skip_special_tokens: false })[0] ?? '';
+
+    // Post-process the generated text
+    const result = florence2Processor.post_process_generation(
+      generatedText,
+      FLORENCE_TASK,
+      { width: image.width, height: image.height },
+    );
+    const englishCaption = result[FLORENCE_TASK] ?? '';
 
     // Translate to Japanese using NLLB model
     const translationResults = await translationPipeline(englishCaption, {
@@ -106,7 +157,7 @@ export class TransformersCaptionService implements CaptionService {
   }
 
   isReady(): boolean {
-    return captionPipeline !== null && translationPipeline !== null;
+    return florence2Model !== null && florence2Processor !== null && translationPipeline !== null;
   }
 
   async initialize(): Promise<void> {
@@ -142,12 +193,15 @@ export class TransformersCaptionService implements CaptionService {
       '@huggingface/transformers',
     )) as unknown as TransformersModule;
 
-    // Load the image-to-text pipeline
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Pipeline type depends on task
-    captionPipeline = await transformers.pipeline(
-      'image-to-text',
+    // Load Florence-2 model
+    florence2Model = await transformers.Florence2ForConditionalGeneration.from_pretrained(
       CAPTION_MODEL_ID,
-    ) as ImageToTextPipeline;
+      { dtype: 'fp32' },
+    );
+
+    // Load Florence-2 processor
+
+    florence2Processor = await transformers.AutoProcessor.from_pretrained(CAPTION_MODEL_ID);
 
     const captionElapsed = Date.now() - startTime;
     // eslint-disable-next-line no-console -- Model loading status
@@ -158,11 +212,10 @@ export class TransformersCaptionService implements CaptionService {
     console.log(`Loading translation model: ${TRANSLATION_MODEL_ID}...`);
     const translationStartTime = Date.now();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Pipeline type depends on task
     translationPipeline = await transformers.pipeline(
       'translation',
       TRANSLATION_MODEL_ID,
-    ) as TranslationPipeline;
+    );
 
     const translationElapsed = Date.now() - translationStartTime;
     // eslint-disable-next-line no-console -- Model loading status
