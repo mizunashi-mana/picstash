@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { injectable } from 'inversify';
+import { isEmptyQuery, parseSearchQuery } from '@/application/search/query-parser.js';
 import { prisma } from '@/infra/database/prisma.js';
 import type {
   CreateImageInput,
@@ -9,6 +10,7 @@ import type {
   UpdateEmbeddingInput,
   UpdateImageInput,
 } from '@/application/ports/image-repository.js';
+import type { Prisma } from '@~generated/prisma/client.js';
 
 @injectable()
 export class PrismaImageRepository implements ImageRepository {
@@ -31,25 +33,73 @@ export class PrismaImageRepository implements ImageRepository {
   }
 
   async search(query: string): Promise<Image[]> {
+    const parsedQuery = parseSearchQuery(query);
+
+    // If query is empty, return all images
+    if (isEmptyQuery(parsedQuery)) {
+      return await this.findAll();
+    }
+
+    // Build WHERE clause for multi-condition search
+    const where = this.buildSearchWhere(parsedQuery);
+
     return await prisma.image.findMany({
-      where: {
-        OR: [
-          { filename: { contains: query } },
-          { description: { contains: query } },
-          {
-            attributes: {
-              some: {
-                OR: [
-                  { keywords: { contains: query } },
-                  { label: { name: { contains: query } } },
-                ],
-              },
-            },
-          },
-        ],
-      },
+      where,
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  /**
+   * Build Prisma WHERE clause for a single search term.
+   * Matches if term is found in filename, description, keywords, or label name.
+   */
+  private buildTermCondition(term: string): Prisma.ImageWhereInput {
+    return {
+      OR: [
+        { filename: { contains: term } },
+        { description: { contains: term } },
+        {
+          attributes: {
+            some: {
+              OR: [
+                { keywords: { contains: term } },
+                { label: { name: { contains: term } } },
+              ],
+            },
+          },
+        },
+      ],
+    };
+  }
+
+  /**
+   * Build Prisma WHERE clause from parsed SearchQuery.
+   * Structure: OR of AND groups, where each AND group contains multiple terms.
+   */
+  private buildSearchWhere(parsedQuery: ReturnType<typeof parseSearchQuery>): Prisma.ImageWhereInput {
+    // Each AND group: all terms must match
+    const orConditions = parsedQuery.map((andGroup) => {
+      if (andGroup.length === 1) {
+        // Single term - no need for AND wrapper
+        // Non-null assertion is safe: andGroup.length === 1 guarantees andGroup[0] exists
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Length check guarantees element exists
+        return this.buildTermCondition(andGroup[0]!);
+      }
+      // Multiple terms - wrap in AND
+      return {
+        AND: andGroup.map(term => this.buildTermCondition(term)),
+      };
+    });
+
+    // If only one OR group, return it directly
+    if (orConditions.length === 1) {
+      // Non-null assertion is safe: orConditions.length === 1 guarantees orConditions[0] exists
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Length check guarantees element exists
+      return orConditions[0]!;
+    }
+
+    // Multiple OR groups - wrap in OR
+    return { OR: orConditions };
   }
 
   async updateById(id: string, input: UpdateImageInput): Promise<Image> {
