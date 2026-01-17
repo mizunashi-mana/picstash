@@ -51,8 +51,8 @@ export const Default: Story = {
     await expect(canvas.getByText('風景')).toBeInTheDocument();
 
     // 編集・削除ボタンが表示されていることを確認
-    await expect(canvas.getAllByRole('button', { name: /Edit/ })).toHaveLength(3);
-    await expect(canvas.getAllByRole('button', { name: /Delete/ })).toHaveLength(3);
+    await expect(canvas.getAllByRole('button', { name: /を編集/ })).toHaveLength(3);
+    await expect(canvas.getAllByRole('button', { name: /を削除/ })).toHaveLength(3);
   },
 };
 
@@ -64,7 +64,7 @@ export const Empty: Story = {
     const canvas = within(canvasElement);
 
     // 空状態のメッセージが表示されていることを確認
-    await expect(canvas.getByText('No labels yet. Create one above!')).toBeInTheDocument();
+    await expect(canvas.getByText('ラベルがまだありません。上のフォームで作成してください。')).toBeInTheDocument();
   },
 };
 
@@ -89,7 +89,7 @@ export const OpenEditModal: Story = {
     const canvas = within(canvasElement);
 
     // 編集ボタンをクリック
-    const editButtons = canvas.getAllByRole('button', { name: /Edit/ });
+    const editButtons = canvas.getAllByRole('button', { name: /を編集/ });
     const firstEditButton = editButtons[0];
     if (firstEditButton !== undefined) {
       await userEvent.click(firstEditButton);
@@ -98,7 +98,7 @@ export const OpenEditModal: Story = {
     // モーダルが開いていることを確認（ドキュメント全体を検索）
     const modal = within(document.body);
     await waitFor(async () => {
-      await expect(modal.getByText('Edit Label')).toBeInTheDocument();
+      await expect(modal.getByText('ラベルを編集')).toBeInTheDocument();
     });
   },
 };
@@ -111,7 +111,7 @@ export const OpenDeleteModal: Story = {
     const canvas = within(canvasElement);
 
     // 削除ボタンをクリック
-    const deleteButtons = canvas.getAllByRole('button', { name: /Delete/ });
+    const deleteButtons = canvas.getAllByRole('button', { name: /を削除/ });
     const firstDeleteButton = deleteButtons[0];
     if (firstDeleteButton !== undefined) {
       await userEvent.click(firstDeleteButton);
@@ -120,7 +120,7 @@ export const OpenDeleteModal: Story = {
     // 削除確認モーダルが開いていることを確認（ドキュメント全体を検索）
     const modal = within(document.body);
     await waitFor(async () => {
-      await expect(modal.getByText('Are you sure you want to delete this label?')).toBeInTheDocument();
+      await expect(modal.getByText('このラベルを削除しますか？')).toBeInTheDocument();
     });
   },
 };

@@ -60,7 +60,7 @@ export function LabelList({
   if (labels.length === 0) {
     return (
       <Text c="dimmed" ta="center" py="xl">
-        No labels yet. Create one above!
+        ラベルがまだありません。上のフォームで作成してください。
       </Text>
     );
   }
@@ -77,7 +77,7 @@ export function LabelList({
                   variant="subtle"
                   color="gray"
                   onClick={() => { setEditingLabel(label); }}
-                  aria-label={`Edit ${label.name}`}
+                  aria-label={`${label.name}を編集`}
                 >
                   <IconEdit size={18} />
                 </ActionIcon>
@@ -85,7 +85,7 @@ export function LabelList({
                   variant="subtle"
                   color="red"
                   onClick={() => { setDeletingLabelId(label.id); }}
-                  aria-label={`Delete ${label.name}`}
+                  aria-label={`${label.name}を削除`}
                 >
                   <IconTrash size={18} />
                 </ActionIcon>
@@ -99,7 +99,7 @@ export function LabelList({
       <Modal
         opened={editingLabel !== null}
         onClose={() => { setEditingLabel(null); }}
-        title="Edit Label"
+        title="ラベルを編集"
       >
         {editingLabel && (
           <LabelForm
@@ -117,17 +117,17 @@ export function LabelList({
       <Modal
         opened={deletingLabelId !== null}
         onClose={() => { setDeletingLabelId(null); }}
-        title="Delete Label"
+        title="ラベルを削除"
       >
         <Stack>
-          <Text>Are you sure you want to delete this label?</Text>
+          <Text>このラベルを削除しますか？</Text>
           <Group justify="flex-end">
             <Button
               variant="subtle"
               onClick={() => { setDeletingLabelId(null); }}
               disabled={isDeleting}
             >
-              Cancel
+              キャンセル
             </Button>
             <ActionIcon
               variant="filled"
@@ -135,7 +135,7 @@ export function LabelList({
               size="lg"
               onClick={handleDelete}
               loading={isDeleting}
-              aria-label="Confirm delete"
+              aria-label="削除を確定"
             >
               <IconTrash size={18} />
             </ActionIcon>

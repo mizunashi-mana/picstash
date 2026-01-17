@@ -30,9 +30,9 @@ export const CreateMode: Story = {
     const canvas = within(canvasElement);
 
     // フォームが表示されていることを確認
-    await expect(canvas.getByLabelText(/Label Name/i)).toBeInTheDocument();
-    await expect(canvas.getByLabelText(/Color/i)).toBeInTheDocument();
-    await expect(canvas.getByRole('button', { name: 'Create Label' })).toBeInTheDocument();
+    await expect(canvas.getByRole('textbox', { name: /ラベル名/ })).toBeInTheDocument();
+    await expect(canvas.getByLabelText('カラー')).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'ラベルを作成' })).toBeInTheDocument();
   },
 };
 
@@ -45,8 +45,8 @@ export const EditMode: Story = {
     const canvas = within(canvasElement);
 
     // 既存の値が入力されていることを確認
-    await expect(canvas.getByLabelText(/Label Name/i)).toHaveValue('キャラクター');
-    await expect(canvas.getByRole('button', { name: 'Update Label' })).toBeInTheDocument();
+    await expect(canvas.getByLabelText('ラベル名')).toHaveValue('キャラクター');
+    await expect(canvas.getByRole('button', { name: 'ラベルを更新' })).toBeInTheDocument();
   },
 };
 
@@ -59,7 +59,7 @@ export const WithExistingColors: Story = {
     const canvas = within(canvasElement);
 
     // フォームが表示されていることを確認
-    await expect(canvas.getByLabelText(/Label Name/i)).toBeInTheDocument();
+    await expect(canvas.getByRole('textbox', { name: /ラベル名/ })).toBeInTheDocument();
   },
 };
 
@@ -72,7 +72,7 @@ export const Submitting: Story = {
     const canvas = within(canvasElement);
 
     // フォームが無効化されていることを確認
-    await expect(canvas.getByLabelText(/Label Name/i)).toBeDisabled();
+    await expect(canvas.getByRole('textbox', { name: /ラベル名/ })).toBeDisabled();
   },
 };
 
@@ -84,14 +84,14 @@ export const CreateLabelInteraction: Story = {
     const canvas = within(canvasElement);
 
     // 名前を入力
-    const nameInput = canvas.getByLabelText(/Label Name/i);
+    const nameInput = canvas.getByRole('textbox', { name: /ラベル名/ });
     await userEvent.type(nameInput, '新しいラベル');
 
     // 名前が入力されていることを確認
     await expect(nameInput).toHaveValue('新しいラベル');
 
     // フォームを送信
-    const submitButton = canvas.getByRole('button', { name: 'Create Label' });
+    const submitButton = canvas.getByRole('button', { name: 'ラベルを作成' });
     await userEvent.click(submitButton);
 
     // onSubmit が呼ばれていることを確認
@@ -108,7 +108,7 @@ export const CancelInteraction: Story = {
     const canvas = within(canvasElement);
 
     // キャンセルボタンをクリック
-    const cancelButton = canvas.getByRole('button', { name: 'Cancel' });
+    const cancelButton = canvas.getByRole('button', { name: 'キャンセル' });
     await userEvent.click(cancelButton);
 
     // onCancel が呼ばれていることを確認
@@ -124,7 +124,7 @@ export const ValidationDisabledWhenEmpty: Story = {
     const canvas = within(canvasElement);
 
     // 名前が空の場合、送信ボタンが無効化されていることを確認
-    const submitButton = canvas.getByRole('button', { name: 'Create Label' });
+    const submitButton = canvas.getByRole('button', { name: 'ラベルを作成' });
     await expect(submitButton).toBeDisabled();
   },
 };

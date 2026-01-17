@@ -130,8 +130,8 @@ export function DuplicatesPage(): React.JSX.Element {
   if (error) {
     return (
       <Container>
-        <Alert color="red" title="Error">
-          Failed to load duplicate images
+        <Alert color="red" title="エラー">
+          重複画像の読み込みに失敗しました
         </Alert>
       </Container>
     );
@@ -141,11 +141,11 @@ export function DuplicatesPage(): React.JSX.Element {
     <Container size="xl" py="md">
       <Stack gap="lg">
         <Group justify="space-between" align="flex-end">
-          <Title order={2}>Duplicate Images</Title>
+          <Title order={2}>重複画像</Title>
           <Group>
             <Stack gap={4}>
               <Text size="sm" c="dimmed">
-                Similarity Threshold:
+                類似度しきい値:
                 {' '}
                 {(threshold * 100).toFixed(0)}
                 %
@@ -170,7 +170,7 @@ export function DuplicatesPage(): React.JSX.Element {
         {deleteError !== null && (
           <Alert
             color="orange"
-            title="Partial Delete"
+            title="一部削除失敗"
             withCloseButton
             onClose={() => { setDeleteError(null); }}
           >
@@ -181,27 +181,16 @@ export function DuplicatesPage(): React.JSX.Element {
         {data !== undefined && data.totalGroups > 0 && (
           <Group justify="space-between">
             <Text c="dimmed">
-              Found
-              {' '}
               {data.totalGroups}
-              {' '}
-              group
-              {data.totalGroups !== 1 ? 's' : ''}
-              {' '}
-              with
-              {' '}
+              グループ、
               {data.totalDuplicates}
-              {' '}
-              duplicate
-              {data.totalDuplicates !== 1 ? 's' : ''}
+              件の重複が見つかりました
             </Text>
             {selectedIds.size > 0 && (
               <Button color="red" onClick={handleDeleteSelected}>
-                Delete
-                {' '}
+                選択した
                 {selectedIds.size}
-                {' '}
-                selected
+                件を削除
               </Button>
             )}
           </Group>
@@ -209,9 +198,9 @@ export function DuplicatesPage(): React.JSX.Element {
 
         {data?.totalGroups === 0
           ? (
-              <Alert color="green" title="No Duplicates Found">
-                No duplicate images were found in your library with the current threshold.
-                Try increasing the threshold to find more similar images.
+              <Alert color="green" title="重複なし">
+                現在のしきい値では重複画像が見つかりませんでした。
+                しきい値を上げると、より類似した画像が見つかる可能性があります。
               </Alert>
             )
           : (
@@ -232,29 +221,23 @@ export function DuplicatesPage(): React.JSX.Element {
       <Modal
         opened={deleteModalOpen}
         onClose={() => { setDeleteModalOpen(false); }}
-        title="Confirm Delete"
+        title="削除の確認"
       >
         <Stack>
           <Text>
-            Are you sure you want to delete
-            {' '}
             {selectedIds.size}
-            {' '}
-            image
-            {selectedIds.size !== 1 ? 's' : ''}
-            ?
-            This action cannot be undone.
+            件の画像を削除しますか？この操作は取り消せません。
           </Text>
           <Group justify="flex-end">
             <Button variant="light" onClick={() => { setDeleteModalOpen(false); }}>
-              Cancel
+              キャンセル
             </Button>
             <Button
               color="red"
               onClick={confirmDelete}
               loading={deleteMutation.isPending}
             >
-              Delete
+              削除
             </Button>
           </Group>
         </Stack>

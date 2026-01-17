@@ -122,8 +122,8 @@ export function CollectionViewerPage(): React.JSX.Element {
   if (error !== null || collection === undefined) {
     return (
       <Center h="100vh">
-        <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red">
-          {error instanceof Error ? error.message : 'Collection not found'}
+        <Alert icon={<IconAlertCircle size={16} />} title="エラー" color="red">
+          {error instanceof Error ? error.message : 'コレクションが見つかりません'}
         </Alert>
       </Center>
     );
@@ -133,7 +133,7 @@ export function CollectionViewerPage(): React.JSX.Element {
     return (
       <Center h="100vh">
         <Stack align="center" gap="md">
-          <Text c="dimmed">No images in this collection</Text>
+          <Text c="dimmed">このコレクションには画像がありません</Text>
           <ActionIcon
             variant="light"
             size="lg"
@@ -166,7 +166,7 @@ export function CollectionViewerPage(): React.JSX.Element {
             size="lg"
             component={Link}
             to={`/collections/${id}`}
-            aria-label="Back to collection"
+            aria-label="コレクションに戻る"
           >
             <IconArrowLeft size={20} />
           </ActionIcon>
@@ -185,7 +185,7 @@ export function CollectionViewerPage(): React.JSX.Element {
             color="gray"
             size="lg"
             onClick={handleClose}
-            aria-label="Close viewer"
+            aria-label="ビューアを閉じる"
           >
             <IconX size={20} />
           </ActionIcon>
@@ -201,7 +201,7 @@ export function CollectionViewerPage(): React.JSX.Element {
           size="xl"
           onClick={goToPrev}
           disabled={!canGoPrev}
-          aria-label="Previous image"
+          aria-label="前の画像"
           style={{
             position: 'absolute',
             left: 16,
@@ -218,7 +218,7 @@ export function CollectionViewerPage(): React.JSX.Element {
           {currentImage !== null && (
             <Image
               src={getImageUrl(currentImage.imageId)}
-              alt={`Image ${currentIndex + 1} of ${collection.images.length}: ${currentImage.filename}`}
+              alt={`${collection.images.length}枚中${currentIndex + 1}枚目: ${currentImage.filename}`}
               fit="contain"
               style={{ maxHeight: '100%', maxWidth: '100%' }}
               fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23333' width='100' height='100'/%3E%3C/svg%3E"
@@ -233,7 +233,7 @@ export function CollectionViewerPage(): React.JSX.Element {
           size="xl"
           onClick={goToNext}
           disabled={!canGoNext}
-          aria-label="Next image"
+          aria-label="次の画像"
           style={{
             position: 'absolute',
             right: 16,

@@ -104,16 +104,16 @@ export function ImageAttributeSectionView({
 
   if (attributesError !== null) {
     return (
-      <Alert color="red" title="Error">
-        Failed to load attributes
+      <Alert color="red" title="エラー">
+        属性の読み込みに失敗しました
       </Alert>
     );
   }
 
   if (labelsError !== null) {
     return (
-      <Alert color="red" title="Error">
-        Failed to load labels
+      <Alert color="red" title="エラー">
+        ラベルの読み込みに失敗しました
       </Alert>
     );
   }

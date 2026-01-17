@@ -124,7 +124,7 @@ export function ArchiveImportPage() {
     <Container size="lg" py="xl">
       <Stack gap="xl">
         <Stack align="center" gap="md">
-          <Title order={1}>Archive Import</Title>
+          <Title order={1}>アーカイブインポート</Title>
           <Text c="dimmed">ZIP/RAR ファイルから画像をインポート</Text>
         </Stack>
 
@@ -143,12 +143,12 @@ export function ArchiveImportPage() {
                   ? (
                       <Stack align="center" py="xl">
                         <Loader size="lg" />
-                        <Text c="dimmed">Loading archive contents...</Text>
+                        <Text c="dimmed">アーカイブを読み込み中...</Text>
                       </Stack>
                     )
                   : sessionQuery.error !== null
                     ? (
-                        <Alert color="red" title="Error">
+                        <Alert color="red" title="エラー">
                           {sessionQuery.error.message}
                         </Alert>
                       )
@@ -164,8 +164,7 @@ export function ArchiveImportPage() {
                                 </Badge>
                                 <Text size="sm" c="dimmed">
                                   {session.imageCount}
-                                  {' '}
-                                  images
+                                  件の画像
                                 </Text>
                               </Group>
                               <Button
@@ -174,7 +173,7 @@ export function ArchiveImportPage() {
                                 onClick={handleClose}
                                 loading={deleteMutation.isPending}
                               >
-                                Close
+                                閉じる
                               </Button>
                             </Group>
 
@@ -182,7 +181,7 @@ export function ArchiveImportPage() {
                             {importResult !== null && (
                               <Alert
                                 color={importResult.failedCount === 0 ? 'green' : 'yellow'}
-                                title="Import Complete"
+                                title="インポート完了"
                                 withCloseButton
                                 onClose={() => { setImportResult(null); }}
                               >

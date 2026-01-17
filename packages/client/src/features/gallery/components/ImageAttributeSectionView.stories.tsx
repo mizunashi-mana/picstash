@@ -164,7 +164,7 @@ export const AttributesError: Story = {
     const canvas = within(canvasElement);
 
     // エラーメッセージが表示されていることを確認
-    await expect(canvas.getByText('Failed to load attributes')).toBeInTheDocument();
+    await expect(canvas.getByText('属性の読み込みに失敗しました')).toBeInTheDocument();
   },
 };
 
@@ -188,7 +188,7 @@ export const LabelsError: Story = {
     const canvas = within(canvasElement);
 
     // エラーメッセージが表示されていることを確認
-    await expect(canvas.getByText('Failed to load labels')).toBeInTheDocument();
+    await expect(canvas.getByText('ラベルの読み込みに失敗しました')).toBeInTheDocument();
   },
 };
 

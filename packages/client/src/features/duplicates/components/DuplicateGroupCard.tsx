@@ -45,18 +45,14 @@ export function DuplicateGroupCard({
         <Group justify="space-between">
           <Text fw={500}>
             {group.duplicates.length}
-            {' '}
-            duplicate
-            {group.duplicates.length !== 1 ? 's' : ''}
-            {' '}
-            found
+            件の重複が見つかりました
           </Text>
           <Button
             variant="light"
             size="xs"
             onClick={() => { onSelectAllDuplicates(group); }}
           >
-            {allDuplicatesSelected ? 'Deselect All' : 'Select All Duplicates'}
+            {allDuplicatesSelected ? '全て選択解除' : '全ての重複を選択'}
           </Button>
         </Group>
 
@@ -75,7 +71,7 @@ export function DuplicateGroupCard({
             </Card.Section>
             <Stack gap={4} mt="xs">
               <Badge color="green" size="sm" variant="filled">
-                Original
+                オリジナル
               </Badge>
               <Text size="xs" c="dimmed" truncate>
                 {group.original.filename}
@@ -107,13 +103,12 @@ export function DuplicateGroupCard({
               <Stack gap={4} mt="xs">
                 <Group gap={4}>
                   <Badge color="orange" size="sm" variant="light">
-                    Duplicate
+                    重複
                   </Badge>
                   {dup.distance !== undefined && (
                     <Badge color="gray" size="xs" variant="outline">
+                      類似度
                       {formatDistance(dup.distance)}
-                      {' '}
-                      similar
                     </Badge>
                   )}
                 </Group>
