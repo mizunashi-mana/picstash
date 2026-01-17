@@ -10,7 +10,7 @@
 
 ```prisma
 model RecommendationConversion {
-  id                  String    @id @default(cuid())
+  id                  String    @id @default(uuid())
   imageId             String
   recommendationScore Float     // 推薦時のスコア
   impressionAt        DateTime  // 推薦が表示された日時

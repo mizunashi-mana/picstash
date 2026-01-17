@@ -21,6 +21,15 @@ export function useViewHistory(
   const viewHistoryIdRef = useRef<string | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const conversionRecordedRef = useRef<boolean>(false);
+  const lastConversionIdRef = useRef<string | null | undefined>(undefined);
+
+  // Reset conversionRecordedRef when conversionId changes
+  useEffect(() => {
+    if (lastConversionIdRef.current !== conversionId) {
+      lastConversionIdRef.current = conversionId;
+      conversionRecordedRef.current = false;
+    }
+  }, [conversionId]);
 
   const sendViewEnd = useCallback(async () => {
     if (viewHistoryIdRef.current === null || startTimeRef.current === null) {

@@ -165,7 +165,7 @@ interface RecommendationCardProps {
 function RecommendationCard({ image, conversionId }: RecommendationCardProps) {
   // Build URL with optional conversionId
   const url = conversionId !== undefined
-    ? `/images/${image.id}?conversionId=${conversionId}`
+    ? `/images/${image.id}?conversionId=${encodeURIComponent(conversionId)}`
     : `/images/${image.id}`;
 
   return (

@@ -28,6 +28,7 @@ function isValidRecommendation(
     typeof rec.imageId === 'string'
     && rec.imageId.trim() !== ''
     && typeof rec.score === 'number'
+    && Number.isFinite(rec.score)
     && rec.score >= 0
     && rec.score <= 1
   );
@@ -49,6 +50,15 @@ export function recommendationConversionRoutes(
         return await reply.status(400).send({
           error: 'Bad Request',
           message: 'At least one recommendation is required',
+        });
+      }
+
+      // Limit array size to prevent resource exhaustion
+      const MAX_RECOMMENDATIONS = 100;
+      if (recommendations.length > MAX_RECOMMENDATIONS) {
+        return await reply.status(400).send({
+          error: 'Bad Request',
+          message: `Too many recommendations (max ${MAX_RECOMMENDATIONS})`,
         });
       }
 
