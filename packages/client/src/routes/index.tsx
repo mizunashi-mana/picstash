@@ -1,6 +1,10 @@
 import { Route, Routes } from 'react-router';
 import { ArchiveImportPage } from '@/features/archive-import';
-import { CollectionDetailPage, CollectionsPage } from '@/features/collections';
+import {
+  CollectionDetailPage,
+  CollectionsPage,
+  CollectionViewerPage,
+} from '@/features/collections';
 import { DuplicatesPage } from '@/features/duplicates';
 import { ImageDetailPage } from '@/features/gallery/pages/ImageDetailPage';
 import { HomePage } from '@/features/home/pages/HomePage';
@@ -14,6 +18,8 @@ export function AppRoutes() {
       <Route path="/labels" element={<LabelsPage />} />
       <Route path="/collections" element={<CollectionsPage />} />
       <Route path="/collections/:id" element={<CollectionDetailPage />} />
+      <Route path="/collections/:id/view" element={<CollectionViewerPage />} />
+      <Route path="/collections/:id/view/:imageId" element={<CollectionViewerPage />} />
       <Route path="/duplicates" element={<DuplicatesPage />} />
       <Route path="/archive-import" element={<ArchiveImportPage />} />
     </Routes>

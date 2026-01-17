@@ -22,6 +22,7 @@ import {
   IconArrowLeft,
   IconEdit,
   IconPhoto,
+  IconPlayerPlay,
   IconTrash,
 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -154,6 +155,16 @@ export function CollectionDetailPage(): React.JSX.Element {
             </Stack>
           </Group>
           <Group>
+            {collection.images.length > 0 && (
+              <Button
+                variant="filled"
+                leftSection={<IconPlayerPlay size={16} />}
+                component={Link}
+                to={`/collections/${id}/view`}
+              >
+                View
+              </Button>
+            )}
             <Button
               variant="light"
               leftSection={<IconEdit size={16} />}
@@ -198,7 +209,7 @@ export function CollectionDetailPage(): React.JSX.Element {
                 {collection.images.map(img => (
                   <Card key={img.id} shadow="xs" padding="xs" radius="sm" withBorder>
                     <Card.Section pos="relative">
-                      <Link to={`/images/${img.imageId}`}>
+                      <Link to={`/collections/${id}/view/${img.imageId}`}>
                         <Image
                           src={getThumbnailUrl(img.imageId)}
                           alt={img.filename}
