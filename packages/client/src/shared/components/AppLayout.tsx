@@ -10,6 +10,7 @@ import {
 } from '@mantine/core';
 import {
   IconArchive,
+  IconChartBar,
   IconCopy,
   IconFolder,
   IconHome,
@@ -29,6 +30,7 @@ const navItems = [
   { label: 'Labels', path: '/labels', icon: IconTags },
   { label: 'Duplicates', path: '/duplicates', icon: IconCopy },
   { label: 'Archive', path: '/archive-import', icon: IconArchive },
+  { label: 'Stats', path: '/stats', icon: IconChartBar },
 ];
 
 export function AppLayout({ children }: AppLayoutProps) {

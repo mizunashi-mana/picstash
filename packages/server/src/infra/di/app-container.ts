@@ -12,6 +12,7 @@ import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
+import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 import type { Container } from 'inversify';
 
@@ -52,6 +53,10 @@ export class AppContainer {
     return this.container.get<RecommendationConversionRepository>(
       TYPES.RecommendationConversionRepository,
     );
+  }
+
+  getStatsRepository(): StatsRepository {
+    return this.container.get<StatsRepository>(TYPES.StatsRepository);
   }
 
   // Storage & Processing
