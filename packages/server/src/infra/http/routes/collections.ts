@@ -1,3 +1,4 @@
+import { Prisma } from '@~generated/prisma/client.js';
 import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
 
@@ -153,8 +154,8 @@ export function collectionRoutes(app: FastifyInstance, container: AppContainer):
         return await reply.status(201).send(collectionImage);
       }
       catch (error) {
-        // Handle duplicate image in collection
-        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+        // Handle duplicate image in collection (P2002: Unique constraint violation)
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
           return await reply.status(409).send({
             error: 'Conflict',
             message: 'Image is already in this collection',
@@ -184,8 +185,8 @@ export function collectionRoutes(app: FastifyInstance, container: AppContainer):
         return await reply.status(204).send();
       }
       catch (error) {
-        // Handle image not found in collection
-        if (error instanceof Error && error.message.includes('Record to delete does not exist')) {
+        // Handle image not found in collection (P2025: Record not found)
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
           return await reply.status(404).send({
             error: 'Not Found',
             message: 'Image not found in collection',

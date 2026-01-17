@@ -34,9 +34,9 @@ export class PrismaCollectionRepository implements CollectionRepository {
         images: {
           orderBy: { order: 'asc' },
           include: {
-            // We need to join with Image table to get filename and thumbnailPath
-            // But Prisma doesn't have Image relation on CollectionImage
-            // We'll need to handle this differently
+            image: {
+              select: { filename: true, thumbnailPath: true },
+            },
           },
         },
       },
@@ -46,15 +46,6 @@ export class PrismaCollectionRepository implements CollectionRepository {
       return null;
     }
 
-    // Fetch image details separately
-    const imageIds = collection.images.map(ci => ci.imageId);
-    const images = await prisma.image.findMany({
-      where: { id: { in: imageIds } },
-      select: { id: true, filename: true, thumbnailPath: true },
-    });
-
-    const imageMap = new Map(images.map(img => [img.id, img]));
-
     return {
       id: collection.id,
       name: collection.name,
@@ -62,16 +53,13 @@ export class PrismaCollectionRepository implements CollectionRepository {
       coverImageId: collection.coverImageId,
       createdAt: collection.createdAt,
       updatedAt: collection.updatedAt,
-      images: collection.images.map((ci) => {
-        const img = imageMap.get(ci.imageId);
-        return {
-          id: ci.id,
-          imageId: ci.imageId,
-          order: ci.order,
-          filename: img?.filename ?? '',
-          thumbnailPath: img?.thumbnailPath ?? null,
-        };
-      }),
+      images: collection.images.map(ci => ({
+        id: ci.id,
+        imageId: ci.imageId,
+        order: ci.order,
+        filename: ci.image.filename,
+        thumbnailPath: ci.image.thumbnailPath,
+      })),
     };
   }
 
@@ -111,23 +99,25 @@ export class PrismaCollectionRepository implements CollectionRepository {
 
   // Collection image management
   async addImage(collectionId: string, input: AddImageToCollectionInput): Promise<CollectionImage> {
-    // If order is not specified, add at the end
-    let order = input.order;
-    if (order === undefined) {
-      const maxOrder = await prisma.collectionImage.findFirst({
-        where: { collectionId },
-        orderBy: { order: 'desc' },
-        select: { order: true },
-      });
-      order = (maxOrder?.order ?? -1) + 1;
-    }
+    return await prisma.$transaction(async (tx) => {
+      // If order is not specified, add at the end
+      let order = input.order;
+      if (order === undefined) {
+        const maxOrder = await tx.collectionImage.findFirst({
+          where: { collectionId },
+          orderBy: { order: 'desc' },
+          select: { order: true },
+        });
+        order = (maxOrder?.order ?? -1) + 1;
+      }
 
-    return await prisma.collectionImage.create({
-      data: {
-        collectionId,
-        imageId: input.imageId,
-        order,
-      },
+      return await tx.collectionImage.create({
+        data: {
+          collectionId,
+          imageId: input.imageId,
+          order,
+        },
+      });
     });
   }
 

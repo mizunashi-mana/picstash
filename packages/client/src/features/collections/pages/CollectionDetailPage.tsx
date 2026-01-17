@@ -85,9 +85,10 @@ export function CollectionDetailPage(): React.JSX.Element {
       if (id === undefined) throw new Error('Collection ID is required');
       await removeImageFromCollection(id, imageId);
     },
-    onSuccess: async () => {
+    onSuccess: async (_data, imageId) => {
       await queryClient.invalidateQueries({ queryKey: ['collection', id] });
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
+      await queryClient.invalidateQueries({ queryKey: ['imageCollections', imageId] });
     },
   });
 
