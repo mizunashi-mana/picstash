@@ -161,6 +161,7 @@ describe('generateRecommendations', () => {
           width: 100,
           height: 100,
           size: 1000,
+          description: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         })
@@ -173,6 +174,7 @@ describe('generateRecommendations', () => {
           width: 100,
           height: 100,
           size: 1000,
+          description: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
