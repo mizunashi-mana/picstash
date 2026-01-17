@@ -18,7 +18,7 @@ import {
   fetchCollections,
   fetchImageCollections,
   removeImageFromCollection,
-} from '@/features/collections/api';
+} from '@/features/collections';
 
 interface ImageCollectionsSectionProps {
   imageId: string;
