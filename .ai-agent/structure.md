@@ -25,10 +25,13 @@ picstash/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
 │   │   │   │   ├── collections/ # コレクション機能
+│   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
 │   │   │   │   ├── duplicates/ # 重複画像検出機能
-│   │   │   │   │   └── pages/
+│   │   │   │   │   ├── components/
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   └── api.ts
 │   │   │   │   ├── gallery/    # ギャラリー機能
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
