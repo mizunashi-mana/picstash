@@ -74,7 +74,8 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
                         回閲覧
                       </Text>
                       <Text size="xs" c="dimmed">
-                        合計
+                        合計:
+                        {' '}
                         {formatDuration(image.totalDuration)}
                       </Text>
                       <Text size="xs" c="dimmed">
