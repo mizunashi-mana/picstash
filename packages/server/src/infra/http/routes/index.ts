@@ -4,6 +4,7 @@ import { healthRoutes } from '@/infra/http/routes/health.js';
 import { imageAttributeRoutes } from '@/infra/http/routes/image-attributes.js';
 import { imageRoutes } from '@/infra/http/routes/images.js';
 import { labelRoutes } from '@/infra/http/routes/labels.js';
+import { recommendationConversionRoutes } from '@/infra/http/routes/recommendation-conversions.js';
 import { recommendationRoutes } from '@/infra/http/routes/recommendations.js';
 import { viewHistoryRoutes } from '@/infra/http/routes/view-history.js';
 import type { AppContainer } from '@/infra/di/index.js';
@@ -33,4 +34,7 @@ export function registerRoutes(app: FastifyInstance, container: AppContainer): v
 
   // Recommendation routes
   recommendationRoutes(app, container);
+
+  // Recommendation conversion routes
+  recommendationConversionRoutes(app, container);
 }

@@ -1,21 +1,26 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { recordRecommendationClick } from '@/features/recommendations';
 import { recordViewEnd, recordViewStart } from './api';
 
 interface UseViewHistoryOptions {
   enabled?: boolean;
+  /** Conversion ID from recommendation click tracking */
+  conversionId?: string | null;
 }
 
 /**
  * Hook to track image view history.
  * Records view start when mounted and view end when unmounted or page becomes hidden.
+ * If conversionId is provided, also records the recommendation click.
  */
 export function useViewHistory(
   imageId: string | undefined,
   options: UseViewHistoryOptions = {},
 ): void {
-  const { enabled = true } = options;
+  const { enabled = true, conversionId } = options;
   const viewHistoryIdRef = useRef<string | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const conversionRecordedRef = useRef<boolean>(false);
 
   const sendViewEnd = useCallback(async () => {
     if (viewHistoryIdRef.current === null || startTimeRef.current === null) {
@@ -48,6 +53,23 @@ export function useViewHistory(
         const viewHistory = await recordViewStart(imageId);
         viewHistoryIdRef.current = viewHistory.id;
         startTimeRef.current = Date.now();
+
+        // Record recommendation click if conversionId is provided
+        if (
+          conversionId !== undefined
+          && conversionId !== null
+          && !conversionRecordedRef.current
+        ) {
+          conversionRecordedRef.current = true;
+          try {
+            await recordRecommendationClick(conversionId, {
+              viewHistoryId: viewHistory.id,
+            });
+          }
+          catch {
+            // Silently fail - conversion tracking is not critical
+          }
+        }
       }
       catch {
         // Silently fail - view history is not critical
@@ -86,5 +108,5 @@ export function useViewHistory(
       window.removeEventListener('beforeunload', handleBeforeUnload);
       void sendViewEnd();
     };
-  }, [imageId, enabled, sendViewEnd]);
+  }, [imageId, enabled, conversionId, sendViewEnd]);
 }
