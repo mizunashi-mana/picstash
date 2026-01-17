@@ -7,17 +7,31 @@ vi.mock('node:fs/promises', () => ({
   readFile: vi.fn(),
 }));
 
-// Track mock pipeline state
-let mockCaptionPipeline: ReturnType<typeof vi.fn>;
+// Track mock state
+let mockFlorence2Model: {
+  generate: ReturnType<typeof vi.fn>;
+};
+let mockFlorence2Processor: ReturnType<typeof vi.fn> & {
+  construct_prompts: ReturnType<typeof vi.fn>;
+  batch_decode: ReturnType<typeof vi.fn>;
+  post_process_generation: ReturnType<typeof vi.fn>;
+};
 let mockTranslationPipeline: ReturnType<typeof vi.fn>;
 let mockRawImageFromBlob: ReturnType<typeof vi.fn>;
 
 // Mock the @huggingface/transformers module
 vi.mock('@huggingface/transformers', () => ({
+  Florence2ForConditionalGeneration: {
+    from_pretrained: vi.fn().mockImplementation(async () => {
+      return await Promise.resolve(mockFlorence2Model);
+    }),
+  },
+  AutoProcessor: {
+    from_pretrained: vi.fn().mockImplementation(async () => {
+      return await Promise.resolve(mockFlorence2Processor);
+    }),
+  },
   pipeline: vi.fn().mockImplementation(async (task: string) => {
-    if (task === 'image-to-text') {
-      return await Promise.resolve(mockCaptionPipeline);
-    }
     if (task === 'translation') {
       return await Promise.resolve(mockTranslationPipeline);
     }
@@ -37,8 +51,24 @@ describe('TransformersCaptionService', () => {
     // Reset module-level state by reimporting
     vi.resetModules();
 
-    // Recreate mock functions
-    mockCaptionPipeline = vi.fn().mockResolvedValue([{ generated_text: 'test caption' }]);
+    // Recreate mock functions for Florence-2
+    mockFlorence2Model = {
+      generate: vi.fn().mockResolvedValue([[1, 2, 3]]),
+    };
+
+    // Create processor mock as a callable function with additional methods
+    const processorFn = vi.fn().mockResolvedValue({
+      input_ids: [[1, 2, 3]],
+      pixel_values: [[[1, 2, 3]]],
+    });
+    mockFlorence2Processor = Object.assign(processorFn, {
+      construct_prompts: vi.fn().mockReturnValue('<MORE_DETAILED_CAPTION>'),
+      batch_decode: vi.fn().mockReturnValue(['test caption']),
+      post_process_generation: vi.fn().mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a cat sitting on a couch',
+      }),
+    });
+
     mockTranslationPipeline = vi.fn().mockResolvedValue([{ translation_text: 'テストキャプション' }]);
     mockRawImageFromBlob = vi.fn().mockResolvedValue({
       data: new Uint8ClampedArray(100),
@@ -53,14 +83,16 @@ describe('TransformersCaptionService', () => {
         '@/infra/caption/transformers-caption-service',
       ));
 
-      mockCaptionPipeline.mockResolvedValue([{ generated_text: 'a cat sitting on a couch' }]);
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a cat sitting on a couch',
+      });
       mockTranslationPipeline.mockResolvedValue([{ translation_text: 'ソファに座っている猫' }]);
 
       const service = new TransformersCaptionService();
       const result = await service.generateFromBuffer(Buffer.from('fake image data'));
 
       expect(result.caption).toBe('ソファに座っている猫');
-      expect(result.model).toContain('vit-gpt2-image-captioning');
+      expect(result.model).toContain('Florence-2');
       expect(result.model).toContain('nllb-200-distilled-600M');
     });
 
@@ -69,7 +101,9 @@ describe('TransformersCaptionService', () => {
         '@/infra/caption/transformers-caption-service',
       ));
 
-      mockCaptionPipeline.mockResolvedValue([{ generated_text: 'a dog running' }]);
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a dog running',
+      });
       mockTranslationPipeline.mockResolvedValue([]);
 
       const service = new TransformersCaptionService();
@@ -83,7 +117,9 @@ describe('TransformersCaptionService', () => {
         '@/infra/caption/transformers-caption-service',
       ));
 
-      mockCaptionPipeline.mockResolvedValue([]);
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': '',
+      });
       mockTranslationPipeline.mockResolvedValue([]);
 
       const service = new TransformersCaptionService();
@@ -99,7 +135,9 @@ describe('TransformersCaptionService', () => {
         '@/infra/caption/transformers-caption-service',
       ));
 
-      mockCaptionPipeline.mockResolvedValue([{ generated_text: 'a beautiful sunset' }]);
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a beautiful sunset',
+      });
       mockTranslationPipeline.mockResolvedValue([{ translation_text: '美しい夕日' }]);
       vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
 
@@ -133,7 +171,7 @@ describe('TransformersCaptionService', () => {
       const service = new TransformersCaptionService();
       const model = service.getModel();
 
-      expect(model).toContain('vit-gpt2-image-captioning');
+      expect(model).toContain('Florence-2');
       expect(model).toContain('nllb-200-distilled-600M');
     });
   });
@@ -171,8 +209,12 @@ describe('TransformersCaptionService', () => {
       const service = new TransformersCaptionService();
       await Promise.all([service.initialize(), service.initialize(), service.initialize()]);
 
-      // pipeline should be called exactly twice (once for caption, once for translation)
-      expect(transformers.pipeline).toHaveBeenCalledTimes(2);
+      // Florence2ForConditionalGeneration.from_pretrained should be called once
+      expect(transformers.Florence2ForConditionalGeneration.from_pretrained).toHaveBeenCalledTimes(1);
+      // AutoProcessor.from_pretrained should be called once
+      expect(transformers.AutoProcessor.from_pretrained).toHaveBeenCalledTimes(1);
+      // pipeline should be called once (for translation only)
+      expect(transformers.pipeline).toHaveBeenCalledTimes(1);
     });
 
     it('should skip initialization if already ready', async () => {
