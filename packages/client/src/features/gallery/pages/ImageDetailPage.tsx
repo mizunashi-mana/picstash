@@ -16,7 +16,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
 import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
 import { ImageCollectionsSection } from '@/features/gallery/components/ImageCollectionsSection';
@@ -50,6 +50,8 @@ function formatDate(dateString: string): string {
 
 export function ImageDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const conversionId = searchParams.get('conversionId');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
@@ -72,7 +74,8 @@ export function ImageDetailPage() {
   });
 
   // Track view history for this image
-  useViewHistory(id);
+  // If conversionId is present, also record the recommendation click
+  useViewHistory(id, { conversionId });
 
   if (isLoading) {
     return (

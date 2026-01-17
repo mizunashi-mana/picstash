@@ -41,3 +41,11 @@ export type {
   CaptionResult,
   CaptionService,
 } from './caption-service.js';
+export type {
+  RecommendationConversion,
+  RecommendationConversionRepository,
+  CreateImpressionInput,
+  RecordClickInput,
+  ConversionStats,
+  ConversionStatsOptions,
+} from './recommendation-conversion-repository.js';

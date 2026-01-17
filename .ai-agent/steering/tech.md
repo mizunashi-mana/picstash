@@ -67,12 +67,6 @@ packages/server/src/infra/di/
 └── app-container.ts   # AppContainer クラス + buildAppContainer()
 ```
 
-**登録サービス:**
-- ImageRepository, LabelRepository, ImageAttributeRepository
-- FileStorage, ImageProcessor
-- ArchiveHandler（複数）, ArchiveSessionManager
-- EmbeddingService, EmbeddingRepository, CaptionService
-
 ### パッケージ構成
 
 | パッケージ | 説明 | 状態 |

@@ -11,6 +11,7 @@ import type { ImageAttributeRepository } from '@/application/ports/image-attribu
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
+import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 import type { Container } from 'inversify';
 
@@ -45,6 +46,12 @@ export class AppContainer {
 
   getViewHistoryRepository(): ViewHistoryRepository {
     return this.container.get<ViewHistoryRepository>(TYPES.ViewHistoryRepository);
+  }
+
+  getRecommendationConversionRepository(): RecommendationConversionRepository {
+    return this.container.get<RecommendationConversionRepository>(
+      TYPES.RecommendationConversionRepository,
+    );
   }
 
   // Storage & Processing

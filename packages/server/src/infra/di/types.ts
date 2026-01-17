@@ -5,6 +5,9 @@ export const TYPES = {
   ImageAttributeRepository: Symbol.for('ImageAttributeRepository'),
   CollectionRepository: Symbol.for('CollectionRepository'),
   ViewHistoryRepository: Symbol.for('ViewHistoryRepository'),
+  RecommendationConversionRepository: Symbol.for(
+    'RecommendationConversionRepository',
+  ),
 
   // Storage & Processing
   FileStorage: Symbol.for('FileStorage'),
