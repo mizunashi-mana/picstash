@@ -1,5 +1,9 @@
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'prisma/config';
-import { config } from './src/config';
+
+const currentDir = dirname(fileURLToPath(import.meta.url));
+const dbPath = resolve(currentDir, 'prisma/data/picstash.db');
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
@@ -7,6 +11,6 @@ export default defineConfig({
     path: 'prisma/migrations',
   },
   datasource: {
-    url: config.database.url,
+    url: `file:${dbPath}`,
   },
 });

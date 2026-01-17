@@ -26,6 +26,7 @@ model Image {
   updatedAt     DateTime          @updatedAt @map("updated_at")
   attributes    ImageAttribute[]
   collections   CollectionImage[]
+  viewHistory   ViewHistory[]
 }
 
 model AttributeLabel {
@@ -74,4 +75,18 @@ model CollectionImage {
 
   @@unique([collectionId, imageId])
   @@map("collection_image")
+}
+
+model ViewHistory {
+  id        String   @id @default(uuid())
+  imageId   String   @map("image_id")
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now()) @map("viewed_at")
+  duration  Int?     /// 滞在時間（ミリ秒）
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([imageId])
+  @@index([viewedAt])
+  @@map("view_history")
 }

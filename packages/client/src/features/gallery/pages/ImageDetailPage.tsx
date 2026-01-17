@@ -22,6 +22,7 @@ import { ImageAttributeSection } from '@/features/gallery/components/ImageAttrib
 import { ImageCollectionsSection } from '@/features/gallery/components/ImageCollectionsSection';
 import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
 import { SimilarImagesSection } from '@/features/gallery/components/SimilarImagesSection';
+import { useViewHistory } from '@/features/view-history';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -69,6 +70,9 @@ export function ImageDetailPage() {
       await navigate('/');
     },
   });
+
+  // Track view history for this image
+  useViewHistory(id);
 
   if (isLoading) {
     return (
