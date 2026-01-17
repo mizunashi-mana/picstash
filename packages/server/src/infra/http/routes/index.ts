@@ -3,21 +3,22 @@ import { healthRoutes } from '@/infra/http/routes/health.js';
 import { imageAttributeRoutes } from '@/infra/http/routes/image-attributes.js';
 import { imageRoutes } from '@/infra/http/routes/images.js';
 import { labelRoutes } from '@/infra/http/routes/labels.js';
+import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
 
-export function registerRoutes(app: FastifyInstance): void {
-  // Health check (no prefix)
-  app.register(healthRoutes);
+export function registerRoutes(app: FastifyInstance, container: AppContainer): void {
+  // Health check (no prefix, no container dependency)
+  healthRoutes(app);
 
   // Image routes
-  app.register(imageRoutes);
+  imageRoutes(app, container);
 
   // Image attribute routes
-  app.register(imageAttributeRoutes);
+  imageAttributeRoutes(app, container);
 
   // Label routes
-  app.register(labelRoutes);
+  labelRoutes(app, container);
 
   // Archive routes
-  app.register(archiveRoutes);
+  archiveRoutes(app, container);
 }

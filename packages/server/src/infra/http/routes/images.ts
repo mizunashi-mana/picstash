@@ -2,18 +2,8 @@ import { createReadStream } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { suggestAttributes } from '@/application/attribute-suggestion/suggest-attributes.js';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
-import {
-  EMBEDDING_DIMENSION,
-  type EmbeddingRepository,
-} from '@/application/ports/embedding-repository.js';
-import { container, TYPES } from '@/infra/di/index.js';
-import type { CaptionService } from '@/application/ports/caption-service.js';
-import type { EmbeddingService } from '@/application/ports/embedding-service.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
-import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
-import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
-import type { LabelRepository } from '@/application/ports/label-repository.js';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
 
 async function fileExists(path: string): Promise<boolean> {
@@ -26,15 +16,15 @@ async function fileExists(path: string): Promise<boolean> {
   }
 }
 
-export function imageRoutes(app: FastifyInstance): void {
-  const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
-  const labelRepository = container.get<LabelRepository>(TYPES.LabelRepository);
-  const imageAttributeRepository = container.get<ImageAttributeRepository>(TYPES.ImageAttributeRepository);
-  const fileStorage = container.get<FileStorage>(TYPES.FileStorage);
-  const imageProcessor = container.get<ImageProcessor>(TYPES.ImageProcessor);
-  const embeddingService = container.get<EmbeddingService>(TYPES.EmbeddingService);
-  const embeddingRepository = container.get<EmbeddingRepository>(TYPES.EmbeddingRepository);
-  const captionService = container.get<CaptionService>(TYPES.CaptionService);
+export function imageRoutes(app: FastifyInstance, container: AppContainer): void {
+  const imageRepository = container.getImageRepository();
+  const labelRepository = container.getLabelRepository();
+  const imageAttributeRepository = container.getImageAttributeRepository();
+  const fileStorage = container.getFileStorage();
+  const imageProcessor = container.getImageProcessor();
+  const embeddingService = container.getEmbeddingService();
+  const embeddingRepository = container.getEmbeddingRepository();
+  const captionService = container.getCaptionService();
 
   // Upload image
   app.post('/api/images', async (request, reply) => {

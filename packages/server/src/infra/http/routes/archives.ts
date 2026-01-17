@@ -1,18 +1,12 @@
 import { importFromArchive } from '@/application/archive/index.js';
-import { container, TYPES } from '@/infra/di/index.js';
-import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
-import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
 
-export function archiveRoutes(app: FastifyInstance): void {
-  const sessionManager = container.get<ArchiveSessionManager>(
-    TYPES.ArchiveSessionManager,
-  );
-  const imageProcessor = container.get<ImageProcessor>(TYPES.ImageProcessor);
-  const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
-  const fileStorage = container.get<FileStorage>(TYPES.FileStorage);
+export function archiveRoutes(app: FastifyInstance, container: AppContainer): void {
+  const sessionManager = container.getArchiveSessionManager();
+  const imageProcessor = container.getImageProcessor();
+  const imageRepository = container.getImageRepository();
+  const fileStorage = container.getFileStorage();
 
   // Upload archive and create session
   app.post('/api/archives', async (request, reply) => {

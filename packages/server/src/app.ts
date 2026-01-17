@@ -3,8 +3,9 @@ import { registerCors } from '@/infra/http/plugins/cors.js';
 import { registerMultipart } from '@/infra/http/plugins/multipart.js';
 import { registerRateLimit } from '@/infra/http/plugins/rate-limit.js';
 import { registerRoutes } from '@/infra/http/routes/index.js';
+import type { AppContainer } from '@/infra/di/index.js';
 
-export async function buildApp(): Promise<FastifyInstance> {
+export async function buildApp(container: AppContainer): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       transport: {
@@ -23,7 +24,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await registerRateLimit(app);
 
   // Register routes
-  registerRoutes(app);
+  registerRoutes(app, container);
 
   return await app;
 }

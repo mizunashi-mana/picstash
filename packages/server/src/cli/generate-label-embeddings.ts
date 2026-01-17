@@ -14,15 +14,13 @@ import {
   type GenerateLabelEmbeddingDeps,
 } from '@/application/attribute-suggestion/generate-label-embeddings.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
-import { container } from '@/infra/di/container.js';
-import { TYPES } from '@/infra/di/types.js';
-import type { EmbeddingService } from '@/application/ports/embedding-service.js';
-import type { LabelRepository } from '@/application/ports/label-repository.js';
+import { buildAppContainer } from '@/infra/di/index.js';
 
 function getDeps(): GenerateLabelEmbeddingDeps {
+  const container = buildAppContainer();
   return {
-    labelRepository: container.get<LabelRepository>(TYPES.LabelRepository),
-    embeddingService: container.get<EmbeddingService>(TYPES.EmbeddingService),
+    labelRepository: container.getLabelRepository(),
+    embeddingService: container.getEmbeddingService(),
   };
 }
 

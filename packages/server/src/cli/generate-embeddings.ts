@@ -14,19 +14,15 @@ import {
   type GenerateEmbeddingDeps,
 } from '@/application/embedding/generate-embedding.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
-import { container } from '@/infra/di/container.js';
-import { TYPES } from '@/infra/di/types.js';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
-import type { EmbeddingService } from '@/application/ports/embedding-service.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
+import { buildAppContainer } from '@/infra/di/index.js';
 
 function getDeps(): GenerateEmbeddingDeps {
+  const container = buildAppContainer();
   return {
-    imageRepository: container.get<ImageRepository>(TYPES.ImageRepository),
-    fileStorage: container.get<FileStorage>(TYPES.FileStorage),
-    embeddingService: container.get<EmbeddingService>(TYPES.EmbeddingService),
-    embeddingRepository: container.get<EmbeddingRepository>(TYPES.EmbeddingRepository),
+    imageRepository: container.getImageRepository(),
+    fileStorage: container.getFileStorage(),
+    embeddingService: container.getEmbeddingService(),
+    embeddingRepository: container.getEmbeddingRepository(),
   };
 }
 
