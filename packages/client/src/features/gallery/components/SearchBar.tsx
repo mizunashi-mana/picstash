@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActionIcon, Autocomplete, Group, Text } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { IconSearch, IconTag, IconX } from '@tabler/icons-react';
@@ -17,6 +17,9 @@ export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(value);
   const [debouncedValue] = useDebouncedValue(inputValue, 300);
 
+  // Track if we should skip the next debounce effect (after immediate actions)
+  const skipNextDebounce = useRef(false);
+
   // Fetch suggestions when input changes
   const suggestionsQuery = useQuery({
     queryKey: ['search-suggestions', debouncedValue],
@@ -25,23 +28,33 @@ export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
     staleTime: 30000, // Cache for 30 seconds
   });
 
+  // Sync inputValue when parent value changes (e.g., from URL)
   useEffect(() => {
-    setInputValue(value);
-  }, [value]);
+    if (value !== inputValue && !skipNextDebounce.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Controlled component pattern: sync internal state with parent value
+      setInputValue(value);
+    }
+  }, [value, inputValue]);
 
+  // Trigger search on debounced value change (for typing)
   useEffect(() => {
+    if (skipNextDebounce.current) {
+      skipNextDebounce.current = false;
+      return;
+    }
     if (debouncedValue !== value) {
       onChange(debouncedValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- onChange is stable from parent
-  }, [debouncedValue, value]);
+  }, [debouncedValue, value, onChange]);
 
   const handleClear = () => {
+    skipNextDebounce.current = true;
     setInputValue('');
     onChange('');
   };
 
   const handleOptionSubmit = (selectedValue: string) => {
+    skipNextDebounce.current = true;
     setInputValue(selectedValue);
     onChange(selectedValue);
   };
