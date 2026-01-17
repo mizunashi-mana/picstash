@@ -36,15 +36,23 @@ picstash/
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
+│   │   │   │   ├── home/       # ホーム画面
+│   │   │   │   │   └── pages/
 │   │   │   │   ├── labels/     # 属性ラベル管理機能
+│   │   │   │   │   ├── components/
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   └── api.ts
+│   │   │   │   ├── recommendations/ # 画像推薦機能
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
 │   │   │   │   ├── upload/     # アップロード機能
 │   │   │   │   │   ├── components/
 │   │   │   │   │   └── api.ts
-│   │   │   │   └── home/       # ホーム画面
-│   │   │   │       └── pages/
+│   │   │   │   └── view-history/ # 閲覧履歴機能
+│   │   │   │       ├── components/
+│   │   │   │       ├── pages/
+│   │   │   │       └── api.ts
 │   │   │   │
 │   │   │   ├── shared/         # 共通部品
 │   │   │   │   ├── components/ # 共通コンポーネント（AppLayout 等）
@@ -73,18 +81,22 @@ picstash/
 │   │   │   │
 │   │   │   ├── domain/         # ドメイン層
 │   │   │   │   ├── archive/    # アーカイブドメインモデル
+│   │   │   │   ├── collection/ # コレクションドメインモデル
 │   │   │   │   ├── image/      # 画像ドメインモデル
 │   │   │   │   ├── image-attribute/ # 画像属性ドメインモデル
-│   │   │   │   └── label/      # ラベルドメインモデル
+│   │   │   │   ├── label/      # ラベルドメインモデル
+│   │   │   │   └── view-history/ # 閲覧履歴ドメインモデル
 │   │   │   │
 │   │   │   ├── application/    # アプリケーション層
 │   │   │   │   ├── archive/    # アーカイブ処理
 │   │   │   │   ├── attribute-suggestion/ # 属性推薦
+│   │   │   │   ├── duplicate-detection/ # 重複画像検出
 │   │   │   │   ├── embedding/  # 埋め込み生成
 │   │   │   │   ├── image/      # 画像ユースケース
 │   │   │   │   ├── image-attribute/ # 画像属性ユースケース
 │   │   │   │   ├── label/      # ラベルユースケース
-│   │   │   │   └── ports/      # ポート定義（インターフェース）
+│   │   │   │   ├── ports/      # ポート定義（インターフェース）
+│   │   │   │   └── recommendation/ # 画像推薦
 │   │   │   │
 │   │   │   ├── infra/          # インフラ層
 │   │   │   │   ├── adapters/   # 外部アダプター実装
@@ -147,7 +159,7 @@ picstash/
 
 ### `packages/client/`
 フロントエンドのパッケージ。Feature-based ディレクトリ構造を採用：
-- **features/** - 機能ごとのモジュール（archive-import, collections, duplicates, gallery, home, labels, upload）
+- **features/** - 機能ごとのモジュール（archive-import, collections, duplicates, gallery, home, labels, recommendations, upload, view-history）
   - 各機能は components/, pages/, api.ts を含む
   - 機能間は index.ts 経由でのみ依存可能（dependency-cruiser で検証）
 - **shared/** - 共通部品

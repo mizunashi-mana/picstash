@@ -68,7 +68,7 @@ packages/server/src/infra/di/
 ```
 
 **登録サービス:**
-- ImageRepository, LabelRepository, ImageAttributeRepository
+- ImageRepository, LabelRepository, ImageAttributeRepository, CollectionRepository, ViewHistoryRepository
 - FileStorage, ImageProcessor
 - ArchiveHandler（複数）, ArchiveSessionManager
 - EmbeddingService, EmbeddingRepository, CaptionService
