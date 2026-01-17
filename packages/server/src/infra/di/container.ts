@@ -17,6 +17,18 @@ import {
 } from '@/infra/adapters/index.js';
 import { TransformersCaptionService } from '@/infra/caption/index.js';
 import { ClipEmbeddingService } from '@/infra/embedding/clip-embedding-service.js';
+import {
+  ArchiveController,
+  CollectionController,
+  ImageAttributeController,
+  ImageController,
+  LabelController,
+  RecommendationController,
+  RecommendationConversionController,
+  SearchController,
+  StatsController,
+  ViewHistoryController,
+} from '@/infra/http/controllers/index.js';
 import { TYPES } from './types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
@@ -112,6 +124,18 @@ export function createContainer(): Container {
     .bind<CaptionService>(TYPES.CaptionService)
     .to(TransformersCaptionService)
     .inSingletonScope();
+
+  // Bind Controllers
+  container.bind<ImageController>(TYPES.ImageController).to(ImageController);
+  container.bind<ImageAttributeController>(TYPES.ImageAttributeController).to(ImageAttributeController);
+  container.bind<LabelController>(TYPES.LabelController).to(LabelController);
+  container.bind<CollectionController>(TYPES.CollectionController).to(CollectionController);
+  container.bind<ArchiveController>(TYPES.ArchiveController).to(ArchiveController);
+  container.bind<ViewHistoryController>(TYPES.ViewHistoryController).to(ViewHistoryController);
+  container.bind<RecommendationController>(TYPES.RecommendationController).to(RecommendationController);
+  container.bind<RecommendationConversionController>(TYPES.RecommendationConversionController).to(RecommendationConversionController);
+  container.bind<StatsController>(TYPES.StatsController).to(StatsController);
+  container.bind<SearchController>(TYPES.SearchController).to(SearchController);
 
   return container;
 }

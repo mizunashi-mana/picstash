@@ -14,6 +14,18 @@ import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
+import type {
+  ArchiveController,
+  CollectionController,
+  ImageAttributeController,
+  ImageController,
+  LabelController,
+  RecommendationController,
+  RecommendationConversionController,
+  SearchController,
+  StatsController,
+  ViewHistoryController,
+} from '@/infra/http/controllers/index.js';
 import type { Container } from 'inversify';
 
 /**
@@ -91,6 +103,48 @@ export class AppContainer {
 
   getCaptionService(): CaptionService {
     return this.container.get<CaptionService>(TYPES.CaptionService);
+  }
+
+  // Controllers
+
+  getImageController(): ImageController {
+    return this.container.get<ImageController>(TYPES.ImageController);
+  }
+
+  getImageAttributeController(): ImageAttributeController {
+    return this.container.get<ImageAttributeController>(TYPES.ImageAttributeController);
+  }
+
+  getLabelController(): LabelController {
+    return this.container.get<LabelController>(TYPES.LabelController);
+  }
+
+  getCollectionController(): CollectionController {
+    return this.container.get<CollectionController>(TYPES.CollectionController);
+  }
+
+  getArchiveController(): ArchiveController {
+    return this.container.get<ArchiveController>(TYPES.ArchiveController);
+  }
+
+  getViewHistoryController(): ViewHistoryController {
+    return this.container.get<ViewHistoryController>(TYPES.ViewHistoryController);
+  }
+
+  getRecommendationController(): RecommendationController {
+    return this.container.get<RecommendationController>(TYPES.RecommendationController);
+  }
+
+  getRecommendationConversionController(): RecommendationConversionController {
+    return this.container.get<RecommendationConversionController>(TYPES.RecommendationConversionController);
+  }
+
+  getStatsController(): StatsController {
+    return this.container.get<StatsController>(TYPES.StatsController);
+  }
+
+  getSearchController(): SearchController {
+    return this.container.get<SearchController>(TYPES.SearchController);
   }
 }
 
