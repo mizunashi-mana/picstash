@@ -143,9 +143,9 @@ export class PrismaCollectionRepository implements CollectionRepository {
   }
 
   async updateImageOrder(collectionId: string, orders: UpdateImageOrderInput[]): Promise<void> {
-    await prisma.$transaction(
-      orders.map(async ({ imageId, order }) =>
-        await prisma.collectionImage.update({
+    await prisma.$transaction(async (tx) => {
+      for (const { imageId, order } of orders) {
+        await tx.collectionImage.update({
           where: {
             collectionId_imageId: {
               collectionId,
@@ -153,9 +153,9 @@ export class PrismaCollectionRepository implements CollectionRepository {
             },
           },
           data: { order },
-        }),
-      ),
-    );
+        });
+      }
+    });
   }
 
   // Query helpers
