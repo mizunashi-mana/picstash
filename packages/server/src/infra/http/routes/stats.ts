@@ -20,10 +20,10 @@ export function statsRoutes(app: FastifyInstance, container: AppContainer): void
         ? parseInt(request.query.days, 10)
         : undefined;
 
-    if (days !== undefined && (isNaN(days) || days < 1)) {
+    if (days !== undefined && (isNaN(days) || days < 1 || days > 365)) {
       return await reply.status(400).send({
         error: 'Bad Request',
-        message: 'Days must be a positive number',
+        message: 'Days must be a positive number not greater than 365',
       });
     }
 
@@ -38,10 +38,10 @@ export function statsRoutes(app: FastifyInstance, container: AppContainer): void
         ? parseInt(request.query.days, 10)
         : undefined;
 
-    if (days !== undefined && (isNaN(days) || days < 1)) {
+    if (days !== undefined && (isNaN(days) || days < 1 || days > 365)) {
       return await reply.status(400).send({
         error: 'Bad Request',
-        message: 'Days must be a positive number',
+        message: 'Days must be a positive number not greater than 365',
       });
     }
 
@@ -58,10 +58,10 @@ export function statsRoutes(app: FastifyInstance, container: AppContainer): void
           ? parseInt(request.query.days, 10)
           : undefined;
 
-      if (days !== undefined && (isNaN(days) || days < 1)) {
+      if (days !== undefined && (isNaN(days) || days < 1 || days > 365)) {
         return await reply.status(400).send({
           error: 'Bad Request',
-          message: 'Days must be a positive number',
+          message: 'Days must be a positive number not greater than 365',
         });
       }
 
@@ -84,10 +84,10 @@ export function statsRoutes(app: FastifyInstance, container: AppContainer): void
           ? parseInt(request.query.limit, 10)
           : undefined;
 
-      if (days !== undefined && (isNaN(days) || days < 1)) {
+      if (days !== undefined && (isNaN(days) || days < 1 || days > 365)) {
         return await reply.status(400).send({
           error: 'Bad Request',
-          message: 'Days must be a positive number',
+          message: 'Days must be a positive number not greater than 365',
         });
       }
 

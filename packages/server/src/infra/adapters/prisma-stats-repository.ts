@@ -63,6 +63,7 @@ export class PrismaStatsRepository implements StatsRepository {
     periodStart.setDate(periodStart.getDate() - days);
 
     // Use raw query to group by date
+    // Note: Prisma's tagged template $queryRaw automatically parameterizes values
     const results = await prisma.$queryRaw<
       Array<{
         date: string;
@@ -74,8 +75,8 @@ export class PrismaStatsRepository implements StatsRepository {
         date(viewed_at) as date,
         COUNT(*) as view_count,
         SUM(duration) as total_duration
-      FROM view_history
-      WHERE viewed_at >= ${periodStart.toISOString()}
+      FROM "view_history"
+      WHERE viewed_at >= ${periodStart}
       GROUP BY date(viewed_at)
       ORDER BY date ASC
     `;
@@ -95,6 +96,7 @@ export class PrismaStatsRepository implements StatsRepository {
     periodStart.setDate(periodStart.getDate() - days);
 
     // Use raw query to group by date
+    // Note: Prisma's tagged template $queryRaw automatically parameterizes values
     const results = await prisma.$queryRaw<
       Array<{
         date: string;
@@ -106,8 +108,8 @@ export class PrismaStatsRepository implements StatsRepository {
         date(impression_at) as date,
         COUNT(*) as impressions,
         SUM(CASE WHEN clicked_at IS NOT NULL THEN 1 ELSE 0 END) as clicks
-      FROM recommendation_conversion
-      WHERE impression_at >= ${periodStart.toISOString()}
+      FROM "recommendation_conversion"
+      WHERE impression_at >= ${periodStart}
       GROUP BY date(impression_at)
       ORDER BY date ASC
     `;
@@ -133,6 +135,7 @@ export class PrismaStatsRepository implements StatsRepository {
     periodStart.setDate(periodStart.getDate() - days);
 
     // Use raw query for aggregation with join
+    // Note: Prisma's tagged template $queryRaw automatically parameterizes values
     const results = await prisma.$queryRaw<
       Array<{
         id: string;
@@ -151,8 +154,8 @@ export class PrismaStatsRepository implements StatsRepository {
         SUM(vh.duration) as total_duration,
         MAX(vh.viewed_at) as last_viewed_at
       FROM "Image" i
-      INNER JOIN view_history vh ON vh.image_id = i.id
-      WHERE vh.viewed_at >= ${periodStart.toISOString()}
+      INNER JOIN "view_history" vh ON vh.image_id = i.id
+      WHERE vh.viewed_at >= ${periodStart}
       GROUP BY i.id, i.filename, i.thumbnail_path
       ORDER BY view_count DESC, total_duration DESC
       LIMIT ${limit}

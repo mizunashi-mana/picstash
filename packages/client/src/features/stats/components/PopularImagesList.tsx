@@ -20,14 +20,14 @@ function formatDate(dateStr: string | null): string {
     return '-';
   }
   const date = new Date(dateStr);
-  return date.toLocaleDateString();
+  return date.toLocaleDateString('ja-JP');
 }
 
 function getThumbnailUrl(thumbnailPath: string | null): string {
   if (thumbnailPath === null) {
     return '';
   }
-  return `/api/images/file/${thumbnailPath}`;
+  return `/api/images/file/${encodeURIComponent(thumbnailPath)}`;
 }
 
 export function PopularImagesList({ images }: PopularImagesListProps) {
