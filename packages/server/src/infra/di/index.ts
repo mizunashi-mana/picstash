@@ -1,2 +1,1 @@
-export { container } from './container.js';
-export { TYPES } from './types.js';
+export { AppContainer, buildAppContainer } from './app-container.js';

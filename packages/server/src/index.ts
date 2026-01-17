@@ -4,9 +4,11 @@
 import { buildApp } from '@/app.js';
 import { config } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
+import { buildAppContainer } from '@/infra/di/index.js';
 
 async function main(): Promise<void> {
-  const app = await buildApp();
+  const container = buildAppContainer();
+  const app = await buildApp(container);
 
   // Connect to database
   await connectDatabase();

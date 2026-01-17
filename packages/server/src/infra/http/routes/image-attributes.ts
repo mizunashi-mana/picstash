@@ -3,10 +3,7 @@ import {
   deleteAttribute,
   updateAttribute,
 } from '@/application/image-attribute/index.js';
-import { container, TYPES } from '@/infra/di/index.js';
-import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
-import type { LabelRepository } from '@/application/ports/label-repository.js';
+import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
 
 interface CreateAttributeBody {
@@ -18,12 +15,10 @@ interface UpdateAttributeBody {
   keywords?: string;
 }
 
-export function imageAttributeRoutes(app: FastifyInstance): void {
-  const imageRepository = container.get<ImageRepository>(TYPES.ImageRepository);
-  const labelRepository = container.get<LabelRepository>(TYPES.LabelRepository);
-  const imageAttributeRepository = container.get<ImageAttributeRepository>(
-    TYPES.ImageAttributeRepository,
-  );
+export function imageAttributeRoutes(app: FastifyInstance, container: AppContainer): void {
+  const imageRepository = container.getImageRepository();
+  const labelRepository = container.getLabelRepository();
+  const imageAttributeRepository = container.getImageAttributeRepository();
 
   // Get all attributes for an image
   app.get<{ Params: { imageId: string } }>(
