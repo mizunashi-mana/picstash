@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 import { injectable } from 'inversify';
+import { buildSearchWhere } from '@/application/search/build-search-where.js';
+import { isEmptyQuery, parseSearchQuery } from '@/application/search/query-parser.js';
 import { prisma } from '@/infra/database/prisma.js';
 import type {
   CreateImageInput,
@@ -9,6 +11,7 @@ import type {
   UpdateEmbeddingInput,
   UpdateImageInput,
 } from '@/application/ports/image-repository.js';
+import type { Prisma } from '@~generated/prisma/client.js';
 
 @injectable()
 export class PrismaImageRepository implements ImageRepository {
@@ -31,23 +34,19 @@ export class PrismaImageRepository implements ImageRepository {
   }
 
   async search(query: string): Promise<Image[]> {
+    const parsedQuery = parseSearchQuery(query);
+
+    // If query is empty, return all images
+    if (isEmptyQuery(parsedQuery)) {
+      return await this.findAll();
+    }
+
+    // Build WHERE clause for multi-condition search
+    // Type assertion is safe: buildSearchWhere returns a structure compatible with Prisma.ImageWhereInput
+    const where = buildSearchWhere(parsedQuery) as Prisma.ImageWhereInput;
+
     return await prisma.image.findMany({
-      where: {
-        OR: [
-          { filename: { contains: query } },
-          { description: { contains: query } },
-          {
-            attributes: {
-              some: {
-                OR: [
-                  { keywords: { contains: query } },
-                  { label: { name: { contains: query } } },
-                ],
-              },
-            },
-          },
-        ],
-      },
+      where,
       orderBy: { createdAt: 'desc' },
     });
   }
