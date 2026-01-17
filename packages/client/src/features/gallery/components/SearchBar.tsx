@@ -8,12 +8,11 @@ import { fetchSearchSuggestions } from '@/features/gallery/api';
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
-  isLoading?: boolean;
 }
 
 const MIN_QUERY_LENGTH = 1;
 
-export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
+export function SearchBar({ value, onChange }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(value);
   const [debouncedValue] = useDebouncedValue(inputValue, 300);
 
@@ -29,12 +28,13 @@ export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
   });
 
   // Sync inputValue when parent value changes (e.g., from URL)
+  // Note: inputValue is intentionally excluded from deps to avoid resetting input during typing
   useEffect(() => {
     if (value !== inputValue && !skipNextDebounce.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Controlled component pattern: sync internal state with parent value
       setInputValue(value);
     }
-  }, [value, inputValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only sync when parent value changes, not on every keystroke
+  }, [value]);
 
   // Trigger search on debounced value change (for typing)
   useEffect(() => {
@@ -91,7 +91,6 @@ export function SearchBar({ value, onChange, isLoading }: SearchBarProps) {
             )
           : null
       }
-      disabled={isLoading}
       data={autocompleteData}
       renderOption={({ option }) => {
         const suggestionType = suggestionTypeMap.get(option.value) ?? 'keyword';
