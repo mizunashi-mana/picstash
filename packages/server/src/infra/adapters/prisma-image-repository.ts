@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { injectable } from 'inversify';
+import { buildSearchWhere } from '@/application/search/build-search-where.js';
 import { isEmptyQuery, parseSearchQuery } from '@/application/search/query-parser.js';
 import { prisma } from '@/infra/database/prisma.js';
 import type {
@@ -41,65 +42,13 @@ export class PrismaImageRepository implements ImageRepository {
     }
 
     // Build WHERE clause for multi-condition search
-    const where = this.buildSearchWhere(parsedQuery);
+    // Type assertion is safe: buildSearchWhere returns a structure compatible with Prisma.ImageWhereInput
+    const where = buildSearchWhere(parsedQuery) as Prisma.ImageWhereInput;
 
     return await prisma.image.findMany({
       where,
       orderBy: { createdAt: 'desc' },
     });
-  }
-
-  /**
-   * Build Prisma WHERE clause for a single search term.
-   * Matches if term is found in filename, description, keywords, or label name.
-   */
-  private buildTermCondition(term: string): Prisma.ImageWhereInput {
-    return {
-      OR: [
-        { filename: { contains: term } },
-        { description: { contains: term } },
-        {
-          attributes: {
-            some: {
-              OR: [
-                { keywords: { contains: term } },
-                { label: { name: { contains: term } } },
-              ],
-            },
-          },
-        },
-      ],
-    };
-  }
-
-  /**
-   * Build Prisma WHERE clause from parsed SearchQuery.
-   * Structure: OR of AND groups, where each AND group contains multiple terms.
-   */
-  private buildSearchWhere(parsedQuery: ReturnType<typeof parseSearchQuery>): Prisma.ImageWhereInput {
-    // Each AND group: all terms must match
-    const orConditions = parsedQuery.map((andGroup) => {
-      if (andGroup.length === 1) {
-        // Single term - no need for AND wrapper
-        // Non-null assertion is safe: andGroup.length === 1 guarantees andGroup[0] exists
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Length check guarantees element exists
-        return this.buildTermCondition(andGroup[0]!);
-      }
-      // Multiple terms - wrap in AND
-      return {
-        AND: andGroup.map(term => this.buildTermCondition(term)),
-      };
-    });
-
-    // If only one OR group, return it directly
-    if (orConditions.length === 1) {
-      // Non-null assertion is safe: orConditions.length === 1 guarantees orConditions[0] exists
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Length check guarantees element exists
-      return orConditions[0]!;
-    }
-
-    // Multiple OR groups - wrap in OR
-    return { OR: orConditions };
   }
 
   async updateById(id: string, input: UpdateImageInput): Promise<Image> {
