@@ -24,6 +24,11 @@ picstash/
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
+│   │   │   │   ├── collections/ # コレクション機能
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   └── api.ts
+│   │   │   │   ├── duplicates/ # 重複画像検出機能
+│   │   │   │   │   └── pages/
 │   │   │   │   ├── gallery/    # ギャラリー機能
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
@@ -139,7 +144,7 @@ picstash/
 
 ### `packages/client/`
 フロントエンドのパッケージ。Feature-based ディレクトリ構造を採用：
-- **features/** - 機能ごとのモジュール（gallery, labels, upload, home など）
+- **features/** - 機能ごとのモジュール（archive-import, collections, duplicates, gallery, home, labels, upload）
   - 各機能は components/, pages/, api.ts を含む
   - 機能間は index.ts 経由でのみ依存可能（dependency-cruiser で検証）
 - **shared/** - 共通部品
