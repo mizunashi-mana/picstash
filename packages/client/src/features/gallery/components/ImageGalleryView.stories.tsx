@@ -97,7 +97,7 @@ export const Loading: Story = {
     const canvas = within(canvasElement);
 
     // ローディングメッセージが表示されていることを確認
-    await expect(canvas.getByText('Loading images...')).toBeInTheDocument();
+    await expect(canvas.getByText('画像を読み込み中...')).toBeInTheDocument();
   },
 };
 
@@ -111,7 +111,7 @@ export const ErrorState: Story = {
     const canvas = within(canvasElement);
 
     // エラーメッセージが表示されていることを確認
-    await expect(canvas.getByText('Error')).toBeInTheDocument();
+    await expect(canvas.getByText('エラー')).toBeInTheDocument();
     await expect(canvas.getByText(/Network error/)).toBeInTheDocument();
   },
 };

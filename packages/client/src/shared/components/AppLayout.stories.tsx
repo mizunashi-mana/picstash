@@ -29,9 +29,9 @@ export const Default: Story = {
     await expect(canvas.getByText('Picstash')).toBeInTheDocument();
 
     // ナビゲーションリンクが表示されていることを確認
-    await expect(canvas.getByRole('link', { name: 'Home' })).toBeInTheDocument();
-    await expect(canvas.getByRole('link', { name: 'Labels' })).toBeInTheDocument();
-    await expect(canvas.getByRole('link', { name: 'Archive' })).toBeInTheDocument();
+    await expect(canvas.getByRole('link', { name: 'ホーム' })).toBeInTheDocument();
+    await expect(canvas.getByRole('link', { name: 'ラベル' })).toBeInTheDocument();
+    await expect(canvas.getByRole('link', { name: 'アーカイブ' })).toBeInTheDocument();
 
     // コンテンツが表示されていることを確認
     await expect(canvas.getByText('Page Content')).toBeInTheDocument();
@@ -51,14 +51,14 @@ export const CollapseSidebar: Story = {
     const canvas = within(canvasElement);
 
     // サイドバーを折りたたむ
-    const collapseButton = canvas.getByRole('button', { name: 'Collapse sidebar' });
+    const collapseButton = canvas.getByRole('button', { name: 'サイドバーを折りたたむ' });
     await userEvent.click(collapseButton);
 
     // タイトルが非表示になっていることを確認
     await expect(canvas.queryByText('Picstash')).not.toBeInTheDocument();
 
     // 展開ボタンが表示されていることを確認
-    await expect(canvas.getByRole('button', { name: 'Expand sidebar' })).toBeInTheDocument();
+    await expect(canvas.getByRole('button', { name: 'サイドバーを展開' })).toBeInTheDocument();
   },
 };
 
@@ -75,11 +75,11 @@ export const ExpandSidebarAfterCollapse: Story = {
     const canvas = within(canvasElement);
 
     // サイドバーを折りたたむ
-    const collapseButton = canvas.getByRole('button', { name: 'Collapse sidebar' });
+    const collapseButton = canvas.getByRole('button', { name: 'サイドバーを折りたたむ' });
     await userEvent.click(collapseButton);
 
     // サイドバーを展開する
-    const expandButton = canvas.getByRole('button', { name: 'Expand sidebar' });
+    const expandButton = canvas.getByRole('button', { name: 'サイドバーを展開' });
     await userEvent.click(expandButton);
 
     // タイトルが表示されていることを確認
