@@ -30,10 +30,10 @@ export function recommendationRoutes(
           : undefined;
 
       // Validate parsed values
-      if (limit !== undefined && (isNaN(limit) || limit < 1)) {
+      if (limit !== undefined && (isNaN(limit) || limit < 1 || limit > 100)) {
         return await reply.status(400).send({
           error: 'Bad Request',
-          message: 'Limit must be a positive number',
+          message: 'Limit must be a positive number not greater than 100',
         });
       }
 

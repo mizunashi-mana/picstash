@@ -72,16 +72,30 @@ export async function generateRecommendations(
     imageWeights.set(vh.imageId, existing + weight);
   }
 
-  // Fetch embeddings for viewed images and compute weighted average
-  const embeddings: Array<{ embedding: Float32Array; weight: number }> = [];
+  // Fetch embeddings for viewed images in parallel and compute weighted average
+  const embeddingResults = await Promise.all(
+    Array.from(imageWeights.entries()).map(async ([imageId, weight]) => {
+      const imageWithEmbedding = await imageRepo.findByIdWithEmbedding(imageId);
+      if (
+        imageWithEmbedding?.embedding !== null
+        && imageWithEmbedding?.embedding !== undefined
+      ) {
+        const { buffer, byteOffset, byteLength } = imageWithEmbedding.embedding;
+        // Validate embedding dimensions
+        if (byteLength !== EMBEDDING_DIMENSION * 4) {
+          return null;
+        }
+        const embedding = new Float32Array(buffer, byteOffset, byteLength / 4);
+        return { embedding, weight };
+      }
+      return null;
+    }),
+  );
 
-  for (const [imageId, weight] of imageWeights) {
-    const imageWithEmbedding = await imageRepo.findByIdWithEmbedding(imageId);
-    if (imageWithEmbedding?.embedding !== null && imageWithEmbedding?.embedding !== undefined) {
-      const embedding = new Float32Array(imageWithEmbedding.embedding.buffer);
-      embeddings.push({ embedding, weight });
-    }
-  }
+  const embeddings = embeddingResults.filter(
+    (result): result is { embedding: Float32Array; weight: number } =>
+      result !== null,
+  );
 
   if (embeddings.length === 0) {
     return { recommendations: [], reason: 'no_embeddings' };
@@ -102,20 +116,26 @@ export async function generateRecommendations(
     return { recommendations: [], reason: 'no_similar' };
   }
 
-  // Fetch image details for recommendations
-  const recommendations: RecommendedImage[] = [];
-  for (const result of similarResults.slice(0, limit)) {
-    const image = await imageRepo.findById(result.imageId);
-    if (image !== null) {
-      recommendations.push({
-        id: image.id,
-        filename: image.filename,
-        thumbnailPath: image.thumbnailPath,
-        // Convert distance to score (lower distance = higher score)
-        score: 1 / (1 + result.distance),
-      });
-    }
-  }
+  // Fetch image details for recommendations in parallel
+  const imageResults = await Promise.all(
+    similarResults.slice(0, limit).map(async (result) => {
+      const image = await imageRepo.findById(result.imageId);
+      if (image !== null) {
+        return {
+          id: image.id,
+          filename: image.filename,
+          thumbnailPath: image.thumbnailPath,
+          // Convert distance to score (lower distance = higher score)
+          score: 1 / (1 + result.distance),
+        };
+      }
+      return null;
+    }),
+  );
+
+  const recommendations = imageResults.filter(
+    (result): result is RecommendedImage => result !== null,
+  );
 
   return { recommendations };
 }
