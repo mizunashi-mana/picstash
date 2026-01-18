@@ -10,7 +10,6 @@ describe('buildTermCondition', () => {
 
     expect(result).toEqual({
       OR: [
-        { filename: { contains: '風景' } },
         { description: { contains: '風景' } },
         {
           attributes: {
@@ -30,7 +29,7 @@ describe('buildTermCondition', () => {
     const result = buildTermCondition('C++');
 
     expect(result.OR).toBeDefined();
-    expect(result.OR?.[0]).toEqual({ filename: { contains: 'C++' } });
+    expect(result.OR?.[0]).toEqual({ description: { contains: 'C++' } });
   });
 });
 
@@ -41,7 +40,7 @@ describe('buildSearchWhere', () => {
 
       // Single term returns the term condition directly (no AND wrapper)
       expect(result.OR).toBeDefined();
-      expect(result.OR).toHaveLength(3);
+      expect(result.OR).toHaveLength(2);
     });
   });
 

@@ -14,7 +14,6 @@ import type { SearchQuery } from './query-parser.js';
 export interface ImageSearchWhereInput {
   OR?: ImageSearchWhereInput[];
   AND?: ImageSearchWhereInput[];
-  filename?: { contains: string };
   description?: { contains: string };
   attributes?: {
     some: {
@@ -28,12 +27,11 @@ export interface ImageSearchWhereInput {
 
 /**
  * Build WHERE clause for a single search term.
- * Matches if term is found in filename, description, keywords, or label name.
+ * Matches if term is found in description, keywords, or label name.
  */
 export function buildTermCondition(term: string): ImageSearchWhereInput {
   return {
     OR: [
-      { filename: { contains: term } },
       { description: { contains: term } },
       {
         attributes: {

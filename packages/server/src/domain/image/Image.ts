@@ -3,7 +3,6 @@
  */
 export interface Image {
   id: string;
-  filename: string;
   path: string;
   thumbnailPath: string | null;
   mimeType: string;
@@ -19,7 +18,6 @@ export interface Image {
  * Input for creating a new image
  */
 export interface CreateImageInput {
-  filename: string;
   path: string;
   thumbnailPath?: string;
   mimeType: string;

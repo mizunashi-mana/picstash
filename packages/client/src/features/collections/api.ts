@@ -17,7 +17,6 @@ export interface CollectionImage {
   id: string;
   imageId: string;
   order: number;
-  filename: string;
   thumbnailPath: string | null;
 }
 

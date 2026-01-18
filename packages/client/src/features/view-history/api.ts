@@ -12,7 +12,6 @@ export interface ViewHistory {
 export interface ViewHistoryWithImage extends ViewHistory {
   image: {
     id: string;
-    filename: string;
     thumbnailPath: string | null;
   };
 }

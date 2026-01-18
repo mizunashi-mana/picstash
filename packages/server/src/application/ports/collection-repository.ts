@@ -24,7 +24,6 @@ export interface CollectionImageInfo {
   id: string;
   imageId: string;
   order: number;
-  filename: string;
   thumbnailPath: string | null;
 }
 

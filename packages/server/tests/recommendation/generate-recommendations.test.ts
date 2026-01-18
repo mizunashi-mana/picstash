@@ -100,7 +100,7 @@ describe('generateRecommendations', () => {
           duration: 5000,
           createdAt: new Date(),
           updatedAt: new Date(),
-          image: { id: 'img-1', filename: 'test.png', thumbnailPath: null },
+          image: { id: 'img-1', thumbnailPath: null },
         },
       ];
       vi.mocked(mockViewHistoryRepo.findRecentWithImages).mockResolvedValue(viewHistory);
@@ -128,7 +128,7 @@ describe('generateRecommendations', () => {
           duration: 5000,
           createdAt: new Date(),
           updatedAt: new Date(),
-          image: { id: 'img-1', filename: 'viewed.png', thumbnailPath: null },
+          image: { id: 'img-1', thumbnailPath: null },
         },
       ];
       vi.mocked(mockViewHistoryRepo.findRecentWithImages).mockResolvedValue(viewHistory);
@@ -155,7 +155,6 @@ describe('generateRecommendations', () => {
       vi.mocked(mockImageRepo.findById)
         .mockResolvedValueOnce({
           id: 'img-2',
-          filename: 'similar1.png',
           path: 'originals/similar1.png',
           thumbnailPath: 'thumbnails/similar1.png',
           mimeType: 'image/png',
@@ -168,7 +167,6 @@ describe('generateRecommendations', () => {
         })
         .mockResolvedValueOnce({
           id: 'img-3',
-          filename: 'similar2.png',
           path: 'originals/similar2.png',
           thumbnailPath: 'thumbnails/similar2.png',
           mimeType: 'image/png',

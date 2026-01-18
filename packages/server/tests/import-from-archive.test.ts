@@ -29,7 +29,6 @@ function createMockSession(overrides: Partial<ArchiveSession> = {}): ArchiveSess
 function createMockImage(overrides: Partial<Image> = {}): Image {
   return {
     id: 'test-image-id',
-    filename: 'saved-image.png',
     path: 'originals/saved-image.png',
     thumbnailPath: 'thumbnails/saved-image.jpg',
     mimeType: 'image/png',

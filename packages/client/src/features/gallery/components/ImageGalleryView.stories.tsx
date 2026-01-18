@@ -13,7 +13,6 @@ type Story = StoryObj<typeof meta>;
 const mockImages = [
   {
     id: '1',
-    filename: 'sample-image-1.jpg',
     path: '/storage/originals/sample-1.jpg',
     thumbnailPath: '/storage/thumbnails/sample-1.jpg',
     mimeType: 'image/jpeg',
@@ -26,7 +25,6 @@ const mockImages = [
   },
   {
     id: '2',
-    filename: 'sample-image-2.png',
     path: '/storage/originals/sample-2.png',
     thumbnailPath: '/storage/thumbnails/sample-2.jpg',
     mimeType: 'image/png',
@@ -39,7 +37,6 @@ const mockImages = [
   },
   {
     id: '3',
-    filename: 'sample-image-3.gif',
     path: '/storage/originals/sample-3.gif',
     thumbnailPath: '/storage/thumbnails/sample-3.jpg',
     mimeType: 'image/gif',
@@ -64,11 +61,6 @@ export const Default: Story = {
     // 3つの画像カードが表示されていることを確認
     const cards = canvas.getAllByRole('link');
     await expect(cards).toHaveLength(3);
-
-    // ファイル名が表示されていることを確認
-    await expect(canvas.getByText('sample-image-1.jpg')).toBeInTheDocument();
-    await expect(canvas.getByText('sample-image-2.png')).toBeInTheDocument();
-    await expect(canvas.getByText('sample-image-3.gif')).toBeInTheDocument();
   },
 };
 
