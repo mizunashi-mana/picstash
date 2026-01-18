@@ -108,3 +108,14 @@ model RecommendationConversion {
   @@index([impressionAt])
   @@map("recommendation_conversion")
 }
+
+model SearchHistory {
+  id         String   @id @default(uuid())
+  query      String   @unique /// 検索クエリ（重複保存しない）
+  searchedAt DateTime @default(now()) @map("searched_at") /// 最後に検索した日時
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([searchedAt])
+  @@map("search_history")
+}

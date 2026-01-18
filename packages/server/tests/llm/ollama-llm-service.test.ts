@@ -1,4 +1,3 @@
-/* eslint-disable n/no-unsupported-features/node-builtins -- fetch/Response/DOMException are available in test environment */
 /* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- mock Response objects require type assertions */
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';

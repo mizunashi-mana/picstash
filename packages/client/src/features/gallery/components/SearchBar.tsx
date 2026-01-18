@@ -1,9 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
-import { ActionIcon, Autocomplete, Group, Text } from '@mantine/core';
+import { useState } from 'react';
+import {
+  ActionIcon,
+  Autocomplete,
+  Group,
+  Text,
+  type AutocompleteProps,
+} from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { IconSearch, IconTag, IconX } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchSearchSuggestions } from '@/features/gallery/api';
+import { IconClock, IconSearch, IconTag, IconX } from '@tabler/icons-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  deleteSearchHistory,
+  fetchSearchSuggestions,
+  type SearchSuggestion,
+} from '@/features/gallery/api';
 
 interface SearchBarProps {
   value: string;
@@ -11,58 +21,79 @@ interface SearchBarProps {
 }
 
 const MIN_QUERY_LENGTH = 1;
+const DEBOUNCE_MS = 300;
 
 export function SearchBar({ value, onChange }: SearchBarProps) {
+  // Track the previous prop value to detect external changes (e.g., URL navigation)
+  const [prevValue, setPrevValue] = useState(value);
   const [inputValue, setInputValue] = useState(value);
-  const [debouncedValue] = useDebouncedValue(inputValue, 300);
+  const queryClient = useQueryClient();
 
-  // Track if we should skip the next debounce effect (after immediate actions)
-  const skipNextDebounce = useRef(false);
+  // Debounced value for suggestions query only
+  const [debouncedInputForSuggestions] = useDebouncedValue(inputValue, DEBOUNCE_MS);
 
-  // Fetch suggestions when input changes
-  const suggestionsQuery = useQuery({
-    queryKey: ['search-suggestions', debouncedValue],
-    queryFn: async () => await fetchSearchSuggestions(debouncedValue),
-    enabled: debouncedValue.length >= MIN_QUERY_LENGTH,
-    staleTime: 30000, // Cache for 30 seconds
-  });
+  // Sync from parent (render-time pattern)
+  // Handles browser back/forward, URL changes, etc.
+  if (value !== prevValue) {
+    setPrevValue(value);
+    setInputValue(value);
+  }
 
-  // Sync inputValue when parent value changes (e.g., from URL)
-  // Note: inputValue is intentionally excluded from deps to avoid resetting input during typing
-  useEffect(() => {
-    if (value !== inputValue && !skipNextDebounce.current) {
-      setInputValue(value);
+  // Handle user typing - only update local state, don't notify parent
+  const handleInputChange = (newValue: string) => {
+    setInputValue(newValue);
+  };
+
+  // Handle search submission (button click or Enter key)
+  const handleSubmit = () => {
+    if (inputValue !== value) {
+      setPrevValue(inputValue);
+      onChange(inputValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only sync when parent value changes, not on every keystroke
-  }, [value]);
+  };
 
-  // Trigger search on debounced value change (for typing)
-  useEffect(() => {
-    if (skipNextDebounce.current) {
-      skipNextDebounce.current = false;
-      return;
-    }
-    if (debouncedValue !== value) {
-      onChange(debouncedValue);
-    }
-  }, [debouncedValue, value, onChange]);
-
+  // Handle clear button - immediate notification
   const handleClear = () => {
-    skipNextDebounce.current = true;
     setInputValue('');
+    setPrevValue('');
     onChange('');
   };
 
+  // Handle option selection - immediate notification
   const handleOptionSubmit = (selectedValue: string) => {
-    skipNextDebounce.current = true;
     setInputValue(selectedValue);
+    setPrevValue(selectedValue);
     onChange(selectedValue);
   };
 
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
+  // Fetch suggestions when input changes (using debounced value)
+  const suggestionsQuery = useQuery({
+    queryKey: ['search-suggestions', debouncedInputForSuggestions],
+    queryFn: async () => await fetchSearchSuggestions(debouncedInputForSuggestions),
+    enabled: debouncedInputForSuggestions.length >= MIN_QUERY_LENGTH,
+    staleTime: 30000, // Cache for 30 seconds
+  });
+
+  // Delete history mutation
+  const deleteHistoryMutation = useMutation({
+    mutationFn: deleteSearchHistory,
+    onSuccess: () => {
+      // Invalidate suggestions to refresh the list
+      void queryClient.invalidateQueries({ queryKey: ['search-suggestions'] });
+    },
+  });
+
   // Map suggestions to a lookup table for rendering
-  const suggestionTypeMap = new Map<string, 'label' | 'keyword'>();
+  const suggestionMap = new Map<string, SearchSuggestion>();
   for (const suggestion of suggestionsQuery.data?.suggestions ?? []) {
-    suggestionTypeMap.set(suggestion.value, suggestion.type);
+    suggestionMap.set(suggestion.value, suggestion);
   }
 
   // Convert suggestions to Autocomplete options (just values)
@@ -70,43 +101,119 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
     suggestion => suggestion.value,
   );
 
-  return (
-    <Autocomplete
-      placeholder="検索..."
-      value={inputValue}
-      onChange={setInputValue}
-      onOptionSubmit={handleOptionSubmit}
-      leftSection={<IconSearch size={16} />}
-      rightSection={
-        inputValue !== ''
-          ? (
-              <ActionIcon
-                size="sm"
-                variant="subtle"
-                onClick={handleClear}
-                aria-label="検索をクリア"
-              >
-                <IconX size={16} />
-              </ActionIcon>
-            )
-          : null
+  const renderOption: AutocompleteProps['renderOption'] = ({ option }) => {
+    const suggestion = suggestionMap.get(option.value);
+    const suggestionType = suggestion?.type ?? 'keyword';
+    const historyId = suggestion?.id;
+
+    const getIcon = () => {
+      switch (suggestionType) {
+        case 'history':
+          return (
+            <IconClock
+              size={14}
+              style={{ color: 'var(--mantine-color-orange-6)' }}
+            />
+          );
+        case 'label':
+          return (
+            <IconTag
+              size={14}
+              style={{ color: 'var(--mantine-color-blue-6)' }}
+            />
+          );
+        default:
+          return (
+            <IconSearch
+              size={14}
+              style={{ color: 'var(--mantine-color-gray-6)' }}
+            />
+          );
       }
-      data={autocompleteData}
-      renderOption={({ option }) => {
-        const suggestionType = suggestionTypeMap.get(option.value) ?? 'keyword';
-        return (
-          <Group gap="xs">
-            {suggestionType === 'label'
-              ? <IconTag size={14} style={{ color: 'var(--mantine-color-blue-6)' }} />
-              : <IconSearch size={14} style={{ color: 'var(--mantine-color-gray-6)' }} />}
-            <Text size="sm">{option.value}</Text>
-            <Text size="xs" c="dimmed">
-              {suggestionType === 'label' ? 'ラベル' : 'キーワード'}
-            </Text>
-          </Group>
-        );
-      }}
-      limit={10}
-    />
+    };
+
+    const getTypeLabel = () => {
+      switch (suggestionType) {
+        case 'history':
+          return '履歴';
+        case 'label':
+          return 'ラベル';
+        default:
+          return 'キーワード';
+      }
+    };
+
+    const handleDeleteHistory = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (historyId !== undefined) {
+        deleteHistoryMutation.mutate(historyId);
+      }
+    };
+
+    return (
+      <Group gap="xs" justify="space-between" wrap="nowrap" w="100%">
+        <Group gap="xs" wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
+          {getIcon()}
+          <Text size="sm" truncate>
+            {option.value}
+          </Text>
+          <Text size="xs" c="dimmed">
+            {getTypeLabel()}
+          </Text>
+        </Group>
+        {suggestionType === 'history' && historyId !== undefined && (
+          <ActionIcon
+            size="xs"
+            variant="subtle"
+            color="gray"
+            radius="xs"
+            onClick={handleDeleteHistory}
+            aria-label="履歴を削除"
+          >
+            <IconX size={14} />
+          </ActionIcon>
+        )}
+      </Group>
+    );
+  };
+
+  return (
+    <Group gap="xs" wrap="nowrap">
+      <Autocomplete
+        placeholder="検索..."
+        value={inputValue}
+        onChange={handleInputChange}
+        onOptionSubmit={handleOptionSubmit}
+        onKeyDown={handleKeyDown}
+        leftSection={<IconSearch size={16} />}
+        rightSection={
+          inputValue !== ''
+            ? (
+                <ActionIcon
+                  size="sm"
+                  variant="subtle"
+                  onClick={handleClear}
+                  aria-label="検索をクリア"
+                >
+                  <IconX size={16} />
+                </ActionIcon>
+              )
+            : null
+        }
+        data={autocompleteData}
+        renderOption={renderOption}
+        limit={10}
+        style={{ flex: 1 }}
+      />
+      <ActionIcon
+        size="lg"
+        variant="filled"
+        onClick={handleSubmit}
+        aria-label="検索"
+      >
+        <IconSearch size={18} />
+      </ActionIcon>
+    </Group>
   );
 }

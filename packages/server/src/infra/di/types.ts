@@ -9,6 +9,7 @@ export const TYPES = {
     'RecommendationConversionRepository',
   ),
   StatsRepository: Symbol.for('StatsRepository'),
+  SearchHistoryRepository: Symbol.for('SearchHistoryRepository'),
 
   // Storage & Processing
   FileStorage: Symbol.for('FileStorage'),

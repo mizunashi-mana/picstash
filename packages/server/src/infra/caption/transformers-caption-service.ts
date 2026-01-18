@@ -78,7 +78,6 @@ interface TransformersModule {
     model: string,
   ) => Promise<TranslationPipeline>;
   RawImage: {
-    // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in Node.js 18+
     fromBlob: (blob: Blob) => Promise<RawImageInstance>;
   };
 }
@@ -146,7 +145,6 @@ export class TransformersCaptionService implements CaptionService {
     }
 
     // Load image using RawImage
-    // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in Node.js 18+
     const image = await transformers.RawImage.fromBlob(new Blob([imageData]));
 
     // Construct prompts for Florence-2

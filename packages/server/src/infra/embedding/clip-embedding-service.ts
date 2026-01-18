@@ -22,7 +22,6 @@ const EMBEDDING_DIMENSION = 512;
 // Type for the transformers module
 interface TransformersModule {
   RawImage: {
-    // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in Node.js 18+
     fromBlob: (blob: Blob) => Promise<unknown>;
   };
   AutoProcessor: {
@@ -86,7 +85,6 @@ export class ClipEmbeddingService implements EmbeddingService {
     }
 
     // Load image using RawImage
-    // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in Node.js 18+
     const image = await transformers.RawImage.fromBlob(new Blob([imageData]));
 
     // Process image through the processor

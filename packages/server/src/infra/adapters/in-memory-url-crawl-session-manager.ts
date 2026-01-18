@@ -1,4 +1,3 @@
-/* eslint-disable n/no-unsupported-features/node-builtins -- fetch is available in Node.js 18+ */
 import 'reflect-metadata';
 import { randomUUID } from 'node:crypto';
 import { injectable } from 'inversify';
