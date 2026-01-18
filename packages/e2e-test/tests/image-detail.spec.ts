@@ -14,6 +14,9 @@ test.describe('Image Detail', () => {
     // Wait for upload success message
     await expect(page.getByText('アップロード完了')).toBeVisible();
 
+    // Expand gallery to see uploaded images
+    await page.getByRole('button', { name: '展開する' }).click();
+
     // Wait for image to appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
   });
