@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   ActionIcon,
   Alert,
@@ -55,6 +56,7 @@ export function ImageDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   const { data: image, isLoading, error } = useQuery({
     queryKey: ['image', id],
@@ -67,15 +69,20 @@ export function ImageDetailPage() {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- button is disabled when id is undefined
     mutationFn: async () => { await deleteImage(id!); },
     onSuccess: async () => {
+      // Mark as deleted before navigation to prevent view history update
+      setIsDeleted(true);
       close();
+      // Invalidate caches that may contain the deleted image
       await queryClient.invalidateQueries({ queryKey: ['images'] });
+      await queryClient.invalidateQueries({ queryKey: ['recommendations'] });
       await navigate('/');
     },
   });
 
   // Track view history for this image
   // If conversionId is present, also record the recommendation click
-  useViewHistory(id, { conversionId });
+  // Skip cleanup if image was deleted (view history is cascade deleted)
+  useViewHistory(id, { conversionId, isDeleted });
 
   if (isLoading) {
     return (

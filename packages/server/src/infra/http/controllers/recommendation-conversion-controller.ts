@@ -79,24 +79,13 @@ export class RecommendationConversionController {
           });
         }
 
-        try {
-          const conversions
-            = await this.conversionRepository.createImpressions(validatedInputs);
+        // Create impressions (missing images are silently skipped)
+        const conversions
+          = await this.conversionRepository.createImpressions(validatedInputs);
 
-          return await reply.status(201).send({
-            ids: conversions.map(c => c.id),
-          });
-        }
-        catch (error) {
-          // Handle image not found (P2003: Foreign key constraint violation)
-          if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
-            return await reply.status(404).send({
-              error: 'Not Found',
-              message: 'One or more images not found',
-            });
-          }
-          throw error;
-        }
+        return await reply.status(201).send({
+          ids: conversions.map(c => c.id),
+        });
       },
     );
 
