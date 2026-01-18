@@ -13,6 +13,7 @@ import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
+import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 import type {
   ArchiveController,
@@ -24,6 +25,7 @@ import type {
   RecommendationConversionController,
   SearchController,
   StatsController,
+  UrlCrawlController,
   ViewHistoryController,
 } from '@/infra/http/controllers/index.js';
 import type { Container } from 'inversify';
@@ -91,6 +93,12 @@ export class AppContainer {
     return this.container.get<ArchiveSessionManager>(TYPES.ArchiveSessionManager);
   }
 
+  // URL Crawl
+
+  getUrlCrawlSessionManager(): UrlCrawlSessionManager {
+    return this.container.get<UrlCrawlSessionManager>(TYPES.UrlCrawlSessionManager);
+  }
+
   // AI/Embedding
 
   getEmbeddingService(): EmbeddingService {
@@ -145,6 +153,10 @@ export class AppContainer {
 
   getSearchController(): SearchController {
     return this.container.get<SearchController>(TYPES.SearchController);
+  }
+
+  getUrlCrawlController(): UrlCrawlController {
+    return this.container.get<UrlCrawlController>(TYPES.UrlCrawlController);
   }
 }
 
