@@ -7,18 +7,12 @@ test.describe('Image Detail', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
 
-    // Set up response listener before triggering upload
-    const uploadResponsePromise = page.waitForResponse(
-      response => response.url().includes('/api/images') && response.request().method() === 'POST',
-    );
-
     // Always upload a test image to ensure a consistent state
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testImagePath);
 
-    // Wait for upload API response
-    const uploadResponse = await uploadResponsePromise;
-    expect(uploadResponse.status()).toBe(201);
+    // Wait for upload success message
+    await expect(page.getByText('アップロード完了')).toBeVisible();
 
     // Wait for image to appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();

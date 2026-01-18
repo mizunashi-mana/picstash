@@ -10,38 +10,26 @@ test.describe('Image Upload', () => {
     // Wait for the dropzone to be visible
     await expect(page.getByText('ここに画像をドラッグ＆ドロップ')).toBeVisible();
 
-    // Set up response listener before triggering upload
-    const uploadResponsePromise = page.waitForResponse(
-      response => response.url().includes('/api/images') && response.request().method() === 'POST',
-    );
-
     // Upload file via input element (Mantine Dropzone has a hidden input)
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testImagePath);
 
-    // Wait for upload API response
-    const response = await uploadResponsePromise;
-    expect(response.status()).toBe(201);
+    // Wait for upload success message
+    await expect(page.getByText('アップロード完了')).toBeVisible();
 
-    // Wait for image to appear in gallery
+    // Image should appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
   });
 
   test('should show uploaded image in gallery', async ({ page }) => {
     await page.goto('/');
 
-    // Set up response listener before triggering upload
-    const uploadResponsePromise = page.waitForResponse(
-      response => response.url().includes('/api/images') && response.request().method() === 'POST',
-    );
-
-    // Always upload a new image for this test
+    // Upload a new image
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testImagePath);
 
-    // Wait for upload API response
-    const response = await uploadResponsePromise;
-    expect(response.status()).toBe(201);
+    // Wait for upload success message
+    await expect(page.getByText('アップロード完了')).toBeVisible();
 
     // Image link should appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
