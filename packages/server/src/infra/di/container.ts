@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
+import { getConfig } from '@/config.js';
 import {
   InMemoryArchiveSessionManager,
   InMemoryUrlCrawlSessionManager,
@@ -136,10 +137,14 @@ export function createContainer(): Container {
     .to(TransformersCaptionService)
     .inSingletonScope();
 
-  container
-    .bind<LlmService>(TYPES.LlmService)
-    .to(OllamaLlmService)
-    .inSingletonScope();
+  // Bind LLM service only if ollama is configured
+  const config = getConfig();
+  if (config.ollama !== undefined) {
+    container
+      .bind<LlmService>(TYPES.LlmService)
+      .to(OllamaLlmService)
+      .inSingletonScope();
+  }
 
   // Bind Controllers
   container.bind<ImageController>(TYPES.ImageController).to(ImageController);

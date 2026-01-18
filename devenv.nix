@@ -4,6 +4,7 @@
   # https://devenv.sh/packages/
   packages = [
     pkgs.actionlint
+    pkgs.ollama
   ];
 
   # https://devenv.sh/languages/

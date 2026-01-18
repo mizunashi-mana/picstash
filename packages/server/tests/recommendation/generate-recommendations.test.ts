@@ -25,6 +25,7 @@ function createMockImageRepository(): ImageRepository {
   return {
     create: vi.fn(),
     findById: vi.fn(),
+    findByIds: vi.fn(),
     findAll: vi.fn(),
     search: vi.fn(),
     updateById: vi.fn(),

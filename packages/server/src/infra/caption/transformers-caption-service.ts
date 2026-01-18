@@ -186,17 +186,12 @@ export class TransformersCaptionService implements CaptionService {
   }
 
   async generateWithContext(imagePath: string, context: CaptionContext): Promise<CaptionResult> {
-    // If no similar descriptions or LLM not available, fall back to basic generation
-    if (
-      context.similarDescriptions.length === 0
-      || this.llmService === undefined
-    ) {
-      return await this.generateFromFile(imagePath);
-    }
+    // Determine whether LLM is available (short-circuit if service is undefined)
+    const llmAvailable
+      = this.llmService !== undefined && await this.llmService.isAvailable();
 
-    // Check if LLM is available
-    const llmAvailable = await this.llmService.isAvailable();
-    if (!llmAvailable) {
+    // If no similar descriptions or LLM not available, fall back to basic generation
+    if (context.similarDescriptions.length === 0 || !llmAvailable) {
       return await this.generateFromFile(imagePath);
     }
 

@@ -482,12 +482,23 @@ export class ImageController {
     // Find similar images, excluding the current image
     const similarResults = this.embeddingRepository.findSimilar(embedding, limit, [imageId]);
 
-    // Get descriptions from similar images that have them, with similarity scores
+    if (similarResults.length === 0) {
+      return [];
+    }
+
+    // Batch fetch all similar images at once to avoid N+1 queries
+    const imageIds = similarResults.map(r => r.imageId);
+    const images = await this.imageRepository.findByIds(imageIds);
+
+    // Create a map for quick lookup
+    const imageMap = new Map(images.map(img => [img.id, img]));
+
+    // Build descriptions with similarity scores, preserving similarity order
     const descriptions: SimilarImageDescription[] = [];
     for (const result of similarResults) {
-      const image = await this.imageRepository.findById(result.imageId);
+      const image = imageMap.get(result.imageId);
       if (
-        image !== null
+        image !== undefined
         && image.description !== null
         && image.description.trim() !== ''
       ) {
