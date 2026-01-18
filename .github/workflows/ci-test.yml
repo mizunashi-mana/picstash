@@ -60,9 +60,6 @@ jobs:
         run: npx playwright install chromium
         working-directory: packages/e2e-test
 
-      - name: Create database directory
-        run: mkdir -p packages/server/prisma/data
-
       - name: Run E2E tests
         run: npm run test:e2e
 
