@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router';
 import { fetchImages } from '@/features/gallery/api';
@@ -7,10 +7,12 @@ import { ImageGalleryView } from './ImageGalleryView';
 export function ImageGallery() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { data: images, isLoading, error } = useQuery({
     queryKey: ['images', query],
     queryFn: async () => await fetchImages(query),
+    enabled: isExpanded,
   });
 
   const handleSearchChange = useCallback((value: string) => {
@@ -22,6 +24,10 @@ export function ImageGallery() {
     }
   }, [setSearchParams]);
 
+  const handleToggleExpand = useCallback(() => {
+    setIsExpanded(prev => !prev);
+  }, []);
+
   return (
     <ImageGalleryView
       images={images}
@@ -29,6 +35,8 @@ export function ImageGallery() {
       error={error}
       searchQuery={query}
       onSearchChange={handleSearchChange}
+      isExpanded={isExpanded}
+      onToggleExpand={handleToggleExpand}
     />
   );
 }
