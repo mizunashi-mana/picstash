@@ -12,6 +12,21 @@ storage:
   # Image storage path (relative to packages/server/)
   path: "../../storage"
 
+# Logging settings
+logging:
+  # Log level: debug, info, warn, error
+  level: "info"
+  # Log format: pretty (development), json (production)
+  format: "pretty"
+  # File output settings
+  file:
+    enabled: false
+    path: "./logs/server.log"
+    rotation:
+      enabled: true
+      maxSize: "10M"
+      maxFiles: 5
+
 # Ollama LLM settings (optional)
 ollama:
   url: "http://localhost:11434"

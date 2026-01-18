@@ -43,6 +43,7 @@
     "inversify": "^7.10.8",
     "js-yaml": "^4.1.1",
     "node-unrar-js": "^2.0.2",
+    "pino-roll": "^4.0.0",
     "reflect-metadata": "^0.2.2",
     "sharp": "^0.34.5",
     "sqlite-vec": "^0.1.7-alpha.2",
