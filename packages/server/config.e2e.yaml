@@ -1,0 +1,20 @@
+# Picstash Server Configuration for E2E Tests
+
+server:
+  port: 3000
+  host: "0.0.0.0"
+
+database:
+  url: "file:./prisma/data/picstash.db"
+
+storage:
+  path: "../../storage"
+
+logging:
+  level: "info"
+  format: "pretty"
+  file:
+    enabled: true
+    path: "./logs/server.log"
+    rotation:
+      enabled: false
