@@ -175,8 +175,8 @@ picstash/
 ## 主要ディレクトリの説明
 
 ### `packages/client/`
-フロントエンドのパッケージ。Feature-based ディレクトリ構造を採用：
-- **features/** - 機能ごとのモジュール（archive-import, collections, duplicates, gallery, home, labels, recommendations, stats, upload, url-crawl, view-history）
+フロントエンドのパッケージ。feature-sliced アーキテクチャを採用：
+- **features/** - 機能ごとのモジュール
   - 各機能は components/, pages/, api.ts を含む
   - 機能間は index.ts 経由でのみ依存可能（dependency-cruiser で検証）
 - **shared/** - 共通部品
