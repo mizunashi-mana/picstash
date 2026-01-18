@@ -169,6 +169,24 @@ const body = createImageSchema.parse(req.body);
 
 ## リソース
 
-* [README.md](../README.md) - プロジェクト概要
+### プロジェクトドキュメント
+
+* [README.md](../README.md) - プロジェクト概要、セットアップ手順
+
+### Steering ドキュメント（`.ai-agent/steering/`）
+
+AI エージェント向けのプロジェクト指針ドキュメントです：
+
+| ファイル | 内容 |
+|---------|------|
+| [product.md](../.ai-agent/steering/product.md) | プロダクト概要、機能一覧、ユースケース |
+| [tech.md](../.ai-agent/steering/tech.md) | 技術スタック、開発コマンド、パッケージ構成 |
+| [plan.md](../.ai-agent/steering/plan.md) | 実装計画、セグメント状態、優先順位 |
+| [work.md](../.ai-agent/steering/work.md) | 作業の進め方、コーディング規約 |
+| [idea.md](../.ai-agent/steering/idea.md) | 将来のアイデア、検討事項 |
+| [structure.md](../.ai-agent/structure.md) | ディレクトリ構成、各ディレクトリの役割 |
+
+### コード関連
+
 * [Prisma Schema](../packages/server/prisma/schema.prisma) - データベーススキーマ
 * [ESLint Config](../packages/eslint-config/) - 共通リンター設定パッケージ
