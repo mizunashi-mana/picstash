@@ -10,6 +10,8 @@ export {
   getMimeTypeFromExtension,
   isImageUrl,
   extractFilenameFromUrl,
+  isImageContentType,
+  getExtensionFromContentType,
 } from './UrlCrawlConfig.js';
 export type { SupportedImageExtension } from './UrlCrawlConfig.js';
 export {
