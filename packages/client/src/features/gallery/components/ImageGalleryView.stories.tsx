@@ -1,10 +1,14 @@
-import { expect, within } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 import { ImageGalleryView } from './ImageGalleryView';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
   title: 'Features/Gallery/ImageGalleryView',
   component: ImageGalleryView,
+  args: {
+    isExpanded: true,
+    onToggleExpand: fn(),
+  },
 } satisfies Meta<typeof ImageGalleryView>;
 
 export default meta;
@@ -124,5 +128,26 @@ export const SingleImage: Story = {
     // 1つの画像カードが表示されていることを確認
     const cards = canvas.getAllByRole('link');
     await expect(cards).toHaveLength(1);
+  },
+};
+
+export const Collapsed: Story = {
+  args: {
+    images: mockImages,
+    isLoading: false,
+    error: null,
+    isExpanded: false,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // 折りたたみ状態では展開ボタンが表示される
+    const expandButton = canvas.getByRole('button', { name: '展開する' });
+    await expect(expandButton).toBeInTheDocument();
+    await expect(expandButton).toHaveAttribute('aria-expanded', 'false');
+
+    // 画像カードは表示されていない
+    const cards = canvas.queryAllByRole('link');
+    await expect(cards).toHaveLength(0);
   },
 };

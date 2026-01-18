@@ -40,7 +40,6 @@ export function ImageGalleryView({
   onToggleExpand,
 }: ImageGalleryViewProps) {
   const hasSearch = searchQuery !== '';
-  const isCollapsible = onToggleExpand !== undefined;
 
   const renderContent = () => {
     if (isLoading) {
@@ -115,32 +114,6 @@ export function ImageGalleryView({
     );
   };
 
-  // Non-collapsible mode (for backwards compatibility)
-  if (!isCollapsible) {
-    return (
-      <Stack gap="md">
-        {onSearchChange !== undefined && (
-          <Group justify="space-between" align="center">
-            <Box style={{ flex: 1, maxWidth: 400 }}>
-              <SearchBar
-                value={searchQuery}
-                onChange={onSearchChange}
-              />
-            </Box>
-            {images !== undefined && images.length > 0 && (
-              <Text size="sm" c="dimmed">
-                {images.length}
-                件
-              </Text>
-            )}
-          </Group>
-        )}
-        {renderContent()}
-      </Stack>
-    );
-  }
-
-  // Collapsible mode
   return (
     <Paper p="md" withBorder>
       <Stack gap="md">
@@ -160,6 +133,7 @@ export function ImageGalleryView({
             size="compact-sm"
             onClick={onToggleExpand}
             rightSection={isExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+            aria-expanded={isExpanded}
           >
             {isExpanded ? '折りたたむ' : '展開する'}
           </Button>

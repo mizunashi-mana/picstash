@@ -7,7 +7,7 @@ import { ImageGalleryView } from './ImageGalleryView';
 export function ImageGallery() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(query !== '');
 
   const { data: images, isLoading, error } = useQuery({
     queryKey: ['images', query],
