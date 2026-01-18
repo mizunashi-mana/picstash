@@ -134,13 +134,24 @@ export class SearchController {
     app.post<{ Body: SaveHistoryBody }>(
       '/api/search/history',
       async (request, reply) => {
-        const { query } = request.body;
+        const body: unknown = request.body;
 
-        if (query.trim() === '') {
+        if (
+          typeof body !== 'object'
+          || body === null
+          || !('query' in body)
+          || typeof body.query !== 'string'
+        ) {
+          return await reply.status(400).send({ error: 'Invalid request body' });
+        }
+
+        const query = body.query.trim();
+
+        if (query === '') {
           return await reply.status(400).send({ error: 'Query is required' });
         }
 
-        const history = await this.searchHistoryRepository.save({ query: query.trim() });
+        const history = await this.searchHistoryRepository.save({ query });
         return await reply.status(201).send(history);
       },
     );

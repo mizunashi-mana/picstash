@@ -9,6 +9,7 @@ import type {
 } from '@/application/ports/search-history-repository.js';
 
 const DEFAULT_LIMIT = 20;
+const MAX_FETCH_LIMIT = 1000;
 
 @injectable()
 export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
@@ -47,9 +48,10 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
     }
 
     // SQLite doesn't support case-insensitive LIKE with Japanese well,
-    // so we fetch all and filter in JS
+    // so we fetch recent records and filter in JS
     const all = await prisma.searchHistory.findMany({
       orderBy: { searchedAt: 'desc' },
+      take: MAX_FETCH_LIMIT,
     });
 
     return all

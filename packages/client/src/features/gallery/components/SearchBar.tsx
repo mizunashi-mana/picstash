@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   ActionIcon,
   Autocomplete,
-  Box,
   Group,
   Text,
   type AutocompleteProps,
@@ -164,29 +163,16 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
           </Text>
         </Group>
         {suggestionType === 'history' && historyId !== undefined && (
-          <Box
-            component="button"
+          <ActionIcon
+            size="xs"
+            variant="subtle"
+            color="gray"
+            radius="xs"
             onClick={handleDeleteHistory}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '2px',
-              display: 'flex',
-              alignItems: 'center',
-              borderRadius: '4px',
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor
-                = 'var(--mantine-color-gray-2)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
             aria-label="履歴を削除"
           >
-            <IconX size={14} style={{ color: 'var(--mantine-color-gray-6)' }} />
-          </Box>
+            <IconX size={14} />
+          </ActionIcon>
         )}
       </Group>
     );
