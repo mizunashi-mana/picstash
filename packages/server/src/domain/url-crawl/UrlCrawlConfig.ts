@@ -10,7 +10,7 @@ export const MAX_IMAGES_PER_PAGE = 500;
 
 /** User-Agent for HTTP requests */
 export const USER_AGENT
-  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
 /** Supported image extensions for crawling */
 export const SUPPORTED_IMAGE_EXTENSIONS = [
@@ -82,7 +82,7 @@ export function extractFilenameFromUrl(url: string): string {
     const pathWithoutQuery = pathname.split('?')[0] ?? pathname;
     const segments = pathWithoutQuery.split('/');
     const filename = segments[segments.length - 1];
-    if (filename !== undefined && filename !== '' && filename.length > 0) {
+    if (filename !== undefined && filename.length > 0) {
       return decodeURIComponent(filename);
     }
     return 'image';

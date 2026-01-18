@@ -54,24 +54,26 @@ function addImageEntry(ctx: ExtractContext, rawUrl: string | undefined): void {
 }
 
 /**
- * Extract from <img> tags with src before alt
+ * Extract from <img> tags, handling src/alt in any attribute order
  */
 function extractFromImgTags(html: string, ctx: ExtractContext): void {
-  const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*(?:alt=["']([^"']*)["'])?[^>]*>/gi;
-  const matches = html.matchAll(imgRegex);
-  for (const match of matches) {
-    addEntry(ctx, match[1], match[2]);
-  }
-}
+  const imgTagRegex = /<img\b[^>]*>/gi;
+  const matches = html.matchAll(imgTagRegex);
 
-/**
- * Extract from <img> tags with alt before src
- */
-function extractFromImgTagsAltFirst(html: string, ctx: ExtractContext): void {
-  const imgRegexAltFirst = /<img[^>]+alt=["']([^"']*)["'][^>]+src=["']([^"']+)["'][^>]*>/gi;
-  const matches = html.matchAll(imgRegexAltFirst);
+  // Attribute-level regexes, independent of attribute order and spacing
+  const srcAttrRegex = /\bsrc\s*=\s*(['"])(.*?)\1/i;
+  const altAttrRegex = /\balt\s*=\s*(['"])(.*?)\1/i;
+
   for (const match of matches) {
-    addEntry(ctx, match[2], match[1]);
+    const tag = match[0];
+    const srcMatch = srcAttrRegex.exec(tag);
+    if (srcMatch === null) {
+      continue;
+    }
+    const altMatch = altAttrRegex.exec(tag);
+    const src = srcMatch[2];
+    const alt = altMatch !== null ? altMatch[2] : undefined;
+    addEntry(ctx, src, alt);
   }
 }
 
@@ -138,7 +140,6 @@ export function extractImageUrls(html: string, baseUrl: string): CrawledImageEnt
   };
 
   extractFromImgTags(html, ctx);
-  extractFromImgTagsAltFirst(html, ctx);
   extractFromLinks(html, ctx);
   extractFromBackgroundImages(html, ctx);
   extractFromSrcset(html, ctx);
@@ -156,20 +157,23 @@ export function extractPageTitle(html: string): string | undefined {
   return titleMatch?.[1]?.trim();
 }
 
+/** Allowed URL protocols (whitelist) */
+const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
+
 /**
  * Resolve a potentially relative URL to an absolute URL
  */
 function resolveUrl(url: string, baseUrl: string): string | null {
   try {
-    // Skip data URLs, javascript:, etc.
-    if (url.startsWith('data:') || url.startsWith('javascript:') || url.startsWith('#')) {
+    // Skip fragment-only URLs
+    if (url.startsWith('#')) {
       return null;
     }
 
     const resolved = new URL(url, baseUrl);
 
-    // Only allow http and https protocols
-    if (resolved.protocol !== 'http:' && resolved.protocol !== 'https:') {
+    // Only allow whitelisted protocols (http, https)
+    if (!ALLOWED_PROTOCOLS.has(resolved.protocol)) {
       return null;
     }
 
@@ -191,15 +195,13 @@ export function filterImageEntries(entries: CrawledImageEntry[]): CrawledImageEn
         const pathname = urlObj.pathname.toLowerCase();
         const pathWithoutQuery = pathname.split('?')[0] ?? pathname;
 
-        // Check if URL ends with supported extension
+        // Check if URL ends with a supported image extension
         const hasImageExtension = SUPPORTED_IMAGE_EXTENSIONS.some(ext =>
           pathWithoutQuery.endsWith(ext),
         );
 
-        // Also accept URLs that might be images but don't have clear extensions
-        // (e.g., CDN URLs like /image/abc123)
-        // We'll validate the actual content type when fetching
-        return hasImageExtension || !pathWithoutQuery.includes('.');
+        // Only accept URLs that clearly reference supported image formats
+        return hasImageExtension;
       }
       catch {
         return false;

@@ -55,7 +55,7 @@ export function UrlCrawlPage() {
 
   const sessionQuery = useQuery({
     queryKey: ['url-crawl-session', sessionId],
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures sessionId is not null
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- query is only enabled when sessionId !== null (see enabled option below)
     queryFn: async () => await getCrawlSession(sessionId!),
     enabled: sessionId !== null,
   });

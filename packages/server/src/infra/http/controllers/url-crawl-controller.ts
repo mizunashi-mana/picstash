@@ -5,10 +5,69 @@ import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+
+/** Rate limit window in milliseconds (1 minute) */
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+
+/** Maximum requests per window for crawl creation */
+const CRAWL_RATE_LIMIT = 10;
+
+/** Maximum requests per window for import */
+const IMPORT_RATE_LIMIT = 20;
+
+interface RateLimitEntry {
+  count: number;
+  windowStart: number;
+}
+
+/**
+ * Simple in-memory rate limiter
+ */
+class RateLimiter {
+  private readonly limits = new Map<string, RateLimitEntry>();
+
+  /**
+   * Check if request should be rate limited
+   * @returns true if the request is allowed, false if rate limited
+   */
+  check(key: string, maxRequests: number): boolean {
+    const now = Date.now();
+    const entry = this.limits.get(key);
+
+    if (entry === undefined || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+      // New window
+      this.limits.set(key, { count: 1, windowStart: now });
+      return true;
+    }
+
+    if (entry.count >= maxRequests) {
+      return false;
+    }
+
+    entry.count++;
+    return true;
+  }
+
+  /**
+   * Get remaining requests for a key
+   */
+  getRemaining(key: string, maxRequests: number): number {
+    const now = Date.now();
+    const entry = this.limits.get(key);
+
+    if (entry === undefined || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+      return maxRequests;
+    }
+
+    return Math.max(0, maxRequests - entry.count);
+  }
+}
 
 @injectable()
 export class UrlCrawlController {
+  private readonly rateLimiter = new RateLimiter();
+
   constructor(
     @inject(TYPES.UrlCrawlSessionManager)
     private readonly sessionManager: UrlCrawlSessionManager,
@@ -17,9 +76,46 @@ export class UrlCrawlController {
     @inject(TYPES.FileStorage) private readonly fileStorage: FileStorage,
   ) {}
 
+  /**
+   * Get rate limit key from request (IP-based)
+   */
+  private getRateLimitKey(request: FastifyRequest, endpoint: string): string {
+    return `${endpoint}:${request.ip}`;
+  }
+
+  /**
+   * Check rate limit and send 429 if exceeded
+   */
+  private checkRateLimit(
+    request: FastifyRequest,
+    reply: FastifyReply,
+    endpoint: string,
+    maxRequests: number,
+  ): boolean {
+    const key = this.getRateLimitKey(request, endpoint);
+    if (!this.rateLimiter.check(key, maxRequests)) {
+      const remaining = this.rateLimiter.getRemaining(key, maxRequests);
+      void reply
+        .status(429)
+        .header('X-RateLimit-Limit', maxRequests.toString())
+        .header('X-RateLimit-Remaining', remaining.toString())
+        .send({
+          error: 'Too Many Requests',
+          message: 'Rate limit exceeded. Please try again later.',
+        });
+      return false;
+    }
+    return true;
+  }
+
   registerRoutes(app: FastifyInstance): void {
     // Create crawl session from URL
     app.post<{ Body: { url: string } }>('/api/url-crawl', async (request, reply) => {
+      // Rate limiting for crawl creation
+      if (!this.checkRateLimit(request, reply, 'crawl', CRAWL_RATE_LIMIT)) {
+        return;
+      }
+
       const { url } = request.body;
 
       if (typeof url !== 'string' || url.trim() === '') {
@@ -201,6 +297,11 @@ export class UrlCrawlController {
       Params: { sessionId: string };
       Body: { indices: number[] };
     }>('/api/url-crawl/:sessionId/import', async (request, reply) => {
+      // Rate limiting for import
+      if (!this.checkRateLimit(request, reply, 'import', IMPORT_RATE_LIMIT)) {
+        return;
+      }
+
       const { sessionId } = request.params;
       const { indices } = request.body;
 
