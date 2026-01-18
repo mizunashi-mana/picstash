@@ -73,6 +73,7 @@ packages/server/src/infra/di/
 |-----------|------|------|
 | `packages/client` | React フロントエンド | セットアップ済み |
 | `packages/server` | Fastify バックエンド API | セットアップ済み |
+| `packages/e2e-test` | Playwright E2E テスト | セットアップ済み |
 | `packages/eslint-config` | 共有 ESLint 設定 | セットアップ済み |
 | `packages/shared` | 共有型定義・定数 | セットアップ済み |
 

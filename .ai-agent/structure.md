@@ -7,7 +7,8 @@ picstash/
 │   │   ├── product.md          # プロダクト概要
 │   │   ├── tech.md             # 技術概要
 │   │   ├── plan.md             # 実装計画
-│   │   └── work.md             # 作業の進め方
+│   │   ├── work.md             # 作業の進め方
+│   │   └── idea.md             # 改善アイデア
 │   ├── tasks/                  # タスクドキュメント
 │   │   └── YYYYMMDD-タスク名/   # 各タスクのディレクトリ
 │   │       └── README.md       # タスク詳細（目的・方針・完了条件・作業ログ）
@@ -46,8 +47,16 @@ picstash/
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
+│   │   │   │   ├── stats/      # 統計ダッシュボード機能
+│   │   │   │   │   ├── components/
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   └── api.ts
 │   │   │   │   ├── upload/     # アップロード機能
 │   │   │   │   │   ├── components/
+│   │   │   │   │   └── api.ts
+│   │   │   │   ├── url-crawl/  # URLクロール機能
+│   │   │   │   │   ├── components/
+│   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
 │   │   │   │   └── view-history/ # 閲覧履歴機能
 │   │   │   │       ├── components/
@@ -135,11 +144,19 @@ picstash/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   └── shared/                 # フロントエンド・バックエンド共通
-│       ├── src/
-│       │   ├── index.ts        # メインエクスポート
-│       │   ├── image-attributes.ts # 画像属性の型定義
-│       │   └── labels.ts       # ラベルの型定義
+│   ├── shared/                 # フロントエンド・バックエンド共通
+│   │   ├── src/
+│   │   │   ├── index.ts        # メインエクスポート
+│   │   │   ├── image-attributes.ts # 画像属性の型定義
+│   │   │   └── labels.ts       # ラベルの型定義
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   └── e2e-test/               # E2E テスト
+│       ├── tests/              # Playwright テストファイル
+│       ├── fixtures/           # テスト用フィクスチャ
+│       ├── playwright.config.ts
+│       ├── eslint.config.mjs
 │       ├── package.json
 │       └── tsconfig.json
 │
@@ -159,7 +176,7 @@ picstash/
 
 ### `packages/client/`
 フロントエンドのパッケージ。Feature-based ディレクトリ構造を採用：
-- **features/** - 機能ごとのモジュール（archive-import, collections, duplicates, gallery, home, labels, recommendations, upload, view-history）
+- **features/** - 機能ごとのモジュール（archive-import, collections, duplicates, gallery, home, labels, recommendations, stats, upload, url-crawl, view-history）
   - 各機能は components/, pages/, api.ts を含む
   - 機能間は index.ts 経由でのみ依存可能（dependency-cruiser で検証）
 - **shared/** - 共通部品
@@ -194,6 +211,9 @@ Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エ
 
 ### `packages/shared/`
 フロントエンドとバックエンドで共有する型定義。API のレスポンス型などを一元管理。
+
+### `packages/e2e-test/`
+Playwright を使用した E2E テストパッケージ。アプリケーション全体の統合テストを実行。
 
 ### `storage/`
 アップロードされた画像の保存先。オリジナル画像とサムネイルを分離して管理。
