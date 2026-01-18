@@ -12,7 +12,10 @@ export default defineConfig({
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
   workers: 1,
-  reporter: 'html',
+  reporter: [
+    ['list', {}],
+    ['html', { open: 'never' }],
+  ],
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
@@ -31,6 +34,9 @@ export default defineConfig({
       reuseExistingServer: !isCI,
       cwd: '../..',
       timeout: 120000,
+      env: {
+        RATE_LIMIT_MAX: '10000',
+      },
     },
     {
       command: 'npm run dev:client',
