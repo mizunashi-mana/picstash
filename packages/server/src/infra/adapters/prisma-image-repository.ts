@@ -27,6 +27,15 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 
+  async findByIds(ids: string[]): Promise<Image[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    return await prisma.image.findMany({
+      where: { id: { in: ids } },
+    });
+  }
+
   async findAll(): Promise<Image[]> {
     return await prisma.image.findMany({
       orderBy: { createdAt: 'desc' },

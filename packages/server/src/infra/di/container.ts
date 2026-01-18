@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
+import { getConfig } from '@/config.js';
 import {
   InMemoryArchiveSessionManager,
   InMemoryUrlCrawlSessionManager,
@@ -31,6 +32,7 @@ import {
   UrlCrawlController,
   ViewHistoryController,
 } from '@/infra/http/controllers/index.js';
+import { OllamaLlmService } from '@/infra/llm/index.js';
 import { TYPES } from './types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
@@ -43,6 +45,7 @@ import type { ImageAttributeRepository } from '@/application/ports/image-attribu
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
+import type { LlmService } from '@/application/ports/llm-service.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
@@ -133,6 +136,15 @@ export function createContainer(): Container {
     .bind<CaptionService>(TYPES.CaptionService)
     .to(TransformersCaptionService)
     .inSingletonScope();
+
+  // Bind LLM service only if ollama is configured
+  const config = getConfig();
+  if (config.ollama !== undefined) {
+    container
+      .bind<LlmService>(TYPES.LlmService)
+      .to(OllamaLlmService)
+      .inSingletonScope();
+  }
 
   // Bind Controllers
   container.bind<ImageController>(TYPES.ImageController).to(ImageController);

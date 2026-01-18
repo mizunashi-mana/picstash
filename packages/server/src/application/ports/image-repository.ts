@@ -23,6 +23,8 @@ export interface UpdateEmbeddingInput {
 export interface ImageRepository {
   create: (input: CreateImageInput) => Promise<Image>;
   findById: (id: string) => Promise<Image | null>;
+  /** Find multiple images by IDs */
+  findByIds: (ids: string[]) => Promise<Image[]>;
   findAll: () => Promise<Image[]>;
   search: (query: string) => Promise<Image[]>;
   updateById: (id: string, input: UpdateImageInput) => Promise<Image>;

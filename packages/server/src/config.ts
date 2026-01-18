@@ -18,6 +18,10 @@ const configSchema = z.object({
   storage: z.object({
     path: z.string().min(1, 'Storage path is required'),
   }),
+  ollama: z.object({
+    url: z.string().default('http://localhost:11434'),
+    model: z.string().default('llama3.2'),
+  }).optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;

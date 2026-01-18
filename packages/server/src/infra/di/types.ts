@@ -25,6 +25,7 @@ export const TYPES = {
   EmbeddingService: Symbol.for('EmbeddingService'),
   EmbeddingRepository: Symbol.for('EmbeddingRepository'),
   CaptionService: Symbol.for('CaptionService'),
+  LlmService: Symbol.for('LlmService'),
 
   // Controllers
   ImageController: Symbol.for('ImageController'),

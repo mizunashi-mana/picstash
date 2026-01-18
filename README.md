@@ -42,6 +42,7 @@
 - **フロントエンド**: React 19 + Vite 7, Mantine 8, TanStack Query
 - **バックエンド**: Fastify 5, Prisma 7
 - **データベース**: SQLite (better-sqlite3)
+- **AI/ML**: Florence-2 (キャプション), CLIP (類似検索), Ollama (LLM)
 - **テスト**: Vitest
 - **リンター**: ESLint 9 (Flat Config)
 
@@ -54,13 +55,35 @@ npm install
 # データベースのセットアップ
 npm run db:migrate
 
-# 開発サーバーの起動（フロント + バック同時）
+# 開発サーバーの起動（フロント + バック + Ollama 同時）
 npm run dev
 ```
 
 開発サーバー起動後:
 - フロントエンド: http://localhost:5173
 - バックエンド API: http://localhost:3000
+- Ollama API: http://localhost:11434
+
+### Ollama のセットアップ（オプション）
+
+画像の説明文生成を高品質化するため、ローカル LLM (Ollama) を使用できます。
+
+```bash
+# devenv を使用している場合は自動でインストールされます
+# 手動インストールの場合: https://ollama.com/download
+
+# モデルのダウンロード（初回のみ、約2GB）
+ollama pull llama3.2
+```
+
+Ollama が利用できない場合でも、従来の Florence-2 + NLLB 翻訳による説明生成は動作します。
+
+**設定ファイル（`packages/server/config.yaml`）**:
+```yaml
+ollama:
+  url: "http://localhost:11434"  # Ollama API の URL
+  model: "llama3.2"              # 使用するモデル
+```
 
 ## ライセンス表記
 

@@ -234,4 +234,143 @@ describe('TransformersCaptionService', () => {
       expect(transformers.pipeline).toHaveBeenCalledTimes(callCount);
     });
   });
+
+  describe('generateWithContext', () => {
+    it('should fall back to basic generation when context is empty', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a cat sitting',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: '座っている猫' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      const service = new TransformersCaptionService();
+      const result = await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [],
+      });
+
+      expect(result.caption).toBe('座っている猫');
+      expect(result.model).toContain('Florence-2');
+      expect(result.model).not.toContain('llama');
+    });
+
+    it('should fall back to basic generation when llmService is undefined', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a dog running',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: '走っている犬' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      // Service without LLM injection
+      const service = new TransformersCaptionService();
+      const result = await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [{ description: 'similar image', similarity: 0.9 }],
+      });
+
+      expect(result.caption).toBe('走っている犬');
+      expect(result.model).not.toContain('llama');
+    });
+
+    it('should fall back to basic generation when llmService is not available', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a bird flying',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: '飛んでいる鳥' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      const mockLlmService = {
+        generate: vi.fn(),
+        getModel: vi.fn().mockReturnValue('test-model'),
+        isAvailable: vi.fn().mockResolvedValue(false),
+      };
+
+      const service = new TransformersCaptionService(mockLlmService);
+      const result = await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [{ description: 'similar image', similarity: 0.9 }],
+      });
+
+      expect(result.caption).toBe('飛んでいる鳥');
+      expect(mockLlmService.isAvailable).toHaveBeenCalled();
+      expect(mockLlmService.generate).not.toHaveBeenCalled();
+    });
+
+    it('should use LLM to refine caption when available with context', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a character illustration',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: 'キャラクターイラスト' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      const mockLlmService = {
+        generate: vi.fn().mockResolvedValue({
+          text: '初音ミクのイラストです。',
+          model: 'llama3.2',
+        }),
+        getModel: vi.fn().mockReturnValue('llama3.2'),
+        isAvailable: vi.fn().mockResolvedValue(true),
+      };
+
+      const service = new TransformersCaptionService(mockLlmService);
+      const result = await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [
+          { description: '初音ミクが歌っている', similarity: 0.85 },
+          { description: 'ボーカロイドのイラスト', similarity: 0.7 },
+        ],
+      });
+
+      expect(result.caption).toBe('初音ミクのイラストです。');
+      expect(result.model).toContain('llama3.2');
+      expect(mockLlmService.generate).toHaveBeenCalledWith(
+        expect.stringContaining('キャラクターイラスト'),
+        expect.objectContaining({ maxTokens: 256 }),
+      );
+    });
+
+    it('should fall back to base result when LLM generation fails', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a flower',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: '花' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      const mockLlmService = {
+        generate: vi.fn().mockRejectedValue(new Error('LLM API error')),
+        getModel: vi.fn().mockReturnValue('llama3.2'),
+        isAvailable: vi.fn().mockResolvedValue(true),
+      };
+
+      // Spy on console.error to suppress output during test
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const service = new TransformersCaptionService(mockLlmService);
+      const result = await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [{ description: 'similar flower', similarity: 0.8 }],
+      });
+
+      expect(result.caption).toBe('花');
+      expect(result.model).not.toContain('llama');
+      expect(consoleSpy).toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+    });
+  });
 });

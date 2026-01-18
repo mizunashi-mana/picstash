@@ -39,7 +39,9 @@ export type {
 export { EMBEDDING_DIMENSION } from './embedding-repository.js';
 export type {
   CaptionResult,
+  CaptionContext,
   CaptionService,
+  SimilarImageDescription,
 } from './caption-service.js';
 export type {
   RecommendationConversion,
@@ -49,3 +51,8 @@ export type {
   ConversionStats,
   ConversionStatsOptions,
 } from './recommendation-conversion-repository.js';
+export type {
+  LlmService,
+  LlmGenerateResult,
+  LlmGenerateOptions,
+} from './llm-service.js';

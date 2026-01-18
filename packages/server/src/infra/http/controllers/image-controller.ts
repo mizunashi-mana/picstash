@@ -6,7 +6,7 @@ import { findDuplicates, DEFAULT_DUPLICATE_THRESHOLD } from '@/application/dupli
 import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { CaptionService } from '@/application/ports/caption-service.js';
+import type { CaptionService, SimilarImageDescription } from '@/application/ports/caption-service.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
@@ -279,11 +279,19 @@ export class ImageController {
         }
 
         try {
-          const result = await this.captionService.generateFromFile(absolutePath);
+          // Get similar images' descriptions for context
+          const similarDescriptions = await this.getSimilarImageDescriptions(id, 5);
+
+          // Generate description with context from similar images
+          const result = await this.captionService.generateWithContext(absolutePath, {
+            similarDescriptions,
+          });
+
           return await reply.send({
             imageId: id,
             description: result.caption,
             model: result.model,
+            usedContext: similarDescriptions.length > 0,
           });
         }
         catch (error) {
@@ -443,5 +451,67 @@ export class ImageController {
         return await reply.status(204).send();
       },
     );
+  }
+
+  /**
+   * Get descriptions from similar images for context with similarity scores
+   */
+  private async getSimilarImageDescriptions(
+    imageId: string,
+    limit: number,
+  ): Promise<SimilarImageDescription[]> {
+    // Get the image with its embedding
+    const imageWithEmbedding = await this.imageRepository.findByIdWithEmbedding(imageId);
+    if (imageWithEmbedding?.embedding === null || imageWithEmbedding?.embedding === undefined) {
+      return [];
+    }
+
+    // Validate embedding dimension
+    const expectedByteLength = EMBEDDING_DIMENSION * 4;
+    if (imageWithEmbedding.embedding.byteLength !== expectedByteLength) {
+      return [];
+    }
+
+    // Convert Uint8Array to Float32Array for similarity search
+    const embedding = new Float32Array(
+      imageWithEmbedding.embedding.buffer,
+      imageWithEmbedding.embedding.byteOffset,
+      imageWithEmbedding.embedding.byteLength / 4,
+    );
+
+    // Find similar images, excluding the current image
+    const similarResults = this.embeddingRepository.findSimilar(embedding, limit, [imageId]);
+
+    if (similarResults.length === 0) {
+      return [];
+    }
+
+    // Batch fetch all similar images at once to avoid N+1 queries
+    const imageIds = similarResults.map(r => r.imageId);
+    const images = await this.imageRepository.findByIds(imageIds);
+
+    // Create a map for quick lookup
+    const imageMap = new Map(images.map(img => [img.id, img]));
+
+    // Build descriptions with similarity scores, preserving similarity order
+    const descriptions: SimilarImageDescription[] = [];
+    for (const result of similarResults) {
+      const image = imageMap.get(result.imageId);
+      if (
+        image !== undefined
+        && image.description !== null
+        && image.description.trim() !== ''
+      ) {
+        // Convert distance to similarity score (0-1, higher is more similar)
+        // Using 1 / (1 + distance) formula for smooth mapping
+        const similarity = 1 / (1 + result.distance);
+        descriptions.push({
+          description: image.description,
+          similarity,
+        });
+      }
+    }
+
+    return descriptions;
   }
 }
