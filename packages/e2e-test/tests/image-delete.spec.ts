@@ -44,8 +44,11 @@ test.describe('Image Delete', () => {
     await expect(page).toHaveURL('/', { timeout: 15000 });
 
     // The deleted image should no longer appear in the gallery
-    // href is always non-null since we got it from the gallery image
-    expect(href).not.toBeNull();
+    // href が null の場合はテストを即座に失敗させる（型ガードとして機能させる）
+    // eslint-disable-next-line playwright/no-conditional-in-test -- 型ガードとして必要
+    if (href === null) {
+      throw new Error('Expected gallery image href to be non-null');
+    }
     await expect(page.locator(`a[href="${href}"]`)).toBeHidden({ timeout: 5000 });
   });
 

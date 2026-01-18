@@ -7,18 +7,12 @@ test.describe('Image Detail', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
 
-    // Check if there are already images in the gallery
-    const existingImages = page.locator('a[href^="/images/"]');
-    const count = await existingImages.count();
+    // Always upload a test image to ensure a consistent state
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles(testImagePath);
 
-    if (count === 0) {
-      // Upload an image only if none exist
-      const fileInput = page.locator('input[type="file"]');
-      await fileInput.setInputFiles(testImagePath);
-
-      // Wait for image to appear in gallery
-      await expect(page.locator('a[href^="/images/"]').first()).toBeVisible({ timeout: 30000 });
-    }
+    // Wait for image to appear in gallery
+    await expect(page.locator('a[href^="/images/"]').first()).toBeVisible({ timeout: 30000 });
   });
 
   test('should display image detail page when clicking an image', async ({ page }) => {
