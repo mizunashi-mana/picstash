@@ -7,7 +7,7 @@ import {
 } from '@/domain/url-crawl/index.js';
 
 describe('isImageContentType', () => {
-  it('should return true for image content types', () => {
+  it('should return true for supported image content types', () => {
     expect(isImageContentType('image/jpeg')).toBe(true);
     expect(isImageContentType('image/png')).toBe(true);
     expect(isImageContentType('image/gif')).toBe(true);
@@ -15,9 +15,17 @@ describe('isImageContentType', () => {
     expect(isImageContentType('image/bmp')).toBe(true);
   });
 
-  it('should return true for image content types with charset', () => {
+  it('should return true for supported image content types with charset', () => {
     expect(isImageContentType('image/jpeg; charset=utf-8')).toBe(true);
     expect(isImageContentType('image/png; boundary=something')).toBe(true);
+  });
+
+  it('should return false for unsupported image types', () => {
+    // These are image types but not supported by our system
+    expect(isImageContentType('image/tiff')).toBe(false);
+    expect(isImageContentType('image/svg+xml')).toBe(false);
+    expect(isImageContentType('image/heic')).toBe(false);
+    expect(isImageContentType('image/avif')).toBe(false);
   });
 
   it('should return false for non-image content types', () => {
@@ -29,6 +37,22 @@ describe('isImageContentType', () => {
 
   it('should handle empty or invalid content types', () => {
     expect(isImageContentType('')).toBe(false);
+  });
+
+  it('should be consistent with getExtensionFromContentType', () => {
+    // For all supported types, both functions should agree
+    const supportedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+    for (const contentType of supportedTypes) {
+      expect(isImageContentType(contentType)).toBe(true);
+      expect(getExtensionFromContentType(contentType)).toBeDefined();
+    }
+
+    // For unsupported image types, both should return false/undefined
+    const unsupportedTypes = ['image/tiff', 'image/svg+xml', 'image/heic'];
+    for (const contentType of unsupportedTypes) {
+      expect(isImageContentType(contentType)).toBe(false);
+      expect(getExtensionFromContentType(contentType)).toBeUndefined();
+    }
   });
 });
 

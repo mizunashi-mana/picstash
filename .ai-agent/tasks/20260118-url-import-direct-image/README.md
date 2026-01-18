@@ -29,10 +29,10 @@ Twitter/X などの直接画像URLを取り込めるようにする。
 
 ## 完了条件
 
-- [ ] `https://pbs.twimg.com/media/G-7eKB6XAAAAsuL?format=jpg&name=large` のような直接画像URLを取り込める
-- [ ] HTMLページからの画像抽出は従来通り動作する
-- [ ] 既存のテストが通る
-- [ ] 新機能のテストを追加
+- [x] `https://pbs.twimg.com/media/G-7eKB6XAAAAsuL?format=jpg&name=large` のような直接画像URLを取り込める
+- [x] HTMLページからの画像抽出は従来通り動作する
+- [x] 既存のテストが通る
+- [x] 新機能のテストを追加
 
 ## 作業ログ
 

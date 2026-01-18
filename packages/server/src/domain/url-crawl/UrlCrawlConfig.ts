@@ -104,11 +104,12 @@ const MIME_TO_EXTENSION_MAP: Record<string, SupportedImageExtension> = {
 };
 
 /**
- * Check if a content-type indicates an image
+ * Check if a content-type indicates a supported image
+ * (i.e. one that can be mapped to a file extension)
  */
 export function isImageContentType(contentType: string): boolean {
   const mimeType = contentType.split(';')[0]?.trim().toLowerCase() ?? '';
-  return mimeType.startsWith('image/');
+  return mimeType in MIME_TO_EXTENSION_MAP;
 }
 
 /**

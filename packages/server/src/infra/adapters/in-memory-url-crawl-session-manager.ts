@@ -182,11 +182,16 @@ export class InMemoryUrlCrawlSessionManager implements UrlCrawlSessionManager {
       const extension = getExtensionFromContentType(contentType);
       let filename = extractFilenameFromUrl(url);
 
-      // If filename doesn't have a proper extension, add one based on content-type
+      // Normalize filename extension based on content-type
       if (extension !== undefined && !filename.toLowerCase().endsWith(extension)) {
-        // Check if filename has no extension at all
+        // Check if filename has any extension at all
         const hasExtension = /\.[a-z0-9]+$/i.test(filename);
-        if (!hasExtension) {
+        if (hasExtension) {
+          // Replace the existing (possibly incorrect) extension with the correct one
+          filename = filename.replace(/\.[a-z0-9]+$/i, extension);
+        }
+        else {
+          // No extension: append the correct one
           filename = `${filename}${extension}`;
         }
       }
