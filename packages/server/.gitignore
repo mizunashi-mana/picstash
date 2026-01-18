@@ -1,4 +1,6 @@
 /coverage/
+/logs/*
+!/logs/.keep
 
 # Keep environment variables out of version control
 .env
