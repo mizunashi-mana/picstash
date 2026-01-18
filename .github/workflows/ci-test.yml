@@ -56,6 +56,9 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      - name: Setup database schema
+        run: npm run db:push -w @picstash/server
+
       - name: Install Playwright browsers
         run: npx playwright install chromium
         working-directory: packages/e2e-test
