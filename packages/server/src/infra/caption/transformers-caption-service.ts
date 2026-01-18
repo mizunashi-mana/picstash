@@ -7,11 +7,14 @@
 
 import 'reflect-metadata';
 import { readFile } from 'node:fs/promises';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
+  CaptionContext,
   CaptionResult,
   CaptionService,
 } from '@/application/ports/caption-service.js';
+import type { LlmService } from '@/application/ports/llm-service.js';
 
 /** Caption model identifier (Florence-2 for detailed captioning) */
 const CAPTION_MODEL_ID = 'onnx-community/Florence-2-base-ft';
@@ -107,9 +110,26 @@ let florence2Model: Florence2Model | null = null;
 let florence2Processor: Florence2Processor | null = null;
 let translationPipeline: TranslationPipeline | null = null;
 
+/** System prompt for LLM refinement */
+const REFINEMENT_SYSTEM_PROMPT = `あなたは画像の説明文を生成するアシスタントです。
+画像分析結果と、類似画像の説明文（類似度付き）が与えられます。
+これらを参考に、適切な日本語の説明文を1つ生成してください。
+
+ルール:
+- 説明文は1〜3文程度で簡潔に
+- 類似度が高い（80%以上）画像の説明を特に重視し、固有名詞（人物名、キャラクター名、シリーズ名など）を積極的に活用
+- 類似度が低い（50%未満）画像の説明は参考程度に
+- 画像分析結果に忠実に、内容を正確に説明
+- 説明文のみを出力（前置きや説明は不要）`;
+
 @injectable()
 export class TransformersCaptionService implements CaptionService {
   private initPromise: Promise<void> | null = null;
+
+  constructor(
+    @inject(TYPES.LlmService) @optional()
+    private readonly llmService?: LlmService,
+  ) {}
 
   async generateFromFile(imagePath: string): Promise<CaptionResult> {
     await this.initialize();
@@ -163,6 +183,60 @@ export class TransformersCaptionService implements CaptionService {
       caption: japaneseCaption,
       model: `${CAPTION_MODEL_ID} + ${TRANSLATION_MODEL_ID}`,
     };
+  }
+
+  async generateWithContext(imagePath: string, context: CaptionContext): Promise<CaptionResult> {
+    // If no similar descriptions or LLM not available, fall back to basic generation
+    if (
+      context.similarDescriptions.length === 0
+      || this.llmService === undefined
+    ) {
+      return await this.generateFromFile(imagePath);
+    }
+
+    // Check if LLM is available
+    const llmAvailable = await this.llmService.isAvailable();
+    if (!llmAvailable) {
+      return await this.generateFromFile(imagePath);
+    }
+
+    // First, generate a base caption using Florence-2
+    const baseResult = await this.generateFromFile(imagePath);
+
+    // Build the prompt for LLM refinement with similarity scores
+    const similarDescriptionsText = context.similarDescriptions
+      .map((item, i) => {
+        const similarityPercent = Math.round(item.similarity * 100);
+        return `${i + 1}. [類似度: ${similarityPercent}%] ${item.description}`;
+      })
+      .join('\n');
+
+    const prompt = `## 画像分析結果
+${baseResult.caption}
+
+## 類似画像の説明文（類似度順）
+${similarDescriptionsText}
+
+上記を参考に、この画像の説明文を生成してください。類似度が高い画像の説明を優先的に参考にしてください。`;
+
+    try {
+      const llmResult = await this.llmService.generate(prompt, {
+        systemPrompt: REFINEMENT_SYSTEM_PROMPT,
+        maxTokens: 256,
+        temperature: 0.7,
+      });
+
+      return {
+        caption: llmResult.text,
+        model: `${this.getModel()} + ${llmResult.model}`,
+      };
+    }
+    catch (error) {
+      // If LLM fails, return the base result
+      // eslint-disable-next-line no-console -- Log LLM errors for debugging
+      console.error('LLM refinement failed, using base caption:', error);
+      return baseResult;
+    }
   }
 
   getModel(): string {
