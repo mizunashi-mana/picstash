@@ -2,11 +2,12 @@
  * Ollama LLM Service
  *
  * Uses the Ollama API for local LLM text generation.
- * Default model: llama3.2 (or configurable via environment)
+ * Configuration is loaded from config.yaml (ollama section).
  */
 
 import 'reflect-metadata';
 import { injectable } from 'inversify';
+import { getConfig } from '@/config.js';
 import type {
   LlmService,
   LlmGenerateResult,
@@ -38,8 +39,9 @@ export class OllamaLlmService implements LlmService {
   private readonly model: string;
 
   constructor() {
-    this.baseUrl = process.env.OLLAMA_URL ?? DEFAULT_OLLAMA_URL;
-    this.model = process.env.OLLAMA_MODEL ?? DEFAULT_MODEL;
+    const config = getConfig();
+    this.baseUrl = config.ollama?.url ?? DEFAULT_OLLAMA_URL;
+    this.model = config.ollama?.model ?? DEFAULT_MODEL;
   }
 
   async generate(prompt: string, options?: LlmGenerateOptions): Promise<LlmGenerateResult> {

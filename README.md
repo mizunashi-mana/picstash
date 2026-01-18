@@ -78,9 +78,12 @@ ollama pull llama3.2
 
 Ollama が利用できない場合でも、従来の Florence-2 + NLLB 翻訳による説明生成は動作します。
 
-**環境変数（オプション）**:
-- `OLLAMA_URL`: Ollama API の URL（デフォルト: `http://localhost:11434`）
-- `OLLAMA_MODEL`: 使用するモデル（デフォルト: `llama3.2`）
+**設定ファイル（`packages/server/config.yaml`）**:
+```yaml
+ollama:
+  url: "http://localhost:11434"  # Ollama API の URL
+  model: "llama3.2"              # 使用するモデル
+```
 
 ## ライセンス表記
 
