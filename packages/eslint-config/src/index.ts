@@ -4,13 +4,14 @@ import { buildGlobalsConfig } from './globals.config.js';
 import { buildImportsConfig } from './imports.config.js';
 import { buildJsConfig } from './js.config.js';
 import { buildNodeConfig } from './node.config.js';
+import { buildPlaywrightConfig } from './playwright.config.js';
 import { buildPromiseConfig } from './promise.config.js';
 import { buildReactConfig } from './react.config.js';
 import { buildStorybookConfig } from './storybook.config.js';
 import { buildStylisticConfig } from './stylistic.config.js';
 import { buildTsConfig } from './ts.config.js';
 
-export type RuleSet = 'common' | 'react' | 'node' | 'storybook';
+export type RuleSet = 'common' | 'react' | 'node' | 'storybook' | 'playwright';
 
 export type Env = {
   disableFixedRules?: boolean;
@@ -51,6 +52,9 @@ export function buildConfig(env: Env) {
 
       case 'storybook':
         rules.push(buildStorybookConfig());
+        break;
+      case 'playwright':
+        rules.push(buildPlaywrightConfig());
         break;
     }
   }

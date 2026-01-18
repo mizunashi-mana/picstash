@@ -16,13 +16,21 @@ export async function apiClient<T>(
     url += `?${searchParams.toString()}`;
   }
 
+  // Only set Content-Type for requests with a body
+  const headers: HeadersInit = fetchOptions.body !== undefined
+    ? {
+        'Content-Type': 'application/json',
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread -- HeadersInit spread is valid
+        ...fetchOptions.headers,
+      }
+    : {
+        // eslint-disable-next-line @typescript-eslint/no-misused-spread -- HeadersInit spread is valid
+        ...fetchOptions.headers,
+      };
+
   const response = await fetch(url, {
     ...fetchOptions,
-    headers: {
-      'Content-Type': 'application/json',
-      // eslint-disable-next-line @typescript-eslint/no-misused-spread -- HeadersInit spread is valid
-      ...fetchOptions.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
