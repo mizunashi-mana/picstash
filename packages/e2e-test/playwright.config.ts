@@ -26,7 +26,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'DISABLE_RATE_LIMIT=true npm run dev:server',
+      command: 'npm run dev:server',
       url: 'http://localhost:3000/health',
       reuseExistingServer: !isCI,
       cwd: '../..',
