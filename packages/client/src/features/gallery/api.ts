@@ -13,6 +13,7 @@ export interface Image {
   size: number;
   width: number | null;
   height: number | null;
+  title: string;
   description: string | null;
   createdAt: string;
   updatedAt: string;
@@ -148,6 +149,7 @@ export async function generateDescription(
 // Similar Images API
 export interface SimilarImage {
   id: string;
+  title: string;
   thumbnailPath: string | null;
   distance: number;
 }

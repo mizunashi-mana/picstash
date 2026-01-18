@@ -53,6 +53,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
         image: {
           select: {
             id: true,
+            title: true,
             thumbnailPath: true,
           },
         },
@@ -68,6 +69,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
       updatedAt: record.updatedAt,
       image: {
         id: record.image.id,
+        title: record.image.title,
         thumbnailPath: record.image.thumbnailPath,
       },
     }));

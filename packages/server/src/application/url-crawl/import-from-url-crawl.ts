@@ -1,5 +1,6 @@
 import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
+import { generateTitle } from '@/domain/image/index.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
@@ -118,9 +119,11 @@ export async function importFromUrlCrawl(
         throw error;
       }
 
-      // Create database record
+      // Create database record with auto-generated title
       let image;
       try {
+        const createdAt = new Date();
+        const title = generateTitle(null, createdAt);
         image = await imageRepository.create({
           path: saved.path,
           thumbnailPath: thumbnail.path,
@@ -128,6 +131,7 @@ export async function importFromUrlCrawl(
           size: fileSize,
           width: metadata.width,
           height: metadata.height,
+          title,
         });
       }
       catch (error) {

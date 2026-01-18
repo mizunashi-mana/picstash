@@ -2,6 +2,7 @@ import { apiClient } from '@/api/client';
 
 export interface DuplicateImageInfo {
   id: string;
+  title: string;
   thumbnailPath: string | null;
   createdAt: string;
   distance?: number;

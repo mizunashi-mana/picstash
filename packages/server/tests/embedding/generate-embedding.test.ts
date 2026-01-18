@@ -25,6 +25,7 @@ function createMockImage(overrides: Partial<Image> = {}): Image {
     size: 1000,
     width: 100,
     height: 100,
+    title: '無題の画像 (test)',
     description: null,
     createdAt: new Date(),
     updatedAt: new Date(),

@@ -2,6 +2,7 @@ import { stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { Readable } from 'node:stream';
 import { getMimeTypeFromExtension } from '@/domain/archive/index.js';
+import { generateTitle } from '@/domain/image/index.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
@@ -100,9 +101,11 @@ export async function importFromArchive(
         throw error;
       }
 
-      // Create database record
+      // Create database record with auto-generated title
       let image;
       try {
+        const createdAt = new Date();
+        const title = generateTitle(null, createdAt);
         image = await imageRepository.create({
           path: saved.path,
           thumbnailPath: thumbnail.path,
@@ -110,6 +113,7 @@ export async function importFromArchive(
           size: fileSize,
           width: metadata.width,
           height: metadata.height,
+          title,
         });
       }
       catch (error) {

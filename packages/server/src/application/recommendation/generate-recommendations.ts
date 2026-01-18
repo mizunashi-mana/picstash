@@ -16,6 +16,7 @@ export interface GenerateRecommendationsOptions {
 /** A recommended image with score */
 export interface RecommendedImage {
   id: string;
+  title: string;
   thumbnailPath: string | null;
   score: number;
 }
@@ -122,6 +123,7 @@ export async function generateRecommendations(
       if (image !== null) {
         return {
           id: image.id,
+          title: image.title,
           thumbnailPath: image.thumbnailPath,
           // Convert distance to score (lower distance = higher score)
           score: 1 / (1 + result.distance),

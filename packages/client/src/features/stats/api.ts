@@ -23,6 +23,7 @@ export interface DailyRecommendationStats {
 
 export interface PopularImage {
   id: string;
+  title: string;
   thumbnailPath: string | null;
   viewCount: number;
   totalDuration: number;

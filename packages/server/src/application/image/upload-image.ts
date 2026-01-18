@@ -1,6 +1,6 @@
 import { stat } from 'node:fs/promises';
 import { generateEmbedding, type GenerateEmbeddingDeps } from '@/application/embedding/generate-embedding.js';
-import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES } from '@/domain/image/index.js';
+import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES, generateTitle } from '@/domain/image/index.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
@@ -75,7 +75,9 @@ export async function uploadImage(
     throw error;
   }
 
-  // Create database record
+  // Create database record with auto-generated title
+  const createdAt = new Date();
+  const title = generateTitle(null, createdAt);
   const image = await imageRepository.create({
     path: saved.path,
     thumbnailPath: thumbnail.path,
@@ -83,6 +85,7 @@ export async function uploadImage(
     size: fileSize,
     width: metadata.width,
     height: metadata.height,
+    title,
   });
 
   // Generate embedding in background (non-blocking)

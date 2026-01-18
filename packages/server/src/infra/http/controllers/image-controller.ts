@@ -5,6 +5,7 @@ import { suggestAttributes } from '@/application/attribute-suggestion/suggest-at
 import { findDuplicates, DEFAULT_DUPLICATE_THRESHOLD } from '@/application/duplicate-detection/index.js';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import { generateTitle } from '@/domain/image/index.js';
 import { TYPES } from '@/infra/di/types.js';
 import type { CaptionService, SimilarImageDescription } from '@/application/ports/caption-service.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
@@ -203,7 +204,9 @@ export class ImageController {
           });
         }
 
-        const updated = await this.imageRepository.updateById(id, { description });
+        // Auto-generate title from new description
+        const title = generateTitle(description ?? null, existing.createdAt);
+        const updated = await this.imageRepository.updateById(id, { description, title });
         return await reply.send(updated);
       },
     );
@@ -413,6 +416,7 @@ export class ImageController {
             }
             return {
               id: image.id,
+              title: image.title,
               thumbnailPath: image.thumbnailPath,
               distance: result.distance,
             };
