@@ -30,6 +30,15 @@ jobs:
       - name: pre-commit run
         run: devenv shell pre-commit run --all-files --verbose
 
+      - name: Show modified files
+        if: failure()
+        run: |
+          echo "=== Modified files ==="
+          git status --short
+          echo ""
+          echo "=== Diff ==="
+          git diff
+
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
