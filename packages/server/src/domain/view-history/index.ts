@@ -24,7 +24,6 @@ export interface UpdateViewHistoryDurationInput {
 export interface ViewHistoryWithImage extends ViewHistory {
   image: {
     id: string;
-    filename: string;
     thumbnailPath: string | null;
   };
 }

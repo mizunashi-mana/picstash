@@ -104,7 +104,6 @@ export async function importFromArchive(
       let image;
       try {
         image = await imageRepository.create({
-          filename: saved.filename,
           path: saved.path,
           thumbnailPath: thumbnail.path,
           mimeType,

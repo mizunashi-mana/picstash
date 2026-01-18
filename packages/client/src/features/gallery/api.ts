@@ -7,7 +7,6 @@ import type {
 
 export interface Image {
   id: string;
-  filename: string;
   path: string;
   thumbnailPath: string | null;
   mimeType: string;
@@ -149,7 +148,6 @@ export async function generateDescription(
 // Similar Images API
 export interface SimilarImage {
   id: string;
-  filename: string;
   thumbnailPath: string | null;
   distance: number;
 }

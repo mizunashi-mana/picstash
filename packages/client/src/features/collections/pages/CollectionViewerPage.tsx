@@ -218,7 +218,7 @@ export function CollectionViewerPage(): React.JSX.Element {
           {currentImage !== null && (
             <Image
               src={getImageUrl(currentImage.imageId)}
-              alt={`${collection.images.length}枚中${currentIndex + 1}枚目: ${currentImage.filename}`}
+              alt={`${collection.images.length}枚中${currentIndex + 1}枚目`}
               fit="contain"
               style={{ maxHeight: '100%', maxWidth: '100%' }}
               fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23333' width='100' height='100'/%3E%3C/svg%3E"
@@ -246,10 +246,12 @@ export function CollectionViewerPage(): React.JSX.Element {
         </ActionIcon>
       </Box>
 
-      {/* Footer - filename */}
+      {/* Footer - page indicator */}
       <Box p="sm" style={{ flexShrink: 0, textAlign: 'center' }}>
         <Text c="dimmed" size="sm">
-          {currentImage?.filename}
+          {currentIndex + 1}
+          {' / '}
+          {collection.images.length}
         </Text>
       </Box>
     </Box>

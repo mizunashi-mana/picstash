@@ -77,7 +77,6 @@ export async function uploadImage(
 
   // Create database record
   const image = await imageRepository.create({
-    filename: saved.filename,
     path: saved.path,
     thumbnailPath: thumbnail.path,
     mimeType: mimetype,

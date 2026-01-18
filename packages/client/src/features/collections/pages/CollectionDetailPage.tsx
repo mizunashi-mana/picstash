@@ -210,7 +210,7 @@ export function CollectionDetailPage(): React.JSX.Element {
                       <Link to={`/collections/${id}/view/${img.imageId}`}>
                         <Image
                           src={getThumbnailUrl(img.imageId)}
-                          alt={img.filename}
+                          alt={`画像 ${img.imageId}`}
                           height={140}
                           fit="cover"
                         />
@@ -228,9 +228,6 @@ export function CollectionDetailPage(): React.JSX.Element {
                         <IconTrash size={14} />
                       </ActionIcon>
                     </Card.Section>
-                    <Text size="xs" c="dimmed" mt="xs" truncate>
-                      {img.filename}
-                    </Text>
                   </Card>
                 ))}
               </SimpleGrid>

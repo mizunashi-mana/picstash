@@ -139,7 +139,6 @@ export class PrismaStatsRepository implements StatsRepository {
     const results = await prisma.$queryRaw<
       Array<{
         id: string;
-        filename: string;
         thumbnail_path: string | null;
         view_count: bigint;
         total_duration: bigint | null;
@@ -148,7 +147,6 @@ export class PrismaStatsRepository implements StatsRepository {
     >`
       SELECT
         i.id,
-        i.filename,
         i.thumbnail_path,
         COUNT(vh.id) as view_count,
         SUM(vh.duration) as total_duration,
@@ -156,14 +154,13 @@ export class PrismaStatsRepository implements StatsRepository {
       FROM "Image" i
       INNER JOIN "view_history" vh ON vh.image_id = i.id
       WHERE vh.viewed_at >= ${periodStart}
-      GROUP BY i.id, i.filename, i.thumbnail_path
+      GROUP BY i.id, i.thumbnail_path
       ORDER BY view_count DESC, total_duration DESC
       LIMIT ${limit}
     `;
 
     return results.map(row => ({
       id: row.id,
-      filename: row.filename,
       thumbnailPath: row.thumbnail_path,
       viewCount: Number(row.view_count),
       totalDuration: Number(row.total_duration ?? 0),

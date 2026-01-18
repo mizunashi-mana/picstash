@@ -19,7 +19,6 @@ vi.mock('node:fs/promises', () => ({
 function createMockImage(overrides: Partial<Image> = {}): Image {
   return {
     id: 'test-image-id',
-    filename: 'test-image.png',
     path: 'originals/test-image.png',
     thumbnailPath: 'thumbnails/test-image.jpg',
     mimeType: 'image/png',

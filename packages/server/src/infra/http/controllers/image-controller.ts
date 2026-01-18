@@ -413,7 +413,6 @@ export class ImageController {
             }
             return {
               id: image.id,
-              filename: image.filename,
               thumbnailPath: image.thumbnailPath,
               distance: result.distance,
             };

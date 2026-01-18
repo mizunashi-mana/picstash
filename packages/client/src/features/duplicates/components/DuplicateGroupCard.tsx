@@ -63,7 +63,7 @@ export function DuplicateGroupCard({
               <Link to={`/images/${group.original.id}`}>
                 <Image
                   src={getThumbnailUrl(group.original.id)}
-                  alt={group.original.filename}
+                  alt={`オリジナル画像 ${group.original.id}`}
                   height={120}
                   fit="cover"
                 />
@@ -73,9 +73,6 @@ export function DuplicateGroupCard({
               <Badge color="green" size="sm" variant="filled">
                 オリジナル
               </Badge>
-              <Text size="xs" c="dimmed" truncate>
-                {group.original.filename}
-              </Text>
             </Stack>
           </Card>
 
@@ -94,7 +91,7 @@ export function DuplicateGroupCard({
                 <Link to={`/images/${dup.id}`}>
                   <Image
                     src={getThumbnailUrl(dup.id)}
-                    alt={dup.filename}
+                    alt={`重複候補画像 ${dup.id}`}
                     height={120}
                     fit="cover"
                   />
@@ -112,9 +109,6 @@ export function DuplicateGroupCard({
                     </Badge>
                   )}
                 </Group>
-                <Text size="xs" c="dimmed" truncate>
-                  {dup.filename}
-                </Text>
               </Stack>
             </Card>
           ))}

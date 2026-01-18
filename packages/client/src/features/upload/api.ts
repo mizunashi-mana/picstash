@@ -1,6 +1,5 @@
 export interface Image {
   id: string;
-  filename: string;
   path: string;
   mimeType: string;
   size: number;

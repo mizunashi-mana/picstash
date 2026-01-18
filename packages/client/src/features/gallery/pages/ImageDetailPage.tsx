@@ -140,7 +140,7 @@ export function ImageDetailPage() {
         <Box>
           <Image
             src={getImageUrl(image.id)}
-            alt={image.filename}
+            alt={image.description ?? ''}
             fit="contain"
             mah="70vh"
             radius="md"
@@ -161,10 +161,6 @@ export function ImageDetailPage() {
         <Paper p="md" withBorder>
           <Stack gap="xs">
             <Title order={5}>ファイル情報</Title>
-            <Group justify="space-between">
-              <Text size="sm" c="dimmed">ファイル名</Text>
-              <Text size="sm">{image.filename}</Text>
-            </Group>
             {image.width !== null && image.height !== null && (
               <Group justify="space-between">
                 <Text size="sm" c="dimmed">サイズ</Text>

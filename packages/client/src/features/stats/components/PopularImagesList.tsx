@@ -57,7 +57,7 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
                   </Text>
                   <Image
                     src={getThumbnailUrl(image.thumbnailPath)}
-                    alt={image.filename}
+                    alt={`画像 ${image.id}`}
                     w={60}
                     h={60}
                     fit="cover"
@@ -65,9 +65,6 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
                     fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect fill='%23ddd' width='60' height='60'/%3E%3C/svg%3E"
                   />
                   <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-                    <Text size="sm" truncate>
-                      {image.filename}
-                    </Text>
                     <Group gap="md">
                       <Text size="xs" c="dimmed">
                         {image.viewCount}

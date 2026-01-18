@@ -185,7 +185,7 @@ function RecommendationCard({ image, conversionId }: RecommendationCardProps) {
         <AspectRatio ratio={1}>
           <Image
             src={getThumbnailUrl(image.id)}
-            alt={image.filename}
+            alt={`推薦画像 ${image.id}`}
             fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3C/svg%3E"
           />
         </AspectRatio>

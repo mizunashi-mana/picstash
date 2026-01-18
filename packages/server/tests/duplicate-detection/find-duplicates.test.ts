@@ -50,11 +50,10 @@ function createNormalizedEmbedding(values: number[]): Uint8Array {
   return new Uint8Array(float32.buffer);
 }
 
-function createImage(id: string, filename: string, createdAt: Date): Image {
+function createImage(id: string, createdAt: Date): Image {
   return {
     id,
-    path: `originals/${filename}`,
-    filename,
+    path: `originals/${id}.png`,
     thumbnailPath: `thumbnails/${id}.webp`,
     mimeType: 'image/png',
     size: 1024,
@@ -128,8 +127,8 @@ describe('findDuplicates', () => {
       embValues[0] = 1;
       const embedding = createNormalizedEmbedding(embValues);
 
-      const img1 = createImage('img-1', 'original.png', new Date('2024-01-01'));
-      const img2 = createImage('img-2', 'copy.png', new Date('2024-01-02'));
+      const img1 = createImage('img-1', new Date('2024-01-01'));
+      const img2 = createImage('img-2', new Date('2024-01-02'));
 
       vi.mocked(mockImageRepository.findByIdWithEmbedding)
         .mockResolvedValueOnce({ id: 'img-1', path: img1.path, embedding })
@@ -150,7 +149,6 @@ describe('findDuplicates', () => {
       expect(result.totalGroups).toBe(1);
       expect(result.totalDuplicates).toBe(1);
       expect(result.groups[0]?.original.id).toBe('img-1');
-      expect(result.groups[0]?.original.filename).toBe('original.png');
       expect(result.groups[0]?.duplicates).toHaveLength(1);
       expect(result.groups[0]?.duplicates[0]?.id).toBe('img-2');
       expect(result.groups[0]?.duplicates[0]?.distance).toBe(0.05);
@@ -164,8 +162,8 @@ describe('findDuplicates', () => {
       const embedding = createNormalizedEmbedding(embValues);
 
       // img-newer was created first in ID order but older date
-      const imgNewer = createImage('img-newer', 'newer.png', new Date('2024-02-01'));
-      const imgOlder = createImage('img-older', 'older.png', new Date('2024-01-01'));
+      const imgNewer = createImage('img-newer', new Date('2024-02-01'));
+      const imgOlder = createImage('img-older', new Date('2024-01-01'));
 
       vi.mocked(mockImageRepository.findByIdWithEmbedding)
         .mockResolvedValueOnce({ id: 'img-newer', path: imgNewer.path, embedding })
@@ -217,8 +215,8 @@ describe('findDuplicates', () => {
       vi.clearAllMocks();
       vi.mocked(mockEmbeddingRepository.getAllImageIds).mockReturnValue(['img-1', 'img-2']);
 
-      const img1 = createImage('img-1', '1.png', new Date('2024-01-01'));
-      const img2 = createImage('img-2', '2.png', new Date('2024-01-02'));
+      const img1 = createImage('img-1', new Date('2024-01-01'));
+      const img2 = createImage('img-2', new Date('2024-01-02'));
 
       vi.mocked(mockImageRepository.findByIdWithEmbedding)
         .mockResolvedValueOnce({ id: 'img-1', path: img1.path, embedding })
@@ -246,9 +244,9 @@ describe('findDuplicates', () => {
       embValues[0] = 1;
       const embedding = createNormalizedEmbedding(embValues);
 
-      const imgA = createImage('img-a', 'a.png', new Date('2024-01-01'));
-      const imgB = createImage('img-b', 'b.png', new Date('2024-01-02'));
-      const imgC = createImage('img-c', 'c.png', new Date('2024-01-03'));
+      const imgA = createImage('img-a', new Date('2024-01-01'));
+      const imgB = createImage('img-b', new Date('2024-01-02'));
+      const imgC = createImage('img-c', new Date('2024-01-03'));
 
       vi.mocked(mockImageRepository.findByIdWithEmbedding)
         .mockResolvedValueOnce({ id: 'img-a', path: imgA.path, embedding })

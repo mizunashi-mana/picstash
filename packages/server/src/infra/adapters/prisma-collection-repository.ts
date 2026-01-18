@@ -35,7 +35,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
           orderBy: { order: 'asc' },
           include: {
             image: {
-              select: { filename: true, thumbnailPath: true },
+              select: { thumbnailPath: true },
             },
           },
         },
@@ -57,7 +57,6 @@ export class PrismaCollectionRepository implements CollectionRepository {
         id: ci.id,
         imageId: ci.imageId,
         order: ci.order,
-        filename: ci.image.filename,
         thumbnailPath: ci.image.thumbnailPath,
       })),
     };

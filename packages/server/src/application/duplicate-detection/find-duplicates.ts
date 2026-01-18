@@ -12,7 +12,6 @@ export const DEFAULT_DUPLICATE_THRESHOLD = 0.1;
 /** Image info for duplicate detection results */
 export interface DuplicateImageInfo {
   id: string;
-  filename: string;
   thumbnailPath: string | null;
   createdAt: Date;
   distance?: number;
@@ -217,7 +216,6 @@ export async function findDuplicates(
       if (image !== null) {
         members.push({
           id: image.id,
-          filename: image.filename,
           thumbnailPath: image.thumbnailPath,
           createdAt: image.createdAt,
         });
@@ -248,7 +246,6 @@ export async function findDuplicates(
     duplicateGroups.push({
       original: {
         id: original.id,
-        filename: original.filename,
         thumbnailPath: original.thumbnailPath,
         createdAt: original.createdAt,
       },
