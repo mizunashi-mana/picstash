@@ -77,7 +77,7 @@ export function SimilarImagesSectionView({
                     ? (
                         <Image
                           src={getThumbnailUrl(image.id)}
-                          alt=""
+                          alt={`類似画像 ${image.id}`}
                           radius="sm"
                           h={80}
                           fit="cover"

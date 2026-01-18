@@ -210,7 +210,7 @@ export function CollectionDetailPage(): React.JSX.Element {
                       <Link to={`/collections/${id}/view/${img.imageId}`}>
                         <Image
                           src={getThumbnailUrl(img.imageId)}
-                          alt=""
+                          alt={`画像 ${img.imageId}`}
                           height={140}
                           fit="cover"
                         />

@@ -57,7 +57,7 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
                   </Text>
                   <Image
                     src={getThumbnailUrl(image.thumbnailPath)}
-                    alt=""
+                    alt={`画像 ${image.id}`}
                     w={60}
                     h={60}
                     fit="cover"
