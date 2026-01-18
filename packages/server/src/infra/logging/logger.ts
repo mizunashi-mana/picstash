@@ -1,154 +1,120 @@
-import { mkdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Config } from '@/config.js';
 import type { FastifyServerOptions } from 'fastify';
 
-const currentDir = dirname(fileURLToPath(import.meta.url));
+// Path from this file (src/infra/logging/) to the server package root (packages/server/)
+const SERVER_ROOT_RELATIVE_PATH = '../../../';
+const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 /**
- * Parse size string (e.g., '10M', '1G') to bytes
+ * Resolve log file path relative to the server package root.
  */
-function parseSize(size: string): number {
-  const match = /^(\d+)([KMG]?)$/i.exec(size);
-  const numStr = match?.[1];
-  if (numStr === undefined) {
-    throw new Error(`Invalid size format: ${size}`);
-  }
-  const num = parseInt(numStr, 10);
-  const unit = match?.[2]?.toUpperCase() ?? '';
-
-  switch (unit) {
-    case 'K':
-      return num * 1024;
-    case 'M':
-      return num * 1024 * 1024;
-    case 'G':
-      return num * 1024 * 1024 * 1024;
-    default:
-      return num;
-  }
+function resolveLogPath(configPath: string): string {
+  return resolve(currentDir, SERVER_ROOT_RELATIVE_PATH, configPath);
 }
 
 /**
- * Build Fastify logger options from config
+ * Create pino-pretty transport options for console output.
+ */
+function createPrettyTransport() {
+  return {
+    target: 'pino-pretty',
+    options: {
+      translateTime: 'HH:MM:ss Z',
+      ignore: 'pid,hostname',
+    },
+  };
+}
+
+/**
+ * Create pino-roll transport options for file output with rotation.
+ */
+function createRollTransport(
+  logPath: string,
+  maxSize: string,
+  maxFiles: number,
+) {
+  return {
+    target: 'pino-roll',
+    options: {
+      file: logPath,
+      size: maxSize,
+      mkdir: true,
+      limit: { count: maxFiles },
+    },
+  };
+}
+
+/**
+ * Create pino/file transport options for file output without rotation.
+ */
+function createFileTransport(destination: string | number) {
+  return {
+    target: 'pino/file',
+    options: { destination },
+  };
+}
+
+/**
+ * Build Fastify logger options from config.
+ *
+ * Supports the following configurations:
+ * - Log level: debug, info, warn, error
+ * - Format: pretty (development) or json (production)
+ * - File output: optional, with or without rotation
+ *
+ * @param config - Application configuration
+ * @returns Fastify logger options
  */
 export function buildLoggerOptions(
   config: Config,
 ): FastifyServerOptions['logger'] {
   const { logging } = config;
+  const baseOptions = { level: logging.level };
 
-  // Base logger options
-  const baseOptions = {
-    level: logging.level,
-  };
+  // Console only (no file output)
+  if (!logging.file.enabled) {
+    if (logging.format === 'pretty') {
+      return {
+        ...baseOptions,
+        transport: createPrettyTransport(),
+      };
+    }
+    // JSON format - use default pino logger (no transport needed)
+    return baseOptions;
+  }
 
-  // Pretty format for development
+  // File output enabled
+  const logPath = resolveLogPath(logging.file.path);
+  const { rotation } = logging.file;
+
   if (logging.format === 'pretty') {
-    if (logging.file.enabled) {
-      // File output with pretty format (using pino-roll)
-      const logPath = resolve(currentDir, '../../../', logging.file.path);
-      mkdirSync(dirname(logPath), { recursive: true });
+    // Pretty format with file output
+    const fileTransport = rotation.enabled
+      ? createRollTransport(logPath, rotation.maxSize, rotation.maxFiles)
+      : createFileTransport(logPath);
 
-      if (logging.file.rotation.enabled) {
-        return {
-          ...baseOptions,
-          transport: {
-            targets: [
-              // Console output (pretty)
-              {
-                target: 'pino-pretty',
-                options: {
-                  translateTime: 'HH:MM:ss Z',
-                  ignore: 'pid,hostname',
-                },
-              },
-              // File output with rotation
-              {
-                target: 'pino-roll',
-                options: {
-                  file: logPath,
-                  size: parseSize(logging.file.rotation.maxSize),
-                  limit: { count: logging.file.rotation.maxFiles },
-                },
-              },
-            ],
-          },
-        };
-      }
-
-      // File output without rotation
-      return {
-        ...baseOptions,
-        transport: {
-          targets: [
-            {
-              target: 'pino-pretty',
-              options: {
-                translateTime: 'HH:MM:ss Z',
-                ignore: 'pid,hostname',
-              },
-            },
-            {
-              target: 'pino/file',
-              options: { destination: logPath },
-            },
-          ],
-        },
-      };
-    }
-
-    // Console only (pretty)
     return {
       ...baseOptions,
       transport: {
-        target: 'pino-pretty',
-        options: {
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
-        },
+        targets: [createPrettyTransport(), fileTransport],
       },
     };
   }
 
-  // JSON format for production
-  if (logging.file.enabled) {
-    const logPath = resolve(currentDir, '../../../', logging.file.path);
-    mkdirSync(dirname(logPath), { recursive: true });
+  // JSON format with file output
+  const fileTransport = rotation.enabled
+    ? createRollTransport(logPath, rotation.maxSize, rotation.maxFiles)
+    : createFileTransport(logPath);
 
-    if (logging.file.rotation.enabled) {
-      return {
-        ...baseOptions,
-        transport: {
-          targets: [
-            // Console output (JSON)
-            { target: 'pino/file', options: { destination: 1 } }, // stdout
-            // File output with rotation
-            {
-              target: 'pino-roll',
-              options: {
-                file: logPath,
-                size: parseSize(logging.file.rotation.maxSize),
-                limit: { count: logging.file.rotation.maxFiles },
-              },
-            },
-          ],
-        },
-      };
-    }
-
-    // File output without rotation
-    return {
-      ...baseOptions,
-      transport: {
-        targets: [
-          { target: 'pino/file', options: { destination: 1 } },
-          { target: 'pino/file', options: { destination: logPath } },
-        ],
-      },
-    };
-  }
-
-  // JSON console only
-  return baseOptions;
+  return {
+    ...baseOptions,
+    transport: {
+      targets: [
+        createFileTransport(1), // stdout
+        fileTransport,
+      ],
+    },
+  };
 }
