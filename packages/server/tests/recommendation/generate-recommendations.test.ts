@@ -100,7 +100,7 @@ describe('generateRecommendations', () => {
           duration: 5000,
           createdAt: new Date(),
           updatedAt: new Date(),
-          image: { id: 'img-1', thumbnailPath: null },
+          image: { id: 'img-1', title: '無題の画像 (img-1)', thumbnailPath: null },
         },
       ];
       vi.mocked(mockViewHistoryRepo.findRecentWithImages).mockResolvedValue(viewHistory);
@@ -128,7 +128,7 @@ describe('generateRecommendations', () => {
           duration: 5000,
           createdAt: new Date(),
           updatedAt: new Date(),
-          image: { id: 'img-1', thumbnailPath: null },
+          image: { id: 'img-1', title: '無題の画像 (img-1)', thumbnailPath: null },
         },
       ];
       vi.mocked(mockViewHistoryRepo.findRecentWithImages).mockResolvedValue(viewHistory);
@@ -161,6 +161,7 @@ describe('generateRecommendations', () => {
           width: 100,
           height: 100,
           size: 1000,
+          title: '無題の画像 (img-2)',
           description: null,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -173,6 +174,7 @@ describe('generateRecommendations', () => {
           width: 100,
           height: 100,
           size: 1000,
+          title: '無題の画像 (img-3)',
           description: null,
           createdAt: new Date(),
           updatedAt: new Date(),

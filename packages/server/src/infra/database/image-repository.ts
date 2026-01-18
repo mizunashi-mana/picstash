@@ -8,6 +8,7 @@ export interface CreateImageInput {
   size: number;
   width?: number;
   height?: number;
+  title?: string;
 }
 
 /**

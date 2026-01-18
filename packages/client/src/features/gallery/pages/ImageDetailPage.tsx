@@ -140,7 +140,7 @@ export function ImageDetailPage() {
         <Box>
           <Image
             src={getImageUrl(image.id)}
-            alt={image.description ?? ''}
+            alt={image.title}
             fit="contain"
             mah="70vh"
             radius="md"

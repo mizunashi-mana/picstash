@@ -63,7 +63,7 @@ export function DuplicateGroupCard({
               <Link to={`/images/${group.original.id}`}>
                 <Image
                   src={getThumbnailUrl(group.original.id)}
-                  alt={`オリジナル画像 ${group.original.id}`}
+                  alt={group.original.title}
                   height={120}
                   fit="cover"
                 />
@@ -91,7 +91,7 @@ export function DuplicateGroupCard({
                 <Link to={`/images/${dup.id}`}>
                   <Image
                     src={getThumbnailUrl(dup.id)}
-                    alt={`重複候補画像 ${dup.id}`}
+                    alt={dup.title}
                     height={120}
                     fit="cover"
                   />

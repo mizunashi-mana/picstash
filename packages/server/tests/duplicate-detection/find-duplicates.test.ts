@@ -59,6 +59,7 @@ function createImage(id: string, createdAt: Date): Image {
     size: 1024,
     width: 100,
     height: 100,
+    title: `無題の画像 (${id})`,
     description: null,
     createdAt,
     updatedAt: createdAt,

@@ -2,6 +2,7 @@ import { apiClient } from '@/api/client';
 
 export interface RecommendedImage {
   id: string;
+  title: string;
   thumbnailPath: string | null;
   score: number;
 }

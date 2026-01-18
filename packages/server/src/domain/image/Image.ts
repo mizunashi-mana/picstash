@@ -9,6 +9,7 @@ export interface Image {
   size: number;
   width: number | null;
   height: number | null;
+  title: string;
   description: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -24,11 +25,14 @@ export interface CreateImageInput {
   size: number;
   width?: number;
   height?: number;
+  title?: string;
+  createdAt?: Date;
 }
 
 /**
  * Input for updating an image
  */
 export interface UpdateImageInput {
+  title?: string;
   description?: string | null;
 }
