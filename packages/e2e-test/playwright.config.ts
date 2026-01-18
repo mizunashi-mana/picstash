@@ -34,9 +34,6 @@ export default defineConfig({
       reuseExistingServer: !isCI,
       cwd: '../..',
       timeout: 120000,
-      env: {
-        RATE_LIMIT_MAX: '10000',
-      },
     },
     {
       command: 'npm run dev:client',
