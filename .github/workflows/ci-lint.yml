@@ -28,7 +28,7 @@ jobs:
         run: devenv shell npm run build
 
       - name: pre-commit run
-        run: devenv shell pre-commit run --all-files
+        run: devenv shell pre-commit run --all-files --verbose
 
   typecheck:
     name: Type Check
