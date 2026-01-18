@@ -171,4 +171,4 @@ const body = createImageSchema.parse(req.body);
 
 * [README.md](../README.md) - プロジェクト概要
 * [Prisma Schema](../packages/server/prisma/schema.prisma) - データベーススキーマ
-* [ESLint Config](../packages/eslint-config/eslint.config.js) - リンター設定
+* [ESLint Config](../packages/eslint-config/) - 共通リンター設定パッケージ
