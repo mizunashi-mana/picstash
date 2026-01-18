@@ -91,3 +91,31 @@ export function extractFilenameFromUrl(url: string): string {
     return 'image';
   }
 }
+
+/**
+ * MIME type to extension mapping (reverse of IMAGE_EXTENSION_MIME_MAP)
+ */
+const MIME_TO_EXTENSION_MAP: Record<string, SupportedImageExtension> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/gif': '.gif',
+  'image/webp': '.webp',
+  'image/bmp': '.bmp',
+};
+
+/**
+ * Check if a content-type indicates an image
+ */
+export function isImageContentType(contentType: string): boolean {
+  const mimeType = contentType.split(';')[0]?.trim().toLowerCase() ?? '';
+  return mimeType.startsWith('image/');
+}
+
+/**
+ * Get file extension from Content-Type header
+ * Returns undefined if the content-type is not a supported image type
+ */
+export function getExtensionFromContentType(contentType: string): SupportedImageExtension | undefined {
+  const mimeType = contentType.split(';')[0]?.trim().toLowerCase() ?? '';
+  return MIME_TO_EXTENSION_MAP[mimeType];
+}

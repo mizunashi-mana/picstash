@@ -6,6 +6,9 @@ import {
   extractImageUrls,
   extractPageTitle,
   filterImageEntries,
+  extractFilenameFromUrl,
+  isImageContentType,
+  getExtensionFromContentType,
   FETCH_TIMEOUT_MS,
   USER_AGENT,
 } from '@/domain/url-crawl/index.js';
@@ -126,18 +129,18 @@ export class InMemoryUrlCrawlSessionManager implements UrlCrawlSessionManager {
       };
     }
 
-    // Fetch the page
-    let html: string;
+    // Fetch the URL
+    let response: Response;
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => {
         controller.abort();
       }, FETCH_TIMEOUT_MS);
 
-      const response = await fetch(url, {
+      response = await fetch(url, {
         headers: {
           'User-Agent': USER_AGENT,
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/*;q=0.8,*/*;q=0.7',
           'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8',
         },
         signal: controller.signal,
@@ -152,8 +155,6 @@ export class InMemoryUrlCrawlSessionManager implements UrlCrawlSessionManager {
           message: `Failed to fetch URL: HTTP ${response.status}`,
         };
       }
-
-      html = await response.text();
     }
     catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
@@ -170,20 +171,49 @@ export class InMemoryUrlCrawlSessionManager implements UrlCrawlSessionManager {
       };
     }
 
-    // Extract image URLs from HTML
-    const rawEntries = extractImageUrls(html, url);
-    const imageEntries = filterImageEntries(rawEntries);
+    // Check Content-Type to determine if this is a direct image URL
+    const contentType = response.headers.get('content-type') ?? '';
 
-    if (imageEntries.length === 0) {
-      return {
-        success: false,
-        error: 'NO_IMAGES_FOUND',
-        message: 'No images found on the page',
-      };
+    let imageEntries: Array<{ index: number; url: string; filename: string; alt?: string }>;
+    let pageTitle: string | undefined;
+
+    if (isImageContentType(contentType)) {
+      // Direct image URL - create a single entry for this image
+      const extension = getExtensionFromContentType(contentType);
+      let filename = extractFilenameFromUrl(url);
+
+      // If filename doesn't have a proper extension, add one based on content-type
+      if (extension !== undefined && !filename.toLowerCase().endsWith(extension)) {
+        // Check if filename has no extension at all
+        const hasExtension = /\.[a-z0-9]+$/i.test(filename);
+        if (!hasExtension) {
+          filename = `${filename}${extension}`;
+        }
+      }
+
+      imageEntries = [{
+        index: 0,
+        url,
+        filename,
+      }];
+      pageTitle = undefined;
     }
+    else {
+      // HTML page - extract images from content
+      const html = await response.text();
+      const rawEntries = extractImageUrls(html, url);
+      imageEntries = filterImageEntries(rawEntries);
 
-    // Extract page title
-    const pageTitle = extractPageTitle(html);
+      if (imageEntries.length === 0) {
+        return {
+          success: false,
+          error: 'NO_IMAGES_FOUND',
+          message: 'No images found on the page',
+        };
+      }
+
+      pageTitle = extractPageTitle(html);
+    }
 
     // Create session
     const sessionId = randomUUID();
