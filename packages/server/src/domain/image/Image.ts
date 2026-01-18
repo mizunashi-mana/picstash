@@ -26,6 +26,7 @@ export interface CreateImageInput {
   width?: number;
   height?: number;
   title?: string;
+  createdAt?: Date;
 }
 
 /**

@@ -86,6 +86,7 @@ export async function uploadImage(
     width: metadata.width,
     height: metadata.height,
     title,
+    createdAt,
   });
 
   // Generate embedding in background (non-blocking)

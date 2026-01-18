@@ -132,6 +132,7 @@ export async function importFromUrlCrawl(
           width: metadata.width,
           height: metadata.height,
           title,
+          createdAt,
         });
       }
       catch (error) {
