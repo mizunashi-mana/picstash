@@ -7,6 +7,52 @@ import { z } from 'zod';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const defaultConfigPath = resolve(currentDir, '../config.yaml');
 
+const rotationSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    maxSize: z
+      .string()
+      .regex(/^\d+[KMGkmg]?$/, 'Invalid size format. Use format like "10M", "1G", or "1024"')
+      .optional(),
+    maxFiles: z.number().int().positive().optional(),
+  })
+  .optional()
+  .transform(val => ({
+    enabled: val?.enabled ?? true,
+    maxSize: val?.maxSize ?? '10M',
+    maxFiles: val?.maxFiles ?? 5,
+  }));
+
+const fileSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    path: z.string().optional(),
+    rotation: rotationSchema,
+  })
+  .optional()
+  .transform(val => ({
+    enabled: val?.enabled ?? false,
+    path: val?.path ?? './logs/server.log',
+    rotation: val?.rotation ?? { enabled: true, maxSize: '10M', maxFiles: 5 },
+  }));
+
+const loggingSchema = z
+  .object({
+    level: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+    format: z.enum(['pretty', 'json']).optional(),
+    file: fileSchema,
+  })
+  .optional()
+  .transform(val => ({
+    level: val?.level ?? 'info',
+    format: val?.format ?? 'pretty',
+    file: val?.file ?? {
+      enabled: false,
+      path: './logs/server.log',
+      rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
+    },
+  }));
+
 const configSchema = z.object({
   server: z.object({
     port: z.number().int().positive().default(3000),
@@ -18,6 +64,7 @@ const configSchema = z.object({
   storage: z.object({
     path: z.string().min(1, 'Storage path is required'),
   }),
+  logging: loggingSchema,
   ollama: z.object({
     url: z.string().default('http://localhost:11434'),
     model: z.string().default('llama3.2'),

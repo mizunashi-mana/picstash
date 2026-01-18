@@ -13,7 +13,7 @@ async function main(): Promise<void> {
   const config = getConfig();
 
   const container = buildAppContainer();
-  const app = await buildApp(container);
+  const app = await buildApp(container, config);
 
   // Connect to database
   await connectDatabase();

@@ -3,19 +3,16 @@ import { registerCors } from '@/infra/http/plugins/cors.js';
 import { registerMultipart } from '@/infra/http/plugins/multipart.js';
 import { registerRateLimit } from '@/infra/http/plugins/rate-limit.js';
 import { registerRoutes } from '@/infra/http/routes/index.js';
+import { buildLoggerOptions } from '@/infra/logging/index.js';
+import type { Config } from '@/config.js';
 import type { AppContainer } from '@/infra/di/index.js';
 
-export async function buildApp(container: AppContainer): Promise<FastifyInstance> {
+export async function buildApp(
+  container: AppContainer,
+  config: Config,
+): Promise<FastifyInstance> {
   const app = Fastify({
-    logger: {
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
-        },
-      },
-    },
+    logger: buildLoggerOptions(config),
   });
 
   // Register plugins
