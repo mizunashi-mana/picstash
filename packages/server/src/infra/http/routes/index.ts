@@ -17,4 +17,5 @@ export function registerRoutes(app: FastifyInstance, container: AppContainer): v
   container.getRecommendationConversionController().registerRoutes(app);
   container.getStatsController().registerRoutes(app);
   container.getSearchController().registerRoutes(app);
+  container.getUrlCrawlController().registerRoutes(app);
 }

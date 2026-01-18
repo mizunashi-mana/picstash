@@ -1,4 +1,5 @@
 export { InMemoryArchiveSessionManager } from './in-memory-archive-session-manager.js';
+export { InMemoryUrlCrawlSessionManager } from './in-memory-url-crawl-session-manager.js';
 export { LocalFileStorage } from './local-file-storage.js';
 export { PrismaCollectionRepository } from './prisma-collection-repository.js';
 export { PrismaImageAttributeRepository } from './prisma-image-attribute-repository.js';

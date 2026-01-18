@@ -7,4 +7,5 @@ export { RecommendationController } from './recommendation-controller.js';
 export { RecommendationConversionController } from './recommendation-conversion-controller.js';
 export { SearchController } from './search-controller.js';
 export { StatsController } from './stats-controller.js';
+export { UrlCrawlController } from './url-crawl-controller.js';
 export { ViewHistoryController } from './view-history-controller.js';

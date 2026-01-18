@@ -18,6 +18,9 @@ export const TYPES = {
   ArchiveHandler: Symbol.for('ArchiveHandler'),
   ArchiveSessionManager: Symbol.for('ArchiveSessionManager'),
 
+  // URL Crawl
+  UrlCrawlSessionManager: Symbol.for('UrlCrawlSessionManager'),
+
   // AI/Embedding
   EmbeddingService: Symbol.for('EmbeddingService'),
   EmbeddingRepository: Symbol.for('EmbeddingRepository'),
@@ -34,4 +37,5 @@ export const TYPES = {
   RecommendationConversionController: Symbol.for('RecommendationConversionController'),
   StatsController: Symbol.for('StatsController'),
   SearchController: Symbol.for('SearchController'),
+  UrlCrawlController: Symbol.for('UrlCrawlController'),
 } as const;

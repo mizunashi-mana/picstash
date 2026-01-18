@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { Container } from 'inversify';
 import {
   InMemoryArchiveSessionManager,
+  InMemoryUrlCrawlSessionManager,
   LocalFileStorage,
   PrismaCollectionRepository,
   PrismaImageAttributeRepository,
@@ -27,6 +28,7 @@ import {
   RecommendationConversionController,
   SearchController,
   StatsController,
+  UrlCrawlController,
   ViewHistoryController,
 } from '@/infra/http/controllers/index.js';
 import { TYPES } from './types.js';
@@ -43,6 +45,7 @@ import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
+import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 
 /**
@@ -109,6 +112,12 @@ export function createContainer(): Container {
     .to(InMemoryArchiveSessionManager)
     .inSingletonScope();
 
+  // Bind URL crawl session manager
+  container
+    .bind<UrlCrawlSessionManager>(TYPES.UrlCrawlSessionManager)
+    .to(InMemoryUrlCrawlSessionManager)
+    .inSingletonScope();
+
   // Bind AI/Embedding services
   container
     .bind<EmbeddingService>(TYPES.EmbeddingService)
@@ -136,6 +145,7 @@ export function createContainer(): Container {
   container.bind<RecommendationConversionController>(TYPES.RecommendationConversionController).to(RecommendationConversionController);
   container.bind<StatsController>(TYPES.StatsController).to(StatsController);
   container.bind<SearchController>(TYPES.SearchController).to(SearchController);
+  container.bind<UrlCrawlController>(TYPES.UrlCrawlController).to(UrlCrawlController);
 
   return container;
 }
