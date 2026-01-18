@@ -18,7 +18,7 @@
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
-    "test:e2e": "npm run test -w @picstash/e2e-test",
+    "test:e2e": "npm run test:run -w @picstash/e2e-test",
     "db:migrate": "npm run db:migrate -w @picstash/server"
   },
   "license": "Apache-2.0 OR MPL-2.0",
