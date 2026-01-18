@@ -7,11 +7,21 @@ test.describe('Image Delete', () => {
   test('should delete an image from detail page', async ({ page }) => {
     // Upload an image first
     await page.goto('/');
+
+    // Set up response listener before triggering upload
+    const uploadResponsePromise = page.waitForResponse(
+      response => response.url().includes('/api/images') && response.request().method() === 'POST',
+    );
+
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testImagePath);
 
+    // Wait for upload API response
+    const uploadResponse = await uploadResponsePromise;
+    expect(uploadResponse.status()).toBe(201);
+
     // Wait for image to appear in gallery
-    await expect(page.locator('a[href^="/images/"]').first()).toBeVisible({ timeout: 30000 });
+    await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
 
     // Navigate to image detail
     const galleryImage = page.locator('a[href^="/images/"]').first();
@@ -38,7 +48,7 @@ test.describe('Image Delete', () => {
     await deleteResponsePromise;
 
     // Wait for the modal to close first
-    await expect(deleteModal).not.toBeVisible({ timeout: 10000 });
+    await expect(deleteModal).toBeHidden();
 
     // Should navigate back to home (give it more time for the delete operation)
     await expect(page).toHaveURL('/', { timeout: 15000 });
@@ -49,17 +59,27 @@ test.describe('Image Delete', () => {
     if (href === null) {
       throw new Error('Expected gallery image href to be non-null');
     }
-    await expect(page.locator(`a[href="${href}"]`)).toBeHidden({ timeout: 5000 });
+    await expect(page.locator(`a[href="${href}"]`)).toBeHidden();
   });
 
   test('should cancel deletion when clicking cancel button', async ({ page }) => {
     // Upload an image first
     await page.goto('/');
+
+    // Set up response listener before triggering upload
+    const uploadResponsePromise = page.waitForResponse(
+      response => response.url().includes('/api/images') && response.request().method() === 'POST',
+    );
+
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(testImagePath);
 
+    // Wait for upload API response
+    const uploadResponse = await uploadResponsePromise;
+    expect(uploadResponse.status()).toBe(201);
+
     // Wait for image to appear in gallery
-    await expect(page.locator('a[href^="/images/"]').first()).toBeVisible({ timeout: 30000 });
+    await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
 
     // Navigate to image detail
     const galleryImage = page.locator('a[href^="/images/"]').first();
