@@ -28,6 +28,9 @@
     "label:embedding:regenerate": "tsx src/cli/generate-label-embeddings.ts regenerate",
     "label:embedding:status": "tsx src/cli/generate-label-embeddings.ts status"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "@fastify/multipart": "^9.3.0",

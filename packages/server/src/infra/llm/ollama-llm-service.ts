@@ -53,7 +53,6 @@ export class OllamaLlmService implements LlmService {
       ? `${systemPrompt}\n\n${prompt}`
       : prompt;
 
-    // eslint-disable-next-line n/no-unsupported-features/node-builtins -- fetch is available in Node.js 18+
     const response = await fetch(`${this.baseUrl}/api/generate`, {
       method: 'POST',
       headers: {
@@ -90,9 +89,7 @@ export class OllamaLlmService implements LlmService {
 
   async isAvailable(): Promise<boolean> {
     try {
-      // eslint-disable-next-line n/no-unsupported-features/node-builtins -- AbortSignal.timeout is available in Node.js 18+
       const signal = AbortSignal.timeout(5000);
-      // eslint-disable-next-line n/no-unsupported-features/node-builtins -- fetch is available in Node.js 18+
       const response = await fetch(`${this.baseUrl}/api/tags`, {
         method: 'GET',
         signal,

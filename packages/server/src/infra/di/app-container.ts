@@ -12,6 +12,7 @@ import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
+import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
@@ -71,6 +72,10 @@ export class AppContainer {
 
   getStatsRepository(): StatsRepository {
     return this.container.get<StatsRepository>(TYPES.StatsRepository);
+  }
+
+  getSearchHistoryRepository(): SearchHistoryRepository {
+    return this.container.get<SearchHistoryRepository>(TYPES.SearchHistoryRepository);
   }
 
   // Storage & Processing

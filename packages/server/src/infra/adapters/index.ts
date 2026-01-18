@@ -7,6 +7,7 @@ export { PrismaImageRepository } from './prisma-image-repository.js';
 export { PrismaLabelRepository } from './prisma-label-repository.js';
 export { PrismaViewHistoryRepository } from './prisma-view-history-repository.js';
 export { PrismaRecommendationConversionRepository } from './prisma-recommendation-conversion-repository.js';
+export { PrismaSearchHistoryRepository } from './prisma-search-history-repository.js';
 export { PrismaStatsRepository } from './prisma-stats-repository.js';
 export { RarArchiveHandler } from './rar-archive-handler.js';
 export { SharpImageProcessor } from './sharp-image-processor.js';

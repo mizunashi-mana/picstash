@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Alert,
   AspectRatio,
   Box,
@@ -8,13 +9,20 @@ import {
   Group,
   Image,
   Loader,
+  Menu,
   Paper,
   SimpleGrid,
   Stack,
   Text,
   Title,
 } from '@mantine/core';
-import { IconChevronDown, IconChevronUp, IconPhoto } from '@tabler/icons-react';
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconHistory,
+  IconPhoto,
+  IconTrash,
+} from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { getThumbnailUrl } from '@/features/gallery/api';
 import { SearchBar } from './SearchBar';
@@ -28,6 +36,7 @@ export interface ImageGalleryViewProps {
   onSearchChange?: (value: string) => void;
   isExpanded?: boolean;
   onToggleExpand?: () => void;
+  onDeleteAllHistory?: () => void;
 }
 
 export function ImageGalleryView({
@@ -38,6 +47,7 @@ export function ImageGalleryView({
   onSearchChange,
   isExpanded = true,
   onToggleExpand,
+  onDeleteAllHistory,
 }: ImageGalleryViewProps) {
   const hasSearch = searchQuery !== '';
 
@@ -96,7 +106,11 @@ export function ImageGalleryView({
             withBorder
             component={Link}
             to={`/images/${image.id}`}
-            style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+            style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+            }}
           >
             <Card.Section>
               <AspectRatio ratio={1}>
@@ -132,7 +146,15 @@ export function ImageGalleryView({
             variant="subtle"
             size="compact-sm"
             onClick={onToggleExpand}
-            rightSection={isExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+            rightSection={
+              isExpanded
+                ? (
+                    <IconChevronUp size={16} />
+                  )
+                : (
+                    <IconChevronDown size={16} />
+                  )
+            }
             aria-expanded={isExpanded}
           >
             {isExpanded ? '折りたたむ' : '展開する'}
@@ -141,12 +163,32 @@ export function ImageGalleryView({
         <Collapse in={isExpanded}>
           <Stack gap="md">
             {onSearchChange !== undefined && (
-              <Box style={{ maxWidth: 400 }}>
-                <SearchBar
-                  value={searchQuery}
-                  onChange={onSearchChange}
-                />
-              </Box>
+              <Group gap="xs" align="flex-end">
+                <Box style={{ maxWidth: 400, flex: 1 }}>
+                  <SearchBar value={searchQuery} onChange={onSearchChange} />
+                </Box>
+                <Menu shadow="md" width={200}>
+                  <Menu.Target>
+                    <ActionIcon
+                      variant="subtle"
+                      color="gray"
+                      aria-label="検索履歴メニュー"
+                    >
+                      <IconHistory size={18} />
+                    </ActionIcon>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Label>検索履歴</Menu.Label>
+                    <Menu.Item
+                      color="red"
+                      leftSection={<IconTrash size={14} />}
+                      onClick={onDeleteAllHistory}
+                    >
+                      履歴をすべて削除
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
+              </Group>
             )}
             {renderContent()}
           </Stack>

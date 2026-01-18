@@ -10,6 +10,7 @@ import {
   PrismaImageRepository,
   PrismaLabelRepository,
   PrismaRecommendationConversionRepository,
+  PrismaSearchHistoryRepository,
   PrismaStatsRepository,
   PrismaViewHistoryRepository,
   RarArchiveHandler,
@@ -47,6 +48,7 @@ import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { LlmService } from '@/application/ports/llm-service.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
+import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
@@ -93,6 +95,11 @@ export function createContainer(): Container {
   container
     .bind<StatsRepository>(TYPES.StatsRepository)
     .to(PrismaStatsRepository)
+    .inSingletonScope();
+
+  container
+    .bind<SearchHistoryRepository>(TYPES.SearchHistoryRepository)
+    .to(PrismaSearchHistoryRepository)
     .inSingletonScope();
 
   // Bind storage & processing as singletons
