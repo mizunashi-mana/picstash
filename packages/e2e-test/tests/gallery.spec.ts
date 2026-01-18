@@ -17,6 +17,9 @@ test.describe('Gallery', () => {
   test('should display search bar', async ({ page }) => {
     await page.goto('/');
 
+    // Expand gallery section first
+    await page.getByRole('button', { name: '展開する' }).click();
+
     // Check search input exists
     await expect(page.getByPlaceholder('検索...')).toBeVisible();
   });

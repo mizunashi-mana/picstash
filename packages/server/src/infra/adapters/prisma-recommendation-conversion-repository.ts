@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { injectable } from 'inversify';
 import { prisma } from '@/infra/database/prisma.js';
+import { Prisma } from '@~generated/prisma/client.js';
 import type {
   RecommendationConversion,
   CreateImpressionInput,
@@ -17,20 +18,33 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
   ): Promise<RecommendationConversion[]> {
     const now = new Date();
 
-    // Create all impressions in a transaction
-    // eslint-disable-next-line @typescript-eslint/promise-function-async -- Prisma batch transaction pattern
-    const createOperations = inputs.map(input =>
-      prisma.recommendationConversion.create({
-        data: {
-          imageId: input.imageId,
-          recommendationScore: input.score,
-          impressionAt: now,
-        },
-      }),
-    );
-    const records = await prisma.$transaction(createOperations);
+    // Create impressions individually, skipping any that fail due to missing images
+    const results: RecommendationConversion[] = [];
 
-    return records;
+    for (const input of inputs) {
+      try {
+        const record = await prisma.recommendationConversion.create({
+          data: {
+            imageId: input.imageId,
+            recommendationScore: input.score,
+            impressionAt: now,
+          },
+        });
+        results.push(record);
+      }
+      catch (error) {
+        // Skip if image doesn't exist (foreign key constraint violation)
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError
+          && error.code === 'P2003'
+        ) {
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    return results;
   }
 
   async findById(id: string): Promise<RecommendationConversion | null> {

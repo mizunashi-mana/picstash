@@ -2,14 +2,19 @@ import {
   Alert,
   AspectRatio,
   Box,
+  Button,
   Card,
+  Collapse,
   Group,
   Image,
   Loader,
+  Paper,
   SimpleGrid,
   Stack,
   Text,
+  Title,
 } from '@mantine/core';
+import { IconChevronDown, IconChevronUp, IconPhoto } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { getThumbnailUrl } from '@/features/gallery/api';
 import { SearchBar } from './SearchBar';
@@ -21,6 +26,8 @@ export interface ImageGalleryViewProps {
   error: Error | null;
   searchQuery?: string;
   onSearchChange?: (value: string) => void;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 }
 
 export function ImageGalleryView({
@@ -29,6 +36,8 @@ export function ImageGalleryView({
   error,
   searchQuery = '',
   onSearchChange,
+  isExpanded = true,
+  onToggleExpand,
 }: ImageGalleryViewProps) {
   const hasSearch = searchQuery !== '';
 
@@ -106,24 +115,43 @@ export function ImageGalleryView({
   };
 
   return (
-    <Stack gap="md">
-      {onSearchChange !== undefined && (
+    <Paper p="md" withBorder>
+      <Stack gap="md">
         <Group justify="space-between" align="center">
-          <Box style={{ flex: 1, maxWidth: 400 }}>
-            <SearchBar
-              value={searchQuery}
-              onChange={onSearchChange}
-            />
-          </Box>
-          {images !== undefined && images.length > 0 && (
-            <Text size="sm" c="dimmed">
-              {images.length}
-              件
-            </Text>
-          )}
+          <Group gap="xs">
+            <IconPhoto size={20} />
+            <Title order={4}>ギャラリー</Title>
+            {isExpanded && images !== undefined && images.length > 0 && (
+              <Text size="sm" c="dimmed">
+                {images.length}
+                件
+              </Text>
+            )}
+          </Group>
+          <Button
+            variant="subtle"
+            size="compact-sm"
+            onClick={onToggleExpand}
+            rightSection={isExpanded ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+            aria-expanded={isExpanded}
+          >
+            {isExpanded ? '折りたたむ' : '展開する'}
+          </Button>
         </Group>
-      )}
-      {renderContent()}
-    </Stack>
+        <Collapse in={isExpanded}>
+          <Stack gap="md">
+            {onSearchChange !== undefined && (
+              <Box style={{ maxWidth: 400 }}>
+                <SearchBar
+                  value={searchQuery}
+                  onChange={onSearchChange}
+                />
+              </Box>
+            )}
+            {renderContent()}
+          </Stack>
+        </Collapse>
+      </Stack>
+    </Paper>
   );
 }

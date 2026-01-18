@@ -14,6 +14,9 @@ test.describe('Image Delete', () => {
     // Wait for upload success message
     await expect(page.getByText('アップロード完了')).toBeVisible();
 
+    // Expand gallery to see uploaded images
+    await page.getByRole('button', { name: '展開する' }).click();
+
     // Wait for image to appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
 
@@ -47,6 +50,9 @@ test.describe('Image Delete', () => {
     // Should navigate back to home (give it more time for the delete operation)
     await expect(page).toHaveURL('/', { timeout: 15000 });
 
+    // Expand gallery to check deleted image
+    await page.getByRole('button', { name: '展開する' }).click();
+
     // The deleted image should no longer appear in the gallery
     // href が null の場合はテストを即座に失敗させる（型ガードとして機能させる）
     // eslint-disable-next-line playwright/no-conditional-in-test -- 型ガードとして必要
@@ -65,6 +71,9 @@ test.describe('Image Delete', () => {
 
     // Wait for upload success message
     await expect(page.getByText('アップロード完了')).toBeVisible();
+
+    // Expand gallery to see uploaded images
+    await page.getByRole('button', { name: '展開する' }).click();
 
     // Wait for image to appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();

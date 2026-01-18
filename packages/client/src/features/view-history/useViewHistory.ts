@@ -6,6 +6,8 @@ interface UseViewHistoryOptions {
   enabled?: boolean;
   /** Conversion ID from recommendation click tracking */
   conversionId?: string | null;
+  /** Set to true when the image has been deleted to skip cleanup */
+  isDeleted?: boolean;
 }
 
 /**
@@ -17,11 +19,17 @@ export function useViewHistory(
   imageId: string | undefined,
   options: UseViewHistoryOptions = {},
 ): void {
-  const { enabled = true, conversionId } = options;
+  const { enabled = true, conversionId, isDeleted = false } = options;
   const viewHistoryIdRef = useRef<string | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const conversionRecordedRef = useRef<boolean>(false);
   const lastConversionIdRef = useRef<string | null | undefined>(undefined);
+  const isDeletedRef = useRef<boolean>(false);
+
+  // Keep isDeletedRef in sync with isDeleted prop
+  useEffect(() => {
+    isDeletedRef.current = isDeleted;
+  }, [isDeleted]);
 
   // Reset conversionRecordedRef when conversionId changes
   useEffect(() => {
@@ -32,6 +40,13 @@ export function useViewHistory(
   }, [conversionId]);
 
   const sendViewEnd = useCallback(async () => {
+    // Skip if image was deleted (view history is cascade deleted)
+    if (isDeletedRef.current) {
+      viewHistoryIdRef.current = null;
+      startTimeRef.current = null;
+      return;
+    }
+
     if (viewHistoryIdRef.current === null || startTimeRef.current === null) {
       return;
     }
@@ -96,6 +111,11 @@ export function useViewHistory(
 
     // Handle page unload (user navigates away or closes tab)
     const handleBeforeUnload = () => {
+      // Skip if image was deleted (view history is cascade deleted)
+      if (isDeletedRef.current) {
+        return;
+      }
+
       if (viewHistoryIdRef.current !== null && startTimeRef.current !== null) {
         const duration = Date.now() - startTimeRef.current;
         // Use fetch with keepalive for reliable delivery during page unload
