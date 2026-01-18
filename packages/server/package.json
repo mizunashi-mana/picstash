@@ -29,7 +29,7 @@
     "label:embedding:status": "tsx src/cli/generate-label-embeddings.ts status"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=21.0.0"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

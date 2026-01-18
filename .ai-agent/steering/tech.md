@@ -104,7 +104,7 @@ export default buildConfig({
 
 ### 前提条件
 
-- Node.js v20 以上
+- Node.js v21 以上
 - npm
 
 ### セットアップ手順
