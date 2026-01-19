@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { basename } from 'node:path';
-import AdmZip from 'adm-zip';
 import { injectable } from 'inversify';
+import { open } from 'yauzl-promise';
 import type {
   ArchiveEntry,
   ArchiveHandler,
@@ -9,6 +9,19 @@ import type {
 
 const ZIP_EXTENSIONS = ['.zip'];
 const ZIP_MIME_TYPES = ['application/zip', 'application/x-zip-compressed'];
+
+/**
+ * Read all data from a stream into a Buffer
+ */
+async function streamToBuffer(
+  stream: NodeJS.ReadableStream,
+): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
 
 @injectable()
 export class ZipArchiveHandler implements ArchiveHandler {
@@ -22,35 +35,66 @@ export class ZipArchiveHandler implements ArchiveHandler {
   }
 
   async listEntries(archivePath: string): Promise<ArchiveEntry[]> {
-    const zip = new AdmZip(archivePath);
-    const zipEntries = zip.getEntries();
+    const zipFile = await open(archivePath);
 
-    return zipEntries.map((entry, index) => ({
-      index,
-      filename: basename(entry.entryName),
-      path: entry.entryName,
-      size: entry.header.size,
-      isDirectory: entry.isDirectory,
-    }));
+    try {
+      const entries = await zipFile.readEntries();
+
+      return entries.map((entry, index) => ({
+        index,
+        filename: basename(entry.filename),
+        path: entry.filename,
+        size: entry.uncompressedSize,
+        isDirectory: entry.filename.endsWith('/'),
+      }));
+    }
+    finally {
+      await zipFile.close();
+    }
   }
 
   async extractEntry(archivePath: string, entryIndex: number): Promise<Buffer> {
-    const zip = new AdmZip(archivePath);
-    const zipEntries = zip.getEntries();
-
-    if (entryIndex < 0 || entryIndex >= zipEntries.length) {
+    if (entryIndex < 0) {
       throw new Error(`Entry index ${entryIndex} out of range`);
     }
 
-    const entry = zipEntries[entryIndex];
-    if (entry === undefined) {
-      throw new Error(`Entry at index ${entryIndex} not found`);
-    }
+    const zipFile = await open(archivePath);
 
-    if (entry.isDirectory) {
-      throw new Error('Cannot extract a directory entry');
-    }
+    try {
+      const entries = await zipFile.readEntries();
 
-    return entry.getData();
+      if (entryIndex >= entries.length) {
+        await zipFile.close();
+        throw new Error(`Entry index ${entryIndex} out of range`);
+      }
+
+      const entry = entries[entryIndex];
+      if (entry === undefined) {
+        await zipFile.close();
+        throw new Error(`Entry at index ${entryIndex} not found`);
+      }
+
+      if (entry.filename.endsWith('/')) {
+        await zipFile.close();
+        throw new Error('Cannot extract a directory entry');
+      }
+
+      // Open a read stream for this specific entry
+      const readStream = await zipFile.openReadStream(entry);
+      // Must consume the stream completely before closing the zip file
+      const buffer = await streamToBuffer(readStream);
+      await zipFile.close();
+      return buffer;
+    }
+    catch (error) {
+      // Ensure we close on any unexpected error during entry read
+      try {
+        await zipFile.close();
+      }
+      catch {
+        // Ignore close errors if already closed or in invalid state
+      }
+      throw error;
+    }
   }
 }
