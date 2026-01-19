@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   Group,
+  Progress,
   Stack,
   Text,
   Textarea,
@@ -16,6 +17,7 @@ export interface ImageDescriptionSectionViewProps {
   editValue: string;
   isPending: boolean;
   isGenerating: boolean;
+  generateProgress?: number;
   generateError?: string | null;
   onStartEdit: () => void;
   onCancel: () => void;
@@ -30,6 +32,7 @@ export function ImageDescriptionSectionView({
   editValue,
   isPending,
   isGenerating,
+  generateProgress,
   generateError,
   onStartEdit,
   onCancel,
@@ -73,6 +76,9 @@ export function ImageDescriptionSectionView({
                     {generateError}
                   </Text>
                 )}
+                {isGenerating && generateProgress !== undefined && generateProgress > 0 && (
+                  <Progress value={generateProgress} size="sm" animated />
+                )}
                 <Group justify="space-between">
                   <Button
                     variant="light"
@@ -82,7 +88,9 @@ export function ImageDescriptionSectionView({
                     loading={isGenerating}
                     disabled={isPending}
                   >
-                    AI で生成
+                    {isGenerating && generateProgress !== undefined && generateProgress > 0
+                      ? `生成中... (${generateProgress}%)`
+                      : 'AI で生成'}
                   </Button>
                   <Group>
                     <Button

@@ -2,6 +2,7 @@ export { ArchiveController } from './archive-controller.js';
 export { CollectionController } from './collection-controller.js';
 export { ImageAttributeController } from './image-attribute-controller.js';
 export { ImageController } from './image-controller.js';
+export { JobController } from './job-controller.js';
 export { LabelController } from './label-controller.js';
 export { RecommendationController } from './recommendation-controller.js';
 export { RecommendationConversionController } from './recommendation-conversion-controller.js';

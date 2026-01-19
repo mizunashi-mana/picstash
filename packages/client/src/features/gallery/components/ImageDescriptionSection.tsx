@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateDescription, updateImage } from '@/features/gallery/api';
+import {
+  generateDescriptionJob,
+  getJobStatus,
+  updateImage,
+} from '@/features/gallery/api';
 import { ImageDescriptionSectionView } from './ImageDescriptionSectionView';
 
 interface ImageDescriptionSectionProps {
@@ -15,6 +19,61 @@ export function ImageDescriptionSection({
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(description ?? '');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [generateProgress, setGenerateProgress] = useState(0);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current !== null) {
+        clearInterval(pollingRef.current);
+      }
+    };
+  }, []);
+
+  const pollJobStatus = useCallback(
+    (jobId: string) => {
+      const poll = async () => {
+        try {
+          const status = await getJobStatus(jobId);
+          setGenerateProgress(status.progress);
+
+          if (status.status === 'completed' && status.result !== undefined) {
+            if (pollingRef.current !== null) {
+              clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+            setIsGenerating(false);
+            setEditValue(status.result.description);
+            setGenerateProgress(0);
+          }
+          else if (status.status === 'failed') {
+            if (pollingRef.current !== null) {
+              clearInterval(pollingRef.current);
+              pollingRef.current = null;
+            }
+            setIsGenerating(false);
+            setGenerateError(status.error ?? '説明の生成に失敗しました');
+            setGenerateProgress(0);
+          }
+        }
+        catch {
+          // Polling error - continue trying
+        }
+      };
+
+      // Start polling every 1 second
+      pollingRef.current = setInterval(() => {
+        void poll();
+      }, 1000);
+
+      // Initial poll
+      void poll();
+    },
+    [],
+  );
 
   const updateMutation = useMutation({
     mutationFn: async (newDescription: string) => {
@@ -31,12 +90,15 @@ export function ImageDescriptionSection({
 
   const generateMutation = useMutation({
     mutationFn: async () => {
-      return await generateDescription(imageId);
+      return await generateDescriptionJob(imageId);
     },
     onSuccess: (result) => {
-      setEditValue(result.description);
+      // Start polling for job status
+      pollJobStatus(result.jobId);
     },
     onError: (error) => {
+      setIsGenerating(false);
+      setGenerateError('説明の生成に失敗しました');
       // eslint-disable-next-line no-console -- Log error for debugging
       console.error('Failed to generate description:', error);
     },
@@ -57,6 +119,8 @@ export function ImageDescriptionSection({
   };
 
   const handleGenerate = () => {
+    setIsGenerating(true);
+    setGenerateError(null);
     generateMutation.mutate();
   };
 
@@ -66,8 +130,9 @@ export function ImageDescriptionSection({
       isEditing={isEditing}
       editValue={editValue}
       isPending={updateMutation.isPending}
-      isGenerating={generateMutation.isPending}
-      generateError={generateMutation.isError ? '説明の生成に失敗しました' : null}
+      isGenerating={isGenerating || generateMutation.isPending}
+      generateProgress={generateProgress}
+      generateError={generateError}
       onStartEdit={handleStartEdit}
       onCancel={handleCancel}
       onSave={handleSave}

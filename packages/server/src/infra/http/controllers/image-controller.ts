@@ -7,14 +7,16 @@ import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
 import { generateTitle } from '@/domain/image/index.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { CaptionService, SimilarImageDescription } from '@/application/ports/caption-service.js';
+import { CAPTION_JOB_TYPE } from '@/infra/workers/index.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { JobQueue } from '@/application/ports/job-queue.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
+import type { CaptionJobPayload } from '@/infra/workers/index.js';
 import type { FastifyInstance } from 'fastify';
 
 async function fileExists(path: string): Promise<boolean> {
@@ -38,7 +40,7 @@ export class ImageController {
     @inject(TYPES.ImageProcessor) private readonly imageProcessor: ImageProcessor,
     @inject(TYPES.EmbeddingService) private readonly embeddingService: EmbeddingService,
     @inject(TYPES.EmbeddingRepository) private readonly embeddingRepository: EmbeddingRepository,
-    @inject(TYPES.CaptionService) private readonly captionService: CaptionService,
+    @inject(TYPES.JobQueue) private readonly jobQueue: JobQueue,
   ) {}
 
   registerRoutes(app: FastifyInstance): void {
@@ -259,7 +261,7 @@ export class ImageController {
       },
     );
 
-    // Generate description for image using AI
+    // Generate description for image using AI (async job)
     app.post<{ Params: { id: string } }>(
       '/api/images/:id/generate-description',
       async (request, reply) => {
@@ -281,29 +283,15 @@ export class ImageController {
           });
         }
 
-        try {
-          // Get similar images' descriptions for context
-          const similarDescriptions = await this.getSimilarImageDescriptions(id, 5);
+        // Create a job for caption generation
+        const payload: CaptionJobPayload = { imageId: id };
+        const job = await this.jobQueue.add(CAPTION_JOB_TYPE, payload);
 
-          // Generate description with context from similar images
-          const result = await this.captionService.generateWithContext(absolutePath, {
-            similarDescriptions,
-          });
-
-          return await reply.send({
-            imageId: id,
-            description: result.caption,
-            model: result.model,
-            usedContext: similarDescriptions.length > 0,
-          });
-        }
-        catch (error) {
-          request.log.error(error, 'Failed to generate description');
-          return await reply.status(500).send({
-            error: 'Internal Server Error',
-            message: 'Failed to generate description',
-          });
-        }
+        return await reply.status(202).send({
+          jobId: job.id,
+          status: 'queued',
+          message: 'Caption generation job has been queued',
+        });
       },
     );
 
@@ -454,67 +442,5 @@ export class ImageController {
         return await reply.status(204).send();
       },
     );
-  }
-
-  /**
-   * Get descriptions from similar images for context with similarity scores
-   */
-  private async getSimilarImageDescriptions(
-    imageId: string,
-    limit: number,
-  ): Promise<SimilarImageDescription[]> {
-    // Get the image with its embedding
-    const imageWithEmbedding = await this.imageRepository.findByIdWithEmbedding(imageId);
-    if (imageWithEmbedding?.embedding === null || imageWithEmbedding?.embedding === undefined) {
-      return [];
-    }
-
-    // Validate embedding dimension
-    const expectedByteLength = EMBEDDING_DIMENSION * 4;
-    if (imageWithEmbedding.embedding.byteLength !== expectedByteLength) {
-      return [];
-    }
-
-    // Convert Uint8Array to Float32Array for similarity search
-    const embedding = new Float32Array(
-      imageWithEmbedding.embedding.buffer,
-      imageWithEmbedding.embedding.byteOffset,
-      imageWithEmbedding.embedding.byteLength / 4,
-    );
-
-    // Find similar images, excluding the current image
-    const similarResults = this.embeddingRepository.findSimilar(embedding, limit, [imageId]);
-
-    if (similarResults.length === 0) {
-      return [];
-    }
-
-    // Batch fetch all similar images at once to avoid N+1 queries
-    const imageIds = similarResults.map(r => r.imageId);
-    const images = await this.imageRepository.findByIds(imageIds);
-
-    // Create a map for quick lookup
-    const imageMap = new Map(images.map(img => [img.id, img]));
-
-    // Build descriptions with similarity scores, preserving similarity order
-    const descriptions: SimilarImageDescription[] = [];
-    for (const result of similarResults) {
-      const image = imageMap.get(result.imageId);
-      if (
-        image !== undefined
-        && image.description !== null
-        && image.description.trim() !== ''
-      ) {
-        // Convert distance to similarity score (0-1, higher is more similar)
-        // Using 1 / (1 + distance) formula for smooth mapping
-        const similarity = 1 / (1 + result.distance);
-        descriptions.push({
-          description: image.description,
-          similarity,
-        });
-      }
-    }
-
-    return descriptions;
   }
 }
