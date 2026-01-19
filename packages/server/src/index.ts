@@ -5,6 +5,8 @@ import { buildApp } from '@/app.js';
 import { getConfig, initConfig, parseConfigArg } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
+import { JobWorker } from '@/infra/queue/index.js';
+import { createCaptionJobHandler, CAPTION_JOB_TYPE } from '@/infra/workers/index.js';
 
 async function main(): Promise<void> {
   // Parse --config argument and initialize configuration
@@ -19,9 +21,24 @@ async function main(): Promise<void> {
   await connectDatabase();
   app.log.info('Database connected');
 
+  // Start job worker
+  const jobWorker = new JobWorker(container.getJobQueue());
+
+  // Register caption generation job handler
+  const captionHandler = createCaptionJobHandler({
+    imageRepository: container.getImageRepository(),
+    fileStorage: container.getFileStorage(),
+    captionService: container.getCaptionService(),
+    embeddingRepository: container.getEmbeddingRepository(),
+  });
+  jobWorker.registerHandler(CAPTION_JOB_TYPE, captionHandler);
+  jobWorker.start();
+  app.log.info('Job worker started');
+
   // Graceful shutdown
   const shutdown = () => {
     app.log.info('Shutting down...');
+    jobWorker.stop();
     app.close()
       .then(async () => { await disconnectDatabase(); })
       .catch((err: unknown) => { app.log.error(err); });

@@ -28,6 +28,9 @@ export const TYPES = {
   CaptionService: Symbol.for('CaptionService'),
   LlmService: Symbol.for('LlmService'),
 
+  // Job Queue
+  JobQueue: Symbol.for('JobQueue'),
+
   // Controllers
   ImageController: Symbol.for('ImageController'),
   ImageAttributeController: Symbol.for('ImageAttributeController'),
@@ -40,4 +43,5 @@ export const TYPES = {
   StatsController: Symbol.for('StatsController'),
   SearchController: Symbol.for('SearchController'),
   UrlCrawlController: Symbol.for('UrlCrawlController'),
+  JobController: Symbol.for('JobController'),
 } as const;

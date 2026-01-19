@@ -10,6 +10,7 @@ import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { JobQueue } from '@/application/ports/job-queue.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
@@ -21,6 +22,7 @@ import type {
   CollectionController,
   ImageAttributeController,
   ImageController,
+  JobController,
   LabelController,
   RecommendationController,
   RecommendationConversionController,
@@ -118,6 +120,12 @@ export class AppContainer {
     return this.container.get<CaptionService>(TYPES.CaptionService);
   }
 
+  // Job Queue
+
+  getJobQueue(): JobQueue {
+    return this.container.get<JobQueue>(TYPES.JobQueue);
+  }
+
   // Controllers
 
   getImageController(): ImageController {
@@ -162,6 +170,10 @@ export class AppContainer {
 
   getUrlCrawlController(): UrlCrawlController {
     return this.container.get<UrlCrawlController>(TYPES.UrlCrawlController);
+  }
+
+  getJobController(): JobController {
+    return this.container.get<JobController>(TYPES.JobController);
   }
 }
 

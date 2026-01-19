@@ -130,20 +130,43 @@ export async function fetchSuggestedAttributes(
   return await apiClient<SuggestedAttributesResponse>(url);
 }
 
-// Generate Description API
-export interface GeneratedDescriptionResponse {
-  imageId: string;
-  description: string;
-  model: string;
+// Generate Description API (Async Job)
+export interface GenerateDescriptionJobResponse {
+  jobId: string;
+  status: 'queued';
+  message: string;
 }
 
-export async function generateDescription(
+export interface JobStatus {
+  id: string;
+  type: string;
+  status: 'waiting' | 'active' | 'completed' | 'failed';
+  progress: number;
+  result?: {
+    description: string;
+    model: string;
+    usedContext?: boolean;
+  };
+  error?: string;
+  attempts: number;
+  maxAttempts: number;
+  createdAt: string;
+  updatedAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+}
+
+export async function generateDescriptionJob(
   imageId: string,
-): Promise<GeneratedDescriptionResponse> {
-  return await apiClient<GeneratedDescriptionResponse>(
+): Promise<GenerateDescriptionJobResponse> {
+  return await apiClient<GenerateDescriptionJobResponse>(
     `/images/${imageId}/generate-description`,
     { method: 'POST', body: JSON.stringify({}) },
   );
+}
+
+export async function getJobStatus(jobId: string): Promise<JobStatus> {
+  return await apiClient<JobStatus>(`/jobs/${jobId}`);
 }
 
 // Similar Images API

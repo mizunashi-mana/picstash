@@ -8,6 +8,7 @@ import {
   PrismaCollectionRepository,
   PrismaImageAttributeRepository,
   PrismaImageRepository,
+  PrismaJobQueue,
   PrismaLabelRepository,
   PrismaRecommendationConversionRepository,
   PrismaSearchHistoryRepository,
@@ -25,6 +26,7 @@ import {
   CollectionController,
   ImageAttributeController,
   ImageController,
+  JobController,
   LabelController,
   RecommendationController,
   RecommendationConversionController,
@@ -45,6 +47,7 @@ import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { JobQueue } from '@/application/ports/job-queue.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { LlmService } from '@/application/ports/llm-service.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
@@ -144,6 +147,12 @@ export function createContainer(): Container {
     .to(TransformersCaptionService)
     .inSingletonScope();
 
+  // Bind Job Queue
+  container
+    .bind<JobQueue>(TYPES.JobQueue)
+    .to(PrismaJobQueue)
+    .inSingletonScope();
+
   // Bind LLM service only if ollama is configured
   const config = getConfig();
   if (config.ollama !== undefined) {
@@ -165,6 +174,7 @@ export function createContainer(): Container {
   container.bind<StatsController>(TYPES.StatsController).to(StatsController);
   container.bind<SearchController>(TYPES.SearchController).to(SearchController);
   container.bind<UrlCrawlController>(TYPES.UrlCrawlController).to(UrlCrawlController);
+  container.bind<JobController>(TYPES.JobController).to(JobController);
 
   return container;
 }
