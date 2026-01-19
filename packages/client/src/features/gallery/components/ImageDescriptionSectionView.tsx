@@ -76,8 +76,13 @@ export function ImageDescriptionSectionView({
                     {generateError}
                   </Text>
                 )}
-                {isGenerating && generateProgress !== undefined && generateProgress > 0 && (
-                  <Progress value={generateProgress} size="sm" animated />
+                {isGenerating && (
+                  <Progress
+                    value={generateProgress !== undefined && generateProgress > 0 ? generateProgress : 100}
+                    size="sm"
+                    animated
+                    {...(generateProgress === undefined || generateProgress === 0 ? { 'aria-label': '処理中' } : {})}
+                  />
                 )}
                 <Group justify="space-between">
                   <Button
@@ -88,8 +93,10 @@ export function ImageDescriptionSectionView({
                     loading={isGenerating}
                     disabled={isPending}
                   >
-                    {isGenerating && generateProgress !== undefined && generateProgress > 0
-                      ? `生成中... (${generateProgress}%)`
+                    {isGenerating
+                      ? generateProgress !== undefined && generateProgress > 0
+                        ? `生成中... (${generateProgress}%)`
+                        : '生成中...'
                       : 'AI で生成'}
                   </Button>
                   <Group>

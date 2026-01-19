@@ -23,6 +23,9 @@ export function ImageDescriptionSection({
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateProgress, setGenerateProgress] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const errorCountRef = useRef(0);
+
+  const MAX_POLLING_ERRORS = 5;
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -33,34 +36,43 @@ export function ImageDescriptionSection({
     };
   }, []);
 
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current !== null) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    errorCountRef.current = 0;
+  }, []);
+
   const pollJobStatus = useCallback(
     (jobId: string) => {
       const poll = async () => {
         try {
           const status = await getJobStatus(jobId);
+          errorCountRef.current = 0; // Reset error count on success
           setGenerateProgress(status.progress);
 
           if (status.status === 'completed' && status.result !== undefined) {
-            if (pollingRef.current !== null) {
-              clearInterval(pollingRef.current);
-              pollingRef.current = null;
-            }
+            stopPolling();
             setIsGenerating(false);
             setEditValue(status.result.description);
             setGenerateProgress(0);
           }
           else if (status.status === 'failed') {
-            if (pollingRef.current !== null) {
-              clearInterval(pollingRef.current);
-              pollingRef.current = null;
-            }
+            stopPolling();
             setIsGenerating(false);
             setGenerateError(status.error ?? '説明の生成に失敗しました');
             setGenerateProgress(0);
           }
         }
         catch {
-          // Polling error - continue trying
+          errorCountRef.current += 1;
+          if (errorCountRef.current >= MAX_POLLING_ERRORS) {
+            stopPolling();
+            setIsGenerating(false);
+            setGenerateError('ジョブ状態の取得に失敗しました。再度お試しください。');
+            setGenerateProgress(0);
+          }
         }
       };
 
@@ -72,7 +84,7 @@ export function ImageDescriptionSection({
       // Initial poll
       void poll();
     },
-    [],
+    [stopPolling],
   );
 
   const updateMutation = useMutation({

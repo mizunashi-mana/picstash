@@ -135,15 +135,25 @@ export class PrismaJobQueue implements JobQueue {
       completedAt: Date | null;
     },
   ): Job<TPayload, TResult> {
+    const safeParse = <T>(value: string): T | undefined => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- JSON.parse result is cast to expected type
+        return JSON.parse(value) as T;
+      }
+      catch {
+        return undefined;
+      }
+    };
+
     return {
       id: job.id,
       type: job.type,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- status is validated by database constraint
       status: job.status as JobStatus,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- payload is JSON serialized by add()
-      payload: JSON.parse(job.payload) as TPayload,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion, @typescript-eslint/strict-boolean-expressions -- result is JSON serialized by completeJob()
-      result: job.result ? (JSON.parse(job.result) as TResult) : undefined,
+      payload: safeParse<TPayload>(job.payload) ?? ({} as unknown as TPayload),
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions -- result is JSON serialized by completeJob()
+      result: job.result ? safeParse<TResult>(job.result) : undefined,
       error: job.error ?? undefined,
       progress: job.progress,
       attempts: job.attempts,
