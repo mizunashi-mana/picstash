@@ -59,42 +59,33 @@ export class ZipArchiveHandler implements ArchiveHandler {
     }
 
     const zipFile = await open(archivePath);
+    let buffer: Buffer | undefined;
 
     try {
       const entries = await zipFile.readEntries();
 
       if (entryIndex >= entries.length) {
-        await zipFile.close();
         throw new Error(`Entry index ${entryIndex} out of range`);
       }
 
       const entry = entries[entryIndex];
       if (entry === undefined) {
-        await zipFile.close();
         throw new Error(`Entry at index ${entryIndex} not found`);
       }
 
       if (entry.filename.endsWith('/')) {
-        await zipFile.close();
         throw new Error('Cannot extract a directory entry');
       }
 
       // Open a read stream for this specific entry
       const readStream = await zipFile.openReadStream(entry);
       // Must consume the stream completely before closing the zip file
-      const buffer = await streamToBuffer(readStream);
+      buffer = await streamToBuffer(readStream);
+    }
+    finally {
       await zipFile.close();
-      return buffer;
     }
-    catch (error) {
-      // Ensure we close on any unexpected error during entry read
-      try {
-        await zipFile.close();
-      }
-      catch {
-        // Ignore close errors if already closed or in invalid state
-      }
-      throw error;
-    }
+
+    return buffer;
   }
 }
