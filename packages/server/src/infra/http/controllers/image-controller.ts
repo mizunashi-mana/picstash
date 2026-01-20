@@ -106,11 +106,11 @@ export class ImageController {
           const defaultLimit = 50;
           const maxLimit = 100;
 
-          const parsedLimit = Number.parseInt(limitStr ?? '', 10);
+          const parsedLimit = limitStr !== undefined ? Number.parseInt(limitStr, 10) : Number.NaN;
           const limit = Number.isNaN(parsedLimit)
             ? defaultLimit
             : Math.min(Math.max(1, parsedLimit), maxLimit);
-          const parsedOffset = Number.parseInt(offsetStr ?? '', 10);
+          const parsedOffset = offsetStr !== undefined ? Number.parseInt(offsetStr, 10) : Number.NaN;
           const offset = Number.isNaN(parsedOffset) ? 0 : Math.max(0, parsedOffset);
 
           const result = query !== ''

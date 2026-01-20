@@ -107,8 +107,7 @@ export function GalleryPage() {
 
   const handleDeleteAllHistory = useCallback(() => {
     deleteAllHistoryMutation.mutate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutate is stable
-  }, []);
+  }, [deleteAllHistoryMutation]);
 
   const allImages = data?.pages.flatMap(page => page.items) ?? [];
   const total = data?.pages[0]?.total ?? 0;
