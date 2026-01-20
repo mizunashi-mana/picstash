@@ -94,13 +94,35 @@ export class ImageController {
       return await reply.status(201).send(result.image);
     });
 
-    // List/search images
-    app.get<{ Querystring: { q?: string } }>(
+    // List/search images with optional pagination
+    app.get<{ Querystring: { q?: string; limit?: string; offset?: string } }>(
       '/api/images',
       async (request, reply) => {
-        const { q } = request.query;
-        const images = q !== undefined && q.trim() !== ''
-          ? await this.imageRepository.search(q.trim())
+        const { q, limit: limitStr, offset: offsetStr } = request.query;
+        const query = q?.trim() ?? '';
+
+        // If pagination params are provided, use paginated response
+        if (limitStr !== undefined || offsetStr !== undefined) {
+          const defaultLimit = 50;
+          const maxLimit = 100;
+
+          const parsedLimit = Number.parseInt(limitStr ?? '', 10);
+          const limit = Number.isNaN(parsedLimit)
+            ? defaultLimit
+            : Math.min(Math.max(1, parsedLimit), maxLimit);
+          const parsedOffset = Number.parseInt(offsetStr ?? '', 10);
+          const offset = Number.isNaN(parsedOffset) ? 0 : Math.max(0, parsedOffset);
+
+          const result = query !== ''
+            ? await this.imageRepository.searchPaginated(query, { limit, offset })
+            : await this.imageRepository.findAllPaginated({ limit, offset });
+
+          return await reply.send(result);
+        }
+
+        // Legacy: return all images as array (for backward compatibility)
+        const images = query !== ''
+          ? await this.imageRepository.search(query)
           : await this.imageRepository.findAll();
         return await reply.send(images);
       },

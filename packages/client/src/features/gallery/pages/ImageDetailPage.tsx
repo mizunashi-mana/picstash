@@ -74,8 +74,9 @@ export function ImageDetailPage() {
       close();
       // Invalidate caches that may contain the deleted image
       await queryClient.invalidateQueries({ queryKey: ['images'] });
+      await queryClient.invalidateQueries({ queryKey: ['images-paginated'] });
       await queryClient.invalidateQueries({ queryKey: ['recommendations'] });
-      await navigate('/');
+      await navigate('/gallery');
     },
   });
 
@@ -125,7 +126,7 @@ export function ImageDetailPage() {
             variant="subtle"
             size="lg"
             component={Link}
-            to="/"
+            to="/gallery"
             aria-label="ギャラリーに戻る"
           >
             <IconArrowLeft size={20} />

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Gallery', () => {
-  test('should display the homepage with gallery', async ({ page }) => {
+  test('should display the homepage with upload area', async ({ page }) => {
     await page.goto('/');
 
     // Check main page title (h1)
@@ -14,11 +14,8 @@ test.describe('Gallery', () => {
     await expect(page.getByText('ここに画像をドラッグ＆ドロップ')).toBeVisible();
   });
 
-  test('should display search bar', async ({ page }) => {
-    await page.goto('/');
-
-    // Expand gallery section first
-    await page.getByRole('button', { name: '展開する' }).click();
+  test('should display search bar on gallery page', async ({ page }) => {
+    await page.goto('/gallery');
 
     // Check search input exists
     await expect(page.getByPlaceholder('検索...')).toBeVisible();
@@ -29,6 +26,7 @@ test.describe('Gallery', () => {
 
     // Check sidebar links exist
     await expect(page.getByRole('link', { name: 'ホーム' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'ギャラリー' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'コレクション' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'ラベル' })).toBeVisible();
   });

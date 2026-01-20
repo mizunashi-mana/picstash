@@ -6,6 +6,7 @@ import {
   CollectionViewerPage,
 } from '@/features/collections';
 import { DuplicatesPage } from '@/features/duplicates';
+import { GalleryPage } from '@/features/gallery';
 import { ImageDetailPage } from '@/features/gallery/pages/ImageDetailPage';
 import { HomePage } from '@/features/home/pages/HomePage';
 import { LabelsPage } from '@/features/labels';
@@ -16,6 +17,7 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/gallery" element={<GalleryPage />} />
       <Route path="/images/:id" element={<ImageDetailPage />} />
       <Route path="/labels" element={<LabelsPage />} />
       <Route path="/collections" element={<CollectionsPage />} />

@@ -16,6 +16,7 @@ import {
   IconHome,
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
+  IconPhoto,
   IconTags,
   IconWorld,
 } from '@tabler/icons-react';
@@ -27,6 +28,7 @@ interface AppLayoutProps {
 
 const navItems = [
   { label: 'ホーム', path: '/', icon: IconHome },
+  { label: 'ギャラリー', path: '/gallery', icon: IconPhoto },
   { label: 'コレクション', path: '/collections', icon: IconFolder },
   { label: 'ラベル', path: '/labels', icon: IconTags },
   { label: '重複検出', path: '/duplicates', icon: IconCopy },

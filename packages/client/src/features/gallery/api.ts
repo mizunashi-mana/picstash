@@ -23,11 +23,38 @@ export interface UpdateImageInput {
   description?: string | null;
 }
 
+/** Paginated result */
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+/** Pagination options */
+export interface PaginationOptions {
+  limit?: number;
+  offset?: number;
+}
+
 export async function fetchImages(query?: string): Promise<Image[]> {
   const url = query !== undefined && query.trim() !== ''
     ? `/images?q=${encodeURIComponent(query.trim())}`
     : '/images';
   return await apiClient<Image[]>(url);
+}
+
+export async function fetchImagesPaginated(
+  query?: string,
+  options?: PaginationOptions,
+): Promise<PaginatedResult<Image>> {
+  const params = new URLSearchParams();
+  if (query !== undefined && query.trim() !== '') {
+    params.set('q', query.trim());
+  }
+  params.set('limit', (options?.limit ?? 50).toString());
+  params.set('offset', (options?.offset ?? 0).toString());
+  return await apiClient<PaginatedResult<Image>>(`/images?${params.toString()}`);
 }
 
 export async function fetchImage(id: string): Promise<Image> {
