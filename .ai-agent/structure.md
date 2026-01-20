@@ -64,6 +64,7 @@ picstash/
 │   │   │   │       └── api.ts
 │   │   │   │
 │   │   │   ├── shared/         # 共通部品
+│   │   │   │   ├── index.ts    # エクスポート
 │   │   │   │   ├── components/ # 共通コンポーネント（AppLayout 等）
 │   │   │   │   ├── helpers/    # ヘルパー関数
 │   │   │   │   └── hooks/      # 共通フック
@@ -91,9 +92,14 @@ picstash/
 │   │   │   ├── domain/         # ドメイン層
 │   │   │   │   ├── archive/    # アーカイブドメインモデル
 │   │   │   │   ├── collection/ # コレクションドメインモデル
+│   │   │   │   ├── embedding/  # 埋め込みドメインモデル
 │   │   │   │   ├── image/      # 画像ドメインモデル
 │   │   │   │   ├── image-attribute/ # 画像属性ドメインモデル
 │   │   │   │   ├── label/      # ラベルドメインモデル
+│   │   │   │   ├── recommendation-conversion/ # 推薦コンバージョンモデル
+│   │   │   │   ├── search-history/ # 検索履歴ドメインモデル
+│   │   │   │   ├── stats/      # 統計ドメインモデル
+│   │   │   │   ├── url-crawl/  # URLクロールドメインモデル
 │   │   │   │   └── view-history/ # 閲覧履歴ドメインモデル
 │   │   │   │
 │   │   │   ├── application/    # アプリケーション層
@@ -105,7 +111,9 @@ picstash/
 │   │   │   │   ├── image-attribute/ # 画像属性ユースケース
 │   │   │   │   ├── label/      # ラベルユースケース
 │   │   │   │   ├── ports/      # ポート定義（インターフェース）
-│   │   │   │   └── recommendation/ # 画像推薦
+│   │   │   │   ├── recommendation/ # 画像推薦
+│   │   │   │   ├── search/     # 検索ユースケース
+│   │   │   │   └── url-crawl/  # URLクロールユースケース
 │   │   │   │
 │   │   │   ├── infra/          # インフラ層
 │   │   │   │   ├── adapters/   # 外部アダプター実装
@@ -116,7 +124,11 @@ picstash/
 │   │   │   │   ├── http/       # Fastify ルート、プラグイン
 │   │   │   │   │   ├── routes/ # API ルート（images, labels, image-attributes, archives 等）
 │   │   │   │   │   └── plugins/
-│   │   │   │   └── storage/    # ファイルストレージ
+│   │   │   │   ├── llm/        # LLM サービス（Ollama 連携）
+│   │   │   │   ├── logging/    # ロギングサービス
+│   │   │   │   ├── queue/      # ジョブキュー
+│   │   │   │   ├── storage/    # ファイルストレージ
+│   │   │   │   └── workers/    # バックグラウンドワーカー
 │   │   │   │
 │   │   │   └── shared/         # サーバー内共通
 │   │   │
