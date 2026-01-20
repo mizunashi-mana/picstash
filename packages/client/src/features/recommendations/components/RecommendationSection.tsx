@@ -22,6 +22,7 @@ import {
   recordImpressions,
   type RecommendedImage,
 } from '@/features/recommendations/api';
+import { buildUrl } from '@/shared/helpers';
 
 /** Maps imageId to conversionId */
 type ConversionMap = Map<string, string>;
@@ -164,9 +165,7 @@ interface RecommendationCardProps {
 
 function RecommendationCard({ image, conversionId }: RecommendationCardProps) {
   // Build URL with optional conversionId
-  const url = conversionId !== undefined
-    ? `/images/${image.id}?conversionId=${encodeURIComponent(conversionId)}`
-    : `/images/${image.id}`;
+  const url = buildUrl(`/images/${image.id}`, { conversionId });
 
   return (
     <Box

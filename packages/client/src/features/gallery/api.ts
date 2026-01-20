@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import { buildUrl } from '@/shared/helpers';
 import type {
   CreateImageAttributeInput,
   ImageAttribute,
@@ -38,23 +39,21 @@ export interface PaginationOptions {
 }
 
 export async function fetchImages(query?: string): Promise<Image[]> {
-  const url = query !== undefined && query.trim() !== ''
-    ? `/images?q=${encodeURIComponent(query.trim())}`
-    : '/images';
-  return await apiClient<Image[]>(url);
+  const q = query?.trim() !== '' ? query?.trim() : undefined;
+  return await apiClient<Image[]>(buildUrl('/images', { q }));
 }
 
 export async function fetchImagesPaginated(
   query?: string,
   options?: PaginationOptions,
 ): Promise<PaginatedResult<Image>> {
-  const params = new URLSearchParams();
-  if (query !== undefined && query.trim() !== '') {
-    params.set('q', query.trim());
-  }
-  params.set('limit', (options?.limit ?? 50).toString());
-  params.set('offset', (options?.offset ?? 0).toString());
-  return await apiClient<PaginatedResult<Image>>(`/images?${params.toString()}`);
+  const q = query?.trim() !== '' ? query?.trim() : undefined;
+  const url = buildUrl('/images', {
+    q,
+    limit: options?.limit ?? 50,
+    offset: options?.offset ?? 0,
+  });
+  return await apiClient<PaginatedResult<Image>>(url);
 }
 
 export async function fetchImage(id: string): Promise<Image> {
@@ -240,7 +239,7 @@ export async function fetchSearchSuggestions(
     return { suggestions: [] };
   }
   return await apiClient<SearchSuggestionsResponse>(
-    `/search/suggestions?q=${encodeURIComponent(query.trim())}`,
+    buildUrl('/search/suggestions', { q: query.trim() }),
   );
 }
 
