@@ -56,7 +56,9 @@ function createMockDeps() {
     findById: vi.fn(),
     findByIds: vi.fn(),
     findAll: vi.fn(),
+    findAllPaginated: vi.fn(),
     search: vi.fn(),
+    searchPaginated: vi.fn(),
     updateById: vi.fn(),
     deleteById: vi.fn(),
     // Embedding-related methods

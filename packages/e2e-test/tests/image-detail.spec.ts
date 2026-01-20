@@ -14,8 +14,8 @@ test.describe('Image Detail', () => {
     // Wait for upload success message
     await expect(page.getByText('アップロード完了')).toBeVisible();
 
-    // Expand gallery to see uploaded images
-    await page.getByRole('button', { name: '展開する' }).click();
+    // Navigate to gallery to see uploaded images
+    await page.goto('/gallery');
 
     // Wait for image to appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
@@ -46,9 +46,8 @@ test.describe('Image Detail', () => {
     // Click back button
     await page.getByRole('link', { name: 'ギャラリーに戻る' }).click();
 
-    // Should be back on homepage
-    await expect(page).toHaveURL('/');
-    await expect(page.locator('h1').getByText('Picstash')).toBeVisible();
+    // Should be back on gallery page
+    await expect(page).toHaveURL('/gallery');
   });
 
   test('should display image with correct format info', async ({ page }) => {

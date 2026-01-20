@@ -20,13 +20,31 @@ export interface UpdateEmbeddingInput {
   embeddedAt: Date;
 }
 
+/** Pagination options */
+export interface PaginationOptions {
+  limit: number;
+  offset: number;
+}
+
+/** Paginated result */
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 export interface ImageRepository {
   create: (input: CreateImageInput) => Promise<Image>;
   findById: (id: string) => Promise<Image | null>;
   /** Find multiple images by IDs */
   findByIds: (ids: string[]) => Promise<Image[]>;
   findAll: () => Promise<Image[]>;
+  /** Find all images with pagination */
+  findAllPaginated: (options: PaginationOptions) => Promise<PaginatedResult<Image>>;
   search: (query: string) => Promise<Image[]>;
+  /** Search images with pagination */
+  searchPaginated: (query: string, options: PaginationOptions) => Promise<PaginatedResult<Image>>;
   updateById: (id: string, input: UpdateImageInput) => Promise<Image>;
   deleteById: (id: string) => Promise<Image>;
 

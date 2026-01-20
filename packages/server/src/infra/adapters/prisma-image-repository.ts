@@ -8,6 +8,8 @@ import type {
   Image,
   ImageRepository,
   ImageWithEmbedding,
+  PaginatedResult,
+  PaginationOptions,
   UpdateEmbeddingInput,
   UpdateImageInput,
 } from '@/application/ports/image-repository.js';
@@ -42,6 +44,24 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 
+  async findAllPaginated(options: PaginationOptions): Promise<PaginatedResult<Image>> {
+    const [items, total] = await Promise.all([
+      prisma.image.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip: options.offset,
+        take: options.limit,
+      }),
+      prisma.image.count(),
+    ]);
+
+    return {
+      items,
+      total,
+      limit: options.limit,
+      offset: options.offset,
+    };
+  }
+
   async search(query: string): Promise<Image[]> {
     const parsedQuery = parseSearchQuery(query);
 
@@ -58,6 +78,36 @@ export class PrismaImageRepository implements ImageRepository {
       where,
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async searchPaginated(query: string, options: PaginationOptions): Promise<PaginatedResult<Image>> {
+    const parsedQuery = parseSearchQuery(query);
+
+    // If query is empty, return all images paginated
+    if (isEmptyQuery(parsedQuery)) {
+      return await this.findAllPaginated(options);
+    }
+
+    // Build WHERE clause for multi-condition search
+    // Type assertion is safe: buildSearchWhere returns a structure compatible with Prisma.ImageWhereInput
+    const where = buildSearchWhere(parsedQuery) as Prisma.ImageWhereInput;
+
+    const [items, total] = await Promise.all([
+      prisma.image.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: options.offset,
+        take: options.limit,
+      }),
+      prisma.image.count({ where }),
+    ]);
+
+    return {
+      items,
+      total,
+      limit: options.limit,
+      offset: options.offset,
+    };
   }
 
   async updateById(id: string, input: UpdateImageInput): Promise<Image> {

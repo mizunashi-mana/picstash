@@ -17,8 +17,8 @@ test.describe('Image Upload', () => {
     // Wait for upload success message
     await expect(page.getByText('アップロード完了')).toBeVisible();
 
-    // Expand gallery to see uploaded images
-    await page.getByRole('button', { name: '展開する' }).click();
+    // Navigate to gallery to see uploaded images
+    await page.goto('/gallery');
 
     // Image should appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
@@ -34,8 +34,8 @@ test.describe('Image Upload', () => {
     // Wait for upload success message
     await expect(page.getByText('アップロード完了')).toBeVisible();
 
-    // Expand gallery to see uploaded images
-    await page.getByRole('button', { name: '展開する' }).click();
+    // Navigate to gallery to see uploaded images
+    await page.goto('/gallery');
 
     // Image link should appear in gallery
     await expect(page.locator('a[href^="/images/"]').first()).toBeVisible();
