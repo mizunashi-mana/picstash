@@ -15,7 +15,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { useElementSize } from '@mantine/hooks';
+import { useElementSize, useMergedRef } from '@mantine/hooks';
 import { IconHistory, IconPhoto, IconTrash } from '@tabler/icons-react';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -52,9 +52,10 @@ export function GalleryPage() {
   const query = searchParams.get('q') ?? '';
   const queryClient = useQueryClient();
 
-  // Container size for responsive grid
-  const { ref: containerRef, width: containerWidth } = useElementSize();
-  const parentRef = useRef<HTMLDivElement>(null);
+  // Container size for responsive grid (merged with scroll container ref)
+  const { ref: sizeRef, width: containerWidth } = useElementSize();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const parentRef = useMergedRef(sizeRef, scrollRef);
 
   const {
     data,
@@ -98,7 +99,7 @@ export function GalleryPage() {
   // Virtual scroll
   const virtualizer = useVirtualizer({
     count: rowCount,
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => scrollRef.current,
     estimateSize: () => rowHeight + GRID_GAP,
     overscan: 3, // Render 3 extra rows above/below viewport
   });
@@ -116,7 +117,7 @@ export function GalleryPage() {
     ) {
       void fetchNextPage();
     }
-  }, [virtualRows, rowCount, hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [virtualRows, rowCount, hasNextPage, isFetchingNextPage, fetchNextPage, columns]);
 
   // Save search history mutation
   const saveHistoryMutation = useMutation({
@@ -320,10 +321,7 @@ export function GalleryPage() {
           </Menu>
         </Group>
 
-        {/* Container for measuring width */}
-        <div ref={containerRef}>
-          {renderContent()}
-        </div>
+        {renderContent()}
       </Stack>
     </Container>
   );
