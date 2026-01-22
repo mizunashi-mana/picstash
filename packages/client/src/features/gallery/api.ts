@@ -39,7 +39,8 @@ export interface PaginationOptions {
 }
 
 export async function fetchImages(query?: string): Promise<Image[]> {
-  const q = query?.trim() !== '' ? query?.trim() : undefined;
+  const trimmed = query?.trim();
+  const q = trimmed !== '' ? trimmed : undefined;
   return await apiClient<Image[]>(buildUrl('/images', { q }));
 }
 
@@ -47,7 +48,8 @@ export async function fetchImagesPaginated(
   query?: string,
   options?: PaginationOptions,
 ): Promise<PaginatedResult<Image>> {
-  const q = query?.trim() !== '' ? query?.trim() : undefined;
+  const trimmed = query?.trim();
+  const q = trimmed !== '' ? trimmed : undefined;
   const url = buildUrl('/images', {
     q,
     limit: options?.limit ?? 50,

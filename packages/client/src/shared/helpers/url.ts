@@ -23,17 +23,18 @@ export function buildUrl(
     return path;
   }
 
-  // Filter out undefined and null values
-  const filteredParams: Record<string, string | number | boolean> = {};
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null) {
-      filteredParams[key] = value;
-    }
-  }
+  // Filter out undefined and null values using Object.fromEntries
+  // Object.entries + filter ensures only safe keys are included
+  const filteredEntries = Object.entries(params).filter(
+    (entry): entry is [string, string | number | boolean] =>
+      entry[1] !== undefined && entry[1] !== null,
+  );
 
-  if (Object.keys(filteredParams).length === 0) {
+  if (filteredEntries.length === 0) {
     return path;
   }
+
+  const filteredParams = Object.fromEntries(filteredEntries);
 
   const queryString = qs.stringify(filteredParams);
   return `${path}?${queryString}`;

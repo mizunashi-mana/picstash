@@ -1,4 +1,4 @@
-# encodeURIComponent の使用をやめ、URLビルダを利用する
+# encodeURIComponent の使用をやめ、URLビルダーを利用する
 
 ## 目的・ゴール
 
