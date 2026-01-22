@@ -59,7 +59,7 @@
    - OCR テキストを LLM プロンプトに含める
    - システムプロンプトを更新して OCR テキストの活用を指示
 
-5. **変更: `GenerateDescriptionWorker`** (`infra/workers/generate-description-worker.ts`)
+5. **変更: `caption-worker.ts`** (`infra/workers/caption-worker.ts`)
    - 説明文生成前に OCR を実行
    - OCR 結果を `CaptionContext` に渡す
 
@@ -73,7 +73,7 @@
 - [x] `TesseractOcrService` を実装（日本語 + 英語対応）
 - [x] `CaptionContext` に `ocrText` を追加
 - [x] `TransformersCaptionService` を更新して OCR テキストを活用
-- [x] `GenerateDescriptionWorker` で OCR を実行
+- [x] `caption-worker.ts` で OCR を実行
 - [x] DI コンテナに `OcrService` を登録
 - [x] 型チェック（`npm run typecheck`）がパス
 - [x] リンターチェック（`npm run lint`）がパス

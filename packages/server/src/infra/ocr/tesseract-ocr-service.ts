@@ -16,9 +16,10 @@ import type { OcrResult, OcrService } from '@/application/ports/ocr-service.js';
 /** Languages to recognize (Japanese + English) */
 const LANGUAGES = 'jpn+eng';
 
-/** Cache path for tessdata (relative to server package) */
+/** Cache path for tessdata (env overrideable, default: relative to server package root) */
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const TESSDATA_CACHE_PATH = join(currentDir, '..', '..', '..', '..', 'tessdata');
+const TESSDATA_CACHE_PATH
+  = process.env.TESSDATA_CACHE_PATH ?? join(currentDir, '..', '..', '..', 'tessdata');
 
 /** Minimum confidence threshold to consider OCR result valid (0-100) */
 const MIN_CONFIDENCE = 30;
@@ -29,8 +30,6 @@ export class TesseractOcrService implements OcrService {
   private initPromise: Promise<void> | null = null;
 
   async extractText(imagePath: string): Promise<OcrResult> {
-    await this.initialize();
-
     const imageData = await readFile(imagePath);
     return await this.extractTextFromBuffer(imageData);
   }
@@ -102,8 +101,8 @@ export class TesseractOcrService implements OcrService {
     // Ensure cache directory exists
     await mkdir(TESSDATA_CACHE_PATH, { recursive: true });
 
-    // Set TESSDATA_PREFIX environment variable to suppress warnings
-    process.env.TESSDATA_PREFIX = TESSDATA_CACHE_PATH;
+    // Set TESSDATA_PREFIX environment variable to suppress warnings (only if not already set)
+    process.env.TESSDATA_PREFIX ??= TESSDATA_CACHE_PATH;
 
     this.worker = await createWorker(LANGUAGES, 1, {
       cachePath: TESSDATA_CACHE_PATH,
