@@ -126,6 +126,7 @@ picstash/
 │   │   │   │   │   └── plugins/
 │   │   │   │   ├── llm/        # LLM サービス（Ollama 連携）
 │   │   │   │   ├── logging/    # ロギングサービス
+│   │   │   │   ├── ocr/        # OCR サービス（Tesseract.js）
 │   │   │   │   ├── queue/      # ジョブキュー
 │   │   │   │   ├── storage/    # ファイルストレージ
 │   │   │   │   └── workers/    # バックグラウンドワーカー

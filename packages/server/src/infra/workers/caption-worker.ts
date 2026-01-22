@@ -8,6 +8,7 @@ import type { EmbeddingRepository } from '@/application/ports/embedding-reposito
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { Job } from '@/application/ports/job-queue.js';
+import type { OcrService } from '@/application/ports/ocr-service.js';
 import type { JobHandler } from '@/infra/queue/job-worker.js';
 
 /** キャプション生成ジョブのタイプ名 */
@@ -43,8 +44,9 @@ export function createCaptionJobHandler(deps: {
   fileStorage: FileStorage;
   captionService: CaptionService;
   embeddingRepository: EmbeddingRepository;
+  ocrService?: OcrService;
 }): JobHandler<CaptionJobPayload, CaptionJobResult> {
-  const { imageRepository, fileStorage, captionService, embeddingRepository } = deps;
+  const { imageRepository, fileStorage, captionService, embeddingRepository, ocrService } = deps;
 
   return async (
     job: Job<CaptionJobPayload>,
@@ -73,6 +75,25 @@ export function createCaptionJobHandler(deps: {
     // 30% - ファイル確認完了
     await updateProgress(30);
 
+    // OCR でテキストを抽出（オプション）
+    let ocrText: string | undefined;
+    if (ocrService !== undefined) {
+      try {
+        const ocrResult = await ocrService.extractText(absolutePath);
+        if (ocrResult.text.trim() !== '') {
+          ocrText = ocrResult.text;
+        }
+      }
+      catch (error) {
+        // OCR 失敗は無視して続行
+        // eslint-disable-next-line no-console -- Log OCR errors for debugging
+        console.warn('OCR extraction failed, continuing without OCR text:', error);
+      }
+    }
+
+    // 40% - OCR 完了
+    await updateProgress(40);
+
     // 類似画像の説明を取得
     const similarDescriptions = await getSimilarImageDescriptions(
       imageId,
@@ -80,12 +101,13 @@ export function createCaptionJobHandler(deps: {
       { imageRepository, embeddingRepository },
     );
 
-    // 40% - 類似画像取得完了
-    await updateProgress(40);
+    // 50% - 類似画像取得完了
+    await updateProgress(50);
 
     // キャプション生成（重い処理）
     const result = await captionService.generateWithContext(absolutePath, {
       similarDescriptions,
+      ocrText,
     });
 
     // 100% - 完了
@@ -94,7 +116,7 @@ export function createCaptionJobHandler(deps: {
     return {
       description: result.caption,
       model: result.model,
-      usedContext: similarDescriptions.length > 0,
+      usedContext: similarDescriptions.length > 0 || ocrText !== undefined,
     };
   };
 }

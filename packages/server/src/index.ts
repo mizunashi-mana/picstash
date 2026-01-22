@@ -30,6 +30,7 @@ async function main(): Promise<void> {
     fileStorage: container.getFileStorage(),
     captionService: container.getCaptionService(),
     embeddingRepository: container.getEmbeddingRepository(),
+    ocrService: container.getOcrService(),
   });
   jobWorker.registerHandler(CAPTION_JOB_TYPE, captionHandler);
   jobWorker.start();

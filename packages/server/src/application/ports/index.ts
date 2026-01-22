@@ -56,3 +56,7 @@ export type {
   LlmGenerateResult,
   LlmGenerateOptions,
 } from './llm-service.js';
+export type {
+  OcrResult,
+  OcrService,
+} from './ocr-service.js';

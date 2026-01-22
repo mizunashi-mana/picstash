@@ -23,6 +23,8 @@ export interface SimilarImageDescription {
 export interface CaptionContext {
   /** Descriptions from similar images with similarity scores */
   similarDescriptions: SimilarImageDescription[];
+  /** Text extracted from the image via OCR (optional) */
+  ocrText?: string;
 }
 
 /**
