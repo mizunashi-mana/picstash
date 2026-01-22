@@ -50,15 +50,16 @@
     "reflect-metadata": "^0.2.2",
     "sharp": "^0.34.5",
     "sqlite-vec": "^0.1.7-alpha.2",
+    "tesseract.js": "^7.0.0",
     "yauzl-promise": "^4.0.0",
     "zod": "^4.3.4"
   },
   "devDependencies": {
     "@picstash/eslint-config": "*",
     "@types/adm-zip": "^0.5.7",
-    "@types/yauzl-promise": "^4.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/js-yaml": "^4.0.9",
+    "@types/yauzl-promise": "^4.0.1",
     "@vitest/coverage-v8": "^4.0.16",
     "dependency-cruiser": "^17.3.6",
     "eslint": "^9.39.2",

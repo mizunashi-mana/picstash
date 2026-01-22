@@ -111,11 +111,12 @@ let translationPipeline: TranslationPipeline | null = null;
 
 /** System prompt for LLM refinement */
 const REFINEMENT_SYSTEM_PROMPT = `あなたは画像の説明文を生成するアシスタントです。
-画像分析結果と、類似画像の説明文（類似度付き）が与えられます。
+画像分析結果、OCRで読み取ったテキスト、類似画像の説明文（類似度付き）が与えられます。
 これらを参考に、適切な日本語の説明文を1つ生成してください。
 
 ルール:
 - 説明文は1〜3文程度で簡潔に
+- OCRテキストがある場合、セリフや文字の内容を説明に含める（ただし全文をそのまま引用しない）
 - 類似度が高い（80%以上）画像の説明を特に重視し、固有名詞（人物名、キャラクター名、シリーズ名など）を積極的に活用
 - 類似度が低い（50%未満）画像の説明は参考程度に
 - 画像分析結果に忠実に、内容を正確に説明
@@ -188,8 +189,12 @@ export class TransformersCaptionService implements CaptionService {
     const llmAvailable
       = this.llmService !== undefined && await this.llmService.isAvailable();
 
-    // If no similar descriptions or LLM not available, fall back to basic generation
-    if (context.similarDescriptions.length === 0 || !llmAvailable) {
+    // Check if we have any context to use (similar descriptions or OCR text)
+    const hasContext = context.similarDescriptions.length > 0
+      || (context.ocrText !== undefined && context.ocrText.trim() !== '');
+
+    // If no context or LLM not available, fall back to basic generation
+    if (!hasContext || !llmAvailable) {
       return await this.generateFromFile(imagePath);
     }
 
@@ -197,20 +202,27 @@ export class TransformersCaptionService implements CaptionService {
     const baseResult = await this.generateFromFile(imagePath);
 
     // Build the prompt for LLM refinement with similarity scores
-    const similarDescriptionsText = context.similarDescriptions
-      .map((item, i) => {
-        const similarityPercent = Math.round(item.similarity * 100);
-        return `${i + 1}. [類似度: ${similarityPercent}%] ${item.description}`;
-      })
-      .join('\n');
+    const similarDescriptionsText = context.similarDescriptions.length > 0
+      ? context.similarDescriptions
+          .map((item, i) => {
+            const similarityPercent = Math.round(item.similarity * 100);
+            return `${i + 1}. [類似度: ${similarityPercent}%] ${item.description}`;
+          })
+          .join('\n')
+      : 'なし';
+
+    // Build OCR text section
+    const ocrSection = context.ocrText !== undefined && context.ocrText.trim() !== ''
+      ? `## OCRで読み取ったテキスト\n${context.ocrText.trim()}\n\n`
+      : '';
 
     const prompt = `## 画像分析結果
 ${baseResult.caption}
 
-## 類似画像の説明文（類似度順）
+${ocrSection}## 類似画像の説明文（類似度順）
 ${similarDescriptionsText}
 
-上記を参考に、この画像の説明文を生成してください。類似度が高い画像の説明を優先的に参考にしてください。`;
+上記を参考に、この画像の説明文を生成してください。OCRテキストがある場合はセリフや文字の内容も考慮してください。類似度が高い画像の説明を優先的に参考にしてください。`;
 
     try {
       const llmResult = await this.llmService.generate(prompt, {

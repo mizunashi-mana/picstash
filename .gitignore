@@ -25,3 +25,7 @@ node_modules/
 
 # Storybook
 storybook-static/
+
+# Tesseract OCR cache
+tessdata/
+*.traineddata

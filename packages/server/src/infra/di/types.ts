@@ -27,6 +27,7 @@ export const TYPES = {
   EmbeddingRepository: Symbol.for('EmbeddingRepository'),
   CaptionService: Symbol.for('CaptionService'),
   LlmService: Symbol.for('LlmService'),
+  OcrService: Symbol.for('OcrService'),
 
   // Job Queue
   JobQueue: Symbol.for('JobQueue'),

@@ -36,6 +36,7 @@ import {
   ViewHistoryController,
 } from '@/infra/http/controllers/index.js';
 import { OllamaLlmService } from '@/infra/llm/index.js';
+import { TesseractOcrService } from '@/infra/ocr/index.js';
 import { TYPES } from './types.js';
 import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
@@ -50,6 +51,7 @@ import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { JobQueue } from '@/application/ports/job-queue.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { LlmService } from '@/application/ports/llm-service.js';
+import type { OcrService } from '@/application/ports/ocr-service.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
@@ -145,6 +147,11 @@ export function createContainer(): Container {
   container
     .bind<CaptionService>(TYPES.CaptionService)
     .to(TransformersCaptionService)
+    .inSingletonScope();
+
+  container
+    .bind<OcrService>(TYPES.OcrService)
+    .to(TesseractOcrService)
     .inSingletonScope();
 
   // Bind Job Queue

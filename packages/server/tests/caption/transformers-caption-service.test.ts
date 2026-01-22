@@ -372,5 +372,106 @@ describe('TransformersCaptionService', () => {
 
       consoleSpy.mockRestore();
     });
+
+    it('should use LLM when only OCR text is provided (no similar descriptions)', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a manga page',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: '漫画のページ' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      const mockLlmService = {
+        generate: vi.fn().mockResolvedValue({
+          text: '「おはよう」と話すキャラクターの漫画ページです。',
+          model: 'llama3.2',
+        }),
+        getModel: vi.fn().mockReturnValue('llama3.2'),
+        isAvailable: vi.fn().mockResolvedValue(true),
+      };
+
+      const service = new TransformersCaptionService(mockLlmService);
+      const result = await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [],
+        ocrText: 'おはよう',
+      });
+
+      expect(result.caption).toBe('「おはよう」と話すキャラクターの漫画ページです。');
+      expect(result.model).toContain('llama3.2');
+      expect(mockLlmService.generate).toHaveBeenCalled();
+    });
+
+    it('should include OCR text section in LLM prompt', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a character illustration',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: 'キャラクターイラスト' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      const mockLlmService = {
+        generate: vi.fn().mockResolvedValue({
+          text: '「今日は天気がいい」と話すキャラクターのイラストです。',
+          model: 'llama3.2',
+        }),
+        getModel: vi.fn().mockReturnValue('llama3.2'),
+        isAvailable: vi.fn().mockResolvedValue(true),
+      };
+
+      const service = new TransformersCaptionService(mockLlmService);
+      await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [{ description: 'similar image', similarity: 0.8 }],
+        ocrText: '今日は天気がいい',
+      });
+
+      // Verify that OCR text is included in the prompt
+      expect(mockLlmService.generate).toHaveBeenCalledWith(
+        expect.stringContaining('OCRで読み取ったテキスト'),
+        expect.any(Object),
+      );
+      expect(mockLlmService.generate).toHaveBeenCalledWith(
+        expect.stringContaining('今日は天気がいい'),
+        expect.any(Object),
+      );
+    });
+
+    it('should not include OCR section when ocrText is empty', async () => {
+      const { TransformersCaptionService } = (await import(
+        '@/infra/caption/transformers-caption-service',
+      ));
+
+      mockFlorence2Processor.post_process_generation.mockReturnValue({
+        '<MORE_DETAILED_CAPTION>': 'a character illustration',
+      });
+      mockTranslationPipeline.mockResolvedValue([{ translation_text: 'キャラクターイラスト' }]);
+      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+
+      const mockLlmService = {
+        generate: vi.fn().mockResolvedValue({
+          text: 'キャラクターのイラストです。',
+          model: 'llama3.2',
+        }),
+        getModel: vi.fn().mockReturnValue('llama3.2'),
+        isAvailable: vi.fn().mockResolvedValue(true),
+      };
+
+      const service = new TransformersCaptionService(mockLlmService);
+      await service.generateWithContext('/path/to/image.jpg', {
+        similarDescriptions: [{ description: 'similar image', similarity: 0.8 }],
+        ocrText: '   ', // Empty/whitespace only
+      });
+
+      // Verify that OCR section is NOT included in the prompt
+      expect(mockLlmService.generate).toHaveBeenCalledWith(
+        expect.not.stringContaining('OCRで読み取ったテキスト'),
+        expect.any(Object),
+      );
+    });
   });
 });

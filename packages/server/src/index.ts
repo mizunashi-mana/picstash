@@ -25,11 +25,13 @@ async function main(): Promise<void> {
   const jobWorker = new JobWorker(container.getJobQueue());
 
   // Register caption generation job handler
+  const ocrService = container.getOcrService();
   const captionHandler = createCaptionJobHandler({
     imageRepository: container.getImageRepository(),
     fileStorage: container.getFileStorage(),
     captionService: container.getCaptionService(),
     embeddingRepository: container.getEmbeddingRepository(),
+    ocrService,
   });
   jobWorker.registerHandler(CAPTION_JOB_TYPE, captionHandler);
   jobWorker.start();
@@ -39,6 +41,10 @@ async function main(): Promise<void> {
   const shutdown = () => {
     app.log.info('Shutting down...');
     jobWorker.stop();
+    // Terminate OCR worker (don't block shutdown on failure)
+    ocrService.terminate().catch((err: unknown) => {
+      app.log.error({ err }, 'OCR terminate error');
+    });
     app.close()
       .then(async () => { await disconnectDatabase(); })
       .catch((err: unknown) => { app.log.error(err); });

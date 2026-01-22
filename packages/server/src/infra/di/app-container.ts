@@ -12,6 +12,7 @@ import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { JobQueue } from '@/application/ports/job-queue.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
+import type { OcrService } from '@/application/ports/ocr-service.js';
 import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
@@ -118,6 +119,10 @@ export class AppContainer {
 
   getCaptionService(): CaptionService {
     return this.container.get<CaptionService>(TYPES.CaptionService);
+  }
+
+  getOcrService(): OcrService {
+    return this.container.get<OcrService>(TYPES.OcrService);
   }
 
   // Job Queue
