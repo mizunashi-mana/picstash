@@ -98,4 +98,99 @@ describe('ZipArchiveHandler', () => {
       );
     });
   });
+
+  describe('corrupted ZIP handling (EOCD missing)', () => {
+    let corruptedZipPath: string;
+    const testContent = 'PNG image data here';
+
+    beforeEach(async () => {
+      // Create a valid ZIP first
+      // ZIP structure: [Local File Headers + Data] [Central Directory] [EOCD]
+      const zip = new AdmZip();
+      zip.addFile('image.png', Buffer.from(testContent));
+      const validZipBuffer = zip.toBuffer();
+
+      // Find EOCD signature from the end (PK\x05\x06 = 0x50 0x4B 0x05 0x06)
+      // Search backwards from the end of the file
+      const corruptedBuffer = Buffer.from(validZipBuffer);
+      let eocdPos = -1;
+      for (let i = corruptedBuffer.length - 22; i >= 0; i--) {
+        if (
+          corruptedBuffer[i] === 0x50
+          && corruptedBuffer[i + 1] === 0x4b
+          && corruptedBuffer[i + 2] === 0x05
+          && corruptedBuffer[i + 3] === 0x06
+        ) {
+          eocdPos = i;
+          break;
+        }
+      }
+
+      if (eocdPos >= 0) {
+        // Truncate the file at the EOCD position to remove it entirely
+        // This ensures yauzl fails with "EOCD not found"
+        const truncatedBuffer = corruptedBuffer.subarray(0, eocdPos);
+        corruptedZipPath = join(tempDir, 'corrupted.zip');
+        await writeFile(corruptedZipPath, truncatedBuffer);
+      }
+      else {
+        throw new Error('EOCD not found in test ZIP');
+      }
+    });
+
+    it('should list entries from corrupted ZIP using fallback streaming mode', async () => {
+      const entries = await handler.listEntries(corruptedZipPath);
+
+      expect(entries).toHaveLength(1);
+      expect(entries[0]?.filename).toBe('image.png');
+      expect(entries[0]?.isDirectory).toBe(false);
+    });
+
+    it('should extract entry from corrupted ZIP using fallback streaming mode', async () => {
+      const entries = await handler.listEntries(corruptedZipPath);
+      expect(entries).toHaveLength(1);
+
+      const buffer = await handler.extractEntry(corruptedZipPath, 0);
+
+      expect(buffer.toString()).toBe(testContent);
+    });
+
+    it('should throw error when extracting directory entry in fallback mode', async () => {
+      // Create a corrupted ZIP with a directory entry
+      const zipWithDir = new AdmZip();
+      zipWithDir.addFile('folder/', Buffer.alloc(0));
+      zipWithDir.addFile('folder/file.txt', Buffer.from('content'));
+      const validBuffer = zipWithDir.toBuffer();
+
+      // Truncate to remove EOCD
+      const truncatedBuffer = validBuffer.subarray(0, validBuffer.length - 22);
+      const zipWithDirPath = join(tempDir, 'corrupted-with-dir.zip');
+      await writeFile(zipWithDirPath, truncatedBuffer);
+
+      const entries = await handler.listEntries(zipWithDirPath);
+      const dirEntry = entries.find(e => e.isDirectory);
+      expect(dirEntry).toBeDefined();
+
+      await expect(handler.extractEntry(zipWithDirPath, dirEntry!.index)).rejects.toThrow(
+        'Cannot extract a directory entry',
+      );
+    });
+
+    it('should throw error for invalid index in fallback mode', async () => {
+      await expect(handler.extractEntry(corruptedZipPath, 999)).rejects.toThrow(
+        'Entry index 999 not found',
+      );
+    });
+
+    it('should handle empty corrupted ZIP gracefully', async () => {
+      // Create a minimal ZIP structure that will be detected as corrupted
+      // but has no valid entries (just some garbage that looks like a ZIP header)
+      const emptyCorruptedPath = join(tempDir, 'empty-corrupted.zip');
+      // Write minimal data that will fail EOCD check but won't parse any entries
+      await writeFile(emptyCorruptedPath, Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x00, 0x00]));
+
+      const entries = await handler.listEntries(emptyCorruptedPath);
+      expect(entries).toHaveLength(0);
+    });
+  });
 });
