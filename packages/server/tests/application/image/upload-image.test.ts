@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { generateEmbedding } from '@/application/embedding/generate-embedding';
 import {
   uploadImage,
   type UploadImageDeps,
@@ -15,6 +16,10 @@ import type { Image, ImageRepository } from '@/application/ports/image-repositor
 
 vi.mock('node:fs/promises', () => ({
   stat: vi.fn(),
+}));
+
+vi.mock('@/application/embedding/generate-embedding', () => ({
+  generateEmbedding: vi.fn().mockResolvedValue({ imageId: 'test-id', success: true }),
 }));
 
 function createMockStats(size: number): Awaited<ReturnType<typeof stat>> {
@@ -170,7 +175,7 @@ describe('uploadImage', () => {
       );
     });
 
-    it('should use MIME type extension when filename has no extension', async () => {
+    it('should use MIME type extension when filename has no extension (PNG)', async () => {
       const deps = createMockDeps();
       const input = createMockInput({ filename: 'test-image' });
       const mockImage = createMockImage();
@@ -195,6 +200,34 @@ describe('uploadImage', () => {
       expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
         input.stream,
         '.png',
+      );
+    });
+
+    it('should use .jpg extension for JPEG MIME type when filename has no extension', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput({ filename: 'test-image', mimetype: 'image/jpeg' });
+      const mockImage = createMockImage({ mimeType: 'image/jpeg' });
+
+      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+        path: 'originals/test-image.jpg',
+        filename: 'test-image.jpg',
+      });
+      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.jpg');
+      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
+        path: 'thumbnails/test-image.jpg',
+        filename: 'test-image.jpg',
+      });
+      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+
+      const result = await uploadImage(input, deps);
+
+      expect(result.success).toBe(true);
+      expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
+        input.stream,
+        '.jpg',
       );
     });
 
@@ -226,6 +259,39 @@ describe('uploadImage', () => {
       expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
         input.stream,
         '.jpg',
+      );
+    });
+
+    it('should trigger background embedding generation after successful upload', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput();
+      const mockImage = createMockImage({ id: 'generated-image-id' });
+
+      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+        path: 'originals/test-image.png',
+        filename: 'test-image.png',
+      });
+      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
+      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
+        path: 'thumbnails/test-image.jpg',
+        filename: 'test-image.jpg',
+      });
+      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+
+      const result = await uploadImage(input, deps);
+
+      expect(result.success).toBe(true);
+      // Verify generateEmbedding was called with the created image ID
+      expect(generateEmbedding).toHaveBeenCalledWith(
+        { imageId: 'generated-image-id' },
+        expect.objectContaining({
+          imageRepository: deps.imageRepository,
+          embeddingService: deps.embeddingService,
+          embeddingRepository: deps.embeddingRepository,
+        }),
       );
     });
   });

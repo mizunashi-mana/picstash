@@ -69,6 +69,7 @@ export default defineConfig({
         'src/infra/adapters/sharp-image-processor.ts',
         'src/infra/adapters/sqlite-vec-embedding-repository.ts',
         'src/infra/adapters/in-memory-url-crawl-session-manager.ts',
+        // インフラ層: アーカイブ処理（外部依存が強く、テストカバレッジ改善に追加作業が必要）
         'src/infra/adapters/in-memory-archive-session-manager.ts',
         'src/infra/adapters/rar-archive-handler.ts',
         // インフラ層: Embedding

@@ -46,7 +46,10 @@ export async function uploadImage(
   const extFromFilename = filename.includes('.')
     ? filename.slice(filename.lastIndexOf('.'))
     : '';
-  const extFromMime = mimetype.split('/')[1] ?? '';
+  // Map MIME subtype to common file extension (e.g., jpeg -> jpg)
+  const mimeSubtype = mimetype.split('/')[1] ?? '';
+  const mimeExtensionMap: Record<string, string> = { jpeg: 'jpg' };
+  const extFromMime = mimeExtensionMap[mimeSubtype] ?? mimeSubtype;
   const extension = extFromFilename !== '' ? extFromFilename : `.${extFromMime}`;
 
   // Save file from stream to storage
