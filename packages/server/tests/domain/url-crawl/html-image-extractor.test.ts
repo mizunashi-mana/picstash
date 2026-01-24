@@ -186,6 +186,28 @@ describe('HtmlImageExtractor', () => {
         const result = extractImageUrls(html, baseUrl);
         expect(result).toHaveLength(0);
       });
+
+      it('should handle URLs that throw during URL parsing', () => {
+        // Use an invalid base URL to trigger the catch block in resolveUrl
+        const invalidBaseUrl = 'not-a-valid-url';
+        const html = '<img src="relative/image.jpg">';
+        const result = extractImageUrls(html, invalidBaseUrl);
+        expect(result).toHaveLength(0);
+      });
+    });
+
+    describe('empty URLs in various sources', () => {
+      it('should skip links with empty href', () => {
+        const html = '<a href="">Link</a>';
+        const result = extractImageUrls(html, baseUrl);
+        expect(result).toHaveLength(0);
+      });
+
+      it('should skip background-image with empty url', () => {
+        const html = '<div style="background-image: url(\'\')"></div>';
+        const result = extractImageUrls(html, baseUrl);
+        expect(result).toHaveLength(0);
+      });
     });
 
     describe('limit', () => {
