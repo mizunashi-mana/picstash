@@ -15,7 +15,7 @@ picstash/
 │   └── structure.md            # ディレクトリ構成（本ファイル）
 │
 ├── packages/                   # ソースコード
-│   ├── client/                 # フロントエンド
+│   ├── web-client/             # フロントエンド
 │   │   ├── src/
 │   │   │   ├── main.tsx        # エントリポイント
 │   │   │   ├── App.tsx         # ルートコンポーネント（Providers）
@@ -74,7 +74,7 @@ picstash/
 │   │   │   └── routes/         # React Router 設定
 │   │   │
 │   │   ├── public/             # 静的ファイル
-│   │   ├── tests/              # client のテスト
+│   │   ├── tests/              # web-client のテスト
 │   │   ├── eslint.config.mjs   # ESLint 設定（browser 環境）
 │   │   ├── package.json
 │   │   └── tsconfig.json
@@ -187,7 +187,7 @@ picstash/
 
 ## 主要ディレクトリの説明
 
-### `packages/client/`
+### `packages/web-client/`
 フロントエンドのパッケージ。feature-sliced アーキテクチャを採用：
 - **features/** - 機能ごとのモジュール
   - 各機能は components/, pages/, api.ts を含む

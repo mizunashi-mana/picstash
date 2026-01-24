@@ -37,10 +37,10 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install chromium
-        working-directory: packages/client
+        working-directory: packages/web-client
 
       - name: Run Storybook tests
-        run: npm run test:storybook -w @picstash/client
+        run: npm run test:storybook -w @picstash/web-client
 
   test-e2e:
     name: Run E2E tests

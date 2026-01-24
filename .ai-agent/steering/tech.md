@@ -71,7 +71,7 @@ packages/server/src/infra/di/
 
 | パッケージ | 説明 | 状態 |
 |-----------|------|------|
-| `packages/client` | React フロントエンド | セットアップ済み |
+| `packages/web-client` | React フロントエンド | セットアップ済み |
 | `packages/server` | Fastify バックエンド API | セットアップ済み |
 | `packages/e2e-test` | Playwright E2E テスト | セットアップ済み |
 | `packages/eslint-config` | 共有 ESLint 設定 | セットアップ済み |
