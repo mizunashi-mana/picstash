@@ -23,6 +23,7 @@ describe('PrismaLabelRepository', () => {
   const mockLabel = {
     id: 'label-1',
     name: 'character',
+    color: null,
     embedding: null,
     embeddedAt: null,
     createdAt: new Date(),
@@ -136,7 +137,8 @@ describe('PrismaLabelRepository', () => {
       const labelsWithEmbedding = [
         { id: 'label-1', name: 'character', embedding: new Uint8Array([1, 2, 3]) },
       ];
-      vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithEmbedding);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- Prisma select returns partial type
+      vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithEmbedding as any);
 
       const result = await repository.findAllWithEmbedding();
 
@@ -155,7 +157,8 @@ describe('PrismaLabelRepository', () => {
         { id: 'label-1', name: 'character' },
         { id: 'label-2', name: 'series' },
       ];
-      vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithoutEmbedding);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- Prisma select returns partial type
+      vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithoutEmbedding as any);
 
       const result = await repository.findIdsWithoutEmbedding();
 
@@ -169,11 +172,11 @@ describe('PrismaLabelRepository', () => {
 
   describe('updateEmbedding', () => {
     it('should update label embedding', async () => {
-      const embedding = new Float32Array([0.1, 0.2, 0.3]);
+      const embedding = new Uint8Array([1, 2, 3, 4]);
       const embeddedAt = new Date();
       vi.mocked(prisma.attributeLabel.update).mockResolvedValue({
         ...mockLabel,
-        embedding: new Uint8Array(embedding.buffer),
+        embedding,
         embeddedAt,
       });
 
@@ -182,8 +185,7 @@ describe('PrismaLabelRepository', () => {
       expect(prisma.attributeLabel.update).toHaveBeenCalledWith({
         where: { id: 'label-1' },
         data: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any
-          embedding: expect.any(Float32Array),
+          embedding,
           embeddedAt,
         },
       });

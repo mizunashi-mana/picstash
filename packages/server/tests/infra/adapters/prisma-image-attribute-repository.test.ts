@@ -29,7 +29,7 @@ describe('PrismaImageAttributeRepository', () => {
     id: 'attr-1',
     imageId: 'image-1',
     labelId: 'label-1',
-    keywords: ['keyword1', 'keyword2'],
+    keywords: 'keyword1, keyword2',
     createdAt: new Date(),
     updatedAt: new Date(),
     label: mockLabel,
@@ -115,7 +115,7 @@ describe('PrismaImageAttributeRepository', () => {
       const result = await repository.create({
         imageId: 'image-1',
         labelId: 'label-1',
-        keywords: ['keyword1', 'keyword2'],
+        keywords: 'keyword1, keyword2',
       });
 
       expect(result).toEqual(mockAttribute);
@@ -123,7 +123,7 @@ describe('PrismaImageAttributeRepository', () => {
         data: {
           imageId: 'image-1',
           labelId: 'label-1',
-          keywords: ['keyword1', 'keyword2'],
+          keywords: 'keyword1, keyword2',
         },
         include: { label: true },
       });
@@ -132,17 +132,17 @@ describe('PrismaImageAttributeRepository', () => {
 
   describe('updateById', () => {
     it('should update attribute keywords', async () => {
-      const updatedAttribute = { ...mockAttribute, keywords: ['new-keyword'] };
+      const updatedAttribute = { ...mockAttribute, keywords: 'new-keyword' };
       vi.mocked(prisma.imageAttribute.update).mockResolvedValue(updatedAttribute);
 
       const result = await repository.updateById('attr-1', {
-        keywords: ['new-keyword'],
+        keywords: 'new-keyword',
       });
 
       expect(result).toEqual(updatedAttribute);
       expect(prisma.imageAttribute.update).toHaveBeenCalledWith({
         where: { id: 'attr-1' },
-        data: { keywords: ['new-keyword'] },
+        data: { keywords: 'new-keyword' },
         include: { label: true },
       });
     });

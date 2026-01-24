@@ -22,10 +22,15 @@ describe('LocalFileStorage', () => {
       storage: { path: tempDir },
       server: { port: 3000, host: '0.0.0.0' },
       database: { url: 'file:./test.db' },
-      embedding: { model: 'test', dimension: 512 },
-      caption: { model: 'test', device: 'cpu' },
-      llm: { provider: 'ollama', model: 'test' },
-      ocr: { language: 'eng' },
+      logging: {
+        level: 'info',
+        format: 'pretty',
+        file: {
+          enabled: false,
+          path: './logs/server.log',
+          rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
+        },
+      },
     });
     storage = new LocalFileStorage();
   });
