@@ -14,9 +14,16 @@ import {
   Stack,
   Text,
   Title,
+  Tooltip,
 } from '@mantine/core';
 import { useElementSize, useMergedRef } from '@mantine/hooks';
-import { IconHistory, IconPhoto, IconTrash } from '@tabler/icons-react';
+import {
+  IconHistory,
+  IconLayoutGrid,
+  IconPhoto,
+  IconSlideshow,
+  IconTrash,
+} from '@tabler/icons-react';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams, Link } from 'react-router';
@@ -26,7 +33,9 @@ import {
   getThumbnailUrl,
   saveSearchHistory,
 } from '@/features/gallery/api';
+import { ImageCarousel } from '@/features/gallery/components/ImageCarousel';
 import { SearchBar } from '@/features/gallery/components/SearchBar';
+import { useViewMode } from '@/shared';
 
 const PAGE_SIZE = 50;
 
@@ -51,6 +60,7 @@ export function GalleryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
   const queryClient = useQueryClient();
+  const [viewMode, setViewMode] = useViewMode('grid');
 
   // Container size for responsive grid (merged with scroll container ref)
   const { ref: sizeRef, width: containerWidth } = useElementSize();
@@ -106,8 +116,10 @@ export function GalleryPage() {
 
   const virtualRows = virtualizer.getVirtualItems();
 
-  // Fetch more when scrolling near the end
+  // Fetch more when scrolling near the end (only in grid mode)
   useEffect(() => {
+    if (viewMode !== 'grid') return;
+
     const lastRow = virtualRows[virtualRows.length - 1];
     if (
       lastRow !== undefined
@@ -117,7 +129,7 @@ export function GalleryPage() {
     ) {
       void fetchNextPage();
     }
-  }, [virtualRows, rowCount, hasNextPage, isFetchingNextPage, fetchNextPage, columns]);
+  }, [virtualRows, rowCount, hasNextPage, isFetchingNextPage, fetchNextPage, columns, viewMode]);
 
   // Save search history mutation
   const saveHistoryMutation = useMutation({
@@ -150,51 +162,7 @@ export function GalleryPage() {
     deleteAllHistoryMutation.mutate();
   }, [deleteAllHistoryMutation]);
 
-  const renderContent = () => {
-    if (isLoading) {
-      return (
-        <Stack align="center" py="xl">
-          <Loader size="lg" />
-          <Text c="dimmed">画像を読み込み中...</Text>
-        </Stack>
-      );
-    }
-
-    if (error) {
-      return (
-        <Alert color="red" title="エラー">
-          画像の読み込みに失敗しました:
-          {' '}
-          {error.message}
-        </Alert>
-      );
-    }
-
-    if (allImages.length === 0) {
-      if (hasSearch) {
-        return (
-          <Stack align="center" py="xl">
-            <Text c="dimmed" size="lg">
-              検索結果がありません
-            </Text>
-            <Text c="dimmed" size="sm">
-              別のキーワードで検索してください
-            </Text>
-          </Stack>
-        );
-      }
-      return (
-        <Stack align="center" py="xl">
-          <Text c="dimmed" size="lg">
-            画像がありません
-          </Text>
-          <Text c="dimmed" size="sm">
-            画像をアップロードしてください
-          </Text>
-        </Stack>
-      );
-    }
-
+  const renderGridView = () => {
     return (
       <>
         {/* Virtual scroll container */}
@@ -278,6 +246,58 @@ export function GalleryPage() {
     );
   };
 
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <Stack align="center" py="xl">
+          <Loader size="lg" />
+          <Text c="dimmed">画像を読み込み中...</Text>
+        </Stack>
+      );
+    }
+
+    if (error) {
+      return (
+        <Alert color="red" title="エラー">
+          画像の読み込みに失敗しました:
+          {' '}
+          {error.message}
+        </Alert>
+      );
+    }
+
+    if (allImages.length === 0) {
+      if (hasSearch) {
+        return (
+          <Stack align="center" py="xl">
+            <Text c="dimmed" size="lg">
+              検索結果がありません
+            </Text>
+            <Text c="dimmed" size="sm">
+              別のキーワードで検索してください
+            </Text>
+          </Stack>
+        );
+      }
+      return (
+        <Stack align="center" py="xl">
+          <Text c="dimmed" size="lg">
+            画像がありません
+          </Text>
+          <Text c="dimmed" size="sm">
+            画像をアップロードしてください
+          </Text>
+        </Stack>
+      );
+    }
+
+    if (viewMode === 'carousel') {
+      return <ImageCarousel images={allImages} />;
+    }
+
+    return renderGridView();
+  };
+
   return (
     <Container size="xl" py="xl">
       <Stack gap="lg">
@@ -292,6 +312,30 @@ export function GalleryPage() {
               </Text>
             )}
           </Group>
+
+          {/* View mode toggle - Finder style */}
+          <ActionIcon.Group>
+            <Tooltip label="グリッド表示" withArrow>
+              <ActionIcon
+                variant={viewMode === 'grid' ? 'filled' : 'default'}
+                size="lg"
+                aria-label="グリッド表示"
+                onClick={() => { setViewMode('grid'); }}
+              >
+                <IconLayoutGrid size={18} />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="カルーセル表示" withArrow>
+              <ActionIcon
+                variant={viewMode === 'carousel' ? 'filled' : 'default'}
+                size="lg"
+                aria-label="カルーセル表示"
+                onClick={() => { setViewMode('carousel'); }}
+              >
+                <IconSlideshow size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </ActionIcon.Group>
         </Group>
 
         <Group gap="xs" align="flex-end">
