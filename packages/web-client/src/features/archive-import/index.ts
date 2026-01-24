@@ -1,4 +1,3 @@
-export { ArchiveImportPage } from './pages/ArchiveImportPage';
 export { ArchiveDropzone } from './components/ArchiveDropzone';
 export { ArchivePreviewGallery } from './components/ArchivePreviewGallery';
 export {

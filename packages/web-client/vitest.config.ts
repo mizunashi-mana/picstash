@@ -67,7 +67,6 @@ export default defineConfig({
         'src/features/archive-import/api.ts',
         'src/features/archive-import/components/ArchiveDropzone.tsx',
         'src/features/archive-import/components/ArchivePreviewGallery.tsx',
-        'src/features/archive-import/pages/ArchiveImportPage.tsx',
 
         // features/collections
         'src/features/collections/api.ts',
@@ -134,7 +133,6 @@ export default defineConfig({
         'src/features/url-crawl/api.ts',
         'src/features/url-crawl/components/CrawlPreviewGallery.tsx',
         'src/features/url-crawl/components/UrlInputForm.tsx',
-        'src/features/url-crawl/pages/UrlCrawlPage.tsx',
 
         // shared/components（AppLayout はテスト未実装）
         'src/shared/components/AppLayout.tsx',
