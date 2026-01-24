@@ -1,5 +1,6 @@
-interface FetchOptions extends RequestInit {
+interface FetchOptions extends Omit<RequestInit, 'headers'> {
   params?: Record<string, string>;
+  headers?: Record<string, string>;
 }
 
 export async function apiClient<T>(
@@ -15,14 +16,12 @@ export async function apiClient<T>(
   }
 
   // Only set Content-Type for requests with a body
-  const headers: HeadersInit = fetchOptions.body !== undefined
+  const headers: Record<string, string> = fetchOptions.body !== undefined
     ? {
         'Content-Type': 'application/json',
-        // eslint-disable-next-line @typescript-eslint/no-misused-spread -- HeadersInit spread is valid
         ...fetchOptions.headers,
       }
     : {
-        // eslint-disable-next-line @typescript-eslint/no-misused-spread -- HeadersInit spread is valid
         ...fetchOptions.headers,
       };
 
