@@ -32,5 +32,5 @@
   - `dev:server`: バックエンドのみ
 - 動作確認完了
   - Vite: http://localhost:5173
-  - Fastify: http://localhost:3000
+  - Fastify: http://localhost:4000
 - **タスク完了**

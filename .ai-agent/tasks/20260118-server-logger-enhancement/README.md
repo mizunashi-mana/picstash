@@ -21,7 +21,7 @@ Fastify サーバーのロギング機能を強化し、以下を実現する：
 
 ```yaml
 server:
-  port: 3000
+  port: 4000
   host: 0.0.0.0
 
 logging:

@@ -6,7 +6,7 @@ function createConfig(
   overrides: Partial<Config['logging']> = {},
 ): Config {
   return {
-    server: { port: 3000, host: '0.0.0.0' },
+    server: { port: 4000, host: '0.0.0.0' },
     database: { url: 'file:./test.db' },
     storage: { path: './storage' },
     logging: {
