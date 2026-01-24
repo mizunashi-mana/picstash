@@ -49,12 +49,13 @@ export default defineConfig({
         'src/domain/search-history/**/*.ts',
         'src/domain/stats/**/*.ts',
         'src/domain/view-history/**/*.ts',
+        // 型定義のみ（interface）: テスト対象外
         'src/domain/url-crawl/CrawledImageEntry.ts',
-        'src/domain/url-crawl/HtmlImageExtractor.ts',
         'src/domain/url-crawl/UrlCrawlSession.ts',
-        'src/domain/url-crawl/UrlCrawlConfig.ts',
         'src/domain/archive/ArchiveEntry.ts',
         'src/domain/archive/ArchiveSession.ts',
+        // ?? 演算子の到達困難な分岐により branch 閾値 80% 未満
+        'src/domain/url-crawl/UrlCrawlConfig.ts',
         // 共有モジュール（テスト未実装）
         'src/shared/**/*.ts',
         // インデックスファイル
