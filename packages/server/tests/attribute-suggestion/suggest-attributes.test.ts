@@ -8,6 +8,7 @@ import type { EmbeddingRepository } from '@/application/ports/embedding-reposito
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository';
 import type { ImageRepository, ImageWithEmbedding } from '@/application/ports/image-repository';
 import type { LabelRepository, LabelWithEmbedding } from '@/application/ports/label-repository';
+import type { ImageAttribute } from '@/domain/image-attribute/ImageAttribute';
 
 function createMockImageRepository(): ImageRepository {
   return {
@@ -79,6 +80,25 @@ function createNormalizedEmbedding(values: number[]): Uint8Array {
   const normalized = values.map(v => v / norm);
   const float32 = new Float32Array(normalized);
   return new Uint8Array(float32.buffer);
+}
+
+function createMockImageAttribute(overrides: Partial<ImageAttribute> = {}): ImageAttribute {
+  return {
+    id: 'attr-1',
+    imageId: 'img-1',
+    labelId: 'label-1',
+    keywords: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    label: {
+      id: 'label-1',
+      name: 'Test Label',
+      color: '#ff0000',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    ...overrides,
+  };
 }
 
 describe('suggestAttributes', () => {
@@ -238,10 +258,10 @@ describe('suggestAttributes', () => {
       // Mock attributes from similar images with keywords
       vi.mocked(mockImageAttributeRepository.findByImageId)
         .mockResolvedValueOnce([
-          { labelId: 'label-1', keywords: 'keyword1, keyword2' },
+          createMockImageAttribute({ labelId: 'label-1', keywords: 'keyword1, keyword2' }),
         ])
         .mockResolvedValueOnce([
-          { labelId: 'label-1', keywords: 'keyword1, keyword3' },
+          createMockImageAttribute({ labelId: 'label-1', keywords: 'keyword1, keyword3' }),
         ]);
 
       const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1 }, deps);
@@ -324,7 +344,7 @@ describe('suggestAttributes', () => {
 
       // Attribute with empty keywords
       vi.mocked(mockImageAttributeRepository.findByImageId).mockResolvedValue([
-        { labelId: 'label-1', keywords: '' },
+        createMockImageAttribute({ labelId: 'label-1', keywords: '' }),
       ]);
 
       const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1 }, deps);

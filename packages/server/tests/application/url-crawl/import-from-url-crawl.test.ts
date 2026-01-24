@@ -77,6 +77,7 @@ function createMockDeps() {
   const mockImageProcessor: ImageProcessor = {
     getMetadata: vi.fn(),
     generateThumbnail: vi.fn(),
+    generateThumbnailFromBuffer: vi.fn(),
   };
 
   return {

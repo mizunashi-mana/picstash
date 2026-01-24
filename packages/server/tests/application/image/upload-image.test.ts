@@ -55,6 +55,7 @@ function createMockImageProcessor(): ImageProcessor {
   return {
     getMetadata: vi.fn(),
     generateThumbnail: vi.fn(),
+    generateThumbnailFromBuffer: vi.fn(),
   };
 }
 

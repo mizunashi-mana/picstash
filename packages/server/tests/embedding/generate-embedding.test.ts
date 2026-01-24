@@ -295,8 +295,8 @@ describe('syncEmbeddingsToVectorDb', () => {
     const embeddingBuffer = Buffer.from(embedding.buffer);
 
     vi.mocked(deps.imageRepository.findWithEmbedding).mockResolvedValue([
-      { id: 'img-1', embedding: embeddingBuffer },
-      { id: 'img-2', embedding: embeddingBuffer },
+      { id: 'img-1', path: 'originals/img-1.jpg', embedding: embeddingBuffer },
+      { id: 'img-2', path: 'originals/img-2.jpg', embedding: embeddingBuffer },
     ]);
 
     const result = await syncEmbeddingsToVectorDb({
@@ -313,7 +313,7 @@ describe('syncEmbeddingsToVectorDb', () => {
     const deps = createMockDeps();
 
     vi.mocked(deps.imageRepository.findWithEmbedding).mockResolvedValue([
-      { id: 'img-1', embedding: null },
+      { id: 'img-1', path: 'originals/img-1.jpg', embedding: null },
     ]);
 
     const result = await syncEmbeddingsToVectorDb({
@@ -332,7 +332,7 @@ describe('syncEmbeddingsToVectorDb', () => {
     const embeddingBuffer = Buffer.from(wrongDimensionEmbedding.buffer);
 
     vi.mocked(deps.imageRepository.findWithEmbedding).mockResolvedValue([
-      { id: 'img-1', embedding: embeddingBuffer },
+      { id: 'img-1', path: 'originals/img-1.jpg', embedding: embeddingBuffer },
     ]);
 
     const result = await syncEmbeddingsToVectorDb({
