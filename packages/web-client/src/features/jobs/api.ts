@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import { jobsEndpoints } from '@picstash/api';
 
 export type JobStatus = 'waiting' | 'active' | 'completed' | 'failed';
 
@@ -48,9 +49,9 @@ export async function listJobs(params?: ListJobsParams): Promise<ListJobsRespons
     queryParams.offset = params.offset.toString();
   }
 
-  return await apiClient<ListJobsResponse>('/jobs', { params: queryParams });
+  return await apiClient<ListJobsResponse>(jobsEndpoints.list, { params: queryParams });
 }
 
 export async function getJob(id: string): Promise<Job> {
-  return await apiClient<Job>(`/jobs/${id}`);
+  return await apiClient<Job>(jobsEndpoints.detail(id));
 }

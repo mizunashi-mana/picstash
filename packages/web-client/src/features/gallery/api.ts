@@ -2,6 +2,8 @@ import { apiClient } from '@/api/client';
 import { buildUrl } from '@/shared/helpers';
 import {
   imageEndpoints,
+  jobsEndpoints,
+  searchEndpoints,
   type CreateImageAttributeInput,
   type ImageAttribute,
   type UpdateImageAttributeInput,
@@ -42,7 +44,7 @@ export interface PaginationOptions {
 export async function fetchImages(query?: string): Promise<Image[]> {
   const trimmed = query?.trim();
   const q = trimmed !== '' ? trimmed : undefined;
-  return await apiClient<Image[]>(buildUrl('/images', { q }));
+  return await apiClient<Image[]>(buildUrl(imageEndpoints.list, { q }));
 }
 
 export async function fetchImagesPaginated(
@@ -51,7 +53,7 @@ export async function fetchImagesPaginated(
 ): Promise<PaginatedResult<Image>> {
   const trimmed = query?.trim();
   const q = trimmed !== '' ? trimmed : undefined;
-  const url = buildUrl('/images', {
+  const url = buildUrl(imageEndpoints.list, {
     q,
     limit: options?.limit ?? 50,
     offset: options?.offset ?? 0,
@@ -60,18 +62,18 @@ export async function fetchImagesPaginated(
 }
 
 export async function fetchImage(id: string): Promise<Image> {
-  return await apiClient<Image>(`/images/${id}`);
+  return await apiClient<Image>(imageEndpoints.detail(id));
 }
 
 export async function deleteImage(id: string): Promise<void> {
-  await apiClient<undefined>(`/images/${id}`, { method: 'DELETE' });
+  await apiClient<undefined>(imageEndpoints.detail(id), { method: 'DELETE' });
 }
 
 export async function updateImage(
   id: string,
   input: UpdateImageInput,
 ): Promise<Image> {
-  return await apiClient<Image>(`/images/${id}`, {
+  return await apiClient<Image>(imageEndpoints.detail(id), {
     method: 'PATCH',
     body: JSON.stringify(input),
   });
@@ -89,14 +91,14 @@ export function getThumbnailUrl(imageId: string): string {
 export async function fetchImageAttributes(
   imageId: string,
 ): Promise<ImageAttribute[]> {
-  return await apiClient<ImageAttribute[]>(`/images/${imageId}/attributes`);
+  return await apiClient<ImageAttribute[]>(imageEndpoints.attributes.list(imageId));
 }
 
 export async function createImageAttribute(
   imageId: string,
   input: CreateImageAttributeInput,
 ): Promise<ImageAttribute> {
-  return await apiClient<ImageAttribute>(`/images/${imageId}/attributes`, {
+  return await apiClient<ImageAttribute>(imageEndpoints.attributes.list(imageId), {
     method: 'POST',
     body: JSON.stringify(input),
   });
@@ -108,7 +110,7 @@ export async function updateImageAttribute(
   input: UpdateImageAttributeInput,
 ): Promise<ImageAttribute> {
   return await apiClient<ImageAttribute>(
-    `/images/${imageId}/attributes/${attributeId}`,
+    imageEndpoints.attributes.detail(imageId, attributeId),
     {
       method: 'PUT',
       body: JSON.stringify(input),
@@ -120,7 +122,7 @@ export async function deleteImageAttribute(
   imageId: string,
   attributeId: string,
 ): Promise<void> {
-  await apiClient<undefined>(`/images/${imageId}/attributes/${attributeId}`, {
+  await apiClient<undefined>(imageEndpoints.attributes.detail(imageId, attributeId), {
     method: 'DELETE',
   });
 }
@@ -155,7 +157,8 @@ export async function fetchSuggestedAttributes(
     params.set('limit', options.limit.toString());
   }
   const queryString = params.toString();
-  const url = `/images/${imageId}/suggested-attributes${queryString !== '' ? `?${queryString}` : ''}`;
+  const baseUrl = imageEndpoints.suggestedAttributes(imageId);
+  const url = queryString !== '' ? `${baseUrl}?${queryString}` : baseUrl;
   return await apiClient<SuggestedAttributesResponse>(url);
 }
 
@@ -189,13 +192,13 @@ export async function generateDescriptionJob(
   imageId: string,
 ): Promise<GenerateDescriptionJobResponse> {
   return await apiClient<GenerateDescriptionJobResponse>(
-    `/images/${imageId}/generate-description`,
+    imageEndpoints.generateDescription(imageId),
     { method: 'POST', body: JSON.stringify({}) },
   );
 }
 
 export async function getJobStatus(jobId: string): Promise<JobStatus> {
-  return await apiClient<JobStatus>(`/jobs/${jobId}`);
+  return await apiClient<JobStatus>(jobsEndpoints.detail(jobId));
 }
 
 // Similar Images API
@@ -220,7 +223,8 @@ export async function fetchSimilarImages(
     params.set('limit', options.limit.toString());
   }
   const queryString = params.toString();
-  const url = `/images/${imageId}/similar${queryString !== '' ? `?${queryString}` : ''}`;
+  const baseUrl = imageEndpoints.similar(imageId);
+  const url = queryString !== '' ? `${baseUrl}?${queryString}` : baseUrl;
   return await apiClient<SimilarImagesResponse>(url);
 }
 
@@ -242,7 +246,7 @@ export async function fetchSearchSuggestions(
     return { suggestions: [] };
   }
   return await apiClient<SearchSuggestionsResponse>(
-    buildUrl('/search/suggestions', { q: query.trim() }),
+    buildUrl(searchEndpoints.suggestions, { q: query.trim() }),
   );
 }
 
@@ -260,20 +264,20 @@ export interface SearchHistoryResponse {
 }
 
 export async function saveSearchHistory(query: string): Promise<SearchHistory> {
-  return await apiClient<SearchHistory>('/search/history', {
+  return await apiClient<SearchHistory>(searchEndpoints.history, {
     method: 'POST',
     body: JSON.stringify({ query }),
   });
 }
 
 export async function fetchSearchHistory(): Promise<SearchHistoryResponse> {
-  return await apiClient<SearchHistoryResponse>('/search/history');
+  return await apiClient<SearchHistoryResponse>(searchEndpoints.history);
 }
 
 export async function deleteSearchHistory(id: string): Promise<void> {
-  await apiClient<undefined>(`/search/history/${id}`, { method: 'DELETE' });
+  await apiClient<undefined>(searchEndpoints.historyDetail(id), { method: 'DELETE' });
 }
 
 export async function deleteAllSearchHistory(): Promise<void> {
-  await apiClient<undefined>('/search/history', { method: 'DELETE' });
+  await apiClient<undefined>(searchEndpoints.history, { method: 'DELETE' });
 }
