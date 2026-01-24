@@ -28,7 +28,7 @@ const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 /**
  * Check if a hostname is a private/internal address (SSRF protection)
  */
-function isPrivateHostname(hostname: string): boolean {
+export function isPrivateHostname(hostname: string): boolean {
   // localhost
   if (hostname === 'localhost' || hostname === 'localhost.localdomain') {
     return true;
