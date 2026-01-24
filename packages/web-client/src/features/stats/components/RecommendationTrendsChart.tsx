@@ -33,11 +33,11 @@ export function RecommendationTrendsChart({
               data={chartData}
               dataKey="date"
               series={[
-                { name: 'impressions', color: 'gray.5', label: '表示回数' },
+                { name: 'impressions', color: 'indigo.4', label: '表示回数' },
                 { name: 'clicks', color: 'teal.6', label: 'クリック数' },
               ]}
               withLegend
-              legendProps={{ verticalAlign: 'bottom', height: 50 }}
+              legendProps={{ verticalAlign: 'bottom', height: 110 }}
             />
           )}
     </Card>
