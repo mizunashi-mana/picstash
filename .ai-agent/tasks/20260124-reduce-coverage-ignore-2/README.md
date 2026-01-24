@@ -53,3 +53,7 @@
 5. isPrivateHostname のテストを追加（関数を export）
 6. UrlCrawlConfig.ts を除外から外す（branch threshold を 70% に緩和）
 7. 除外リストを更新してカバレッジテスト実行・成功
+
+## PR
+
+https://github.com/mizunashi-mana/picstash/pull/98
