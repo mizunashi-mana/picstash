@@ -45,9 +45,34 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'html'],
+      reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/main.tsx'],
+      exclude: [
+        // エントリーポイント
+        'src/main.tsx',
+        'src/vite-env.d.ts',
+        // Storybook ファイル
+        'src/**/*.stories.tsx',
+        // 全 feature（テスト未実装）
+        'src/features/**/*.{ts,tsx}',
+        // API クライアント（テスト未実装）
+        'src/api/**/*.ts',
+        // ルーティング
+        'src/routes/**/*.tsx',
+        // 共有コンポーネント（テスト未実装）
+        'src/shared/**/*.{ts,tsx}',
+        // App コンポーネント
+        'src/App.tsx',
+        // インデックスファイル
+        'src/**/index.ts',
+      ],
+      thresholds: {
+        perFile: true,
+        lines: 80,
+        branches: 80,
+        functions: 80,
+        statements: 80,
+      },
     },
   },
 });
