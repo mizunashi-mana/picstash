@@ -23,11 +23,8 @@ function formatDate(dateStr: string | null): string {
   return date.toLocaleDateString('ja-JP');
 }
 
-function getThumbnailUrl(thumbnailPath: string | null): string {
-  if (thumbnailPath === null) {
-    return '';
-  }
-  return `/api/images/file/${encodeURIComponent(thumbnailPath)}`;
+function getThumbnailUrl(imageId: string): string {
+  return `/api/images/${imageId}/thumbnail`;
 }
 
 export function PopularImagesList({ images }: PopularImagesListProps) {
@@ -56,7 +53,7 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
                     {index + 1}
                   </Text>
                   <Image
-                    src={getThumbnailUrl(image.thumbnailPath)}
+                    src={getThumbnailUrl(image.id)}
                     alt={image.title}
                     w={60}
                     h={60}
