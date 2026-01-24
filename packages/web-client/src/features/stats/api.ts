@@ -19,46 +19,28 @@ export type {
   PopularImagesQueryOptions,
 };
 
-function buildQueryString(params: Record<string, number | undefined>): string {
-  const queryParams = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined) {
-      queryParams.set(key, value.toString());
-    }
-  }
-  const queryString = queryParams.toString();
-  return queryString !== '' ? `?${queryString}` : '';
-}
-
 export async function fetchOverviewStats(
   options?: StatsQueryOptions,
 ): Promise<OverviewStats> {
-  const queryString = buildQueryString({ days: options?.days });
-  return await apiClient<OverviewStats>(`${statsEndpoints.overview}${queryString}`);
+  return await apiClient<OverviewStats>(statsEndpoints.overview(options));
 }
 
 export async function fetchViewTrends(
   options?: StatsQueryOptions,
 ): Promise<DailyViewStats[]> {
-  const queryString = buildQueryString({ days: options?.days });
-  return await apiClient<DailyViewStats[]>(`${statsEndpoints.viewTrends}${queryString}`);
+  return await apiClient<DailyViewStats[]>(statsEndpoints.viewTrends(options));
 }
 
 export async function fetchRecommendationTrends(
   options?: StatsQueryOptions,
 ): Promise<DailyRecommendationStats[]> {
-  const queryString = buildQueryString({ days: options?.days });
   return await apiClient<DailyRecommendationStats[]>(
-    `${statsEndpoints.recommendationTrends}${queryString}`,
+    statsEndpoints.recommendationTrends(options),
   );
 }
 
 export async function fetchPopularImages(
   options?: PopularImagesQueryOptions,
 ): Promise<PopularImage[]> {
-  const queryString = buildQueryString({
-    days: options?.days,
-    limit: options?.limit,
-  });
-  return await apiClient<PopularImage[]>(`${statsEndpoints.popularImages}${queryString}`);
+  return await apiClient<PopularImage[]>(statsEndpoints.popularImages(options));
 }

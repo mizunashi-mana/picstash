@@ -71,13 +71,11 @@ export function JobsProvider({ children }: JobsProviderProps) {
     staleTime: 1000,
   });
 
-  const jobs = data?.jobs ?? [];
-
   // 監視対象のジョブをフィルタリング
-  const trackedJobs = useMemo(
-    () => jobs.filter(job => trackedJobIds.has(job.id)),
-    [jobs, trackedJobIds],
-  );
+  const trackedJobs = useMemo(() => {
+    const jobs = data?.jobs ?? [];
+    return jobs.filter(job => trackedJobIds.has(job.id));
+  }, [data?.jobs, trackedJobIds]);
 
   // アクティブなジョブ
   const activeJobs = useMemo(
@@ -136,6 +134,22 @@ export function JobsProvider({ children }: JobsProviderProps) {
     }
   }, [trackedJobs]);
 
+  // ジョブをトラッキングから完全に削除
+  const removeJobFromTracking = useCallback((jobId: string) => {
+    setTrackedJobIds((prev) => {
+      const next = new Set(prev);
+      next.delete(jobId);
+      return next;
+    });
+    setReadJobIds((prev) => {
+      const next = new Set(prev);
+      next.delete(jobId);
+      return next;
+    });
+    previousJobsRef.current.delete(jobId);
+    notifiedJobIds.current.delete(jobId);
+  }, []);
+
   // 完了したジョブを監視リストから自動削除（5分後）
   useEffect(() => {
     const completedJobs = trackedJobs.filter(
@@ -154,18 +168,7 @@ export function JobsProvider({ children }: JobsProviderProps) {
           : 10 * 60 * 1000; // completedAt が不明な場合はより長い待機時間を設定（10分）
 
       return setTimeout(() => {
-        setTrackedJobIds((prev) => {
-          const next = new Set(prev);
-          next.delete(job.id);
-          return next;
-        });
-        setReadJobIds((prev) => {
-          const next = new Set(prev);
-          next.delete(job.id);
-          return next;
-        });
-        previousJobsRef.current.delete(job.id);
-        notifiedJobIds.current.delete(job.id);
+        removeJobFromTracking(job.id);
       }, remaining);
     });
 
@@ -174,7 +177,7 @@ export function JobsProvider({ children }: JobsProviderProps) {
         clearTimeout(timer);
       }
     };
-  }, [trackedJobs]);
+  }, [trackedJobs, removeJobFromTracking]);
 
   const trackJob = useCallback((jobId: string) => {
     setTrackedJobIds(prev => new Set(prev).add(jobId));
