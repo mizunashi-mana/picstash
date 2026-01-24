@@ -116,7 +116,7 @@ export function GalleryPage() {
 
   const virtualRows = virtualizer.getVirtualItems();
 
-  // Fetch more when scrolling near the end (only in grid mode)
+  // Fetch more when scrolling near the end (grid mode)
   useEffect(() => {
     if (viewMode !== 'grid') return;
 
@@ -130,6 +130,14 @@ export function GalleryPage() {
       void fetchNextPage();
     }
   }, [virtualRows, rowCount, hasNextPage, isFetchingNextPage, fetchNextPage, columns, viewMode]);
+
+  // Fetch more when carousel index approaches the end
+  const handleCarouselIndexChange = useCallback((index: number) => {
+    // Fetch next page when within 5 images of the end
+    if (hasNextPage && !isFetchingNextPage && index >= allImages.length - 5) {
+      void fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, allImages.length, fetchNextPage]);
 
   // Save search history mutation
   const saveHistoryMutation = useMutation({
@@ -292,7 +300,7 @@ export function GalleryPage() {
     }
 
     if (viewMode === 'carousel') {
-      return <ImageCarousel images={allImages} />;
+      return <ImageCarousel images={allImages} onIndexChange={handleCarouselIndexChange} />;
     }
 
     return renderGridView();

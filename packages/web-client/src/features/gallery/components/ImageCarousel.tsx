@@ -9,6 +9,7 @@ import {
   ScrollArea,
   Stack,
   Text,
+  UnstyledButton,
 } from '@mantine/core';
 import { useHotkeys } from '@mantine/hooks';
 import {
@@ -19,14 +20,14 @@ import {
 import { Link } from 'react-router';
 import { getImageUrl, getThumbnailUrl } from '@/features/gallery/api';
 import type { Image as ImageType } from '@/features/gallery/api';
-import '@mantine/carousel/styles.css';
 
 export interface ImageCarouselProps {
   images: ImageType[];
   initialIndex?: number;
+  onIndexChange?: (index: number) => void;
 }
 
-export function ImageCarousel({ images, initialIndex = 0 }: ImageCarouselProps) {
+export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const goToPrev = useCallback(() => {
@@ -45,6 +46,18 @@ export function ImageCarousel({ images, initialIndex = 0 }: ImageCarouselProps) 
   useEffect(() => {
     setCurrentIndex(initialIndex);
   }, [initialIndex]);
+
+  // Clamp currentIndex when images array changes
+  useEffect(() => {
+    if (images.length > 0 && currentIndex >= images.length) {
+      setCurrentIndex(images.length - 1);
+    }
+  }, [images.length, currentIndex]);
+
+  // Notify parent when index changes
+  useEffect(() => {
+    onIndexChange?.(currentIndex);
+  }, [currentIndex, onIndexChange]);
 
   if (images.length === 0) {
     return (
@@ -171,7 +184,7 @@ export function ImageCarousel({ images, initialIndex = 0 }: ImageCarouselProps) 
             borderRadius: 12,
           }}
         >
-          {currentIndex + 1}
+          {safeIndex + 1}
           {' / '}
           {images.length}
         </Text>
@@ -182,18 +195,19 @@ export function ImageCarousel({ images, initialIndex = 0 }: ImageCarouselProps) 
         <ScrollArea type="scroll" scrollbarSize={8}>
           <Group gap="xs" wrap="nowrap" justify="center">
             {images.map((image, index) => (
-              <Box
+              <UnstyledButton
                 key={image.id}
                 onClick={() => { setCurrentIndex(index); }}
+                aria-label={`${image.title} (${index + 1}/${images.length})`}
+                aria-current={index === safeIndex ? 'true' : undefined}
                 style={{
-                  cursor: 'pointer',
                   borderRadius: 8,
                   overflow: 'hidden',
                   border:
-                    index === currentIndex
+                    index === safeIndex
                       ? '3px solid var(--mantine-color-blue-filled)'
                       : '3px solid transparent',
-                  opacity: index === currentIndex ? 1 : 0.6,
+                  opacity: index === safeIndex ? 1 : 0.6,
                   transition: 'all 0.15s ease',
                   flexShrink: 0,
                 }}
@@ -206,7 +220,7 @@ export function ImageCarousel({ images, initialIndex = 0 }: ImageCarouselProps) 
                     fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect fill='%23dee2e6' width='60' height='60'/%3E%3C/svg%3E"
                   />
                 </AspectRatio>
-              </Box>
+              </UnstyledButton>
             ))}
           </Group>
         </ScrollArea>
