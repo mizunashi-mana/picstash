@@ -55,7 +55,6 @@ export default defineConfig({
         'src/domain/url-crawl/UrlCrawlConfig.ts',
         'src/domain/archive/ArchiveEntry.ts',
         'src/domain/archive/ArchiveSession.ts',
-        'src/domain/index.ts',
         // 共有モジュール（テスト未実装）
         'src/shared/**/*.ts',
         // インデックスファイル
