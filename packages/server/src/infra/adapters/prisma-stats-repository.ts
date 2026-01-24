@@ -38,7 +38,8 @@ export class PrismaStatsRepository implements StatsRepository {
   async getOverview(options?: TrendOptions): Promise<OverviewStats> {
     const days = options?.days ?? 30;
     const periodStart = new Date();
-    periodStart.setDate(periodStart.getDate() - days);
+    periodStart.setHours(0, 0, 0, 0);
+    periodStart.setDate(periodStart.getDate() - (days - 1));
 
     // Get total images
     const totalImages = await prisma.image.count();
@@ -82,7 +83,8 @@ export class PrismaStatsRepository implements StatsRepository {
   async getViewTrends(options?: TrendOptions): Promise<DailyViewStats[]> {
     const days = options?.days ?? 30;
     const periodStart = new Date();
-    periodStart.setDate(periodStart.getDate() - days);
+    periodStart.setHours(0, 0, 0, 0);
+    periodStart.setDate(periodStart.getDate() - (days - 1));
 
     // Use raw query to group by date
     // Note: Prisma's tagged template $queryRaw automatically parameterizes values
@@ -94,12 +96,12 @@ export class PrismaStatsRepository implements StatsRepository {
       }>
     >`
       SELECT
-        date(viewed_at) as date,
+        date(viewed_at, 'localtime') as date,
         COUNT(*) as view_count,
         SUM(duration) as total_duration
       FROM "view_history"
       WHERE viewed_at >= ${periodStart}
-      GROUP BY date(viewed_at)
+      GROUP BY date(viewed_at, 'localtime')
       ORDER BY date ASC
     `;
 
@@ -128,7 +130,8 @@ export class PrismaStatsRepository implements StatsRepository {
   ): Promise<DailyRecommendationStats[]> {
     const days = options?.days ?? 30;
     const periodStart = new Date();
-    periodStart.setDate(periodStart.getDate() - days);
+    periodStart.setHours(0, 0, 0, 0);
+    periodStart.setDate(periodStart.getDate() - (days - 1));
 
     // Use raw query to group by date
     // Note: Prisma's tagged template $queryRaw automatically parameterizes values
@@ -140,12 +143,12 @@ export class PrismaStatsRepository implements StatsRepository {
       }>
     >`
       SELECT
-        date(impression_at) as date,
+        date(impression_at, 'localtime') as date,
         COUNT(*) as impressions,
         SUM(CASE WHEN clicked_at IS NOT NULL THEN 1 ELSE 0 END) as clicks
       FROM "recommendation_conversion"
       WHERE impression_at >= ${periodStart}
-      GROUP BY date(impression_at)
+      GROUP BY date(impression_at, 'localtime')
       ORDER BY date ASC
     `;
 
@@ -181,7 +184,8 @@ export class PrismaStatsRepository implements StatsRepository {
     const days = options?.days ?? 30;
     const limit = options?.limit ?? 10;
     const periodStart = new Date();
-    periodStart.setDate(periodStart.getDate() - days);
+    periodStart.setHours(0, 0, 0, 0);
+    periodStart.setDate(periodStart.getDate() - (days - 1));
 
     // Use raw query for aggregation with join
     // Note: Prisma's tagged template $queryRaw automatically parameterizes values
