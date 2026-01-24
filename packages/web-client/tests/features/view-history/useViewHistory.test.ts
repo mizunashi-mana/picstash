@@ -131,8 +131,10 @@ describe('useViewHistory', () => {
     // Should not throw
     const { unmount } = renderHook(createHookFn('image-1'));
 
-    // Wait a tick for the async operation
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Wait for the async operation to complete
+    await waitFor(() => {
+      expect(recordViewStart).toHaveBeenCalled();
+    });
 
     // Should not throw on unmount either
     unmount();
