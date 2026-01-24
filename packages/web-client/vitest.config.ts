@@ -99,11 +99,9 @@ export default defineConfig({
         // features/home
         'src/features/home/pages/HomePage.tsx',
 
-        // features/import
+        // features/import（既存ページのロジック流用のため除外）
         'src/features/import/components/ArchiveImportTab.tsx',
-        'src/features/import/components/ImageUploadTab.tsx',
         'src/features/import/components/UrlCrawlTab.tsx',
-        'src/features/import/pages/ImportPage.tsx',
 
         // features/jobs（context.tsx, api.ts, utils.ts はテスト済み）
         'src/features/jobs/components/JobStatusButton.tsx',
