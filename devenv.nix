@@ -36,10 +36,10 @@
     entry = "./scripts/run-script.mjs --cwd packages/server -- npx eslint --cache --fix FILES";
     files = "^packages/server/.*\.[cm]?(js|ts)x?$";
   };
-  git-hooks.hooks.npx-eslint-pkg-client = {
+  git-hooks.hooks.npx-eslint-pkg-web-client = {
     enable = true;
-    entry = "./scripts/run-script.mjs --cwd packages/client -- npx eslint --cache --fix FILES";
-    files = "^packages/client/.*\.[cm]?(js|ts)x?$";
+    entry = "./scripts/run-script.mjs --cwd packages/web-client -- npx eslint --cache --fix FILES";
+    files = "^packages/web-client/.*\.[cm]?(js|ts)x?$";
   };
   git-hooks.hooks.npx-prisma-lint-pkg-server = {
     enable = true;

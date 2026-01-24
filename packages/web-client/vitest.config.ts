@@ -53,15 +53,19 @@ export default defineConfig({
         'src/vite-env.d.ts',
         // Storybook ファイル
         'src/**/*.stories.tsx',
-        // 全 feature（テスト未実装）
-        'src/features/**/*.{ts,tsx}',
-        // API クライアント（テスト未実装）
-        'src/api/**/*.ts',
+        // feature API（テスト未実装）
+        'src/features/*/api.ts',
+        // feature ページ（テスト未実装）
+        'src/features/*/pages/*.tsx',
+        // feature コンポーネント（テスト未実装）
+        'src/features/*/components/**/*.{ts,tsx}',
+        // feature その他（テスト未実装）
+        'src/features/jobs/context.tsx',
+        'src/features/view-history/useViewHistory.ts',
         // ルーティング
         'src/routes/**/*.tsx',
-        // 共有コンポーネント・フック（テスト未実装）
+        // 共有コンポーネント（テスト未実装）
         'src/shared/components/**/*.{ts,tsx}',
-        'src/shared/hooks/**/*.{ts,tsx}',
         // App コンポーネント
         'src/App.tsx',
         // インデックスファイル
