@@ -50,3 +50,4 @@ GitHub Issue: https://github.com/mizunashi-mana/picstash/issues/65
   - Grid.Col に `minWidth: 0` を追加
 - 動作確認：レジェンドが正しく表示されることを確認
 - lint / typecheck パス
+- PR作成: https://github.com/mizunashi-mana/picstash/pull/94
