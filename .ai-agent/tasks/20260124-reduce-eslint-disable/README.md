@@ -6,7 +6,7 @@
 
 ## 現状
 
-86件の `eslint-disable-next-line` が存在。
+92件の `eslint-disable-next-line` が存在。
 
 ## 実装方針
 
@@ -37,10 +37,10 @@
 ### 2026-01-24
 
 - 現状調査: 92件の eslint-disable-next-line を確認
-- 修正実施: 5件削減（92件 → 87件）
-  - `react-hooks/exhaustive-deps` (3件): mutate 関数を deps に追加
+- 修正実施: 2件削減（92件 → 90件）
   - `no-misused-spread` (2件): HeadersInit を Record<string, string> に変更
-- 残りの87件は正当な理由があるため維持:
+- `react-hooks/exhaustive-deps` は mutate オブジェクト全体を deps に含めると不要な再レンダリングが発生するため維持
+- 残りの90件は正当な理由があるため維持:
   - 配列ループ内のインデックスアクセス（TypeScript の型システムの限界）
   - React Query の enabled パターン
   - API レスポンスの型アサーション（runtime 検証なしでは不可避）
