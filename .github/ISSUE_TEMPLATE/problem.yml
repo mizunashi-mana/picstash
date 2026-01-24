@@ -1,0 +1,55 @@
+name: Problem
+description: 改善したい課題がある（解決策は未定）
+title: "[Problem]: "
+labels: ["problem"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        具体的な解決策はまだないが、改善が必要な課題を報告します。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 課題
+      description: どのような問題・不便さがあるかを記載してください
+      placeholder: 例: 大量の画像を扱うときにUIが重くなる
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影響
+      description: この課題によってどのような影響があるかを記載してください
+      placeholder: 例: 作業効率が下がる、ストレスを感じる
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 発生状況
+      description: どのような状況でこの課題が発生するかを記載してください
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: 影響度に基づいて優先度を選択してください
+      options:
+        - "高: 頻繁に発生し、大きな影響がある"
+        - "中: 時々発生し、影響は中程度"
+        - "低: まれに発生、影響は限定的"
+    validations:
+      required: true
+
+  - type: textarea
+    id: ideas
+    attributes:
+      label: アイデア（任意）
+      description: 解決のヒントになりそうなアイデアがあれば記載してください
+    validations:
+      required: false

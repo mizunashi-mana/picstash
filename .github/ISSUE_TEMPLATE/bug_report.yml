@@ -1,0 +1,66 @@
+name: Bug Report
+description: 不具合を報告する
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        不具合の報告ありがとうございます。以下の項目を記入してください。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 概要
+      description: 不具合の内容を簡潔に説明してください
+      placeholder: 例: 統計表示画面でグラフが正しく表示されない
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 不具合を再現する手順を記載してください
+      placeholder: |
+        1. ホーム画面を開く
+        2. 統計タブをクリック
+        3. グラフが表示されない
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待される動作
+      description: 正常であればどうなるべきかを記載してください
+    validations:
+      required: false
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の動作
+      description: 実際にどうなったかを記載してください
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: 影響度に基づいて優先度を選択してください
+      options:
+        - "高: サービス利用不可、データ損失の可能性"
+        - "中: 主要機能が使いにくい、回避策あり"
+        - "低: 軽微な問題、影響は限定的"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 追加情報
+      description: 環境情報やスクリーンショットなど
+    validations:
+      required: false
