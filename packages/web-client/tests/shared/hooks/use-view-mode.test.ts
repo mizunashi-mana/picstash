@@ -9,7 +9,7 @@ vi.mock('@mantine/hooks', () => ({
 
 describe('useViewMode', () => {
   beforeEach(() => {
-    vi.mocked(useLocalStorage).mockReturnValue(['grid', vi.fn()]);
+    vi.mocked(useLocalStorage).mockReturnValue(['grid', vi.fn(), { removeValue: vi.fn() }]);
   });
 
   afterEach(() => {
@@ -36,10 +36,11 @@ describe('useViewMode', () => {
 
   it('should return the result from useLocalStorage', () => {
     const mockSetValue = vi.fn();
-    vi.mocked(useLocalStorage).mockReturnValue(['carousel', mockSetValue]);
+    const mockRemoveValue = vi.fn();
+    vi.mocked(useLocalStorage).mockReturnValue(['carousel', mockSetValue, { removeValue: mockRemoveValue }]);
 
     const result = useViewMode();
 
-    expect(result).toEqual(['carousel', mockSetValue]);
+    expect(result).toEqual(['carousel', mockSetValue, { removeValue: mockRemoveValue }]);
   });
 });
