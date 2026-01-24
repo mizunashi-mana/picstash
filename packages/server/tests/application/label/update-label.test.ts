@@ -32,6 +32,11 @@ function createMockLabelRepository(
         updatedAt: new Date(),
       })),
     deleteById: vi.fn().mockResolvedValue(undefined),
+    findAllWithEmbedding: vi.fn().mockResolvedValue([]),
+    findIdsWithoutEmbedding: vi.fn().mockResolvedValue([]),
+    updateEmbedding: vi.fn().mockResolvedValue(undefined),
+    clearAllEmbeddings: vi.fn().mockResolvedValue(undefined),
+    countWithEmbedding: vi.fn().mockResolvedValue(0),
     ...overrides,
   };
 }
