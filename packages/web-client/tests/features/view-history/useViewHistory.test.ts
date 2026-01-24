@@ -36,7 +36,15 @@ describe('useViewHistory', () => {
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
     });
-    vi.mocked(recordRecommendationClick).mockResolvedValue(undefined);
+    vi.mocked(recordRecommendationClick).mockResolvedValue({
+      id: 'conversion-1',
+      imageId: 'image-1',
+      recommendationScore: 0.85,
+      impressionAt: '2024-01-01T00:00:00Z',
+      clickedAt: '2024-01-01T00:00:01Z',
+      viewHistoryId: 'view-history-1',
+      createdAt: '2024-01-01T00:00:00Z',
+    });
   });
 
   afterEach(() => {
