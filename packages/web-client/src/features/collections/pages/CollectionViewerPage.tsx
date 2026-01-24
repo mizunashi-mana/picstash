@@ -20,11 +20,8 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
+import { imageEndpoints } from '@picstash/api';
 import { fetchCollection } from '@/features/collections/api';
-
-function getImageUrl(imageId: string): string {
-  return `/api/images/${imageId}/file`;
-}
 
 export function CollectionViewerPage(): React.JSX.Element {
   const { id, imageId: initialImageId } = useParams<{ id: string; imageId?: string }>();
@@ -217,7 +214,7 @@ export function CollectionViewerPage(): React.JSX.Element {
         <Center h="100%">
           {currentImage !== null && (
             <Image
-              src={getImageUrl(currentImage.imageId)}
+              src={imageEndpoints.file(currentImage.imageId)}
               alt={`${collection.images.length}枚中${currentIndex + 1}枚目`}
               fit="contain"
               style={{ maxHeight: '100%', maxWidth: '100%' }}

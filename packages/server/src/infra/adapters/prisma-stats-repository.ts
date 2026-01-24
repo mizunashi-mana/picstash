@@ -220,7 +220,7 @@ export class PrismaStatsRepository implements StatsRepository {
       thumbnailPath: row.thumbnail_path,
       viewCount: Number(row.view_count),
       totalDuration: Number(row.total_duration ?? 0),
-      lastViewedAt: row.last_viewed_at !== null ? new Date(row.last_viewed_at) : null,
+      lastViewedAt: row.last_viewed_at !== null ? new Date(row.last_viewed_at).toISOString() : null,
     }));
   }
 }

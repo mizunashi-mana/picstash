@@ -18,7 +18,7 @@ import {
 } from '@mantine/core';
 import { IconEdit, IconPlus, IconSparkles, IconTrash } from '@tabler/icons-react';
 import type { AttributeSuggestion } from '@/features/gallery/api';
-import type { ImageAttribute } from '@picstash/shared';
+import type { ImageAttribute } from '@picstash/api';
 
 export interface ImageAttributeSectionViewProps {
   attributes: ImageAttribute[] | undefined;

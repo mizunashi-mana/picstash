@@ -57,9 +57,13 @@ picstash/
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
-│   │   │   │   └── view-history/ # 閲覧履歴機能
+│   │   │   │   ├── view-history/ # 閲覧履歴機能
+│   │   │   │   │   ├── components/
+│   │   │   │   │   ├── pages/
+│   │   │   │   │   └── api.ts
+│   │   │   │   └── jobs/        # ジョブ管理機能
 │   │   │   │       ├── components/
-│   │   │   │       ├── pages/
+│   │   │   │       ├── context.tsx
 │   │   │   │       └── api.ts
 │   │   │   │
 │   │   │   ├── shared/         # 共通部品
@@ -156,11 +160,13 @@ picstash/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   ├── shared/                 # フロントエンド・バックエンド共通
+│   ├── api/                    # 共有 API 型定義 (@picstash/api)
 │   │   ├── src/
 │   │   │   ├── index.ts        # メインエクスポート
-│   │   │   ├── image-attributes.ts # 画像属性の型定義
-│   │   │   └── labels.ts       # ラベルの型定義
+│   │   │   ├── images.ts       # 画像 API エンドポイント定義
+│   │   │   ├── stats.ts        # 統計 API エンドポイント・型定義
+│   │   │   ├── labels.ts       # ラベル API エンドポイント・型定義
+│   │   │   └── image-attributes.ts # 画像属性 API エンドポイント・型定義
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
@@ -221,8 +227,12 @@ Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エ
 - `ruleSets: ['common']` - 共通ルール
 - `ruleSets: ['common', 'react']` - React ルール込み
 
-### `packages/shared/`
-フロントエンドとバックエンドで共有する型定義。API のレスポンス型などを一元管理。
+### `packages/api/`
+フロントエンドとバックエンドで共有する API 型定義とエンドポイント定義 (`@picstash/api`)。
+- **images.ts** - 画像 API のエンドポイント URL ヘルパー
+- **stats.ts** - 統計 API の Zod スキーマと型定義
+- **labels.ts** - ラベル API の Zod スキーマと型定義
+- **image-attributes.ts** - 画像属性 API の Zod スキーマと型定義
 
 ### `packages/e2e-test/`
 Playwright を使用した E2E テストパッケージ。アプリケーション全体の統合テストを実行。

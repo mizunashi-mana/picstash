@@ -37,7 +37,7 @@
     "@fastify/rate-limit": "^10.3.0",
     "@fastify/static": "^9.0.0",
     "@huggingface/transformers": "^3.8.1",
-    "@picstash/shared": "*",
+    "@picstash/api": "*",
     "@prisma/adapter-better-sqlite3": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "adm-zip": "^0.5.16",

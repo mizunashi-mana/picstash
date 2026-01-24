@@ -11,7 +11,7 @@ import {
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { LabelBadge } from './LabelBadge';
 import { LabelForm } from './LabelForm';
-import type { Label, UpdateLabelInput } from '@picstash/shared';
+import type { Label, UpdateLabelInput } from '@picstash/api';
 
 interface LabelListProps {
   labels: Label[];

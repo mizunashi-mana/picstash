@@ -27,6 +27,7 @@ import {
 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
+import { imageEndpoints } from '@picstash/api';
 import {
   deleteCollection,
   fetchCollection,
@@ -34,10 +35,6 @@ import {
   updateCollection,
 } from '@/features/collections/api';
 import type { UpdateCollectionInput } from '@/features/collections/api';
-
-function getThumbnailUrl(imageId: string): string {
-  return `/api/images/${imageId}/thumbnail`;
-}
 
 export function CollectionDetailPage(): React.JSX.Element {
   const { id } = useParams<{ id: string }>();
@@ -209,7 +206,7 @@ export function CollectionDetailPage(): React.JSX.Element {
                     <Card.Section pos="relative">
                       <Link to={`/collections/${id}/view/${img.imageId}`}>
                         <Image
-                          src={getThumbnailUrl(img.imageId)}
+                          src={imageEndpoints.thumbnail(img.imageId)}
                           alt={img.title}
                           height={140}
                           fit="cover"

@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import { collectionsEndpoints, imageEndpoints } from '@picstash/api';
 
 export interface Collection {
   id: string;
@@ -50,15 +51,15 @@ export interface UpdateOrderInput {
 }
 
 export async function fetchCollections(): Promise<CollectionWithCount[]> {
-  return await apiClient<CollectionWithCount[]>('/collections');
+  return await apiClient<CollectionWithCount[]>(collectionsEndpoints.list);
 }
 
 export async function fetchCollection(id: string): Promise<CollectionWithImages> {
-  return await apiClient<CollectionWithImages>(`/collections/${id}`);
+  return await apiClient<CollectionWithImages>(collectionsEndpoints.detail(id));
 }
 
 export async function createCollection(input: CreateCollectionInput): Promise<Collection> {
-  return await apiClient<Collection>('/collections', {
+  return await apiClient<Collection>(collectionsEndpoints.list, {
     method: 'POST',
     body: JSON.stringify(input),
   });
@@ -68,21 +69,21 @@ export async function updateCollection(
   id: string,
   input: UpdateCollectionInput,
 ): Promise<Collection> {
-  return await apiClient<Collection>(`/collections/${id}`, {
+  return await apiClient<Collection>(collectionsEndpoints.detail(id), {
     method: 'PUT',
     body: JSON.stringify(input),
   });
 }
 
 export async function deleteCollection(id: string): Promise<void> {
-  await apiClient<undefined>(`/collections/${id}`, { method: 'DELETE' });
+  await apiClient<undefined>(collectionsEndpoints.detail(id), { method: 'DELETE' });
 }
 
 export async function addImageToCollection(
   collectionId: string,
   input: AddImageInput,
 ): Promise<void> {
-  await apiClient<undefined>(`/collections/${collectionId}/images`, {
+  await apiClient<undefined>(collectionsEndpoints.images.list(collectionId), {
     method: 'POST',
     body: JSON.stringify(input),
   });
@@ -92,7 +93,7 @@ export async function removeImageFromCollection(
   collectionId: string,
   imageId: string,
 ): Promise<void> {
-  await apiClient<undefined>(`/collections/${collectionId}/images/${imageId}`, {
+  await apiClient<undefined>(collectionsEndpoints.images.detail(collectionId, imageId), {
     method: 'DELETE',
   });
 }
@@ -101,12 +102,12 @@ export async function updateImageOrder(
   collectionId: string,
   input: UpdateOrderInput,
 ): Promise<void> {
-  await apiClient<undefined>(`/collections/${collectionId}/images/order`, {
+  await apiClient<undefined>(collectionsEndpoints.images.order(collectionId), {
     method: 'PUT',
     body: JSON.stringify(input),
   });
 }
 
 export async function fetchImageCollections(imageId: string): Promise<Collection[]> {
-  return await apiClient<Collection[]>(`/images/${imageId}/collections`);
+  return await apiClient<Collection[]>(imageEndpoints.collections(imageId));
 }
