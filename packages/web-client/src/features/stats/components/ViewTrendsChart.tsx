@@ -34,7 +34,7 @@ export function ViewTrendsChart({ data }: ViewTrendsChartProps) {
               ]}
               curveType="monotone"
               withLegend
-              legendProps={{ verticalAlign: 'bottom', height: 50 }}
+              legendProps={{ verticalAlign: 'bottom', height: 70 }}
             />
           )}
     </Card>

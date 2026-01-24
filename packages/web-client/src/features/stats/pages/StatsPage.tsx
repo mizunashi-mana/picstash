@@ -81,12 +81,12 @@ export function StatsPage() {
                 )}
 
                 <Grid gutter="lg">
-                  <Grid.Col span={{ base: 12, md: 6 }}>
+                  <Grid.Col span={{ base: 12, md: 6 }} style={{ minWidth: 0 }}>
                     {viewTrendsQuery.data !== undefined && (
                       <ViewTrendsChart data={viewTrendsQuery.data} />
                     )}
                   </Grid.Col>
-                  <Grid.Col span={{ base: 12, md: 6 }}>
+                  <Grid.Col span={{ base: 12, md: 6 }} style={{ minWidth: 0 }}>
                     {recommendationTrendsQuery.data !== undefined && (
                       <RecommendationTrendsChart
                         data={recommendationTrendsQuery.data}
