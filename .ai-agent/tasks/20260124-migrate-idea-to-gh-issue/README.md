@@ -23,11 +23,10 @@
 - 今後のロードマップを明確化（未着手8セグメント）
 - 実装順序の図を未着手分のみに簡略化
 
-### 3. idea.md の整理
+### 3. idea.md の GitHub Issues 移行
 
-- GitHub Issues への移行手順を記載
-- 未整理メモとして既存アイデアを保持
-- Issue 化したらテーブルから削除するフローを明記
+- idea.md に記載されていた全アイデアを GitHub Issues (#64-#83) に移行
+- 移行完了後、idea.md は削除
 
 ## 完了条件
 
@@ -35,7 +34,7 @@
 - [x] 優先度ラベルが追加されている（priority: high / medium / low）
 - [x] `/autodev:create-issue` コマンドが作成されている
 - [x] plan.md が今後のロードマップとして更新されている
-- [x] idea.md が整理されている（Issue 化フロー追記）
+- [x] idea.md が GitHub Issues に移行され、削除されている
 - [x] client パッケージ改名は完了済みなので削除
 
 ## 作業ログ
@@ -62,7 +61,6 @@
    - 未着手8セグメントをロードマップとして明記
    - 実装順序を未着手分のみに簡略化
 
-5. idea.md を更新
-   - GitHub Issues への移行説明を追記
-   - 未整理メモテーブルとして既存アイデアを保持
-   - Issue 化手順を追記
+5. idea.md を GitHub Issues に移行・削除
+   - 全アイデアを GitHub Issues (#64-#83) に登録
+   - 移行完了後、idea.md を削除
