@@ -2276,7 +2276,11 @@ exports[`buildConfig > should generate correct config for common + react + story
       "**/*.test.{ts,tsx}",
     ],
     "rules": {
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-type-assertion": "off",
       "@typescript-eslint/unbound-method": "off",
     },
   },
@@ -5316,7 +5320,11 @@ exports[`buildConfig > should generate correct config for common ruleSet only 1`
       "**/*.test.{ts,tsx}",
     ],
     "rules": {
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-type-assertion": "off",
       "@typescript-eslint/unbound-method": "off",
     },
   },
