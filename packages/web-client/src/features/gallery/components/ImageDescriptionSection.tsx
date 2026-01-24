@@ -5,6 +5,7 @@ import {
   getJobStatus,
   updateImage,
 } from '@/features/gallery/api';
+import { useJobs } from '@/features/jobs';
 import { ImageDescriptionSectionView } from './ImageDescriptionSectionView';
 
 interface ImageDescriptionSectionProps {
@@ -17,6 +18,7 @@ export function ImageDescriptionSection({
   description,
 }: ImageDescriptionSectionProps) {
   const queryClient = useQueryClient();
+  const { trackJob } = useJobs();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(description ?? '');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -105,6 +107,8 @@ export function ImageDescriptionSection({
       return await generateDescriptionJob(imageId);
     },
     onSuccess: (result) => {
+      // Track job in global context for notifications
+      trackJob(result.jobId);
       // Start polling for job status
       pollJobStatus(result.jobId);
     },

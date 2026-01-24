@@ -25,6 +25,18 @@ export interface AddJobOptions {
   maxAttempts?: number;
 }
 
+export interface ListJobsOptions {
+  status?: JobStatus | JobStatus[];
+  type?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ListJobsResult<TPayload = unknown, TResult = unknown> {
+  jobs: Array<Job<TPayload, TResult>>;
+  total: number;
+}
+
 export interface JobQueue {
   /** ジョブを追加 */
   add: <T>(type: string, payload: T, options?: AddJobOptions) => Promise<Job<T>>;
@@ -33,6 +45,11 @@ export interface JobQueue {
   getJob: <TPayload = unknown, TResult = unknown>(
     id: string,
   ) => Promise<Job<TPayload, TResult> | null>;
+
+  /** ジョブ一覧を取得 */
+  listJobs: <TPayload = unknown, TResult = unknown>(
+    options?: ListJobsOptions,
+  ) => Promise<ListJobsResult<TPayload, TResult>>;
 
   /** 待機中のジョブを1件取得してアクティブに（アトミック操作） */
   acquireJob: <TPayload = unknown>(type: string) => Promise<Job<TPayload> | null>;
