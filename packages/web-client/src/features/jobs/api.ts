@@ -32,24 +32,20 @@ export interface ListJobsParams {
 }
 
 export async function listJobs(params?: ListJobsParams): Promise<ListJobsResponse> {
-  const queryParams: Record<string, string> = {};
-
-  if (params?.status !== undefined) {
-    queryParams.status = Array.isArray(params.status)
+  const status = params?.status !== undefined
+    ? Array.isArray(params.status)
       ? params.status.join(',')
-      : params.status;
-  }
-  if (params?.type !== undefined) {
-    queryParams.type = params.type;
-  }
-  if (params?.limit !== undefined) {
-    queryParams.limit = params.limit.toString();
-  }
-  if (params?.offset !== undefined) {
-    queryParams.offset = params.offset.toString();
-  }
+      : params.status
+    : undefined;
 
-  return await apiClient<ListJobsResponse>(jobsEndpoints.list, { params: queryParams });
+  return await apiClient<ListJobsResponse>(
+    jobsEndpoints.list({
+      status,
+      type: params?.type,
+      limit: params?.limit,
+      offset: params?.offset,
+    }),
+  );
 }
 
 export async function getJob(id: string): Promise<Job> {

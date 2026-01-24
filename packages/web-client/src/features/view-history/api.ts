@@ -25,7 +25,7 @@ export interface ImageViewStats {
 }
 
 export async function recordViewStart(imageId: string): Promise<ViewHistory> {
-  return await apiClient<ViewHistory>(viewHistoryEndpoints.list, {
+  return await apiClient<ViewHistory>(viewHistoryEndpoints.list(), {
     method: 'POST',
     body: JSON.stringify({ imageId }),
   });
@@ -45,17 +45,7 @@ export async function fetchViewHistory(options?: {
   limit?: number;
   offset?: number;
 }): Promise<ViewHistoryWithImage[]> {
-  const params = new URLSearchParams();
-  if (options?.limit !== undefined) {
-    params.set('limit', options.limit.toString());
-  }
-  if (options?.offset !== undefined) {
-    params.set('offset', options.offset.toString());
-  }
-  const queryString = params.toString();
-  const baseUrl = viewHistoryEndpoints.list;
-  const url = queryString !== '' ? `${baseUrl}?${queryString}` : baseUrl;
-  return await apiClient<ViewHistoryWithImage[]>(url);
+  return await apiClient<ViewHistoryWithImage[]>(viewHistoryEndpoints.list(options));
 }
 
 export async function fetchImageViewStats(imageId: string): Promise<ImageViewStats> {

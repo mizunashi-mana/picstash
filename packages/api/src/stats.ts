@@ -5,21 +5,27 @@
  */
 import { z } from 'zod';
 
+import { buildUrl } from './url.js';
+
 /**
  * 統計エンドポイント定義
  */
 export const statsEndpoints = {
   /** 概要統計を取得 */
-  overview: '/api/stats/overview' as const,
+  overview: (query?: StatsQueryOptions) =>
+    buildUrl('/api/stats/overview', query),
 
   /** 日別閲覧トレンドを取得 */
-  viewTrends: '/api/stats/view-trends' as const,
+  viewTrends: (query?: StatsQueryOptions) =>
+    buildUrl('/api/stats/view-trends', query),
 
   /** 日別レコメンドトレンドを取得 */
-  recommendationTrends: '/api/stats/recommendation-trends' as const,
+  recommendationTrends: (query?: StatsQueryOptions) =>
+    buildUrl('/api/stats/recommendation-trends', query),
 
   /** よく閲覧された画像を取得 */
-  popularImages: '/api/stats/popular-images' as const,
+  popularImages: (query?: PopularImagesQueryOptions) =>
+    buildUrl('/api/stats/popular-images', query),
 
   /**
    * server 側のルート登録用パターン
@@ -119,13 +125,13 @@ export type PopularImage = z.infer<typeof PopularImageSchema>;
 // ============================================================
 
 /** 統計取得オプション */
-export interface StatsQueryOptions {
+export type StatsQueryOptions = {
   /** 取得期間（日数） */
   days?: number;
-}
+};
 
 /** よく閲覧された画像取得オプション */
-export interface PopularImagesQueryOptions extends StatsQueryOptions {
+export type PopularImagesQueryOptions = StatsQueryOptions & {
   /** 取得件数上限 */
   limit?: number;
-}
+};

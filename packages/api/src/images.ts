@@ -4,6 +4,46 @@
  * client と server で共有する画像関連の API 定義
  */
 
+import { buildUrl } from './url.js';
+
+// ============================================================
+// クエリパラメータ型
+// ============================================================
+
+/** 画像一覧取得オプション */
+export type ImageListQuery = {
+  /** 検索クエリ */
+  q?: string;
+  /** 取得件数 */
+  limit?: number;
+  /** オフセット */
+  offset?: number;
+};
+
+/** 類似画像取得オプション */
+export type SimilarImagesQuery = {
+  /** 取得件数 */
+  limit?: number;
+};
+
+/** 属性提案取得オプション */
+export type SuggestedAttributesQuery = {
+  /** 類似度閾値 */
+  threshold?: number;
+  /** 取得件数 */
+  limit?: number;
+};
+
+/** 重複画像取得オプション */
+export type DuplicatesQuery = {
+  /** 類似度閾値 */
+  threshold?: number;
+};
+
+// ============================================================
+// エンドポイント定義
+// ============================================================
+
 /**
  * 画像エンドポイント定義
  *
@@ -12,7 +52,7 @@
  */
 export const imageEndpoints = {
   /** 画像一覧を取得 (GET) / 画像をアップロード (POST) */
-  list: '/api/images' as const,
+  list: (query?: ImageListQuery) => buildUrl('/api/images', query),
 
   /** 画像詳細を取得 (GET) / 画像を更新 (PATCH) / 画像を削除 (DELETE) */
   detail: (imageId: string) => `/api/images/${imageId}` as const,
@@ -24,16 +64,18 @@ export const imageEndpoints = {
   file: (imageId: string) => `/api/images/${imageId}/file` as const,
 
   /** 類似画像一覧を取得 */
-  similar: (imageId: string) => `/api/images/${imageId}/similar` as const,
+  similar: (imageId: string, query?: SimilarImagesQuery) =>
+    buildUrl(`/api/images/${imageId}/similar`, query),
 
   /** 属性提案を取得 */
-  suggestedAttributes: (imageId: string) => `/api/images/${imageId}/suggested-attributes` as const,
+  suggestedAttributes: (imageId: string, query?: SuggestedAttributesQuery) =>
+    buildUrl(`/api/images/${imageId}/suggested-attributes`, query),
 
   /** 説明文を生成（ジョブ作成） */
   generateDescription: (imageId: string) => `/api/images/${imageId}/generate-description` as const,
 
   /** 重複画像グループを取得 */
-  duplicates: '/api/images/duplicates' as const,
+  duplicates: (query?: DuplicatesQuery) => buildUrl('/api/images/duplicates', query),
 
   /** 画像が所属するコレクション一覧を取得 */
   collections: (imageId: string) => `/api/images/${imageId}/collections` as const,

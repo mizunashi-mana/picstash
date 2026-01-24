@@ -4,12 +4,30 @@
  * client と server で共有する閲覧履歴関連の API 定義
  */
 
+import { buildUrl } from './url.js';
+
+// ============================================================
+// クエリパラメータ型
+// ============================================================
+
+/** 閲覧履歴一覧取得オプション */
+export type ViewHistoryListQuery = {
+  /** 取得件数 */
+  limit?: number;
+  /** オフセット */
+  offset?: number;
+};
+
+// ============================================================
+// エンドポイント定義
+// ============================================================
+
 /**
  * 閲覧履歴エンドポイント定義
  */
 export const viewHistoryEndpoints = {
   /** 閲覧履歴一覧取得 (GET) / 閲覧開始記録 (POST) */
-  list: '/api/view-history' as const,
+  list: (query?: ViewHistoryListQuery) => buildUrl('/api/view-history', query),
 
   /** 閲覧時間更新 (PATCH) */
   detail: (id: string) => `/api/view-history/${id}` as const,

@@ -1,5 +1,4 @@
 import { apiClient } from '@/api/client';
-import { buildUrl } from '@/shared/helpers';
 import {
   imageEndpoints,
   jobsEndpoints,
@@ -44,7 +43,7 @@ export interface PaginationOptions {
 export async function fetchImages(query?: string): Promise<Image[]> {
   const trimmed = query?.trim();
   const q = trimmed !== '' ? trimmed : undefined;
-  return await apiClient<Image[]>(buildUrl(imageEndpoints.list, { q }));
+  return await apiClient<Image[]>(imageEndpoints.list({ q }));
 }
 
 export async function fetchImagesPaginated(
@@ -53,12 +52,13 @@ export async function fetchImagesPaginated(
 ): Promise<PaginatedResult<Image>> {
   const trimmed = query?.trim();
   const q = trimmed !== '' ? trimmed : undefined;
-  const url = buildUrl(imageEndpoints.list, {
-    q,
-    limit: options?.limit ?? 50,
-    offset: options?.offset ?? 0,
-  });
-  return await apiClient<PaginatedResult<Image>>(url);
+  return await apiClient<PaginatedResult<Image>>(
+    imageEndpoints.list({
+      q,
+      limit: options?.limit ?? 50,
+      offset: options?.offset ?? 0,
+    }),
+  );
 }
 
 export async function fetchImage(id: string): Promise<Image> {
@@ -149,17 +149,9 @@ export async function fetchSuggestedAttributes(
   imageId: string,
   options?: { threshold?: number; limit?: number },
 ): Promise<SuggestedAttributesResponse> {
-  const params = new URLSearchParams();
-  if (options?.threshold !== undefined) {
-    params.set('threshold', options.threshold.toString());
-  }
-  if (options?.limit !== undefined) {
-    params.set('limit', options.limit.toString());
-  }
-  const queryString = params.toString();
-  const baseUrl = imageEndpoints.suggestedAttributes(imageId);
-  const url = queryString !== '' ? `${baseUrl}?${queryString}` : baseUrl;
-  return await apiClient<SuggestedAttributesResponse>(url);
+  return await apiClient<SuggestedAttributesResponse>(
+    imageEndpoints.suggestedAttributes(imageId, options),
+  );
 }
 
 // Generate Description API (Async Job)
@@ -218,14 +210,9 @@ export async function fetchSimilarImages(
   imageId: string,
   options?: { limit?: number },
 ): Promise<SimilarImagesResponse> {
-  const params = new URLSearchParams();
-  if (options?.limit !== undefined) {
-    params.set('limit', options.limit.toString());
-  }
-  const queryString = params.toString();
-  const baseUrl = imageEndpoints.similar(imageId);
-  const url = queryString !== '' ? `${baseUrl}?${queryString}` : baseUrl;
-  return await apiClient<SimilarImagesResponse>(url);
+  return await apiClient<SimilarImagesResponse>(
+    imageEndpoints.similar(imageId, options),
+  );
 }
 
 // Search Suggestions API
@@ -246,7 +233,7 @@ export async function fetchSearchSuggestions(
     return { suggestions: [] };
   }
   return await apiClient<SearchSuggestionsResponse>(
-    buildUrl(searchEndpoints.suggestions, { q: query.trim() }),
+    searchEndpoints.suggestions({ q: query.trim() }),
   );
 }
 
