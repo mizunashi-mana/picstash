@@ -15,11 +15,21 @@ const ZIP_MIME_TYPES = ['application/zip', 'application/x-zip-compressed'];
 /** Error message indicating EOCD is not found (from yauzl) */
 const EOCD_NOT_FOUND_ERROR = 'End of Central Directory Record not found';
 
+/** Error message for truncated ZIP files (from unzipper) */
+const FILE_ENDED_ERROR = 'FILE_ENDED';
+
 /**
  * Check if an error is an EOCD not found error
  */
 function isEocdNotFoundError(error: unknown): boolean {
   return error instanceof Error && error.message === EOCD_NOT_FOUND_ERROR;
+}
+
+/**
+ * Check if an error is a FILE_ENDED error (expected for truncated ZIPs)
+ */
+function isFileEndedError(error: unknown): boolean {
+  return error instanceof Error && error.message === FILE_ENDED_ERROR;
 }
 
 /**
@@ -49,6 +59,10 @@ function getUncompressedSize(entry: unzipper.Entry): number {
 /**
  * List entries using streaming mode (fallback for corrupted ZIPs)
  * This scans local file headers instead of relying on the central directory.
+ *
+ * Note: Entry indices are assigned sequentially including directory entries,
+ * matching the behavior of yauzl's readEntries() to ensure consistency
+ * between normal and fallback modes.
  */
 async function listEntriesWithStreaming(
   archivePath: string,
@@ -57,8 +71,10 @@ async function listEntriesWithStreaming(
   let index = 0;
 
   await new Promise<void>((resolve, reject) => {
-    createReadStream(archivePath)
-      .pipe(unzipper.Parse())
+    const fileStream = createReadStream(archivePath);
+    const parser = fileStream.pipe(unzipper.Parse());
+
+    parser
       .on('entry', (entry: unzipper.Entry) => {
         entries.push({
           index: index++,
@@ -72,9 +88,11 @@ async function listEntriesWithStreaming(
       })
       .on('close', resolve)
       .on('error', (err: Error) => {
+        // Clean up file stream on error
+        fileStream.destroy();
         // FILE_ENDED error is expected for truncated ZIPs
         // We still have the entries we found before the error
-        if (err.message === 'FILE_ENDED') {
+        if (isFileEndedError(err)) {
           resolve();
         }
         else {
@@ -88,6 +106,9 @@ async function listEntriesWithStreaming(
 
 /**
  * Extract entry using streaming mode (fallback for corrupted ZIPs)
+ *
+ * Note: Entry indices must match those from listEntriesWithStreaming().
+ * Both functions assign indices sequentially including directory entries.
  */
 async function extractEntryWithStreaming(
   archivePath: string,
@@ -95,17 +116,41 @@ async function extractEntryWithStreaming(
 ): Promise<Buffer> {
   return await new Promise<Buffer>((resolve, reject) => {
     let currentIndex = 0;
-    let found = false;
+    let entryFound = false;
+    let resolved = false;
 
-    createReadStream(archivePath)
-      .pipe(unzipper.Parse())
+    const fileStream = createReadStream(archivePath);
+    const parser = fileStream.pipe(unzipper.Parse());
+
+    const cleanup = (): void => {
+      fileStream.destroy();
+    };
+
+    parser
       .on('entry', (entry: unzipper.Entry) => {
         if (currentIndex === entryIndex) {
-          found = true;
-          // Use streamToBuffer to avoid async callback issues
+          entryFound = true;
+
+          // Check for directory entry (consistent with yauzl path)
+          if (entry.type === 'Directory') {
+            resolved = true;
+            cleanup();
+            reject(new Error('Cannot extract a directory entry'));
+            return;
+          }
+
+          // Extract the entry content
           streamToBuffer(entry)
-            .then(resolve)
-            .catch(reject);
+            .then((buffer) => {
+              resolved = true;
+              cleanup();
+              resolve(buffer);
+            })
+            .catch((err: unknown) => {
+              resolved = true;
+              cleanup();
+              reject(err instanceof Error ? err : new Error(String(err)));
+            });
         }
         else {
           entry.autodrain();
@@ -113,16 +158,28 @@ async function extractEntryWithStreaming(
         currentIndex++;
       })
       .on('close', () => {
-        if (!found) {
+        // Only reject if entry was never found (not if extraction is in progress)
+        if (!entryFound && !resolved) {
           reject(new Error(`Entry index ${entryIndex} not found`));
         }
       })
       .on('error', (err: Error) => {
-        // If we already found and resolved, ignore FILE_ENDED
-        if (found && err.message === 'FILE_ENDED') {
+        // If already resolved, ignore errors (especially FILE_ENDED)
+        if (resolved) {
           return;
         }
-        reject(err);
+        // FILE_ENDED is expected for truncated ZIPs - ignore if entry was found
+        if (isFileEndedError(err) && entryFound) {
+          return;
+        }
+        cleanup();
+        // FILE_ENDED with entry not found means entry was not found before truncation
+        if (isFileEndedError(err)) {
+          reject(new Error(`Entry index ${entryIndex} not found`));
+        }
+        else {
+          reject(err);
+        }
       });
   });
 }
@@ -130,11 +187,6 @@ async function extractEntryWithStreaming(
 @injectable()
 export class ZipArchiveHandler implements ArchiveHandler {
   readonly archiveType = 'zip' as const;
-
-  /**
-   * Track which archives need streaming mode (corrupted ZIPs without valid EOCD)
-   */
-  private readonly corruptedArchives = new Set<string>();
 
   canHandle(filePath: string, mimeType: string): boolean {
     const extension = filePath.toLowerCase().slice(filePath.lastIndexOf('.'));
@@ -144,11 +196,6 @@ export class ZipArchiveHandler implements ArchiveHandler {
   }
 
   async listEntries(archivePath: string): Promise<ArchiveEntry[]> {
-    // If we already know this archive is corrupted, use streaming mode directly
-    if (this.corruptedArchives.has(archivePath)) {
-      return await listEntriesWithStreaming(archivePath);
-    }
-
     try {
       // Try the normal yauzl approach first (faster and more accurate)
       const zipFile = await open(archivePath);
@@ -171,7 +218,6 @@ export class ZipArchiveHandler implements ArchiveHandler {
     catch (error) {
       // If EOCD not found, fall back to streaming mode
       if (isEocdNotFoundError(error)) {
-        this.corruptedArchives.add(archivePath);
         return await listEntriesWithStreaming(archivePath);
       }
       throw error;
@@ -181,11 +227,6 @@ export class ZipArchiveHandler implements ArchiveHandler {
   async extractEntry(archivePath: string, entryIndex: number): Promise<Buffer> {
     if (entryIndex < 0) {
       throw new Error(`Entry index ${entryIndex} out of range`);
-    }
-
-    // If we know this archive is corrupted, use streaming mode directly
-    if (this.corruptedArchives.has(archivePath)) {
-      return await extractEntryWithStreaming(archivePath, entryIndex);
     }
 
     try {
@@ -222,7 +263,6 @@ export class ZipArchiveHandler implements ArchiveHandler {
     catch (error) {
       // If EOCD not found, fall back to streaming mode
       if (isEocdNotFoundError(error)) {
-        this.corruptedArchives.add(archivePath);
         return await extractEntryWithStreaming(archivePath, entryIndex);
       }
       throw error;
