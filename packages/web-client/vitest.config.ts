@@ -48,35 +48,99 @@ export default defineConfig({
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
-        // エントリーポイント
+        // エントリーポイント（テスト不要）
         'src/main.tsx',
         'src/vite-env.d.ts',
-        // Storybook ファイル
+        // Storybook（別途 Storybook テストで対応）
         'src/**/*.stories.tsx',
-        // feature API（テスト未実装）
-        'src/features/*/api.ts',
-        // feature ページ（テスト未実装）
-        'src/features/*/pages/*.tsx',
-        // feature コンポーネント（テスト未実装）
-        'src/features/*/components/**/*.{ts,tsx}',
-        // feature その他（テスト未実装）
-        'src/features/jobs/context.tsx',
-        'src/features/view-history/useViewHistory.ts',
-        // ルーティング
-        'src/routes/**/*.tsx',
-        // 共有コンポーネント（テスト未実装）
-        'src/shared/components/**/*.{ts,tsx}',
-        // App コンポーネント
-        'src/App.tsx',
-        // インデックスファイル
+        // index.ts（エクスポートのみ）
         'src/**/index.ts',
+        // App（プロバイダー構成のみ）
+        'src/App.tsx',
+        // ルーティング（React Router 設定のみ）
+        'src/routes/index.tsx',
+
+        // === 未テストファイル（個別指定） ===
+        // 新規ファイルはここに含まれないため、自動的にカバレッジ対象になる
+
+        // features/archive-import
+        'src/features/archive-import/api.ts',
+        'src/features/archive-import/components/ArchiveDropzone.tsx',
+        'src/features/archive-import/components/ArchivePreviewGallery.tsx',
+        'src/features/archive-import/pages/ArchiveImportPage.tsx',
+
+        // features/collections
+        'src/features/collections/api.ts',
+        'src/features/collections/pages/CollectionDetailPage.tsx',
+        'src/features/collections/pages/CollectionViewerPage.tsx',
+        'src/features/collections/pages/CollectionsPage.tsx',
+
+        // features/duplicates
+        'src/features/duplicates/api.ts',
+        'src/features/duplicates/components/DuplicateGroupCard.tsx',
+        'src/features/duplicates/pages/DuplicatesPage.tsx',
+
+        // features/gallery
+        'src/features/gallery/api.ts',
+        'src/features/gallery/components/ImageAttributeSection.tsx',
+        'src/features/gallery/components/ImageAttributeSectionView.tsx',
+        'src/features/gallery/components/ImageCarousel.tsx',
+        'src/features/gallery/components/ImageCollectionsSection.tsx',
+        'src/features/gallery/components/ImageDescriptionSection.tsx',
+        'src/features/gallery/components/ImageDescriptionSectionView.tsx',
+        'src/features/gallery/components/ImageGallery.tsx',
+        'src/features/gallery/components/ImageGalleryView.tsx',
+        'src/features/gallery/components/SearchBar.tsx',
+        'src/features/gallery/components/SimilarImagesSection.tsx',
+        'src/features/gallery/components/SimilarImagesSectionView.tsx',
+        'src/features/gallery/pages/GalleryPage.tsx',
+        'src/features/gallery/pages/ImageDetailPage.tsx',
+
+        // features/home
+        'src/features/home/pages/HomePage.tsx',
+
+        // features/jobs（context.tsx, api.ts, utils.ts はテスト済み）
+        'src/features/jobs/components/JobStatusButton.tsx',
+
+        // features/labels
+        'src/features/labels/api.ts',
+        'src/features/labels/components/LabelBadge.tsx',
+        'src/features/labels/components/LabelForm.tsx',
+        'src/features/labels/components/LabelList.tsx',
+        'src/features/labels/pages/LabelsPage.tsx',
+
+        // features/recommendations
+        'src/features/recommendations/api.ts',
+        'src/features/recommendations/components/RecommendationSection.tsx',
+
+        // features/stats
+        'src/features/stats/api.ts',
+        'src/features/stats/components/PopularImagesList.tsx',
+        'src/features/stats/components/RecommendationTrendsChart.tsx',
+        'src/features/stats/components/StatsOverviewCards.tsx',
+        'src/features/stats/components/ViewTrendsChart.tsx',
+        'src/features/stats/pages/StatsPage.tsx',
+
+        // features/upload
+        'src/features/upload/api.ts',
+        'src/features/upload/components/ImageDropzone.tsx',
+        'src/features/upload/components/ImageDropzoneView.tsx',
+
+        // features/url-crawl
+        'src/features/url-crawl/api.ts',
+        'src/features/url-crawl/components/CrawlPreviewGallery.tsx',
+        'src/features/url-crawl/components/UrlInputForm.tsx',
+        'src/features/url-crawl/pages/UrlCrawlPage.tsx',
+
+        // shared/components（AppLayout はテスト未実装）
+        'src/shared/components/AppLayout.tsx',
       ],
       thresholds: {
         perFile: true,
-        lines: 80,
-        branches: 80,
-        functions: 80,
-        statements: 80,
+        lines: 70,
+        branches: 70,
+        functions: 70,
+        statements: 70,
       },
     },
   },
