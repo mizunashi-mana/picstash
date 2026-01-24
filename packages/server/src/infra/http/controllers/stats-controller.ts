@@ -1,3 +1,4 @@
+import { statsEndpoints } from '@picstash/api';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
@@ -20,7 +21,7 @@ export class StatsController {
 
   registerRoutes(app: FastifyInstance): void {
     // Get overview statistics
-    app.get<{ Querystring: StatsQuery }>('/api/stats/overview', async (request, reply) => {
+    app.get<{ Querystring: StatsQuery }>(statsEndpoints.routes.overview, async (request, reply) => {
       const days
         = request.query.days !== undefined && request.query.days !== ''
           ? parseInt(request.query.days, 10)
@@ -38,7 +39,7 @@ export class StatsController {
     });
 
     // Get daily view trends
-    app.get<{ Querystring: StatsQuery }>('/api/stats/view-trends', async (request, reply) => {
+    app.get<{ Querystring: StatsQuery }>(statsEndpoints.routes.viewTrends, async (request, reply) => {
       const days
         = request.query.days !== undefined && request.query.days !== ''
           ? parseInt(request.query.days, 10)
@@ -57,7 +58,7 @@ export class StatsController {
 
     // Get daily recommendation trends
     app.get<{ Querystring: StatsQuery }>(
-      '/api/stats/recommendation-trends',
+      statsEndpoints.routes.recommendationTrends,
       async (request, reply) => {
         const days
           = request.query.days !== undefined && request.query.days !== ''
@@ -78,7 +79,7 @@ export class StatsController {
 
     // Get popular images
     app.get<{ Querystring: PopularImagesQuery }>(
-      '/api/stats/popular-images',
+      statsEndpoints.routes.popularImages,
       async (request, reply) => {
         const days
           = request.query.days !== undefined && request.query.days !== ''

@@ -3,9 +3,9 @@ import type {
   DailyViewStats,
   DailyRecommendationStats,
   PopularImage,
-} from '@/domain/stats/index.js';
+} from '@picstash/api';
 
-// Re-export domain types for convenience
+// Re-export API types for convenience
 export type {
   OverviewStats,
   DailyViewStats,

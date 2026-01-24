@@ -27,20 +27,22 @@ client と server で同じ型が別々に定義されている:
 
 ## 実装方針
 
-### 方針: shared パッケージに API 型定義を集約
+### 方針: @picstash/api パッケージに API 型定義を集約
 
-1. **shared パッケージに API 型を定義**
-   - `packages/shared/src/api/` ディレクトリを作成
-   - 各 API のリクエスト/レスポンス型を定義
+1. **@picstash/api パッケージに API 型を定義**
+   - `packages/api/src/` ディレクトリに各 API の型を定義
+   - 各 API のリクエスト/レスポンス型を Zod スキーマで定義
    - JSON シリアライズ後の型（Date → string）を使用
+   - エンドポイント URL を共有して URL 不整合を防止
 
 2. **server 側の対応**
-   - ドメイン型（Date を使用）はそのまま維持
-   - API レスポンス型は shared から import
-   - シリアライズ時に型変換
+   - API レスポンス型は @picstash/api から import
+   - エンドポイント URL は `statsEndpoints.routes` を使用
+   - 適切な型変換（Date → ISO 文字列）
 
 3. **client 側の対応**
-   - API 型は shared から import
+   - API 型は @picstash/api から import
+   - エンドポイント URL は `imageEndpoints` 等を使用
    - 重複定義を削除
 
 ### 段階的な移行
@@ -50,12 +52,34 @@ client と server で同じ型が別々に定義されている:
 
 ## 完了条件
 
-- [ ] shared パッケージに API 型定義を追加
-- [ ] stats API の型を共通化
-- [ ] client と server が shared の型を使用
-- [ ] 型チェックが通る
-- [ ] テストが通る
+- [x] @picstash/api パッケージに API 型定義を追加
+- [x] stats API の型を共通化
+- [x] client と server が @picstash/api の型を使用
+- [x] 型チェックが通る
+- [x] テストが通る
 
 ## 作業ログ
 
-（作業中に記録）
+### 2026-01-24
+
+1. `packages/shared` を `packages/api` (`@picstash/api`) にリネーム
+2. 以下のエンドポイント定義と型を追加:
+   - `images.ts`: `imageEndpoints` (サムネイル、ファイル、詳細等の URL)
+   - `stats.ts`: `statsEndpoints` + Zod スキーマ (OverviewStats, DailyViewStats 等)
+   - `labels.ts`: `labelsEndpoints` + Zod スキーマ
+   - `image-attributes.ts`: `imageAttributeEndpoints` + Zod スキーマ
+
+3. **client 側の対応**:
+   - ハードコードされた `/api/images/...` URL を `imageEndpoints` に置き換え
+   - stats/labels の型を `@picstash/api` から import
+
+4. **server 側の対応**:
+   - `stats-controller.ts`: `statsEndpoints.routes` を使用
+   - `domain/stats/index.ts`: `@picstash/api` から型を re-export
+   - `stats-repository.ts`: `@picstash/api` から型を import
+   - `prisma-stats-repository.ts`: `lastViewedAt` を ISO 文字列に変換
+
+5. 検証:
+   - Typecheck: 全パッケージ合格
+   - Unit Tests: 265 テスト合格
+   - E2E Tests: 10 テスト合格
