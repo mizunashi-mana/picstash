@@ -59,8 +59,9 @@ export default defineConfig({
         'src/api/**/*.ts',
         // ルーティング
         'src/routes/**/*.tsx',
-        // 共有コンポーネント（テスト未実装）
-        'src/shared/**/*.{ts,tsx}',
+        // 共有コンポーネント・フック（テスト未実装）
+        'src/shared/components/**/*.{ts,tsx}',
+        'src/shared/hooks/**/*.{ts,tsx}',
         // App コンポーネント
         'src/App.tsx',
         // インデックスファイル
