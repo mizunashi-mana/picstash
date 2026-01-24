@@ -6,6 +6,8 @@ import type {
   Job,
   JobQueue,
   JobStatus,
+  ListJobsOptions,
+  ListJobsResult,
 } from '@/application/ports/job-queue.js';
 
 /**
@@ -42,6 +44,39 @@ export class PrismaJobQueue implements JobQueue {
     }
 
     return this.mapToJob<TPayload, TResult>(job);
+  }
+
+  async listJobs<TPayload = unknown, TResult = unknown>(
+    options?: ListJobsOptions,
+  ): Promise<ListJobsResult<TPayload, TResult>> {
+    const { status, type, limit = 50, offset = 0 } = options ?? {};
+
+    // ステータスフィルタの構築
+    const statusFilter = status !== undefined
+      ? Array.isArray(status)
+        ? { in: status }
+        : status
+      : undefined;
+
+    const where = {
+      ...(statusFilter !== undefined && { status: statusFilter }),
+      ...(type !== undefined && { type }),
+    };
+
+    const [jobs, total] = await Promise.all([
+      prisma.job.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.job.count({ where }),
+    ]);
+
+    return {
+      jobs: jobs.map(job => this.mapToJob<TPayload, TResult>(job)),
+      total,
+    };
   }
 
   async acquireJob<TPayload = unknown>(

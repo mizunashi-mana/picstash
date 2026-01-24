@@ -24,6 +24,8 @@ import { Link, useLocation } from 'react-router';
 
 interface AppLayoutProps {
   children: React.ReactNode;
+  /** ヘッダーに表示する追加のアクション（例: ジョブステータスボタン） */
+  headerActions?: React.ReactNode;
 }
 
 const navItems = [
@@ -37,7 +39,7 @@ const navItems = [
   { label: '統計', path: '/stats', icon: IconChartBar },
 ];
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, headerActions }: AppLayoutProps) {
   const [opened, setOpened] = useState(true);
   const location = useLocation();
 
@@ -58,19 +60,22 @@ export function AppLayout({ children }: AppLayoutProps) {
                 Picstash
               </Title>
             )}
-            <ActionIcon
-              variant="subtle"
-              onClick={() => { setOpened(!opened); }}
-              aria-label={opened ? 'サイドバーを折りたたむ' : 'サイドバーを展開'}
-            >
-              {opened
-                ? (
-                    <IconLayoutSidebarLeftCollapse size={20} />
-                  )
-                : (
-                    <IconLayoutSidebarLeftExpand size={20} />
-                  )}
-            </ActionIcon>
+            <Group gap="xs">
+              {headerActions}
+              <ActionIcon
+                variant="subtle"
+                onClick={() => { setOpened(!opened); }}
+                aria-label={opened ? 'サイドバーを折りたたむ' : 'サイドバーを展開'}
+              >
+                {opened
+                  ? (
+                      <IconLayoutSidebarLeftCollapse size={20} />
+                    )
+                  : (
+                      <IconLayoutSidebarLeftExpand size={20} />
+                    )}
+              </ActionIcon>
+            </Group>
           </Group>
 
           <Stack gap={4}>
