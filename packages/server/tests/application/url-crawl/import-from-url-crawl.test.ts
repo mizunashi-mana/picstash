@@ -1,25 +1,23 @@
 import 'reflect-metadata';
 import { describe, expect, it, vi } from 'vitest';
-import { importFromArchive } from '@/application/archive/import-from-archive';
-import type { ArchiveSessionManager, ArchiveSession } from '@/application/ports/archive-session-manager';
+import { importFromUrlCrawl } from '@/application/url-crawl/import-from-url-crawl';
 import type { FileStorage } from '@/application/ports/file-storage';
 import type { ImageProcessor } from '@/application/ports/image-processor';
 import type { Image, ImageRepository } from '@/application/ports/image-repository';
+import type { UrlCrawlSessionManager, UrlCrawlSession } from '@/application/ports/url-crawl-session-manager';
 
-// Mock node:fs/promises
 vi.mock('node:fs/promises', () => ({
   stat: vi.fn().mockResolvedValue({ size: 1000 }),
 }));
 
-function createMockSession(overrides: Partial<ArchiveSession> = {}): ArchiveSession {
+function createMockSession(overrides: Partial<UrlCrawlSession> = {}): UrlCrawlSession {
   return {
     id: 'test-session-id',
-    filename: 'test.zip',
-    archiveType: 'zip',
-    archivePath: '/tmp/test.zip',
+    sourceUrl: 'https://example.com/gallery',
+    pageTitle: 'Test Gallery',
     imageEntries: [
-      { index: 0, filename: 'image1.png', path: 'image1.png', size: 1000, isDirectory: false },
-      { index: 1, filename: 'image2.jpg', path: 'image2.jpg', size: 2000, isDirectory: false },
+      { index: 0, url: 'https://example.com/image1.png', filename: 'image1.png' },
+      { index: 1, url: 'https://example.com/image2.jpg', filename: 'image2.jpg' },
     ],
     createdAt: new Date(),
     ...overrides,
@@ -44,10 +42,10 @@ function createMockImage(overrides: Partial<Image> = {}): Image {
 }
 
 function createMockDeps() {
-  const mockArchiveSessionManager: ArchiveSessionManager = {
+  const mockUrlCrawlSessionManager: UrlCrawlSessionManager = {
     createSession: vi.fn(),
     getSession: vi.fn(),
-    extractImage: vi.fn(),
+    fetchImage: vi.fn(),
     deleteSession: vi.fn(),
   };
 
@@ -61,7 +59,6 @@ function createMockDeps() {
     searchPaginated: vi.fn(),
     updateById: vi.fn(),
     deleteById: vi.fn(),
-    // Embedding-related methods
     findIdsWithoutEmbedding: vi.fn(),
     findByIdWithEmbedding: vi.fn(),
     findWithEmbedding: vi.fn(),
@@ -84,20 +81,20 @@ function createMockDeps() {
   };
 
   return {
-    archiveSessionManager: mockArchiveSessionManager,
+    urlCrawlSessionManager: mockUrlCrawlSessionManager,
     imageRepository: mockImageRepository,
     fileStorage: mockFileStorage,
     imageProcessor: mockImageProcessor,
   };
 }
 
-describe('importFromArchive', () => {
+describe('importFromUrlCrawl', () => {
   describe('when session does not exist', () => {
     it('should return all failures', async () => {
       const deps = createMockDeps();
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(undefined);
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(undefined);
 
-      const result = await importFromArchive(
+      const result = await importFromUrlCrawl(
         { sessionId: 'non-existent', indices: [0, 1, 2] },
         deps,
       );
@@ -111,13 +108,13 @@ describe('importFromArchive', () => {
     });
   });
 
-  describe('when entry does not exist in archive', () => {
+  describe('when image entry does not exist in session', () => {
     it('should return failure for that entry', async () => {
       const deps = createMockDeps();
       const session = createMockSession();
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
 
-      const result = await importFromArchive(
+      const result = await importFromUrlCrawl(
         { sessionId: 'test-session-id', indices: [999] },
         deps,
       );
@@ -126,7 +123,7 @@ describe('importFromArchive', () => {
       expect(result.successCount).toBe(0);
       expect(result.failedCount).toBe(1);
       expect(result.results[0]?.success).toBe(false);
-      expect(result.results[0]?.error).toBe('Entry 999 not found in archive');
+      expect(result.results[0]?.error).toBe('Image 999 not found in session');
     });
   });
 
@@ -136,8 +133,11 @@ describe('importFromArchive', () => {
       const session = createMockSession();
       const mockImage = createMockImage();
 
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(session);
-      vi.mocked(deps.archiveSessionManager.extractImage).mockResolvedValue(Buffer.from('image data'));
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
       vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
@@ -150,7 +150,7 @@ describe('importFromArchive', () => {
       });
       vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
 
-      const result = await importFromArchive(
+      const result = await importFromUrlCrawl(
         { sessionId: 'test-session-id', indices: [0] },
         deps,
       );
@@ -167,8 +167,43 @@ describe('importFromArchive', () => {
       const session = createMockSession();
       const mockImage = createMockImage();
 
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(session);
-      vi.mocked(deps.archiveSessionManager.extractImage).mockResolvedValue(Buffer.from('image data'));
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/jpeg',
+      });
+      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+        filename: 'saved.jpg',
+        path: 'originals/saved.jpg',
+      });
+      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.jpg');
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
+        filename: 'saved.jpg',
+        path: 'thumbnails/saved.jpg',
+      });
+      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0, 1] },
+        deps,
+      );
+
+      expect(result.totalRequested).toBe(2);
+      expect(result.successCount).toBe(2);
+      expect(result.failedCount).toBe(0);
+    });
+
+    it('should handle content type with charset', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+      const mockImage = createMockImage();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png; charset=utf-8',
+      });
       vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
@@ -181,14 +216,66 @@ describe('importFromArchive', () => {
       });
       vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
 
-      const result = await importFromArchive(
-        { sessionId: 'test-session-id', indices: [0, 1] },
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
         deps,
       );
 
-      expect(result.totalRequested).toBe(2);
-      expect(result.successCount).toBe(2);
-      expect(result.failedCount).toBe(0);
+      expect(result.successCount).toBe(1);
+    });
+
+    it('should use default extension for unknown content type', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+      const mockImage = createMockImage();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'application/octet-stream',
+      });
+      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+        filename: 'saved.jpg',
+        path: 'originals/saved.jpg',
+      });
+      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.jpg');
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
+        filename: 'saved.jpg',
+        path: 'thumbnails/saved.jpg',
+      });
+      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(1);
+      expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
+        expect.anything(),
+        '.jpg',
+      );
+    });
+  });
+
+  describe('when fetch fails', () => {
+    it('should return failure', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockRejectedValue(new Error('Network error'));
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(0);
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.success).toBe(false);
+      expect(result.results[0]?.error).toBe('Network error');
     });
   });
 
@@ -197,8 +284,11 @@ describe('importFromArchive', () => {
       const deps = createMockDeps();
       const session = createMockSession();
 
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(session);
-      vi.mocked(deps.archiveSessionManager.extractImage).mockResolvedValue(Buffer.from('image data'));
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
       vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
@@ -207,7 +297,7 @@ describe('importFromArchive', () => {
       vi.mocked(deps.imageProcessor.getMetadata).mockRejectedValue(new Error('Invalid image'));
       vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
 
-      const result = await importFromArchive(
+      const result = await importFromUrlCrawl(
         { sessionId: 'test-session-id', indices: [0] },
         deps,
       );
@@ -223,8 +313,11 @@ describe('importFromArchive', () => {
       const deps = createMockDeps();
       const session = createMockSession();
 
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(session);
-      vi.mocked(deps.archiveSessionManager.extractImage).mockResolvedValue(Buffer.from('image data'));
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
       vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
@@ -233,14 +326,13 @@ describe('importFromArchive', () => {
       vi.mocked(deps.imageProcessor.getMetadata).mockRejectedValue(new Error('Invalid image'));
       vi.mocked(deps.fileStorage.deleteFile).mockRejectedValue(new Error('Cleanup failed'));
 
-      const result = await importFromArchive(
+      const result = await importFromUrlCrawl(
         { sessionId: 'test-session-id', indices: [0] },
         deps,
       );
 
       expect(result.successCount).toBe(0);
       expect(result.failedCount).toBe(1);
-      expect(result.results[0]?.success).toBe(false);
       expect(result.results[0]?.error).toBe('Invalid image');
     });
   });
@@ -250,8 +342,11 @@ describe('importFromArchive', () => {
       const deps = createMockDeps();
       const session = createMockSession();
 
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(session);
-      vi.mocked(deps.archiveSessionManager.extractImage).mockResolvedValue(Buffer.from('image data'));
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
       vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
@@ -265,7 +360,7 @@ describe('importFromArchive', () => {
       vi.mocked(deps.imageRepository.create).mockRejectedValue(new Error('Database error'));
       vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
 
-      const result = await importFromArchive(
+      const result = await importFromUrlCrawl(
         { sessionId: 'test-session-id', indices: [0] },
         deps,
       );
@@ -285,10 +380,10 @@ describe('importFromArchive', () => {
       const session = createMockSession();
       const mockImage = createMockImage();
 
-      vi.mocked(deps.archiveSessionManager.getSession).mockReturnValue(session);
-      vi.mocked(deps.archiveSessionManager.extractImage)
-        .mockResolvedValueOnce(Buffer.from('image data'))
-        .mockRejectedValueOnce(new Error('Extraction failed'));
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage)
+        .mockResolvedValueOnce({ data: Buffer.from('image data'), contentType: 'image/png' })
+        .mockRejectedValueOnce(new Error('Network error'));
       vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
@@ -301,7 +396,7 @@ describe('importFromArchive', () => {
       });
       vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
 
-      const result = await importFromArchive(
+      const result = await importFromUrlCrawl(
         { sessionId: 'test-session-id', indices: [0, 1] },
         deps,
       );
@@ -311,7 +406,7 @@ describe('importFromArchive', () => {
       expect(result.failedCount).toBe(1);
       expect(result.results[0]?.success).toBe(true);
       expect(result.results[1]?.success).toBe(false);
-      expect(result.results[1]?.error).toBe('Extraction failed');
+      expect(result.results[1]?.error).toBe('Network error');
     });
   });
 });

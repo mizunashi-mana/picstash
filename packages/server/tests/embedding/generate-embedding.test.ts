@@ -3,9 +3,12 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import {
   generateEmbedding,
+  generateMissingEmbeddings,
   removeEmbedding,
+  syncEmbeddingsToVectorDb,
   type GenerateEmbeddingDeps,
 } from '@/application/embedding/generate-embedding';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository';
 import type { EmbeddingService, EmbeddingResult } from '@/application/ports/embedding-service';
 import type { FileStorage } from '@/application/ports/file-storage';
@@ -199,5 +202,146 @@ describe('removeEmbedding', () => {
     removeEmbedding('test-image-id', { embeddingRepository: mockEmbeddingRepository });
 
     expect(mockEmbeddingRepository.remove).toHaveBeenCalledWith('test-image-id');
+  });
+});
+
+describe('generateMissingEmbeddings', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should generate embeddings for images without embeddings', async () => {
+    const deps = createMockDeps();
+    const mockEmbeddingResult = createMockEmbeddingResult();
+
+    vi.mocked(deps.imageRepository.findIdsWithoutEmbedding).mockResolvedValue([
+      { id: 'img-1' },
+      { id: 'img-2' },
+    ]);
+    vi.mocked(deps.imageRepository.findById)
+      .mockResolvedValueOnce(createMockImage({ id: 'img-1' }))
+      .mockResolvedValueOnce(createMockImage({ id: 'img-2' }));
+    vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test.png');
+    vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+    vi.mocked(deps.embeddingService.generateFromBuffer).mockResolvedValue(mockEmbeddingResult);
+
+    const result = await generateMissingEmbeddings(deps);
+
+    expect(result.total).toBe(2);
+    expect(result.success).toBe(2);
+    expect(result.failed).toBe(0);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('should report errors for failed embeddings', async () => {
+    const deps = createMockDeps();
+
+    vi.mocked(deps.imageRepository.findIdsWithoutEmbedding).mockResolvedValue([
+      { id: 'img-1' },
+    ]);
+    vi.mocked(deps.imageRepository.findById).mockResolvedValue(null);
+
+    const result = await generateMissingEmbeddings(deps);
+
+    expect(result.total).toBe(1);
+    expect(result.success).toBe(0);
+    expect(result.failed).toBe(1);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.imageId).toBe('img-1');
+    expect(result.errors[0]?.error).toBe('IMAGE_NOT_FOUND');
+  });
+
+  it('should call onProgress callback', async () => {
+    const deps = createMockDeps();
+    const mockEmbeddingResult = createMockEmbeddingResult();
+    const onProgress = vi.fn();
+
+    vi.mocked(deps.imageRepository.findIdsWithoutEmbedding).mockResolvedValue([
+      { id: 'img-1' },
+      { id: 'img-2' },
+    ]);
+    vi.mocked(deps.imageRepository.findById).mockResolvedValue(createMockImage());
+    vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test.png');
+    vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+    vi.mocked(deps.embeddingService.generateFromBuffer).mockResolvedValue(mockEmbeddingResult);
+
+    await generateMissingEmbeddings(deps, { onProgress });
+
+    expect(onProgress).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenNthCalledWith(1, 1, 2);
+    expect(onProgress).toHaveBeenNthCalledWith(2, 2, 2);
+  });
+
+  it('should return empty result when no images without embeddings', async () => {
+    const deps = createMockDeps();
+    vi.mocked(deps.imageRepository.findIdsWithoutEmbedding).mockResolvedValue([]);
+
+    const result = await generateMissingEmbeddings(deps);
+
+    expect(result.total).toBe(0);
+    expect(result.success).toBe(0);
+    expect(result.failed).toBe(0);
+  });
+});
+
+describe('syncEmbeddingsToVectorDb', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should sync embeddings from Prisma to sqlite-vec', async () => {
+    const deps = createMockDeps();
+    const embedding = new Float32Array(EMBEDDING_DIMENSION).fill(0.1);
+    const embeddingBuffer = Buffer.from(embedding.buffer);
+
+    vi.mocked(deps.imageRepository.findWithEmbedding).mockResolvedValue([
+      { id: 'img-1', path: 'originals/img-1.jpg', embedding: embeddingBuffer },
+      { id: 'img-2', path: 'originals/img-2.jpg', embedding: embeddingBuffer },
+    ]);
+
+    const result = await syncEmbeddingsToVectorDb({
+      imageRepository: deps.imageRepository,
+      embeddingRepository: deps.embeddingRepository,
+    });
+
+    expect(result.synced).toBe(2);
+    expect(result.skipped).toBe(0);
+    expect(deps.embeddingRepository.upsert).toHaveBeenCalledTimes(2);
+  });
+
+  it('should skip images with null embeddings', async () => {
+    const deps = createMockDeps();
+
+    vi.mocked(deps.imageRepository.findWithEmbedding).mockResolvedValue([
+      { id: 'img-1', path: 'originals/img-1.jpg', embedding: null },
+    ]);
+
+    const result = await syncEmbeddingsToVectorDb({
+      imageRepository: deps.imageRepository,
+      embeddingRepository: deps.embeddingRepository,
+    });
+
+    expect(result.synced).toBe(0);
+    expect(result.skipped).toBe(1);
+    expect(deps.embeddingRepository.upsert).not.toHaveBeenCalled();
+  });
+
+  it('should skip embeddings with wrong dimensions', async () => {
+    const deps = createMockDeps();
+    const wrongDimensionEmbedding = new Float32Array(256).fill(0.1);
+    const embeddingBuffer = Buffer.from(wrongDimensionEmbedding.buffer);
+
+    vi.mocked(deps.imageRepository.findWithEmbedding).mockResolvedValue([
+      { id: 'img-1', path: 'originals/img-1.jpg', embedding: embeddingBuffer },
+    ]);
+
+    const result = await syncEmbeddingsToVectorDb({
+      imageRepository: deps.imageRepository,
+      embeddingRepository: deps.embeddingRepository,
+    });
+
+    expect(result.synced).toBe(0);
+    expect(result.skipped).toBe(1);
+    expect(deps.embeddingRepository.upsert).not.toHaveBeenCalled();
   });
 });
