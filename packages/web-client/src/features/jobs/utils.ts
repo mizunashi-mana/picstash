@@ -12,6 +12,7 @@ export function getJobTypeName(type: string): string {
 
 /** ペイロードから対象の画像IDを取得 */
 export function getImageId(job: Job): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- job.payload is unknown type
   const payload = job.payload as { imageId?: string } | undefined;
   return payload?.imageId;
 }

@@ -1,4 +1,3 @@
-import { apiClient } from '@/api/client';
 import {
   statsEndpoints,
   type OverviewStats,
@@ -8,6 +7,7 @@ import {
   type StatsQueryOptions,
   type PopularImagesQueryOptions,
 } from '@picstash/api';
+import { apiClient } from '@/api/client';
 
 // Re-export types for convenience
 export type {

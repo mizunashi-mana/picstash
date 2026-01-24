@@ -1,4 +1,3 @@
-import { apiClient } from '@/api/client';
 import {
   imageEndpoints,
   jobsEndpoints,
@@ -7,6 +6,7 @@ import {
   type ImageAttribute,
   type UpdateImageAttributeInput,
 } from '@picstash/api';
+import { apiClient } from '@/api/client';
 
 export interface Image {
   id: string;

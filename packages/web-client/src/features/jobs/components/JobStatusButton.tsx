@@ -9,29 +9,33 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { IconLoader2, IconCheck, IconX, IconClock } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
+import { IconLoader2, IconCheck, IconX, IconClock } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import type { Job } from '../api';
 import { useJobs } from '../context';
 import { getJobTypeName, getImageId } from '../utils';
 import styles from './JobStatusButton.module.css';
+import type { Job } from '../api';
 
 function JobProgressItem({ job }: { job: Job }) {
   const { markAsRead } = useJobs();
   const imageId = getImageId(job);
 
-  const statusIcon =
-    job.status === 'active' || job.status === 'waiting' ? (
-      <IconLoader2 size={16} className={styles.spin} />
-    ) : job.status === 'completed' ? (
-      <IconCheck size={16} color="green" />
-    ) : (
-      <IconX size={16} color="red" />
-    );
+  const statusIcon
+    = job.status === 'active' || job.status === 'waiting'
+      ? (
+          <IconLoader2 size={16} className={styles.spin} />
+        )
+      : job.status === 'completed'
+        ? (
+            <IconCheck size={16} color="green" />
+          )
+        : (
+            <IconX size={16} color="red" />
+          );
 
-  const statusColor =
-    job.status === 'completed'
+  const statusColor
+    = job.status === 'completed'
       ? 'green'
       : job.status === 'failed'
         ? 'red'
@@ -49,7 +53,10 @@ function JobProgressItem({ job }: { job: Job }) {
           </Text>
           {imageId !== undefined && (
             <Text size="xs" c="dimmed" truncate>
-              画像 {imageId.slice(0, 8)}...
+              画像
+              {' '}
+              {imageId.slice(0, 8)}
+              ...
             </Text>
           )}
         </Box>
@@ -131,11 +138,13 @@ export function JobStatusButton() {
             onClick={toggle}
             aria-label="ジョブ状況"
           >
-            {activeJobCount > 0 ? (
-              <IconLoader2 size={20} className={styles.spin} />
-            ) : (
-              <IconClock size={20} />
-            )}
+            {activeJobCount > 0
+              ? (
+                  <IconLoader2 size={20} className={styles.spin} />
+                )
+              : (
+                  <IconClock size={20} />
+                )}
           </ActionIcon>
         </Indicator>
       </Popover.Target>
@@ -147,40 +156,42 @@ export function JobStatusButton() {
           </Text>
         </Box>
 
-        {allJobs.length === 0 ? (
-          <Box p="md">
-            <Text size="sm" c="dimmed" ta="center">
-              実行中のジョブはありません
-            </Text>
-          </Box>
-        ) : (
-          <Stack gap={0}>
-            {activeJobs.length > 0 && (
-              <>
-                <Box px="sm" py="xs" bg="gray.0">
-                  <Text size="xs" c="dimmed" fw={500}>
-                    実行中
-                  </Text>
-                </Box>
-                {activeJobs.map((job) => (
-                  <JobProgressItem key={job.id} job={job} />
-                ))}
-              </>
+        {allJobs.length === 0
+          ? (
+              <Box p="md">
+                <Text size="sm" c="dimmed" ta="center">
+                  実行中のジョブはありません
+                </Text>
+              </Box>
+            )
+          : (
+              <Stack gap={0}>
+                {activeJobs.length > 0 && (
+                  <>
+                    <Box px="sm" py="xs" bg="gray.0">
+                      <Text size="xs" c="dimmed" fw={500}>
+                        実行中
+                      </Text>
+                    </Box>
+                    {activeJobs.map(job => (
+                      <JobProgressItem key={job.id} job={job} />
+                    ))}
+                  </>
+                )}
+                {recentCompletedJobs.length > 0 && (
+                  <>
+                    <Box px="sm" py="xs" bg="gray.0">
+                      <Text size="xs" c="dimmed" fw={500}>
+                        完了
+                      </Text>
+                    </Box>
+                    {recentCompletedJobs.map(job => (
+                      <JobProgressItem key={job.id} job={job} />
+                    ))}
+                  </>
+                )}
+              </Stack>
             )}
-            {recentCompletedJobs.length > 0 && (
-              <>
-                <Box px="sm" py="xs" bg="gray.0">
-                  <Text size="xs" c="dimmed" fw={500}>
-                    完了
-                  </Text>
-                </Box>
-                {recentCompletedJobs.map((job) => (
-                  <JobProgressItem key={job.id} job={job} />
-                ))}
-              </>
-            )}
-          </Stack>
-        )}
       </Popover.Dropdown>
     </Popover>
   );
