@@ -134,7 +134,7 @@ describe('PrismaRecommendationConversionRepository', () => {
       expect(prisma.recommendationConversion.update).toHaveBeenCalledWith({
         where: { id: 'conv-1' },
         data: {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any
+
           clickedAt: expect.any(Date),
           viewHistoryId: 'view-1',
         },

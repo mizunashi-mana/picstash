@@ -16,7 +16,6 @@ type ConfigItem = {
  * Focuses on rules, files, ignores, and settings - the parts we want to track for changes.
  */
 function extractSnapshotData(config: ReturnType<typeof buildConfig>) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- ESLint config structure is known
   return (config as ConfigItem[]).map((item) => {
     const result: Record<string, unknown> = {};
 

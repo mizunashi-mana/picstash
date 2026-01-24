@@ -137,7 +137,7 @@ describe('PrismaLabelRepository', () => {
       const labelsWithEmbedding = [
         { id: 'label-1', name: 'character', embedding: new Uint8Array([1, 2, 3]) },
       ];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- Prisma select returns partial type
+
       vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithEmbedding as any);
 
       const result = await repository.findAllWithEmbedding();
@@ -157,7 +157,7 @@ describe('PrismaLabelRepository', () => {
         { id: 'label-1', name: 'character' },
         { id: 'label-2', name: 'series' },
       ];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument -- Prisma select returns partial type
+
       vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithoutEmbedding as any);
 
       const result = await repository.findIdsWithoutEmbedding();

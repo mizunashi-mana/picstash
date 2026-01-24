@@ -90,9 +90,9 @@ describe('generateLabelEmbedding', () => {
       expect(deps.labelRepository.updateEmbedding).toHaveBeenCalledWith(
         'test-label-id',
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns any
+
           embedding: expect.any(Buffer),
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any() returns any
+
           embeddedAt: expect.any(Date),
         }),
       );

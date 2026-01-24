@@ -130,9 +130,9 @@ describe('generateEmbedding', () => {
       expect(deps.imageRepository.updateEmbedding).toHaveBeenCalledWith(
         'test-image-id',
         expect.objectContaining({
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any
+
           embedding: expect.any(Buffer),
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- expect.any returns any
+
           embeddedAt: expect.any(Date),
         }),
       );

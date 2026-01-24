@@ -260,6 +260,7 @@ export function buildTsConfig() {
         '@typescript-eslint/unbound-method': 'off',
         // For test data
         '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-unsafe-type-assertion': 'off',
       },
