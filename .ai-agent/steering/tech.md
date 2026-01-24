@@ -75,7 +75,7 @@ packages/server/src/infra/di/
 | `packages/server` | Fastify バックエンド API | セットアップ済み |
 | `packages/e2e-test` | Playwright E2E テスト | セットアップ済み |
 | `packages/eslint-config` | 共有 ESLint 設定 | セットアップ済み |
-| `packages/shared` | 共有型定義・定数 | セットアップ済み |
+| `packages/api` | 共有 API 型定義・エンドポイント (`@picstash/api`) | セットアップ済み |
 
 詳細は [structure.md](../structure.md) を参照。
 
