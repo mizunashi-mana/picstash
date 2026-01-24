@@ -56,16 +56,11 @@ export default defineConfig({
         // インフラ層: Storage
         'src/infra/storage/file-storage.ts',
         'src/infra/storage/image-processor.ts',
-        // インフラ層: Adapters（テスト未実装）
-        'src/infra/adapters/local-file-storage.ts',
+        // インフラ層: Adapters（テスト未実装または外部依存が強い）
         'src/infra/adapters/prisma-collection-repository.ts',
-        'src/infra/adapters/prisma-image-attribute-repository.ts',
         'src/infra/adapters/prisma-image-repository.ts',
         'src/infra/adapters/prisma-job-queue.ts',
-        'src/infra/adapters/prisma-label-repository.ts',
-        'src/infra/adapters/prisma-recommendation-conversion-repository.ts',
         'src/infra/adapters/prisma-stats-repository.ts',
-        'src/infra/adapters/prisma-view-history-repository.ts',
         'src/infra/adapters/sharp-image-processor.ts',
         'src/infra/adapters/sqlite-vec-embedding-repository.ts',
         'src/infra/adapters/in-memory-url-crawl-session-manager.ts',

@@ -86,3 +86,12 @@ thresholds: {
   - 理由: 実際の RAR ファイル生成ツールが必要でテスト困難
 - 2026-01-24: 全テスト通過を確認（36ファイル、445テスト）
   - Statements: 97.48%、Branches: 89%、Functions: 94.97%、Lines: 97.42%
+- 2026-01-24: 追加の Prisma リポジトリテストを作成
+  - `prisma-image-attribute-repository.ts` のテスト追加、exclude から削除
+  - `prisma-label-repository.ts` のテスト追加、exclude から削除
+  - `prisma-view-history-repository.ts` のテスト追加、exclude から削除
+  - `prisma-recommendation-conversion-repository.ts` のテスト追加、exclude から削除
+  - `local-file-storage.ts` のテスト追加、exclude から削除
+- 2026-01-24: 全テスト通過を確認（40ファイル、493テスト）
+  - Statements: 97.67%、Branches: 89.47%、Functions: 95.34%、Lines: 97.6%
+  - exclude リストから 6 ファイル削除
