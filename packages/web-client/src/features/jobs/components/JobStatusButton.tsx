@@ -14,22 +14,8 @@ import { useDisclosure } from '@mantine/hooks';
 import { Link } from 'react-router';
 import type { Job } from '../api';
 import { useJobs } from '../context';
-
-// ジョブタイプの日本語表示名
-function getJobTypeName(type: string): string {
-  switch (type) {
-    case 'caption-generation':
-      return '説明文生成';
-    default:
-      return type;
-  }
-}
-
-// ペイロードから対象の画像IDを取得
-function getImageId(job: Job): string | undefined {
-  const payload = job.payload as { imageId?: string } | undefined;
-  return payload?.imageId;
-}
+import { getJobTypeName, getImageId } from '../utils';
+import styles from './JobStatusButton.module.css';
 
 function JobProgressItem({ job }: { job: Job }) {
   const { markAsRead } = useJobs();
@@ -37,7 +23,7 @@ function JobProgressItem({ job }: { job: Job }) {
 
   const statusIcon =
     job.status === 'active' || job.status === 'waiting' ? (
-      <IconLoader2 size={16} className="animate-spin" />
+      <IconLoader2 size={16} className={styles.spin} />
     ) : job.status === 'completed' ? (
       <IconCheck size={16} color="green" />
     ) : (
@@ -103,7 +89,7 @@ function JobProgressItem({ job }: { job: Job }) {
           display: 'block',
           borderRadius: 'var(--mantine-radius-sm)',
         }}
-        className="hover:bg-gray-100"
+        className={styles.hoverHighlight}
       >
         {content}
       </Box>
@@ -146,7 +132,7 @@ export function JobStatusButton() {
             aria-label="ジョブ状況"
           >
             {activeJobCount > 0 ? (
-              <IconLoader2 size={20} className="animate-spin" />
+              <IconLoader2 size={20} className={styles.spin} />
             ) : (
               <IconClock size={20} />
             )}

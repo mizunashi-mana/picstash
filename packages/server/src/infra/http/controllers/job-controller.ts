@@ -35,8 +35,22 @@ export class JobController {
             : statusFilter
           : undefined,
         type,
-        limit: limit !== undefined ? parseInt(limit, 10) : undefined,
-        offset: offset !== undefined ? parseInt(offset, 10) : undefined,
+        limit: (() => {
+          if (limit === undefined) {
+            return undefined;
+          }
+
+          const parsed = parseInt(limit, 10);
+          return Number.isNaN(parsed) || parsed < 0 ? undefined : parsed;
+        })(),
+        offset: (() => {
+          if (offset === undefined) {
+            return undefined;
+          }
+
+          const parsed = parseInt(offset, 10);
+          return Number.isNaN(parsed) || parsed < 0 ? undefined : parsed;
+        })(),
       });
 
       return await reply.send({

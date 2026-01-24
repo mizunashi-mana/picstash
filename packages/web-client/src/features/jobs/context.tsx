@@ -10,6 +10,7 @@ import {
 import { notifications } from '@mantine/notifications';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { listJobs, type Job, type JobStatus } from './api';
+import { getJobTypeName, getJobTargetDescription } from './utils';
 
 interface JobsContextValue {
   /** 監視中のジョブ一覧 */
@@ -36,25 +37,6 @@ const JobsContext = createContext<JobsContextValue | null>(null);
 
 const POLLING_INTERVAL = 2000; // 2秒
 const RECENT_JOBS_LIMIT = 10;
-
-// ジョブタイプの日本語表示名
-function getJobTypeName(type: string): string {
-  switch (type) {
-    case 'caption-generation':
-      return '説明文生成';
-    default:
-      return type;
-  }
-}
-
-// ペイロードから対象の説明を取得
-function getJobTargetDescription(job: Job): string {
-  const payload = job.payload as { imageId?: string } | undefined;
-  if (payload?.imageId !== undefined) {
-    return `画像 ${payload.imageId.slice(0, 8)}...`;
-  }
-  return '';
-}
 
 interface JobsProviderProps {
   children: React.ReactNode;
@@ -162,9 +144,13 @@ export function JobsProvider({ children }: JobsProviderProps) {
     if (completedJobs.length === 0) return;
 
     const timers = completedJobs.map((job) => {
-      const completedAt = job.completedAt !== null ? new Date(job.completedAt).getTime() : Date.now();
-      const elapsed = Date.now() - completedAt;
-      const remaining = Math.max(0, 5 * 60 * 1000 - elapsed); // 5分
+      const completedAt =
+        job.completedAt !== null ? new Date(job.completedAt).getTime() : null;
+      const elapsed = completedAt !== null ? Date.now() - completedAt : 0;
+      const remaining =
+        completedAt !== null
+          ? Math.max(0, 5 * 60 * 1000 - elapsed) // 5分
+          : 10 * 60 * 1000; // completedAt が不明な場合はより長い待機時間を設定（10分）
 
       return setTimeout(() => {
         setTrackedJobIds((prev) => {
