@@ -72,18 +72,22 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show session info after crawl', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({ sessionId: 'session-1' });
+    vi.mocked(crawlUrl).mockResolvedValue({
+      sessionId: 'session-1',
+      sourceUrl: 'https://example.com',
+      imageCount: 5,
+    });
     vi.mocked(getCrawlSession).mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       pageTitle: 'Example Page',
       imageCount: 5,
       images: [
-        { index: 0, url: 'https://example.com/img1.png' },
-        { index: 1, url: 'https://example.com/img2.png' },
-        { index: 2, url: 'https://example.com/img3.png' },
-        { index: 3, url: 'https://example.com/img4.png' },
-        { index: 4, url: 'https://example.com/img5.png' },
+        { index: 0, url: 'https://example.com/img1.png', filename: 'img1.png' },
+        { index: 1, url: 'https://example.com/img2.png', filename: 'img2.png' },
+        { index: 2, url: 'https://example.com/img3.png', filename: 'img3.png' },
+        { index: 3, url: 'https://example.com/img4.png', filename: 'img4.png' },
+        { index: 4, url: 'https://example.com/img5.png', filename: 'img5.png' },
       ],
     });
 
@@ -98,13 +102,17 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show source URL link when session is active', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({ sessionId: 'session-1' });
+    vi.mocked(crawlUrl).mockResolvedValue({
+      sessionId: 'session-1',
+      sourceUrl: 'https://example.com/gallery',
+      imageCount: 1,
+    });
     vi.mocked(getCrawlSession).mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com/gallery',
       pageTitle: 'Gallery',
       imageCount: 1,
-      images: [{ index: 0, url: 'https://example.com/img.png' }],
+      images: [{ index: 0, url: 'https://example.com/img.png', filename: 'img.png' }],
     });
 
     render(<UrlCrawlTab />, { wrapper: createWrapper() });
@@ -119,13 +127,17 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show close button when session is active', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({ sessionId: 'session-1' });
+    vi.mocked(crawlUrl).mockResolvedValue({
+      sessionId: 'session-1',
+      sourceUrl: 'https://example.com',
+      imageCount: 1,
+    });
     vi.mocked(getCrawlSession).mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       pageTitle: 'Test',
       imageCount: 1,
-      images: [{ index: 0, url: 'https://example.com/img.png' }],
+      images: [{ index: 0, url: 'https://example.com/img.png', filename: 'img.png' }],
     });
 
     render(<UrlCrawlTab />, { wrapper: createWrapper() });
@@ -138,15 +150,19 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show selection controls when session is active', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({ sessionId: 'session-1' });
+    vi.mocked(crawlUrl).mockResolvedValue({
+      sessionId: 'session-1',
+      sourceUrl: 'https://example.com',
+      imageCount: 2,
+    });
     vi.mocked(getCrawlSession).mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       pageTitle: 'Test',
       imageCount: 2,
       images: [
-        { index: 0, url: 'https://example.com/img1.png' },
-        { index: 1, url: 'https://example.com/img2.png' },
+        { index: 0, url: 'https://example.com/img1.png', filename: 'img1.png' },
+        { index: 1, url: 'https://example.com/img2.png', filename: 'img2.png' },
       ],
     });
 

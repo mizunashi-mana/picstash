@@ -72,16 +72,21 @@ describe('ArchiveImportTab', () => {
   });
 
   it('should show session info after upload', async () => {
-    vi.mocked(uploadArchive).mockResolvedValue({ sessionId: 'session-1' });
+    vi.mocked(uploadArchive).mockResolvedValue({
+      sessionId: 'session-1',
+      filename: 'test.zip',
+      archiveType: 'zip',
+      imageCount: 3,
+    });
     vi.mocked(getArchiveSession).mockResolvedValue({
       sessionId: 'session-1',
       filename: 'test.zip',
       archiveType: 'zip',
       imageCount: 3,
       images: [
-        { index: 0, filename: 'img1.png' },
-        { index: 1, filename: 'img2.png' },
-        { index: 2, filename: 'img3.png' },
+        { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000 },
+        { index: 1, filename: 'img2.png', path: '/img2.png', size: 2000 },
+        { index: 2, filename: 'img3.png', path: '/img3.png', size: 3000 },
       ],
     });
 
@@ -97,13 +102,18 @@ describe('ArchiveImportTab', () => {
   });
 
   it('should show close button when session is active', async () => {
-    vi.mocked(uploadArchive).mockResolvedValue({ sessionId: 'session-1' });
+    vi.mocked(uploadArchive).mockResolvedValue({
+      sessionId: 'session-1',
+      filename: 'test.zip',
+      archiveType: 'zip',
+      imageCount: 1,
+    });
     vi.mocked(getArchiveSession).mockResolvedValue({
       sessionId: 'session-1',
       filename: 'test.zip',
       archiveType: 'zip',
       imageCount: 1,
-      images: [{ index: 0, filename: 'img1.png' }],
+      images: [{ index: 0, filename: 'img1.png', path: '/img1.png', size: 1000 }],
     });
 
     render(<ArchiveImportTab />, { wrapper: createWrapper() });
@@ -116,15 +126,20 @@ describe('ArchiveImportTab', () => {
   });
 
   it('should show selection controls when session is active', async () => {
-    vi.mocked(uploadArchive).mockResolvedValue({ sessionId: 'session-1' });
+    vi.mocked(uploadArchive).mockResolvedValue({
+      sessionId: 'session-1',
+      filename: 'test.zip',
+      archiveType: 'zip',
+      imageCount: 2,
+    });
     vi.mocked(getArchiveSession).mockResolvedValue({
       sessionId: 'session-1',
       filename: 'test.zip',
       archiveType: 'zip',
       imageCount: 2,
       images: [
-        { index: 0, filename: 'img1.png' },
-        { index: 1, filename: 'img2.png' },
+        { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000 },
+        { index: 1, filename: 'img2.png', path: '/img2.png', size: 2000 },
       ],
     });
 
