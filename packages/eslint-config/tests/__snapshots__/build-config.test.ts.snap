@@ -3014,7 +3014,7 @@ exports[`buildConfig > should generate correct config for common + react + story
     ],
     "name": "storybook:recommended:stories-rules",
     "rules": {
-      "import/no-anonymous-default-export": "off",
+      "import-x/no-anonymous-default-export": "off",
       "react-hooks/rules-of-hooks": "off",
       "storybook/await-interactions": "error",
       "storybook/context-in-play-function": "error",
