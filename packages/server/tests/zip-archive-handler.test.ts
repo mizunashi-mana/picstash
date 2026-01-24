@@ -98,4 +98,48 @@ describe('ZipArchiveHandler', () => {
       );
     });
   });
+
+  describe('corrupted ZIP handling (EOCD missing)', () => {
+    let corruptedZipPath: string;
+
+    beforeEach(async () => {
+      // Create a valid ZIP first
+      const zip = new AdmZip();
+      zip.addFile('image.png', Buffer.from('PNG image data here'));
+      const validZipBuffer = zip.toBuffer();
+
+      // Truncate to remove EOCD (last 22 bytes minimum)
+      // Keep enough data for the local file header and compressed data
+      const truncatedBuffer = validZipBuffer.subarray(0, validZipBuffer.length - 22);
+
+      corruptedZipPath = join(tempDir, 'corrupted.zip');
+      await writeFile(corruptedZipPath, truncatedBuffer);
+    });
+
+    it('should list entries from corrupted ZIP using fallback streaming mode', async () => {
+      const entries = await handler.listEntries(corruptedZipPath);
+
+      expect(entries).toHaveLength(1);
+      expect(entries[0]?.filename).toBe('image.png');
+      expect(entries[0]?.isDirectory).toBe(false);
+    });
+
+    it('should extract entry from corrupted ZIP using fallback streaming mode', async () => {
+      const entries = await handler.listEntries(corruptedZipPath);
+      expect(entries).toHaveLength(1);
+
+      const buffer = await handler.extractEntry(corruptedZipPath, 0);
+
+      expect(buffer.toString()).toBe('PNG image data here');
+    });
+
+    it('should cache corrupted archive status and use streaming directly on subsequent calls', async () => {
+      // First call triggers fallback
+      await handler.listEntries(corruptedZipPath);
+
+      // Second call should use streaming directly (no error from yauzl)
+      const entries = await handler.listEntries(corruptedZipPath);
+      expect(entries).toHaveLength(1);
+    });
+  });
 });
