@@ -92,7 +92,7 @@ export default buildConfig({
   ruleSets: ['common'],     // 共通ルール
 });
 
-// packages/client/eslint.config.mjs
+// packages/web-client/eslint.config.mjs
 import { buildConfig } from '@picstash/eslint-config';
 
 export default buildConfig({
