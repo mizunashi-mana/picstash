@@ -71,17 +71,15 @@ export function JobsProvider({ children }: JobsProviderProps) {
     staleTime: 1000,
   });
 
-  const jobs = data?.jobs ?? [];
-
   // 監視対象のジョブをフィルタリング
-  const trackedJobs = useMemo(
-    () => jobs.filter((job) => trackedJobIds.has(job.id)),
-    [jobs, trackedJobIds],
-  );
+  const trackedJobs = useMemo(() => {
+    const jobs = data?.jobs ?? [];
+    return jobs.filter(job => trackedJobIds.has(job.id));
+  }, [data?.jobs, trackedJobIds]);
 
   // アクティブなジョブ
   const activeJobs = useMemo(
-    () => trackedJobs.filter((job) => job.status === 'waiting' || job.status === 'active'),
+    () => trackedJobs.filter(job => job.status === 'waiting' || job.status === 'active'),
     [trackedJobs],
   );
 
@@ -89,7 +87,7 @@ export function JobsProvider({ children }: JobsProviderProps) {
   const recentCompletedJobs = useMemo(
     () =>
       trackedJobs.filter(
-        (job) =>
+        job =>
           (job.status === 'completed' || job.status === 'failed') && !readJobIds.has(job.id),
       ),
     [trackedJobs, readJobIds],
@@ -102,11 +100,11 @@ export function JobsProvider({ children }: JobsProviderProps) {
 
       // 新しく完了/失敗したジョブを検知
       if (
-        previousStatus !== undefined &&
-        previousStatus !== 'completed' &&
-        previousStatus !== 'failed' &&
-        (job.status === 'completed' || job.status === 'failed') &&
-        !notifiedJobIds.current.has(job.id)
+        previousStatus !== undefined
+        && previousStatus !== 'completed'
+        && previousStatus !== 'failed'
+        && (job.status === 'completed' || job.status === 'failed')
+        && !notifiedJobIds.current.has(job.id)
       ) {
         notifiedJobIds.current.add(job.id);
 
@@ -120,7 +118,8 @@ export function JobsProvider({ children }: JobsProviderProps) {
             color: 'green',
             autoClose: 5000,
           });
-        } else {
+        }
+        else {
           notifications.show({
             title: `${typeName}が失敗しました`,
             message: job.error ?? 'エラーが発生しました',
@@ -135,36 +134,41 @@ export function JobsProvider({ children }: JobsProviderProps) {
     }
   }, [trackedJobs]);
 
+  // ジョブをトラッキングから完全に削除
+  const removeJobFromTracking = useCallback((jobId: string) => {
+    setTrackedJobIds((prev) => {
+      const next = new Set(prev);
+      next.delete(jobId);
+      return next;
+    });
+    setReadJobIds((prev) => {
+      const next = new Set(prev);
+      next.delete(jobId);
+      return next;
+    });
+    previousJobsRef.current.delete(jobId);
+    notifiedJobIds.current.delete(jobId);
+  }, []);
+
   // 完了したジョブを監視リストから自動削除（5分後）
   useEffect(() => {
     const completedJobs = trackedJobs.filter(
-      (job) => job.status === 'completed' || job.status === 'failed',
+      job => job.status === 'completed' || job.status === 'failed',
     );
 
     if (completedJobs.length === 0) return;
 
     const timers = completedJobs.map((job) => {
-      const completedAt =
-        job.completedAt !== null ? new Date(job.completedAt).getTime() : null;
+      const completedAt
+        = job.completedAt !== null ? new Date(job.completedAt).getTime() : null;
       const elapsed = completedAt !== null ? Date.now() - completedAt : 0;
-      const remaining =
-        completedAt !== null
+      const remaining
+        = completedAt !== null
           ? Math.max(0, 5 * 60 * 1000 - elapsed) // 5分
           : 10 * 60 * 1000; // completedAt が不明な場合はより長い待機時間を設定（10分）
 
       return setTimeout(() => {
-        setTrackedJobIds((prev) => {
-          const next = new Set(prev);
-          next.delete(job.id);
-          return next;
-        });
-        setReadJobIds((prev) => {
-          const next = new Set(prev);
-          next.delete(job.id);
-          return next;
-        });
-        previousJobsRef.current.delete(job.id);
-        notifiedJobIds.current.delete(job.id);
+        removeJobFromTracking(job.id);
       }, remaining);
     });
 
@@ -173,10 +177,10 @@ export function JobsProvider({ children }: JobsProviderProps) {
         clearTimeout(timer);
       }
     };
-  }, [trackedJobs]);
+  }, [trackedJobs, removeJobFromTracking]);
 
   const trackJob = useCallback((jobId: string) => {
-    setTrackedJobIds((prev) => new Set(prev).add(jobId));
+    setTrackedJobIds(prev => new Set(prev).add(jobId));
     // 新しいジョブを追加したらすぐにデータを再取得
     void queryClient.invalidateQueries({ queryKey: ['jobs', 'list'] });
   }, [queryClient]);
@@ -190,7 +194,7 @@ export function JobsProvider({ children }: JobsProviderProps) {
   }, []);
 
   const markAsRead = useCallback((jobId: string) => {
-    setReadJobIds((prev) => new Set(prev).add(jobId));
+    setReadJobIds(prev => new Set(prev).add(jobId));
   }, []);
 
   const value = useMemo<JobsContextValue>(

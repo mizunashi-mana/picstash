@@ -9,8 +9,8 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { Link } from 'react-router';
 import { imageEndpoints } from '@picstash/api';
+import { Link } from 'react-router';
 import type { DuplicateGroup } from '@/features/duplicates/api';
 
 interface DuplicateGroupCardProps {

@@ -11,6 +11,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import { imageEndpoints } from '@picstash/api';
 import {
   IconAlertCircle,
   IconArrowLeft,
@@ -20,7 +21,6 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
-import { imageEndpoints } from '@picstash/api';
 import { fetchCollection } from '@/features/collections/api';
 
 export function CollectionViewerPage(): React.JSX.Element {
