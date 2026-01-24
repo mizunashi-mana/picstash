@@ -212,6 +212,129 @@ describe('suggestAttributes', () => {
         expect(result.suggestions.length).toBe(3);
       }
     });
+
+    it('should include suggested keywords from similar images', async () => {
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
+      imageEmbValues[0] = 1;
+      const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
+
+      const labelEmbValues: number[] = new Array<number>(512).fill(0);
+      labelEmbValues[0] = 1;
+      const labelEmbedding = createNormalizedEmbedding(labelEmbValues);
+
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(
+        { id: 'img-1', path: 'originals/test.png', embedding: imageEmbedding },
+      );
+      vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue([
+        { id: 'label-1', name: 'Character', embedding: labelEmbedding },
+      ]);
+
+      // Mock similar images found by embedding search
+      vi.mocked(mockEmbeddingRepository.findSimilar).mockReturnValue([
+        { imageId: 'similar-1', distance: 0.1 },
+        { imageId: 'similar-2', distance: 0.2 },
+      ]);
+
+      // Mock attributes from similar images with keywords
+      vi.mocked(mockImageAttributeRepository.findByImageId)
+        .mockResolvedValueOnce([
+          { labelId: 'label-1', keywords: 'keyword1, keyword2' },
+        ])
+        .mockResolvedValueOnce([
+          { labelId: 'label-1', keywords: 'keyword1, keyword3' },
+        ]);
+
+      const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1 }, deps);
+
+      expect(typeof result).toBe('object');
+      if (typeof result === 'object') {
+        expect(result.suggestions.length).toBe(1);
+        expect(result.suggestions[0]?.suggestedKeywords).toBeDefined();
+        // keyword1 appears twice, should have higher count
+        const keywords = result.suggestions[0]?.suggestedKeywords ?? [];
+        const keyword1 = keywords.find(k => k.keyword === 'keyword1');
+        expect(keyword1?.count).toBe(2);
+      }
+    });
+
+    it('should skip labels with null embeddings', async () => {
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
+      imageEmbValues[0] = 1;
+      const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
+
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(
+        { id: 'img-1', path: 'originals/test.png', embedding: imageEmbedding },
+      );
+      vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue([
+        { id: 'label-1', name: 'No Embedding', embedding: null },
+      ]);
+
+      const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1 }, deps);
+
+      expect(typeof result).toBe('object');
+      if (typeof result === 'object') {
+        expect(result.suggestions.length).toBe(0);
+      }
+    });
+
+    it('should skip labels with wrong embedding dimensions', async () => {
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
+      imageEmbValues[0] = 1;
+      const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
+
+      // Create embedding with wrong dimensions
+      const wrongDimValues: number[] = new Array<number>(256).fill(0);
+      wrongDimValues[0] = 1;
+      const wrongDimEmbedding = createNormalizedEmbedding(wrongDimValues);
+
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(
+        { id: 'img-1', path: 'originals/test.png', embedding: imageEmbedding },
+      );
+      vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue([
+        { id: 'label-1', name: 'Wrong Dim', embedding: wrongDimEmbedding },
+      ]);
+
+      const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1 }, deps);
+
+      expect(typeof result).toBe('object');
+      if (typeof result === 'object') {
+        expect(result.suggestions.length).toBe(0);
+      }
+    });
+
+    it('should handle attributes with empty keywords', async () => {
+      const imageEmbValues: number[] = new Array<number>(512).fill(0);
+      imageEmbValues[0] = 1;
+      const imageEmbedding = createNormalizedEmbedding(imageEmbValues);
+
+      const labelEmbValues: number[] = new Array<number>(512).fill(0);
+      labelEmbValues[0] = 1;
+      const labelEmbedding = createNormalizedEmbedding(labelEmbValues);
+
+      vi.mocked(mockImageRepository.findByIdWithEmbedding).mockResolvedValue(
+        { id: 'img-1', path: 'originals/test.png', embedding: imageEmbedding },
+      );
+      vi.mocked(mockLabelRepository.findAllWithEmbedding).mockResolvedValue([
+        { id: 'label-1', name: 'Character', embedding: labelEmbedding },
+      ]);
+
+      vi.mocked(mockEmbeddingRepository.findSimilar).mockReturnValue([
+        { imageId: 'similar-1', distance: 0.1 },
+      ]);
+
+      // Attribute with empty keywords
+      vi.mocked(mockImageAttributeRepository.findByImageId).mockResolvedValue([
+        { labelId: 'label-1', keywords: '' },
+      ]);
+
+      const result = await suggestAttributes({ imageId: 'img-1', threshold: 0.1 }, deps);
+
+      expect(typeof result).toBe('object');
+      if (typeof result === 'object') {
+        expect(result.suggestions.length).toBe(1);
+        expect(result.suggestions[0]?.suggestedKeywords).toEqual([]);
+      }
+    });
   });
 
   describe('error cases', () => {
