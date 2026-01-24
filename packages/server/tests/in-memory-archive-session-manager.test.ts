@@ -135,6 +135,26 @@ describe('InMemoryArchiveSessionManager', () => {
       }
     });
 
+    it('should re-throw non-FILE_TOO_LARGE errors during stream processing', async () => {
+      // Create a stream that emits an error other than FILE_TOO_LARGE
+      const errorStream = new Readable({
+        read() {
+          // Emit an error after a small delay
+          process.nextTick(() => {
+            this.destroy(new Error('STREAM_ERROR'));
+          });
+        },
+      });
+
+      await expect(
+        manager.createSession({
+          filename: 'test.zip',
+          mimeType: 'application/zip',
+          stream: errorStream,
+        }),
+      ).rejects.toThrow('STREAM_ERROR');
+    });
+
     it('should filter out files with path traversal', async () => {
       const zip = new AdmZip();
       zip.addFile('normal.png', Buffer.from('normal image'));
