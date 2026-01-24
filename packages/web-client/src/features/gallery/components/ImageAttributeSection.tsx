@@ -10,7 +10,7 @@ import {
 } from '@/features/gallery/api';
 import { fetchLabels } from '@/features/labels';
 import { ImageAttributeSectionView } from './ImageAttributeSectionView';
-import type { ImageAttribute } from '@picstash/shared';
+import type { ImageAttribute } from '@picstash/api';
 
 interface ImageAttributeSectionProps {
   imageId: string;

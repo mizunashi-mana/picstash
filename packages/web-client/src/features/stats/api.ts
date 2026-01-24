@@ -1,42 +1,23 @@
 import { apiClient } from '@/api/client';
+import {
+  statsEndpoints,
+  type OverviewStats,
+  type DailyViewStats,
+  type DailyRecommendationStats,
+  type PopularImage,
+  type StatsQueryOptions,
+  type PopularImagesQueryOptions,
+} from '@picstash/api';
 
-export interface OverviewStats {
-  totalImages: number;
-  totalViews: number;
-  totalViewDuration: number;
-  conversionRate: number;
-  avgViewDuration: number | null;
-}
-
-export interface DailyViewStats {
-  date: string;
-  viewCount: number;
-  totalDuration: number;
-}
-
-export interface DailyRecommendationStats {
-  date: string;
-  impressions: number;
-  clicks: number;
-  conversionRate: number;
-}
-
-export interface PopularImage {
-  id: string;
-  title: string;
-  thumbnailPath: string | null;
-  viewCount: number;
-  totalDuration: number;
-  lastViewedAt: string | null;
-}
-
-export interface StatsOptions {
-  days?: number;
-}
-
-export interface PopularImagesOptions extends StatsOptions {
-  limit?: number;
-}
+// Re-export types for convenience
+export type {
+  OverviewStats,
+  DailyViewStats,
+  DailyRecommendationStats,
+  PopularImage,
+  StatsQueryOptions,
+  PopularImagesQueryOptions,
+};
 
 function buildQueryString(params: Record<string, number | undefined>): string {
   const queryParams = new URLSearchParams();
@@ -50,34 +31,34 @@ function buildQueryString(params: Record<string, number | undefined>): string {
 }
 
 export async function fetchOverviewStats(
-  options?: StatsOptions,
+  options?: StatsQueryOptions,
 ): Promise<OverviewStats> {
   const queryString = buildQueryString({ days: options?.days });
-  return await apiClient<OverviewStats>(`/stats/overview${queryString}`);
+  return await apiClient<OverviewStats>(`${statsEndpoints.overview}${queryString}`);
 }
 
 export async function fetchViewTrends(
-  options?: StatsOptions,
+  options?: StatsQueryOptions,
 ): Promise<DailyViewStats[]> {
   const queryString = buildQueryString({ days: options?.days });
-  return await apiClient<DailyViewStats[]>(`/stats/view-trends${queryString}`);
+  return await apiClient<DailyViewStats[]>(`${statsEndpoints.viewTrends}${queryString}`);
 }
 
 export async function fetchRecommendationTrends(
-  options?: StatsOptions,
+  options?: StatsQueryOptions,
 ): Promise<DailyRecommendationStats[]> {
   const queryString = buildQueryString({ days: options?.days });
   return await apiClient<DailyRecommendationStats[]>(
-    `/stats/recommendation-trends${queryString}`,
+    `${statsEndpoints.recommendationTrends}${queryString}`,
   );
 }
 
 export async function fetchPopularImages(
-  options?: PopularImagesOptions,
+  options?: PopularImagesQueryOptions,
 ): Promise<PopularImage[]> {
   const queryString = buildQueryString({
     days: options?.days,
     limit: options?.limit,
   });
-  return await apiClient<PopularImage[]>(`/stats/popular-images${queryString}`);
+  return await apiClient<PopularImage[]>(`${statsEndpoints.popularImages}${queryString}`);
 }

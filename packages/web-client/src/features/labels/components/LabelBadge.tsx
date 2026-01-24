@@ -1,5 +1,5 @@
 import { Badge } from '@mantine/core';
-import type { Label } from '@picstash/shared';
+import type { Label } from '@picstash/api';
 
 interface LabelBadgeProps {
   label: Label;

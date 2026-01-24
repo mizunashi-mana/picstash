@@ -16,7 +16,7 @@ import {
   updateLabel,
 } from '@/features/labels/api';
 import { LabelForm, LabelList } from '@/features/labels/components';
-import type { CreateLabelInput, UpdateLabelInput } from '@picstash/shared';
+import type { CreateLabelInput, UpdateLabelInput } from '@picstash/api';
 
 export function LabelsPage() {
   const queryClient = useQueryClient();

@@ -1,10 +1,11 @@
 import { apiClient } from '@/api/client';
 import { buildUrl } from '@/shared/helpers';
-import type {
-  CreateImageAttributeInput,
-  ImageAttribute,
-  UpdateImageAttributeInput,
-} from '@picstash/shared';
+import {
+  imageEndpoints,
+  type CreateImageAttributeInput,
+  type ImageAttribute,
+  type UpdateImageAttributeInput,
+} from '@picstash/api';
 
 export interface Image {
   id: string;
@@ -77,11 +78,11 @@ export async function updateImage(
 }
 
 export function getImageUrl(imageId: string): string {
-  return `/api/images/${imageId}/file`;
+  return imageEndpoints.file(imageId);
 }
 
 export function getThumbnailUrl(imageId: string): string {
-  return `/api/images/${imageId}/thumbnail`;
+  return imageEndpoints.thumbnail(imageId);
 }
 
 // Image Attribute APIs

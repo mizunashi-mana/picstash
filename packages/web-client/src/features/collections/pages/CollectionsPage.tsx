@@ -19,16 +19,13 @@ import {
 import { IconAlertCircle, IconFolder, IconPlus } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
+import { imageEndpoints } from '@picstash/api';
 import {
   createCollection,
   deleteCollection,
   fetchCollections,
 } from '@/features/collections/api';
 import type { CollectionWithCount, CreateCollectionInput } from '@/features/collections/api';
-
-function getThumbnailUrl(imageId: string): string {
-  return `/api/images/${imageId}/thumbnail`;
-}
 
 interface CollectionCardProps {
   collection: CollectionWithCount;
@@ -52,7 +49,7 @@ function CollectionCard({ collection, onDelete, isDeleting }: CollectionCardProp
             {collection.coverImageId !== null
               ? (
                   <Image
-                    src={getThumbnailUrl(collection.coverImageId)}
+                    src={imageEndpoints.thumbnail(collection.coverImageId)}
                     height={160}
                     alt={collection.name}
                     fit="cover"
