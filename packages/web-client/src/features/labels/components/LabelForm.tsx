@@ -6,7 +6,7 @@ import {
   Stack,
   TextInput,
 } from '@mantine/core';
-import type { Label, CreateLabelInput, UpdateLabelInput } from '@picstash/shared';
+import type { Label, CreateLabelInput, UpdateLabelInput } from '@picstash/api';
 
 // Predefined color palette for auto-suggestion
 const COLOR_PALETTE = [

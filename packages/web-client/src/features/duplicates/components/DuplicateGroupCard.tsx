@@ -10,17 +10,14 @@ import {
   Text,
 } from '@mantine/core';
 import { Link } from 'react-router';
+import { imageEndpoints } from '@picstash/api';
 import type { DuplicateGroup } from '@/features/duplicates/api';
 
 interface DuplicateGroupCardProps {
   group: DuplicateGroup;
   selectedIds: Set<string>;
-  onSelectToggle: (imageId: string) => void;
+  onSelectToggle: (id: string) => void;
   onSelectAllDuplicates: (group: DuplicateGroup) => void;
-}
-
-function getThumbnailUrl(imageId: string): string {
-  return `/api/images/${imageId}/thumbnail`;
 }
 
 function formatDistance(distance: number): string {
@@ -62,7 +59,7 @@ export function DuplicateGroupCard({
             <Card.Section>
               <Link to={`/images/${group.original.id}`}>
                 <Image
-                  src={getThumbnailUrl(group.original.id)}
+                  src={imageEndpoints.thumbnail(group.original.id)}
                   alt={group.original.title}
                   height={120}
                   fit="cover"
@@ -90,7 +87,7 @@ export function DuplicateGroupCard({
                 />
                 <Link to={`/images/${dup.id}`}>
                   <Image
-                    src={getThumbnailUrl(dup.id)}
+                    src={imageEndpoints.thumbnail(dup.id)}
                     alt={dup.title}
                     height={120}
                     fit="cover"

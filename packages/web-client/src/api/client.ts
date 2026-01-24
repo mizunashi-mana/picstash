@@ -1,5 +1,3 @@
-const API_BASE_URL = '/api';
-
 interface FetchOptions extends RequestInit {
   params?: Record<string, string>;
 }
@@ -10,7 +8,7 @@ export async function apiClient<T>(
 ): Promise<T> {
   const { params, ...fetchOptions } = options;
 
-  let url = `${API_BASE_URL}${endpoint}`;
+  let url = endpoint;
   if (params) {
     const searchParams = new URLSearchParams(params);
     url += `?${searchParams.toString()}`;

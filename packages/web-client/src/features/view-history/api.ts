@@ -1,4 +1,5 @@
 import { apiClient } from '@/api/client';
+import { viewHistoryEndpoints } from '@picstash/api';
 
 export interface ViewHistory {
   id: string;
@@ -24,7 +25,7 @@ export interface ImageViewStats {
 }
 
 export async function recordViewStart(imageId: string): Promise<ViewHistory> {
-  return await apiClient<ViewHistory>('/view-history', {
+  return await apiClient<ViewHistory>(viewHistoryEndpoints.list(), {
     method: 'POST',
     body: JSON.stringify({ imageId }),
   });
@@ -34,7 +35,7 @@ export async function recordViewEnd(
   viewHistoryId: string,
   duration: number,
 ): Promise<ViewHistory> {
-  return await apiClient<ViewHistory>(`/view-history/${viewHistoryId}`, {
+  return await apiClient<ViewHistory>(viewHistoryEndpoints.detail(viewHistoryId), {
     method: 'PATCH',
     body: JSON.stringify({ duration }),
   });
@@ -44,18 +45,9 @@ export async function fetchViewHistory(options?: {
   limit?: number;
   offset?: number;
 }): Promise<ViewHistoryWithImage[]> {
-  const params = new URLSearchParams();
-  if (options?.limit !== undefined) {
-    params.set('limit', options.limit.toString());
-  }
-  if (options?.offset !== undefined) {
-    params.set('offset', options.offset.toString());
-  }
-  const queryString = params.toString();
-  const url = `/view-history${queryString !== '' ? `?${queryString}` : ''}`;
-  return await apiClient<ViewHistoryWithImage[]>(url);
+  return await apiClient<ViewHistoryWithImage[]>(viewHistoryEndpoints.list(options));
 }
 
 export async function fetchImageViewStats(imageId: string): Promise<ImageViewStats> {
-  return await apiClient<ImageViewStats>(`/images/${imageId}/view-stats`);
+  return await apiClient<ImageViewStats>(viewHistoryEndpoints.imageStats(imageId));
 }
