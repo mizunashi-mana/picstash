@@ -45,8 +45,7 @@ export function ImageGallery() {
         saveHistoryMutation.mutate(value);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutate is stable
-    [setSearchParams],
+    [setSearchParams, saveHistoryMutation],
   );
 
   const handleToggleExpand = useCallback(() => {
@@ -55,8 +54,7 @@ export function ImageGallery() {
 
   const handleDeleteAllHistory = useCallback(() => {
     deleteAllHistoryMutation.mutate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutate is stable
-  }, []);
+  }, [deleteAllHistoryMutation]);
 
   return (
     <ImageGalleryView
