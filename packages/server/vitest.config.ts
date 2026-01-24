@@ -60,7 +60,7 @@ export default defineConfig({
       thresholds: {
         perFile: true,
         lines: 80,
-        branches: 70, // ?? 演算子の到達困難な分岐を考慮して緩和
+        branches: 70,
         functions: 80,
         statements: 80,
       },
