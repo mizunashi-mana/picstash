@@ -254,10 +254,15 @@ export function buildTsConfig() {
     {
       files: ['**/*.test.{ts,tsx}'],
       rules: {
-      // Non-null assertions are often used in tests to shorthand assertions
+        // Non-null assertions are often used in tests to shorthand assertions
         '@typescript-eslint/no-non-null-assertion': 'off',
         // Mocking functions can lead to unbound method errors
         '@typescript-eslint/unbound-method': 'off',
+        // For test data
+        '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-type-assertion': 'off',
       },
     },
     {

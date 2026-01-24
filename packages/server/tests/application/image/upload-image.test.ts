@@ -23,7 +23,7 @@ vi.mock('@/application/embedding/generate-embedding', () => ({
 }));
 
 function createMockStats(size: number): Awaited<ReturnType<typeof stat>> {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-type-assertion -- stat returns Stats or BigIntStats, we only use size property
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- stat returns Stats or BigIntStats, we only use size property
   return { size } as Awaited<ReturnType<typeof stat>>;
 }
 

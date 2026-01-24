@@ -55,7 +55,7 @@ const loggingSchema = z
 
 const configSchema = z.object({
   server: z.object({
-    port: z.number().int().positive().default(3000),
+    port: z.number().int().positive().default(4000),
     host: z.string().default('0.0.0.0'),
   }),
   database: z.object({

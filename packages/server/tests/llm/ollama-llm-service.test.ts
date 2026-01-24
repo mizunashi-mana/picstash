@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-type-assertion -- mock Response objects require type assertions */
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 

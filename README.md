@@ -61,7 +61,7 @@ npm run dev
 
 開発サーバー起動後:
 - フロントエンド: http://localhost:5173
-- バックエンド API: http://localhost:3000
+- バックエンド API: http://localhost:4000
 - Ollama API: http://localhost:11434
 
 ### Ollama のセットアップ（オプション）
