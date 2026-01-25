@@ -93,3 +93,28 @@ jobs:
           name: server-logs
           path: packages/server/data/*.log
           retention-days: 3
+
+  test-e2e-desktop:
+    name: Run Desktop App E2E tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: ./.github/actions/setup-node
+
+      - name: Build desktop app
+        run: npm run build -w @picstash/desktop-app
+
+      - name: Run Desktop E2E tests
+        run: xvfb-run --auto-servernum npm run test:e2e -w @picstash/desktop-app
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ !cancelled() }}
+        with:
+          name: desktop-playwright-report
+          path: packages/desktop-app/playwright-report/
+          retention-days: 3
