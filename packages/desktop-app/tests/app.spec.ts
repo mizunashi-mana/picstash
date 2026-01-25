@@ -10,8 +10,13 @@ let window: Page;
 
 test.beforeAll(async () => {
   // Electron アプリをビルドしてから起動
+  // CI 環境では --no-sandbox フラグが必要（Linux の SUID サンドボックス権限問題を回避）
+  const args = [appPath];
+  if (process.env.CI !== undefined) {
+    args.push('--no-sandbox');
+  }
   electronApp = await electron.launch({
-    args: [appPath],
+    args,
   });
 
   // 最初のウィンドウを取得
