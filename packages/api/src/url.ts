@@ -12,9 +12,7 @@ export type QueryParamValue = string | number | boolean | undefined | null;
 /**
  * クエリパラメータ型
  */
-export type QueryParams = {
-  [key: string]: QueryParamValue;
-};
+export type QueryParams = Record<string, QueryParamValue>;
 
 /**
  * クエリパラメータ付き URL を構築する

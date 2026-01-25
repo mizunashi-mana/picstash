@@ -13,5 +13,5 @@ export * from './collections.js';
 export * from './view-history.js';
 
 // 共有型定義
-export * from './image-attributes.js';
+export type * from './image-attributes.js';
 export * from './labels.js';
