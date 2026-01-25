@@ -192,6 +192,27 @@ picstash/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
+│   ├── desktop-app/            # Electron デスクトップアプリ (@picstash/desktop-app)
+│   │   ├── src/
+│   │   │   ├── main/           # メインプロセス
+│   │   │   │   └── index.ts    # エントリポイント（BrowserWindow 作成）
+│   │   │   ├── preload/        # プリロードスクリプト
+│   │   │   │   └── index.ts    # contextBridge による API 公開
+│   │   │   └── renderer/       # レンダラープロセス
+│   │   │       ├── index.html
+│   │   │       ├── styles.css
+│   │   │       └── renderer.js
+│   │   ├── tests/              # Playwright E2E テスト
+│   │   │   └── app.spec.ts
+│   │   ├── dist/               # ビルド出力
+│   │   ├── electron-builder.json  # Electron Builder 設定
+│   │   ├── playwright.config.ts
+│   │   ├── eslint.config.mjs
+│   │   ├── package.json
+│   │   ├── tsconfig.main.json     # メインプロセス用
+│   │   ├── tsconfig.preload.json  # プリロード用
+│   │   └── tsconfig.test.json     # テスト用
+│   │
 │   └── e2e-test/               # E2E テスト
 │       ├── tests/              # Playwright テストファイル
 │       ├── fixtures/           # テスト用フィクスチャ
