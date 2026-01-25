@@ -50,6 +50,29 @@ export default {
         path: '^src/(domain|application|infra)/',
       },
     },
+
+    // エントリポイントから到達できないモジュールを検出
+    {
+      name: 'not-reachable-from-entry',
+      severity: 'error',
+      comment:
+        'エントリポイントから到達できないモジュールはデッドコードの可能性がある',
+      from: {
+        path: '^src/(index\\.ts|cli/.+\\.ts)$',
+      },
+      to: {
+        path: '^src/',
+        pathNot: [
+          '\\.test\\.tsx?$',
+          '__tests__/',
+          '__mocks__/',
+          // エントリポイント自体は除外（相互に到達可能である必要はない）
+          '^src/index\\.ts$',
+          '^src/cli/',
+        ],
+        reachable: false,
+      },
+    },
   ],
   options: {
     doNotFollow: {

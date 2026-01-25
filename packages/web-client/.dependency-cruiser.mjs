@@ -39,6 +39,28 @@ export default {
         path: '^src/(features|api|routes)/',
       },
     },
+
+    // main.tsx から到達できないモジュールを検出
+    {
+      name: 'not-reachable-from-main',
+      severity: 'error',
+      comment:
+        'main.tsx から到達できないモジュールはデッドコードの可能性がある',
+      from: {
+        path: '^src/main\\.tsx$',
+      },
+      to: {
+        path: '^src/',
+        pathNot: [
+          '\\.test\\.tsx?$',
+          '\\.stories\\.tsx$',
+          '__tests__/',
+          '__mocks__/',
+          'vite-env\\.d\\.ts$',
+        ],
+        reachable: false,
+      },
+    },
   ],
   options: {
     doNotFollow: {
