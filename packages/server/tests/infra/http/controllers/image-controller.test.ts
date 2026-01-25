@@ -2,11 +2,14 @@ import 'reflect-metadata';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { ImageController } from '@/infra/http/controllers/image-controller';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository';
-import type { EmbeddingService } from '@/application/ports/embedding-service';
-import type { FileStorage } from '@/application/ports/file-storage';
-import type { ImageProcessor } from '@/application/ports/image-processor';
-import type { ImageRepository, Image } from '@/application/ports/image-repository';
+import type {
+  EmbeddingRepository,
+  EmbeddingService,
+  FileStorage,
+  ImageProcessor,
+  ImageRepository,
+  Image,
+} from '@picstash/core';
 
 interface ErrorResponse {
   error: string;
@@ -90,6 +93,7 @@ function createMockEmbeddingRepository(): EmbeddingRepository {
     findSimilar: vi.fn().mockReturnValue([]),
     count: vi.fn(),
     getAllImageIds: vi.fn().mockReturnValue([]),
+    hasEmbedding: vi.fn().mockReturnValue(false),
     close: vi.fn(),
   };
 }

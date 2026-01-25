@@ -1,7 +1,7 @@
 import type {
   SearchHistory,
   SaveSearchHistoryInput,
-} from '../../domain/search-history/index.js';
+} from '@/domain/search-history/index.js';
 
 // Re-export domain types for convenience
 export type { SearchHistory, SaveSearchHistoryInput };

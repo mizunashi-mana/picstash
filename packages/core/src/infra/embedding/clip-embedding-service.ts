@@ -11,7 +11,7 @@ import { injectable } from 'inversify';
 import type {
   EmbeddingResult,
   EmbeddingService,
-} from '../../application/ports/embedding-service.js';
+} from '@/application/ports/embedding-service.js';
 
 /** CLIP model identifier */
 const MODEL_ID = 'Xenova/clip-vit-base-patch16';

@@ -1,7 +1,7 @@
-import { EMBEDDING_DIMENSION } from '../ports/embedding-repository.js';
-import type { EmbeddingRepository } from '../ports/embedding-repository.js';
-import type { ImageRepository } from '../ports/image-repository.js';
-import type { ViewHistoryRepository } from '../ports/view-history-repository.js';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 
 /** Options for generating recommendations */
 export interface GenerateRecommendationsOptions {

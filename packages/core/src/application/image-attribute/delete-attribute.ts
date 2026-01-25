@@ -1,4 +1,4 @@
-import type { ImageAttributeRepository } from '../ports/image-attribute-repository.js';
+import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
 
 export interface DeleteAttributeInput {
   imageId: string;

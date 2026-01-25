@@ -1,17 +1,16 @@
 // @picstash/server
 // API サーバーのエントリポイント
 
-import { buildApp } from '@/app.js';
-import { initConfig, parseConfigArg } from '@/config.js';
-import { connectDatabase, disconnectDatabase } from '@/infra/database/index.js';
-import { buildAppContainer } from '@/infra/di/index.js';
-import { JobWorker } from '@/infra/queue/index.js';
 import {
+  JobWorker,
   createCaptionJobHandler,
   CAPTION_JOB_TYPE,
   createArchiveImportJobHandler,
   ARCHIVE_IMPORT_JOB_TYPE,
-} from '@/infra/workers/index.js';
+} from '@picstash/core';
+import { buildApp } from '@/app.js';
+import { initConfig, parseConfigArg } from '@/config.js';
+import { buildAppContainer } from '@/infra/di/index.js';
 
 async function main(): Promise<void> {
   // Parse --config argument and initialize configuration
@@ -21,8 +20,9 @@ async function main(): Promise<void> {
   const container = buildAppContainer(config);
   const app = await buildApp(container, config);
 
-  // Connect to database
-  await connectDatabase();
+  // Connect to database (run `npm run db:migrate:deploy` before starting server)
+  const prismaService = container.getPrismaService();
+  await prismaService.connect();
   app.log.info('Database connected');
 
   // Start job worker
@@ -98,7 +98,8 @@ async function main(): Promise<void> {
 
     // データベース接続を閉じる
     try {
-      await disconnectDatabase();
+      await prismaService.disconnect();
+      container.getEmbeddingRepository().close();
       app.log.info('Database disconnected');
     }
     catch (err: unknown) {

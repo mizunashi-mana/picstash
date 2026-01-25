@@ -54,6 +54,13 @@ export interface EmbeddingRepository {
   getAllImageIds: () => string[];
 
   /**
+   * Check if an image has an embedding.
+   * @param imageId - The image ID
+   * @returns true if embedding exists
+   */
+  hasEmbedding: (imageId: string) => boolean;
+
+  /**
    * Close the repository and release resources.
    */
   close: () => void;

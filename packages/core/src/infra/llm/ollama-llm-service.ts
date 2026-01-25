@@ -7,13 +7,13 @@
 
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../di/types.js';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   LlmService,
   LlmGenerateResult,
   LlmGenerateOptions,
-} from '../../application/ports/llm-service.js';
-import type { CoreConfig } from '../../config.js';
+} from '@/application/ports/llm-service.js';
+import type { CoreConfig } from '@/config.js';
 
 /** Default Ollama API URL */
 const DEFAULT_OLLAMA_URL = 'http://localhost:11434';

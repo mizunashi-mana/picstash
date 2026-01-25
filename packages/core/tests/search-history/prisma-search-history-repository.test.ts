@@ -1,27 +1,30 @@
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaSearchHistoryRepository } from '@/infra/adapters/prisma-search-history-repository.js';
-import { prisma } from '@/infra/database/prisma.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 
-// Mock the prisma client
-vi.mock('@/infra/database/prisma.js', () => ({
-  prisma: {
-    searchHistory: {
-      upsert: vi.fn(),
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-      delete: vi.fn(),
-      deleteMany: vi.fn(),
-    },
+const mockPrismaClient = {
+  searchHistory: {
+    upsert: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    delete: vi.fn(),
+    deleteMany: vi.fn(),
   },
-}));
+};
+
+const mockPrismaService = {
+  getClient: () => mockPrismaClient,
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+} as unknown as PrismaService;
 
 describe('PrismaSearchHistoryRepository', () => {
   let repository: PrismaSearchHistoryRepository;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new PrismaSearchHistoryRepository();
+    repository = new PrismaSearchHistoryRepository(mockPrismaService);
   });
 
   describe('save', () => {
@@ -34,19 +37,23 @@ describe('PrismaSearchHistoryRepository', () => {
         updatedAt: new Date(),
       };
 
-      vi.mocked(prisma.searchHistory.upsert).mockResolvedValue(mockHistory);
+      vi.mocked(mockPrismaClient.searchHistory.upsert).mockResolvedValue(mockHistory);
 
       const result = await repository.save({ query: 'test query' });
 
       expect(result).toEqual(mockHistory);
-      expect(prisma.searchHistory.upsert).toHaveBeenCalledWith(
+      expect(mockPrismaClient.searchHistory.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { query: 'test query' },
         }) as unknown,
       );
 
       // Verify the call arguments more specifically
-      const call = vi.mocked(prisma.searchHistory.upsert).mock.calls[0]?.[0];
+      const call = vi.mocked(mockPrismaClient.searchHistory.upsert).mock.calls[0]?.[0] as {
+        where: { query: string };
+        create: { query: string; searchedAt: Date };
+        update: { searchedAt: Date };
+      } | undefined;
       expect(call?.where).toEqual({ query: 'test query' });
       expect(call?.create.query).toBe('test query');
       expect(call?.update.searchedAt).toBeInstanceOf(Date);
@@ -61,11 +68,11 @@ describe('PrismaSearchHistoryRepository', () => {
         updatedAt: new Date(),
       };
 
-      vi.mocked(prisma.searchHistory.upsert).mockResolvedValue(mockHistory);
+      vi.mocked(mockPrismaClient.searchHistory.upsert).mockResolvedValue(mockHistory);
 
       await repository.save({ query: 'existing query' });
 
-      expect(prisma.searchHistory.upsert).toHaveBeenCalled();
+      expect(mockPrismaClient.searchHistory.upsert).toHaveBeenCalled();
     });
 
     it('should trim whitespace from query', async () => {
@@ -77,11 +84,11 @@ describe('PrismaSearchHistoryRepository', () => {
         updatedAt: new Date(),
       };
 
-      vi.mocked(prisma.searchHistory.upsert).mockResolvedValue(mockHistory);
+      vi.mocked(mockPrismaClient.searchHistory.upsert).mockResolvedValue(mockHistory);
 
       await repository.save({ query: '  trimmed query  ' });
 
-      expect(prisma.searchHistory.upsert).toHaveBeenCalledWith(
+      expect(mockPrismaClient.searchHistory.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { query: 'trimmed query' },
         }),
@@ -108,18 +115,18 @@ describe('PrismaSearchHistoryRepository', () => {
         updatedAt: new Date(),
       };
 
-      vi.mocked(prisma.searchHistory.findUnique).mockResolvedValue(mockHistory);
+      vi.mocked(mockPrismaClient.searchHistory.findUnique).mockResolvedValue(mockHistory);
 
       const result = await repository.findByQuery('test query');
 
       expect(result).toEqual(mockHistory);
-      expect(prisma.searchHistory.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaClient.searchHistory.findUnique).toHaveBeenCalledWith({
         where: { query: 'test query' },
       });
     });
 
     it('should return null when not found', async () => {
-      vi.mocked(prisma.searchHistory.findUnique).mockResolvedValue(null);
+      vi.mocked(mockPrismaClient.searchHistory.findUnique).mockResolvedValue(null);
 
       const result = await repository.findByQuery('non-existent');
 
@@ -153,7 +160,7 @@ describe('PrismaSearchHistoryRepository', () => {
         },
       ];
 
-      vi.mocked(prisma.searchHistory.findMany).mockResolvedValue(mockHistories);
+      vi.mocked(mockPrismaClient.searchHistory.findMany).mockResolvedValue(mockHistories);
 
       const result = await repository.findByPrefix('test');
 
@@ -187,7 +194,7 @@ describe('PrismaSearchHistoryRepository', () => {
         },
       ];
 
-      vi.mocked(prisma.searchHistory.findMany).mockResolvedValue(mockHistories);
+      vi.mocked(mockPrismaClient.searchHistory.findMany).mockResolvedValue(mockHistories);
 
       const result = await repository.findByPrefix('test', 2);
 
@@ -198,14 +205,14 @@ describe('PrismaSearchHistoryRepository', () => {
       const result = await repository.findByPrefix('');
 
       expect(result).toEqual([]);
-      expect(prisma.searchHistory.findMany).not.toHaveBeenCalled();
+      expect(mockPrismaClient.searchHistory.findMany).not.toHaveBeenCalled();
     });
 
     it('should return empty array for whitespace-only prefix', async () => {
       const result = await repository.findByPrefix('   ');
 
       expect(result).toEqual([]);
-      expect(prisma.searchHistory.findMany).not.toHaveBeenCalled();
+      expect(mockPrismaClient.searchHistory.findMany).not.toHaveBeenCalled();
     });
   });
 
@@ -228,23 +235,23 @@ describe('PrismaSearchHistoryRepository', () => {
         },
       ];
 
-      vi.mocked(prisma.searchHistory.findMany).mockResolvedValue(mockHistories);
+      vi.mocked(mockPrismaClient.searchHistory.findMany).mockResolvedValue(mockHistories);
 
       const result = await repository.findRecent({ limit: 10 });
 
       expect(result).toEqual(mockHistories);
-      expect(prisma.searchHistory.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.searchHistory.findMany).toHaveBeenCalledWith({
         orderBy: { searchedAt: 'desc' },
         take: 10,
       });
     });
 
     it('should use default limit when not specified', async () => {
-      vi.mocked(prisma.searchHistory.findMany).mockResolvedValue([]);
+      vi.mocked(mockPrismaClient.searchHistory.findMany).mockResolvedValue([]);
 
       await repository.findRecent();
 
-      expect(prisma.searchHistory.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.searchHistory.findMany).toHaveBeenCalledWith({
         orderBy: { searchedAt: 'desc' },
         take: 20, // DEFAULT_LIMIT
       });
@@ -253,7 +260,7 @@ describe('PrismaSearchHistoryRepository', () => {
 
   describe('deleteById', () => {
     it('should delete search history by id', async () => {
-      vi.mocked(prisma.searchHistory.delete).mockResolvedValue({
+      vi.mocked(mockPrismaClient.searchHistory.delete).mockResolvedValue({
         id: 'history-1',
         query: 'test',
         searchedAt: new Date(),
@@ -263,13 +270,13 @@ describe('PrismaSearchHistoryRepository', () => {
 
       await repository.deleteById('history-1');
 
-      expect(prisma.searchHistory.delete).toHaveBeenCalledWith({
+      expect(mockPrismaClient.searchHistory.delete).toHaveBeenCalledWith({
         where: { id: 'history-1' },
       });
     });
 
     it('should throw when deleting non-existent history', async () => {
-      vi.mocked(prisma.searchHistory.delete).mockRejectedValue(
+      vi.mocked(mockPrismaClient.searchHistory.delete).mockRejectedValue(
         new Error('Record not found'),
       );
 
@@ -279,11 +286,11 @@ describe('PrismaSearchHistoryRepository', () => {
 
   describe('deleteAll', () => {
     it('should delete all search history', async () => {
-      vi.mocked(prisma.searchHistory.deleteMany).mockResolvedValue({ count: 5 });
+      vi.mocked(mockPrismaClient.searchHistory.deleteMany).mockResolvedValue({ count: 5 });
 
       await repository.deleteAll();
 
-      expect(prisma.searchHistory.deleteMany).toHaveBeenCalled();
+      expect(mockPrismaClient.searchHistory.deleteMany).toHaveBeenCalled();
     });
   });
 });

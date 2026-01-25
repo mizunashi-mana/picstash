@@ -10,13 +10,13 @@ import type { CoreConfig } from '@/config.js';
 function createTestConfig(tempDir: string): CoreConfig {
   return {
     storage: { path: tempDir },
-    database: { url: 'file:./test.db' },
+    database: { path: join(tempDir, 'test.db') },
     logging: {
       level: 'info',
       format: 'pretty',
       file: {
         enabled: false,
-        path: './logs/server.log',
+        path: join(tempDir, 'logs/server.log'),
         rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
       },
     },

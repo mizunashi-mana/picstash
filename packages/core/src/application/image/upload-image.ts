@@ -1,11 +1,11 @@
 import { stat } from 'node:fs/promises';
-import { generateEmbedding, type GenerateEmbeddingDeps } from '../embedding/generate-embedding.js';
-import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES, generateTitle } from '../../domain/image/index.js';
-import type { EmbeddingRepository } from '../ports/embedding-repository.js';
-import type { EmbeddingService } from '../ports/embedding-service.js';
-import type { FileStorage } from '../ports/file-storage.js';
-import type { ImageProcessor } from '../ports/image-processor.js';
-import type { Image, ImageRepository } from '../ports/image-repository.js';
+import { generateEmbedding, type GenerateEmbeddingDeps } from '@/application/embedding/generate-embedding.js';
+import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES, generateTitle } from '@/domain/image/index.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingService } from '@/application/ports/embedding-service.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageProcessor } from '@/application/ports/image-processor.js';
+import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
 import type { Readable } from 'node:stream';
 
 export interface UploadImageInput {

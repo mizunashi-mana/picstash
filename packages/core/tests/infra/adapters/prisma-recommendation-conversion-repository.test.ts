@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaRecommendationConversionRepository } from '@/infra/adapters/prisma-recommendation-conversion-repository.js';
-import { prisma } from '@/infra/database/prisma.js';
 import { Prisma } from '@~generated/prisma/client.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 
 // Mock the Prisma client module including the error class
 vi.mock('@~generated/prisma/client.js', () => {
@@ -21,20 +21,24 @@ vi.mock('@~generated/prisma/client.js', () => {
   };
 });
 
-vi.mock('@/infra/database/prisma.js', () => ({
-  prisma: {
-    recommendationConversion: {
-      create: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
-      aggregate: vi.fn(),
-      count: vi.fn(),
-    },
-    viewHistory: {
-      aggregate: vi.fn(),
-    },
+const mockPrismaClient = {
+  recommendationConversion: {
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    update: vi.fn(),
+    aggregate: vi.fn(),
+    count: vi.fn(),
   },
-}));
+  viewHistory: {
+    aggregate: vi.fn(),
+  },
+};
+
+const mockPrismaService = {
+  getClient: () => mockPrismaClient,
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+} as unknown as PrismaService;
 
 describe('PrismaRecommendationConversionRepository', () => {
   let repository: PrismaRecommendationConversionRepository;
@@ -52,12 +56,12 @@ describe('PrismaRecommendationConversionRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new PrismaRecommendationConversionRepository();
+    repository = new PrismaRecommendationConversionRepository(mockPrismaService);
   });
 
   describe('createImpressions', () => {
     it('should create impressions for valid inputs', async () => {
-      vi.mocked(prisma.recommendationConversion.create).mockResolvedValue(mockConversion);
+      vi.mocked(mockPrismaClient.recommendationConversion.create).mockResolvedValue(mockConversion);
 
       const result = await repository.createImpressions([
         { imageId: 'image-1', score: 0.95 },
@@ -65,7 +69,7 @@ describe('PrismaRecommendationConversionRepository', () => {
       ]);
 
       expect(result).toHaveLength(2);
-      expect(prisma.recommendationConversion.create).toHaveBeenCalledTimes(2);
+      expect(mockPrismaClient.recommendationConversion.create).toHaveBeenCalledTimes(2);
     });
 
     it('should skip impressions for non-existent images (P2003 error)', async () => {
@@ -74,7 +78,7 @@ describe('PrismaRecommendationConversionRepository', () => {
         { code: 'P2003', clientVersion: '5.0.0' },
       );
 
-      vi.mocked(prisma.recommendationConversion.create)
+      vi.mocked(mockPrismaClient.recommendationConversion.create)
         .mockRejectedValueOnce(p2003Error)
         .mockResolvedValueOnce(mockConversion);
 
@@ -84,12 +88,12 @@ describe('PrismaRecommendationConversionRepository', () => {
       ]);
 
       expect(result).toHaveLength(1);
-      expect(prisma.recommendationConversion.create).toHaveBeenCalledTimes(2);
+      expect(mockPrismaClient.recommendationConversion.create).toHaveBeenCalledTimes(2);
     });
 
     it('should throw other errors', async () => {
       const otherError = new Error('Database connection failed');
-      vi.mocked(prisma.recommendationConversion.create).mockRejectedValue(otherError);
+      vi.mocked(mockPrismaClient.recommendationConversion.create).mockRejectedValue(otherError);
 
       await expect(
         repository.createImpressions([{ imageId: 'image-1', score: 0.95 }]),
@@ -99,18 +103,18 @@ describe('PrismaRecommendationConversionRepository', () => {
 
   describe('findById', () => {
     it('should find conversion by id', async () => {
-      vi.mocked(prisma.recommendationConversion.findUnique).mockResolvedValue(mockConversion);
+      vi.mocked(mockPrismaClient.recommendationConversion.findUnique).mockResolvedValue(mockConversion);
 
       const result = await repository.findById('conv-1');
 
       expect(result).toEqual(mockConversion);
-      expect(prisma.recommendationConversion.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaClient.recommendationConversion.findUnique).toHaveBeenCalledWith({
         where: { id: 'conv-1' },
       });
     });
 
     it('should return null when not found', async () => {
-      vi.mocked(prisma.recommendationConversion.findUnique).mockResolvedValue(null);
+      vi.mocked(mockPrismaClient.recommendationConversion.findUnique).mockResolvedValue(null);
 
       const result = await repository.findById('non-existent');
 
@@ -125,13 +129,13 @@ describe('PrismaRecommendationConversionRepository', () => {
         clickedAt: new Date(),
         viewHistoryId: 'view-1',
       };
-      vi.mocked(prisma.recommendationConversion.update).mockResolvedValue(clickedConversion);
+      vi.mocked(mockPrismaClient.recommendationConversion.update).mockResolvedValue(clickedConversion);
 
       const result = await repository.recordClick('conv-1', { viewHistoryId: 'view-1' });
 
       expect(result.clickedAt).not.toBeNull();
       expect(result.viewHistoryId).toBe('view-1');
-      expect(prisma.recommendationConversion.update).toHaveBeenCalledWith({
+      expect(mockPrismaClient.recommendationConversion.update).toHaveBeenCalledWith({
         where: { id: 'conv-1' },
         data: {
 
@@ -144,15 +148,15 @@ describe('PrismaRecommendationConversionRepository', () => {
 
   describe('getStats', () => {
     it('should return conversion stats with default 30 days', async () => {
-      vi.mocked(prisma.recommendationConversion.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.recommendationConversion.aggregate).mockResolvedValue({
         _count: { _all: 100 },
         _avg: { recommendationScore: null },
         _sum: { recommendationScore: null },
         _min: { recommendationScore: null, impressionAt: null, clickedAt: null },
         _max: { recommendationScore: null, impressionAt: null, clickedAt: null },
       });
-      vi.mocked(prisma.recommendationConversion.count).mockResolvedValue(25);
-      vi.mocked(prisma.viewHistory.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.recommendationConversion.count).mockResolvedValue(25);
+      vi.mocked(mockPrismaClient.viewHistory.aggregate).mockResolvedValue({
         _avg: { duration: 5000 },
         _count: { _all: 0 },
         _sum: { duration: null },
@@ -169,15 +173,15 @@ describe('PrismaRecommendationConversionRepository', () => {
     });
 
     it('should handle custom days option', async () => {
-      vi.mocked(prisma.recommendationConversion.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.recommendationConversion.aggregate).mockResolvedValue({
         _count: { _all: 50 },
         _avg: { recommendationScore: null },
         _sum: { recommendationScore: null },
         _min: { recommendationScore: null, impressionAt: null, clickedAt: null },
         _max: { recommendationScore: null, impressionAt: null, clickedAt: null },
       });
-      vi.mocked(prisma.recommendationConversion.count).mockResolvedValue(10);
-      vi.mocked(prisma.viewHistory.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.recommendationConversion.count).mockResolvedValue(10);
+      vi.mocked(mockPrismaClient.viewHistory.aggregate).mockResolvedValue({
         _avg: { duration: null },
         _count: { _all: 0 },
         _sum: { duration: null },
@@ -194,15 +198,15 @@ describe('PrismaRecommendationConversionRepository', () => {
     });
 
     it('should handle zero impressions', async () => {
-      vi.mocked(prisma.recommendationConversion.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.recommendationConversion.aggregate).mockResolvedValue({
         _count: { _all: 0 },
         _avg: { recommendationScore: null },
         _sum: { recommendationScore: null },
         _min: { recommendationScore: null, impressionAt: null, clickedAt: null },
         _max: { recommendationScore: null, impressionAt: null, clickedAt: null },
       });
-      vi.mocked(prisma.recommendationConversion.count).mockResolvedValue(0);
-      vi.mocked(prisma.viewHistory.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.recommendationConversion.count).mockResolvedValue(0);
+      vi.mocked(mockPrismaClient.viewHistory.aggregate).mockResolvedValue({
         _avg: { duration: null },
         _count: { _all: 0 },
         _sum: { duration: null },

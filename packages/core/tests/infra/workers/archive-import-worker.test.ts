@@ -1,11 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createArchiveImportJobHandler, ARCHIVE_IMPORT_JOB_TYPE } from '@/index.js';
-import type { ArchiveSessionManager, ArchiveSession } from '@/index.js';
-import type { FileStorage } from '@/index.js';
-import type { ImageProcessor } from '@/index.js';
-import type { ImageRepository } from '@/index.js';
-import type { Job } from '@/index.js';
-import type { ArchiveImportJobPayload } from '@/index.js';
+import type { ArchiveSessionManager, ArchiveSession, FileStorage, ImageProcessor, ImageRepository, Job, ArchiveImportJobPayload } from '@/index.js';
 
 // Mock fs/promises to avoid actual file system operations
 vi.mock('node:fs/promises', () => ({

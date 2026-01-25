@@ -1,7 +1,6 @@
+import { Prisma, type CreateImpressionInput, type RecommendationConversionRepository } from '@picstash/core';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
-import { Prisma } from '@~generated/prisma/client.js';
-import type { CreateImpressionInput, RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface RecommendationInput {

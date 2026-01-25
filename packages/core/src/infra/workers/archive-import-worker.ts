@@ -1,14 +1,14 @@
 import { stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { Readable } from 'node:stream';
-import { getMimeTypeFromExtension } from '../../domain/archive/index.js';
-import { generateTitle } from '../../domain/image/index.js';
-import type { ArchiveSessionManager } from '../../application/ports/archive-session-manager.js';
-import type { FileStorage } from '../../application/ports/file-storage.js';
-import type { ImageProcessor } from '../../application/ports/image-processor.js';
-import type { ImageRepository } from '../../application/ports/image-repository.js';
-import type { Job } from '../../application/ports/job-queue.js';
-import type { JobHandler } from '../queue/job-worker.js';
+import { getMimeTypeFromExtension } from '@/domain/archive/index.js';
+import { generateTitle } from '@/domain/image/index.js';
+import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageProcessor } from '@/application/ports/image-processor.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { Job } from '@/application/ports/job-queue.js';
+import type { JobHandler } from '@/infra/queue/job-worker.js';
 
 /** アーカイブインポートジョブのタイプ名 */
 export const ARCHIVE_IMPORT_JOB_TYPE = 'archive-import';

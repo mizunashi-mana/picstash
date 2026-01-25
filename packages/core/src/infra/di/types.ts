@@ -2,6 +2,9 @@ export const TYPES = {
   // Config
   Config: Symbol.for('Config'),
 
+  // Database
+  PrismaService: Symbol.for('PrismaService'),
+
   // Repositories
   ImageRepository: Symbol.for('ImageRepository'),
   LabelRepository: Symbol.for('LabelRepository'),

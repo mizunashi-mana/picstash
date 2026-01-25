@@ -1,18 +1,15 @@
 import 'reflect-metadata';
 import { mkdir } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 import { inject, injectable } from 'inversify';
 import sharp from 'sharp';
-import { TYPES } from '../di/types.js';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   ImageMetadata,
   ImageProcessor,
   ThumbnailResult,
-} from '../../application/ports/image-processor.js';
-import type { CoreConfig } from '../../config.js';
-
-const currentDir = dirname(fileURLToPath(import.meta.url));
+} from '@/application/ports/image-processor.js';
+import type { CoreConfig } from '@/config.js';
 
 const THUMBNAIL_SIZE = 300;
 
@@ -21,7 +18,8 @@ export class SharpImageProcessor implements ImageProcessor {
   private readonly storagePath: string;
 
   constructor(@inject(TYPES.Config) config: CoreConfig) {
-    this.storagePath = resolve(currentDir, '../../..', config.storage.path);
+    // storage.path must be an absolute path (resolved by server package)
+    this.storagePath = config.storage.path;
   }
 
   private getThumbnailsPath(): string {

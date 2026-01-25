@@ -86,6 +86,7 @@ function createMockDeps(): GenerateEmbeddingDeps {
     findSimilar: vi.fn(),
     count: vi.fn(),
     getAllImageIds: vi.fn().mockReturnValue([]),
+    hasEmbedding: vi.fn(),
     close: vi.fn(),
   };
 
@@ -196,6 +197,7 @@ describe('removeEmbedding', () => {
       findSimilar: vi.fn(),
       count: vi.fn(),
       getAllImageIds: vi.fn().mockReturnValue([]),
+      hasEmbedding: vi.fn(),
       close: vi.fn(),
     };
 

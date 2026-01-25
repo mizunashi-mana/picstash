@@ -1,18 +1,26 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   SearchHistory,
   SearchHistoryRepository,
   SearchHistoryListOptions,
   SaveSearchHistoryInput,
-} from '../../application/ports/search-history-repository.js';
+} from '@/application/ports/search-history-repository.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 const DEFAULT_LIMIT = 20;
 const MAX_FETCH_LIMIT = 1000;
 
 @injectable()
 export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async save(input: SaveSearchHistoryInput): Promise<SearchHistory> {
     const normalizedQuery = input.query.trim();
     if (normalizedQuery === '') {
@@ -20,7 +28,7 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
     }
 
     // Upsert: create new or update searchedAt
-    return await prisma.searchHistory.upsert({
+    return await this.prisma.searchHistory.upsert({
       where: { query: normalizedQuery },
       create: {
         query: normalizedQuery,
@@ -33,7 +41,7 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
   }
 
   async findByQuery(query: string): Promise<SearchHistory | null> {
-    return await prisma.searchHistory.findUnique({
+    return await this.prisma.searchHistory.findUnique({
       where: { query: query.trim() },
     });
   }
@@ -49,7 +57,7 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
 
     // SQLite doesn't support case-insensitive LIKE with Japanese well,
     // so we fetch recent records and filter in JS
-    const all = await prisma.searchHistory.findMany({
+    const all = await this.prisma.searchHistory.findMany({
       orderBy: { searchedAt: 'desc' },
       take: MAX_FETCH_LIMIT,
     });
@@ -64,19 +72,19 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
   ): Promise<SearchHistory[]> {
     const limit = options?.limit ?? DEFAULT_LIMIT;
 
-    return await prisma.searchHistory.findMany({
+    return await this.prisma.searchHistory.findMany({
       orderBy: { searchedAt: 'desc' },
       take: limit,
     });
   }
 
   async deleteById(id: string): Promise<void> {
-    await prisma.searchHistory.delete({
+    await this.prisma.searchHistory.delete({
       where: { id },
     });
   }
 
   async deleteAll(): Promise<void> {
-    await prisma.searchHistory.deleteMany();
+    await this.prisma.searchHistory.deleteMany();
   }
 }

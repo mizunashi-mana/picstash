@@ -1,15 +1,15 @@
-import { EMBEDDING_DIMENSION } from '../../application/ports/embedding-repository.js';
-import { fileExists } from '../../shared/file-utils.js';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import { fileExists } from '@/shared/file-utils.js';
 import type {
   CaptionService,
   SimilarImageDescription,
-} from '../../application/ports/caption-service.js';
-import type { EmbeddingRepository } from '../../application/ports/embedding-repository.js';
-import type { FileStorage } from '../../application/ports/file-storage.js';
-import type { ImageRepository } from '../../application/ports/image-repository.js';
-import type { Job } from '../../application/ports/job-queue.js';
-import type { OcrService } from '../../application/ports/ocr-service.js';
-import type { JobHandler } from '../queue/job-worker.js';
+} from '@/application/ports/caption-service.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { Job } from '@/application/ports/job-queue.js';
+import type { OcrService } from '@/application/ports/ocr-service.js';
+import type { JobHandler } from '@/infra/queue/job-worker.js';
 
 /** キャプション生成ジョブのタイプ名 */
 export const CAPTION_JOB_TYPE = 'caption-generation';

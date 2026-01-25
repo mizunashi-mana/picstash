@@ -1,4 +1,4 @@
-import type { Label } from '../label/Label.js';
+import type { Label } from '@/domain/label/Label.js';
 
 /**
  * ImageAttribute entity - represents a label with keywords assigned to an image

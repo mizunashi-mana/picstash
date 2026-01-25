@@ -1,7 +1,6 @@
+import { Prisma, type CollectionRepository } from '@picstash/core';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
-import { Prisma } from '@~generated/prisma/client.js';
-import type { CollectionRepository } from '@/application/ports/collection-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface CreateCollectionBody {

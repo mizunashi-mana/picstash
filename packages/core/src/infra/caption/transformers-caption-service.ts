@@ -8,13 +8,13 @@
 import 'reflect-metadata';
 import { readFile } from 'node:fs/promises';
 import { inject, injectable, optional } from 'inversify';
-import { TYPES } from '../di/types.js';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   CaptionContext,
   CaptionResult,
   CaptionService,
-} from '../../application/ports/caption-service.js';
-import type { LlmService } from '../../application/ports/llm-service.js';
+} from '@/application/ports/caption-service.js';
+import type { LlmService } from '@/application/ports/llm-service.js';
 
 /** Caption model identifier (Florence-2 for detailed captioning) */
 const CAPTION_MODEL_ID = 'onnx-community/Florence-2-base-ft';

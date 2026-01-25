@@ -8,11 +8,11 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { EMBEDDING_DIMENSION } from '../ports/embedding-repository.js';
-import type { EmbeddingRepository } from '../ports/embedding-repository.js';
-import type { EmbeddingService } from '../ports/embedding-service.js';
-import type { FileStorage } from '../ports/file-storage.js';
-import type { ImageRepository } from '../ports/image-repository.js';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingService } from '@/application/ports/embedding-service.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
 
 export interface GenerateEmbeddingInput {
   imageId: string;

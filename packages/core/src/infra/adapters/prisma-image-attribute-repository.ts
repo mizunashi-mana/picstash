@@ -1,25 +1,33 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   CreateImageAttributeInput,
   ImageAttribute,
   ImageAttributeRepository,
   UpdateImageAttributeInput,
-} from '../../application/ports/image-attribute-repository.js';
+} from '@/application/ports/image-attribute-repository.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()
 export class PrismaImageAttributeRepository
 implements ImageAttributeRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async findById(id: string): Promise<ImageAttribute | null> {
-    return await prisma.imageAttribute.findUnique({
+    return await this.prisma.imageAttribute.findUnique({
       where: { id },
       include: { label: true },
     });
   }
 
   async findByImageId(imageId: string): Promise<ImageAttribute[]> {
-    return await prisma.imageAttribute.findMany({
+    return await this.prisma.imageAttribute.findMany({
       where: { imageId },
       include: { label: true },
       orderBy: { createdAt: 'asc' },
@@ -30,14 +38,14 @@ implements ImageAttributeRepository {
     imageId: string,
     labelId: string,
   ): Promise<ImageAttribute | null> {
-    return await prisma.imageAttribute.findUnique({
+    return await this.prisma.imageAttribute.findUnique({
       where: { imageId_labelId: { imageId, labelId } },
       include: { label: true },
     });
   }
 
   async create(input: CreateImageAttributeInput): Promise<ImageAttribute> {
-    return await prisma.imageAttribute.create({
+    return await this.prisma.imageAttribute.create({
       data: {
         imageId: input.imageId,
         labelId: input.labelId,
@@ -51,7 +59,7 @@ implements ImageAttributeRepository {
     id: string,
     input: UpdateImageAttributeInput,
   ): Promise<ImageAttribute> {
-    return await prisma.imageAttribute.update({
+    return await this.prisma.imageAttribute.update({
       where: { id },
       data: { keywords: input.keywords },
       include: { label: true },
@@ -59,7 +67,7 @@ implements ImageAttributeRepository {
   }
 
   async deleteById(id: string): Promise<void> {
-    await prisma.imageAttribute.delete({
+    await this.prisma.imageAttribute.delete({
       where: { id },
     });
   }

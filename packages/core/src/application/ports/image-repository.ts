@@ -2,7 +2,7 @@ import type {
   Image,
   CreateImageInput,
   UpdateImageInput,
-} from '../../domain/image/index.js';
+} from '@/domain/image/index.js';
 
 // Re-export domain types for backward compatibility
 export type { Image, CreateImageInput, UpdateImageInput };

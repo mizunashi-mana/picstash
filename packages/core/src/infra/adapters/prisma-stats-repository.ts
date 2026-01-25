@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   OverviewStats,
   DailyViewStats,
@@ -9,7 +9,9 @@ import type {
   StatsRepository,
   TrendOptions,
   PopularImagesOptions,
-} from '../../application/ports/stats-repository.js';
+} from '@/application/ports/stats-repository.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 /** Format a date as YYYY-MM-DD in local timezone */
 function formatLocalDate(date: Date): string {
@@ -35,6 +37,12 @@ function generateDateRange(days: number): string[] {
 
 @injectable()
 export class PrismaStatsRepository implements StatsRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async getOverview(options?: TrendOptions): Promise<OverviewStats> {
     const days = options?.days ?? 30;
     const periodStart = new Date();
@@ -42,10 +50,10 @@ export class PrismaStatsRepository implements StatsRepository {
     periodStart.setDate(periodStart.getDate() - (days - 1));
 
     // Get total images
-    const totalImages = await prisma.image.count();
+    const totalImages = await this.prisma.image.count();
 
     // Get view stats for the period
-    const viewStats = await prisma.viewHistory.aggregate({
+    const viewStats = await this.prisma.viewHistory.aggregate({
       where: {
         viewedAt: { gte: periodStart },
       },
@@ -55,13 +63,13 @@ export class PrismaStatsRepository implements StatsRepository {
     });
 
     // Get recommendation conversion stats for the period
-    const totalImpressions = await prisma.recommendationConversion.count({
+    const totalImpressions = await this.prisma.recommendationConversion.count({
       where: {
         impressionAt: { gte: periodStart },
       },
     });
 
-    const totalClicks = await prisma.recommendationConversion.count({
+    const totalClicks = await this.prisma.recommendationConversion.count({
       where: {
         impressionAt: { gte: periodStart },
         clickedAt: { not: null },
@@ -88,7 +96,7 @@ export class PrismaStatsRepository implements StatsRepository {
 
     // Use raw query to group by date
     // Note: Prisma's tagged template $queryRaw automatically parameterizes values
-    const results = await prisma.$queryRaw<
+    const results = await this.prisma.$queryRaw<
       Array<{
         date: string;
         view_count: bigint;
@@ -135,7 +143,7 @@ export class PrismaStatsRepository implements StatsRepository {
 
     // Use raw query to group by date
     // Note: Prisma's tagged template $queryRaw automatically parameterizes values
-    const results = await prisma.$queryRaw<
+    const results = await this.prisma.$queryRaw<
       Array<{
         date: string;
         impressions: bigint;
@@ -189,7 +197,7 @@ export class PrismaStatsRepository implements StatsRepository {
 
     // Use raw query for aggregation with join
     // Note: Prisma's tagged template $queryRaw automatically parameterizes values
-    const results = await prisma.$queryRaw<
+    const results = await this.prisma.$queryRaw<
       Array<{
         id: string;
         title: string;

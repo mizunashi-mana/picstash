@@ -1,19 +1,23 @@
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaImageAttributeRepository } from '@/infra/adapters/prisma-image-attribute-repository.js';
-import { prisma } from '@/infra/database/prisma.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 
-vi.mock('@/infra/database/prisma.js', () => ({
-  prisma: {
-    imageAttribute: {
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    },
+const mockPrismaClient = {
+  imageAttribute: {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   },
-}));
+};
+
+const mockPrismaService = {
+  getClient: () => mockPrismaClient,
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+} as unknown as PrismaService;
 
 describe('PrismaImageAttributeRepository', () => {
   let repository: PrismaImageAttributeRepository;
@@ -37,24 +41,24 @@ describe('PrismaImageAttributeRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new PrismaImageAttributeRepository();
+    repository = new PrismaImageAttributeRepository(mockPrismaService);
   });
 
   describe('findById', () => {
     it('should find attribute by id', async () => {
-      vi.mocked(prisma.imageAttribute.findUnique).mockResolvedValue(mockAttribute);
+      vi.mocked(mockPrismaClient.imageAttribute.findUnique).mockResolvedValue(mockAttribute);
 
       const result = await repository.findById('attr-1');
 
       expect(result).toEqual(mockAttribute);
-      expect(prisma.imageAttribute.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaClient.imageAttribute.findUnique).toHaveBeenCalledWith({
         where: { id: 'attr-1' },
         include: { label: true },
       });
     });
 
     it('should return null when not found', async () => {
-      vi.mocked(prisma.imageAttribute.findUnique).mockResolvedValue(null);
+      vi.mocked(mockPrismaClient.imageAttribute.findUnique).mockResolvedValue(null);
 
       const result = await repository.findById('non-existent');
 
@@ -65,12 +69,12 @@ describe('PrismaImageAttributeRepository', () => {
   describe('findByImageId', () => {
     it('should find all attributes for an image', async () => {
       const attributes = [mockAttribute, { ...mockAttribute, id: 'attr-2' }];
-      vi.mocked(prisma.imageAttribute.findMany).mockResolvedValue(attributes);
+      vi.mocked(mockPrismaClient.imageAttribute.findMany).mockResolvedValue(attributes);
 
       const result = await repository.findByImageId('image-1');
 
       expect(result).toEqual(attributes);
-      expect(prisma.imageAttribute.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.imageAttribute.findMany).toHaveBeenCalledWith({
         where: { imageId: 'image-1' },
         include: { label: true },
         orderBy: { createdAt: 'asc' },
@@ -78,7 +82,7 @@ describe('PrismaImageAttributeRepository', () => {
     });
 
     it('should return empty array when no attributes', async () => {
-      vi.mocked(prisma.imageAttribute.findMany).mockResolvedValue([]);
+      vi.mocked(mockPrismaClient.imageAttribute.findMany).mockResolvedValue([]);
 
       const result = await repository.findByImageId('image-1');
 
@@ -88,19 +92,19 @@ describe('PrismaImageAttributeRepository', () => {
 
   describe('findByImageAndLabel', () => {
     it('should find attribute by image and label', async () => {
-      vi.mocked(prisma.imageAttribute.findUnique).mockResolvedValue(mockAttribute);
+      vi.mocked(mockPrismaClient.imageAttribute.findUnique).mockResolvedValue(mockAttribute);
 
       const result = await repository.findByImageAndLabel('image-1', 'label-1');
 
       expect(result).toEqual(mockAttribute);
-      expect(prisma.imageAttribute.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaClient.imageAttribute.findUnique).toHaveBeenCalledWith({
         where: { imageId_labelId: { imageId: 'image-1', labelId: 'label-1' } },
         include: { label: true },
       });
     });
 
     it('should return null when not found', async () => {
-      vi.mocked(prisma.imageAttribute.findUnique).mockResolvedValue(null);
+      vi.mocked(mockPrismaClient.imageAttribute.findUnique).mockResolvedValue(null);
 
       const result = await repository.findByImageAndLabel('image-1', 'label-2');
 
@@ -110,7 +114,7 @@ describe('PrismaImageAttributeRepository', () => {
 
   describe('create', () => {
     it('should create a new attribute', async () => {
-      vi.mocked(prisma.imageAttribute.create).mockResolvedValue(mockAttribute);
+      vi.mocked(mockPrismaClient.imageAttribute.create).mockResolvedValue(mockAttribute);
 
       const result = await repository.create({
         imageId: 'image-1',
@@ -119,7 +123,7 @@ describe('PrismaImageAttributeRepository', () => {
       });
 
       expect(result).toEqual(mockAttribute);
-      expect(prisma.imageAttribute.create).toHaveBeenCalledWith({
+      expect(mockPrismaClient.imageAttribute.create).toHaveBeenCalledWith({
         data: {
           imageId: 'image-1',
           labelId: 'label-1',
@@ -133,14 +137,14 @@ describe('PrismaImageAttributeRepository', () => {
   describe('updateById', () => {
     it('should update attribute keywords', async () => {
       const updatedAttribute = { ...mockAttribute, keywords: 'new-keyword' };
-      vi.mocked(prisma.imageAttribute.update).mockResolvedValue(updatedAttribute);
+      vi.mocked(mockPrismaClient.imageAttribute.update).mockResolvedValue(updatedAttribute);
 
       const result = await repository.updateById('attr-1', {
         keywords: 'new-keyword',
       });
 
       expect(result).toEqual(updatedAttribute);
-      expect(prisma.imageAttribute.update).toHaveBeenCalledWith({
+      expect(mockPrismaClient.imageAttribute.update).toHaveBeenCalledWith({
         where: { id: 'attr-1' },
         data: { keywords: 'new-keyword' },
         include: { label: true },
@@ -150,11 +154,11 @@ describe('PrismaImageAttributeRepository', () => {
 
   describe('deleteById', () => {
     it('should delete attribute by id', async () => {
-      vi.mocked(prisma.imageAttribute.delete).mockResolvedValue(mockAttribute);
+      vi.mocked(mockPrismaClient.imageAttribute.delete).mockResolvedValue(mockAttribute);
 
       await repository.deleteById('attr-1');
 
-      expect(prisma.imageAttribute.delete).toHaveBeenCalledWith({
+      expect(mockPrismaClient.imageAttribute.delete).toHaveBeenCalledWith({
         where: { id: 'attr-1' },
       });
     });

@@ -5,8 +5,8 @@
  * image-to-label similarity matching for attribute suggestion.
  */
 
-import type { EmbeddingService } from '../ports/embedding-service.js';
-import type { LabelRepository } from '../ports/label-repository.js';
+import type { EmbeddingService } from '@/application/ports/embedding-service.js';
+import type { LabelRepository } from '@/application/ports/label-repository.js';
 
 export interface GenerateLabelEmbeddingInput {
   labelId: string;

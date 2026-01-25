@@ -11,7 +11,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { injectable } from 'inversify';
 import { createWorker, type Worker } from 'tesseract.js';
-import type { OcrResult, OcrService } from '../../application/ports/ocr-service.js';
+import type { OcrResult, OcrService } from '@/application/ports/ocr-service.js';
 
 /** Languages to recognize (Japanese + English) */
 const LANGUAGES = 'jpn+eng';

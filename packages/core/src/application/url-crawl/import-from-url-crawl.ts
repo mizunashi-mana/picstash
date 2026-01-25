@@ -1,10 +1,10 @@
 import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
-import { generateTitle } from '../../domain/image/index.js';
-import type { FileStorage } from '../ports/file-storage.js';
-import type { ImageProcessor } from '../ports/image-processor.js';
-import type { Image, ImageRepository } from '../ports/image-repository.js';
-import type { UrlCrawlSessionManager } from '../ports/url-crawl-session-manager.js';
+import { generateTitle } from '@/domain/image/index.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageProcessor } from '@/application/ports/image-processor.js';
+import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
+import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 
 export interface ImportFromUrlCrawlInput {
   sessionId: string;

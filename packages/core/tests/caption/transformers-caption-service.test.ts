@@ -80,7 +80,7 @@ describe('TransformersCaptionService', () => {
   describe('generateFromBuffer', () => {
     it('should generate caption and translate to Japanese', async () => {
       const { TransformersCaptionService } = (await import(
-        '@picstash/core'
+        '@picstash/core',
       ));
 
       mockFlorence2Processor.post_process_generation.mockReturnValue({

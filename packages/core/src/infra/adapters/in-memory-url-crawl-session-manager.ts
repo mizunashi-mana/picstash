@@ -10,14 +10,14 @@ import {
   getExtensionFromContentType,
   FETCH_TIMEOUT_MS,
   USER_AGENT,
-} from '../../domain/url-crawl/index.js';
+} from '@/domain/url-crawl/index.js';
 import type {
   CreateCrawlSessionInput,
   CreateCrawlSessionResult,
   FetchImageResult,
   UrlCrawlSessionManager,
-} from '../../application/ports/url-crawl-session-manager.js';
-import type { UrlCrawlSession } from '../../domain/url-crawl/index.js';
+} from '@/application/ports/url-crawl-session-manager.js';
+import type { UrlCrawlSession } from '@/domain/url-crawl/index.js';
 
 /** Session expiration time in milliseconds (1 hour) */
 const SESSION_EXPIRATION_MS = 60 * 60 * 1000;

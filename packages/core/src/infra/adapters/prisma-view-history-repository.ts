@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   ViewHistory,
   ViewHistoryWithImage,
@@ -9,12 +9,20 @@ import type {
   ImageViewStats,
   ViewHistoryRepository,
   ViewHistoryListOptions,
-} from '../../application/ports/view-history-repository.js';
+} from '@/application/ports/view-history-repository.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()
 export class PrismaViewHistoryRepository implements ViewHistoryRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async create(input: CreateViewHistoryInput): Promise<ViewHistory> {
-    return await prisma.viewHistory.create({
+    return await this.prisma.viewHistory.create({
       data: {
         imageId: input.imageId,
       },
@@ -22,7 +30,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
   }
 
   async findById(id: string): Promise<ViewHistory | null> {
-    return await prisma.viewHistory.findUnique({
+    return await this.prisma.viewHistory.findUnique({
       where: { id },
     });
   }
@@ -31,7 +39,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
     id: string,
     input: UpdateViewHistoryDurationInput,
   ): Promise<ViewHistory> {
-    return await prisma.viewHistory.update({
+    return await this.prisma.viewHistory.update({
       where: { id },
       data: {
         duration: input.duration,
@@ -45,7 +53,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
     const limit = options?.limit ?? 50;
     const offset = options?.offset ?? 0;
 
-    const records = await prisma.viewHistory.findMany({
+    const records = await this.prisma.viewHistory.findMany({
       take: limit,
       skip: offset,
       orderBy: { viewedAt: 'desc' },
@@ -76,7 +84,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
   }
 
   async getImageStats(imageId: string): Promise<ImageViewStats> {
-    const stats = await prisma.viewHistory.aggregate({
+    const stats = await this.prisma.viewHistory.aggregate({
       where: { imageId },
       _count: { _all: true },
       _sum: { duration: true },
@@ -91,7 +99,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
   }
 
   async deleteById(id: string): Promise<void> {
-    await prisma.viewHistory.delete({
+    await this.prisma.viewHistory.delete({
       where: { id },
     });
   }

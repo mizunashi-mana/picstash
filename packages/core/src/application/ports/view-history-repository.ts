@@ -4,7 +4,7 @@ import type {
   CreateViewHistoryInput,
   UpdateViewHistoryDurationInput,
   ImageViewStats,
-} from '../../domain/view-history/index.js';
+} from '@/domain/view-history/index.js';
 
 // Re-export domain types for convenience
 export type {

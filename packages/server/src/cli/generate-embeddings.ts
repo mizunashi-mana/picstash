@@ -16,18 +16,22 @@ import {
   generateMissingEmbeddings,
   syncEmbeddingsToVectorDb,
   type GenerateEmbeddingDeps,
-} from '@/application/embedding/generate-embedding.js';
-import { type Config, initConfig, parseCliArgs } from '@/config.js';
-import { connectDatabase, disconnectDatabase } from '@/infra/database/index.js';
-import { buildAppContainer } from '@/infra/di/index.js';
+  type PrismaService,
+} from '@picstash/core';
+import { initConfig, parseCliArgs } from '@/config.js';
+import { type AppContainer, buildAppContainer } from '@/infra/di/index.js';
 
-function getDeps(config: Config): GenerateEmbeddingDeps {
-  const container = buildAppContainer(config);
+interface CliDeps extends GenerateEmbeddingDeps {
+  prismaService: PrismaService;
+}
+
+function getDeps(container: AppContainer): CliDeps {
   return {
     imageRepository: container.getImageRepository(),
     fileStorage: container.getFileStorage(),
     embeddingService: container.getEmbeddingService(),
     embeddingRepository: container.getEmbeddingRepository(),
+    prismaService: container.getPrismaService(),
   };
 }
 
@@ -36,11 +40,11 @@ async function main(): Promise<void> {
 
   // Initialize configuration
   const config = initConfig(configPath);
+  const container = buildAppContainer(config);
+  const deps = getDeps(container);
 
   console.log('Connecting to database...');
-  await connectDatabase();
-
-  const deps = getDeps(config);
+  await deps.prismaService.connect();
 
   try {
     switch (command) {
@@ -64,7 +68,7 @@ async function main(): Promise<void> {
   }
   finally {
     deps.embeddingRepository.close();
-    await disconnectDatabase();
+    await deps.prismaService.disconnect();
   }
 }
 

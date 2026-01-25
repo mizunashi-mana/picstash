@@ -2,7 +2,7 @@ import type {
   ImageAttribute,
   CreateImageAttributeInput,
   UpdateImageAttributeInput,
-} from '../../domain/image-attribute/index.js';
+} from '@/domain/image-attribute/index.js';
 
 // Re-export domain types for backward compatibility
 export type { ImageAttribute, CreateImageAttributeInput, UpdateImageAttributeInput };

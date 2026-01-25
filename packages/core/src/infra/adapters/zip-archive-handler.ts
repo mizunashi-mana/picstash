@@ -7,7 +7,7 @@ import { open } from 'yauzl-promise';
 import type {
   ArchiveEntry,
   ArchiveHandler,
-} from '../../application/ports/archive-handler.js';
+} from '@/application/ports/archive-handler.js';
 
 const ZIP_EXTENSIONS = ['.zip'];
 const ZIP_MIME_TYPES = ['application/zip', 'application/x-zip-compressed'];

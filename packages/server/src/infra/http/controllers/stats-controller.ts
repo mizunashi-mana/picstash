@@ -1,7 +1,7 @@
 import { statsEndpoints } from '@picstash/api';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
-import type { StatsRepository } from '@/application/ports/stats-repository.js';
+import type { StatsRepository } from '@picstash/core';
 import type { FastifyInstance } from 'fastify';
 
 interface StatsQuery {

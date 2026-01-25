@@ -2,26 +2,24 @@ import 'reflect-metadata';
 import { randomUUID } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
 import { mkdir, unlink } from 'node:fs/promises';
-import { dirname, join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { pipeline } from 'node:stream/promises';
-import { fileURLToPath } from 'node:url';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../di/types.js';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   FileStorage,
   SaveFileResult,
-} from '../../application/ports/file-storage.js';
-import type { CoreConfig } from '../../config.js';
+} from '@/application/ports/file-storage.js';
+import type { CoreConfig } from '@/config.js';
 import type { Readable } from 'node:stream';
-
-const currentDir = dirname(fileURLToPath(import.meta.url));
 
 @injectable()
 export class LocalFileStorage implements FileStorage {
   private readonly storagePath: string;
 
   constructor(@inject(TYPES.Config) config: CoreConfig) {
-    this.storagePath = resolve(currentDir, '../../..', config.storage.path);
+    // storage.path must be an absolute path (resolved by server package)
+    this.storagePath = config.storage.path;
   }
 
   private getOriginalsPath(): string {

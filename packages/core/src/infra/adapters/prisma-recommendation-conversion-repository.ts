@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import { Prisma } from '@~generated/prisma/client.js';
 import type {
   RecommendationConversion,
@@ -9,10 +9,18 @@ import type {
   ConversionStats,
   RecommendationConversionRepository,
   ConversionStatsOptions,
-} from '../../application/ports/recommendation-conversion-repository.js';
+} from '@/application/ports/recommendation-conversion-repository.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()
 export class PrismaRecommendationConversionRepository implements RecommendationConversionRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async createImpressions(
     inputs: CreateImpressionInput[],
   ): Promise<RecommendationConversion[]> {
@@ -23,7 +31,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
 
     for (const input of inputs) {
       try {
-        const record = await prisma.recommendationConversion.create({
+        const record = await this.prisma.recommendationConversion.create({
           data: {
             imageId: input.imageId,
             recommendationScore: input.score,
@@ -48,7 +56,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
   }
 
   async findById(id: string): Promise<RecommendationConversion | null> {
-    return await prisma.recommendationConversion.findUnique({
+    return await this.prisma.recommendationConversion.findUnique({
       where: { id },
     });
   }
@@ -57,7 +65,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
     id: string,
     input: RecordClickInput,
   ): Promise<RecommendationConversion> {
-    return await prisma.recommendationConversion.update({
+    return await this.prisma.recommendationConversion.update({
       where: { id },
       data: {
         clickedAt: new Date(),
@@ -73,7 +81,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
     periodStart.setDate(periodStart.getDate() - days);
 
     // Get total impressions and clicks
-    const totals = await prisma.recommendationConversion.aggregate({
+    const totals = await this.prisma.recommendationConversion.aggregate({
       where: {
         impressionAt: {
           gte: periodStart,
@@ -85,7 +93,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
       },
     });
 
-    const clicks = await prisma.recommendationConversion.count({
+    const clicks = await this.prisma.recommendationConversion.count({
       where: {
         impressionAt: {
           gte: periodStart,
@@ -96,7 +104,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
     });
 
     // Get average duration for clicked recommendations
-    const avgDuration = await prisma.viewHistory.aggregate({
+    const avgDuration = await this.prisma.viewHistory.aggregate({
       where: {
         recommendationConversion: {
           impressionAt: {

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   AddImageToCollectionInput,
   Collection,
@@ -11,24 +11,32 @@ import type {
   CreateCollectionInput,
   UpdateCollectionInput,
   UpdateImageOrderInput,
-} from '../../application/ports/collection-repository.js';
+} from '@/application/ports/collection-repository.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()
 export class PrismaCollectionRepository implements CollectionRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async create(input: CreateCollectionInput): Promise<Collection> {
-    return await prisma.collection.create({
+    return await this.prisma.collection.create({
       data: input,
     });
   }
 
   async findById(id: string): Promise<Collection | null> {
-    return await prisma.collection.findUnique({
+    return await this.prisma.collection.findUnique({
       where: { id },
     });
   }
 
   async findByIdWithImages(id: string): Promise<CollectionWithImages | null> {
-    const collection = await prisma.collection.findUnique({
+    const collection = await this.prisma.collection.findUnique({
       where: { id },
       include: {
         images: {
@@ -64,7 +72,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
   }
 
   async findAll(): Promise<CollectionWithCount[]> {
-    const collections = await prisma.collection.findMany({
+    const collections = await this.prisma.collection.findMany({
       orderBy: { updatedAt: 'desc' },
       include: {
         _count: {
@@ -85,21 +93,21 @@ export class PrismaCollectionRepository implements CollectionRepository {
   }
 
   async updateById(id: string, input: UpdateCollectionInput): Promise<Collection> {
-    return await prisma.collection.update({
+    return await this.prisma.collection.update({
       where: { id },
       data: input,
     });
   }
 
   async deleteById(id: string): Promise<Collection> {
-    return await prisma.collection.delete({
+    return await this.prisma.collection.delete({
       where: { id },
     });
   }
 
   // Collection image management
   async addImage(collectionId: string, input: AddImageToCollectionInput): Promise<CollectionImage> {
-    return await prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       // If order is not specified, add at the end
       let order = input.order;
       if (order === undefined) {
@@ -122,7 +130,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
   }
 
   async removeImage(collectionId: string, imageId: string): Promise<void> {
-    await prisma.collectionImage.delete({
+    await this.prisma.collectionImage.delete({
       where: {
         collectionId_imageId: {
           collectionId,
@@ -133,7 +141,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
   }
 
   async updateImageOrder(collectionId: string, orders: UpdateImageOrderInput[]): Promise<void> {
-    await prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       for (const { imageId, order } of orders) {
         await tx.collectionImage.update({
           where: {
@@ -150,7 +158,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
 
   // Query helpers
   async findCollectionsByImageId(imageId: string): Promise<Collection[]> {
-    const collectionImages = await prisma.collectionImage.findMany({
+    const collectionImages = await this.prisma.collectionImage.findMany({
       where: { imageId },
       include: { collection: true },
     });

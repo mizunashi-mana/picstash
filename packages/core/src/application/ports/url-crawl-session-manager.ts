@@ -1,4 +1,4 @@
-import type { UrlCrawlSession } from '../../domain/url-crawl/index.js';
+import type { UrlCrawlSession } from '@/domain/url-crawl/index.js';
 
 // Re-export domain type for convenience
 export type { UrlCrawlSession };

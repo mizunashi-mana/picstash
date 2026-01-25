@@ -1,20 +1,24 @@
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaViewHistoryRepository } from '@/infra/adapters/prisma-view-history-repository.js';
-import { prisma } from '@/infra/database/prisma.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 
-vi.mock('@/infra/database/prisma.js', () => ({
-  prisma: {
-    viewHistory: {
-      create: vi.fn(),
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      aggregate: vi.fn(),
-    },
+const mockPrismaClient = {
+  viewHistory: {
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    aggregate: vi.fn(),
   },
-}));
+};
+
+const mockPrismaService = {
+  getClient: () => mockPrismaClient,
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+} as unknown as PrismaService;
 
 describe('PrismaViewHistoryRepository', () => {
   let repository: PrismaViewHistoryRepository;
@@ -39,17 +43,17 @@ describe('PrismaViewHistoryRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new PrismaViewHistoryRepository();
+    repository = new PrismaViewHistoryRepository(mockPrismaService);
   });
 
   describe('create', () => {
     it('should create a new view history', async () => {
-      vi.mocked(prisma.viewHistory.create).mockResolvedValue(mockViewHistory);
+      vi.mocked(mockPrismaClient.viewHistory.create).mockResolvedValue(mockViewHistory);
 
       const result = await repository.create({ imageId: 'image-1' });
 
       expect(result).toEqual(mockViewHistory);
-      expect(prisma.viewHistory.create).toHaveBeenCalledWith({
+      expect(mockPrismaClient.viewHistory.create).toHaveBeenCalledWith({
         data: { imageId: 'image-1' },
       });
     });
@@ -57,18 +61,18 @@ describe('PrismaViewHistoryRepository', () => {
 
   describe('findById', () => {
     it('should find view history by id', async () => {
-      vi.mocked(prisma.viewHistory.findUnique).mockResolvedValue(mockViewHistory);
+      vi.mocked(mockPrismaClient.viewHistory.findUnique).mockResolvedValue(mockViewHistory);
 
       const result = await repository.findById('view-1');
 
       expect(result).toEqual(mockViewHistory);
-      expect(prisma.viewHistory.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaClient.viewHistory.findUnique).toHaveBeenCalledWith({
         where: { id: 'view-1' },
       });
     });
 
     it('should return null when not found', async () => {
-      vi.mocked(prisma.viewHistory.findUnique).mockResolvedValue(null);
+      vi.mocked(mockPrismaClient.viewHistory.findUnique).mockResolvedValue(null);
 
       const result = await repository.findById('non-existent');
 
@@ -79,12 +83,12 @@ describe('PrismaViewHistoryRepository', () => {
   describe('updateDuration', () => {
     it('should update view duration', async () => {
       const updatedHistory = { ...mockViewHistory, duration: 10000 };
-      vi.mocked(prisma.viewHistory.update).mockResolvedValue(updatedHistory);
+      vi.mocked(mockPrismaClient.viewHistory.update).mockResolvedValue(updatedHistory);
 
       const result = await repository.updateDuration('view-1', { duration: 10000 });
 
       expect(result).toEqual(updatedHistory);
-      expect(prisma.viewHistory.update).toHaveBeenCalledWith({
+      expect(mockPrismaClient.viewHistory.update).toHaveBeenCalledWith({
         where: { id: 'view-1' },
         data: { duration: 10000 },
       });
@@ -93,7 +97,7 @@ describe('PrismaViewHistoryRepository', () => {
 
   describe('findRecentWithImages', () => {
     it('should find recent view history with images', async () => {
-      vi.mocked(prisma.viewHistory.findMany).mockResolvedValue([mockViewHistoryWithImage]);
+      vi.mocked(mockPrismaClient.viewHistory.findMany).mockResolvedValue([mockViewHistoryWithImage]);
 
       const result = await repository.findRecentWithImages();
 
@@ -107,7 +111,7 @@ describe('PrismaViewHistoryRepository', () => {
         updatedAt: mockViewHistoryWithImage.updatedAt,
         image: mockViewHistoryWithImage.image,
       });
-      expect(prisma.viewHistory.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.viewHistory.findMany).toHaveBeenCalledWith({
         take: 50,
         skip: 0,
         orderBy: { viewedAt: 'desc' },
@@ -124,11 +128,11 @@ describe('PrismaViewHistoryRepository', () => {
     });
 
     it('should respect limit and offset options', async () => {
-      vi.mocked(prisma.viewHistory.findMany).mockResolvedValue([]);
+      vi.mocked(mockPrismaClient.viewHistory.findMany).mockResolvedValue([]);
 
       await repository.findRecentWithImages({ limit: 10, offset: 20 });
 
-      expect(prisma.viewHistory.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.viewHistory.findMany).toHaveBeenCalledWith({
         take: 10,
         skip: 20,
         orderBy: { viewedAt: 'desc' },
@@ -148,7 +152,7 @@ describe('PrismaViewHistoryRepository', () => {
   describe('getImageStats', () => {
     it('should return image view statistics', async () => {
       const lastViewed = new Date();
-      vi.mocked(prisma.viewHistory.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.viewHistory.aggregate).mockResolvedValue({
         _count: { _all: 5 },
         _sum: { duration: 25000 },
         _max: { viewedAt: lastViewed },
@@ -163,7 +167,7 @@ describe('PrismaViewHistoryRepository', () => {
         totalDuration: 25000,
         lastViewedAt: lastViewed,
       });
-      expect(prisma.viewHistory.aggregate).toHaveBeenCalledWith({
+      expect(mockPrismaClient.viewHistory.aggregate).toHaveBeenCalledWith({
         where: { imageId: 'image-1' },
         _count: { _all: true },
         _sum: { duration: true },
@@ -172,7 +176,7 @@ describe('PrismaViewHistoryRepository', () => {
     });
 
     it('should handle null duration sum', async () => {
-      vi.mocked(prisma.viewHistory.aggregate).mockResolvedValue({
+      vi.mocked(mockPrismaClient.viewHistory.aggregate).mockResolvedValue({
         _count: { _all: 0 },
         _sum: { duration: null },
         _max: { viewedAt: null },
@@ -192,11 +196,11 @@ describe('PrismaViewHistoryRepository', () => {
 
   describe('deleteById', () => {
     it('should delete view history by id', async () => {
-      vi.mocked(prisma.viewHistory.delete).mockResolvedValue(mockViewHistory);
+      vi.mocked(mockPrismaClient.viewHistory.delete).mockResolvedValue(mockViewHistory);
 
       await repository.deleteById('view-1');
 
-      expect(prisma.viewHistory.delete).toHaveBeenCalledWith({
+      expect(mockPrismaClient.viewHistory.delete).toHaveBeenCalledWith({
         where: { id: 'view-1' },
       });
     });

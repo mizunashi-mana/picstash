@@ -1,4 +1,4 @@
-import type { ArchiveSession } from '../../domain/archive/index.js';
+import type { ArchiveSession } from '@/domain/archive/index.js';
 import type { Readable } from 'node:stream';
 
 // Re-export domain type for backward compatibility

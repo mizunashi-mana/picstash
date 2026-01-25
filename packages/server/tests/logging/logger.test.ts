@@ -7,14 +7,14 @@ function createConfig(
 ): Config {
   return {
     server: { port: 4000, host: '0.0.0.0' },
-    database: { url: 'file:./test.db' },
-    storage: { path: './storage' },
+    database: { path: '/tmp/test.db' },
+    storage: { path: '/tmp/storage' },
     logging: {
       level: 'info',
       format: 'pretty',
       file: {
         enabled: false,
-        path: './logs/server.log',
+        path: '/tmp/logs/server.log',
         rotation: {
           enabled: true,
           maxSize: '10M',

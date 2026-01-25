@@ -3,10 +3,13 @@
   "type": "module",
   "name": "@picstash/core",
   "version": "1.0.0",
-  "main": "./src/index.ts",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*.ts"
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
   },
   "scripts": {
     "build": "npm run db:generate && tsc",
@@ -17,11 +20,7 @@
     "lint:eslint": "eslint --cache --fix src",
     "lint:prisma": "prisma-lint",
     "lint:deps": "depcruise src --config .dependency-cruiser.mjs",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:generate": "prisma generate"
   },
   "engines": {
     "node": ">=21.0.0"
@@ -34,7 +33,6 @@
     "adm-zip": "^0.5.16",
     "better-sqlite3": "^12.5.0",
     "inversify": "^7.10.8",
-    "js-yaml": "^4.1.1",
     "node-unrar-js": "^2.0.2",
     "pino-roll": "^4.0.0",
     "reflect-metadata": "^0.2.2",
@@ -49,7 +47,6 @@
     "@picstash/eslint-config": "*",
     "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/js-yaml": "^4.0.9",
     "@types/unzipper": "^0.10.11",
     "@types/yauzl-promise": "^4.0.1",
     "@vitest/coverage-v8": "^4.0.16",

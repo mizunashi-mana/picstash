@@ -3,8 +3,8 @@ import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
 
 export function registerRoutes(app: FastifyInstance, container: AppContainer): void {
-  // Health check (no prefix, no container dependency)
-  healthRoutes(app);
+  // Health check (no prefix, needs PrismaService for database check)
+  healthRoutes(app, container.getPrismaService());
 
   // Register controllers with inversify DI
   container.getImageController().registerRoutes(app);

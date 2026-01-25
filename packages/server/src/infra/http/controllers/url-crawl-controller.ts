@@ -1,10 +1,12 @@
+import {
+  importFromUrlCrawl,
+  type FileStorage,
+  type ImageProcessor,
+  type ImageRepository,
+  type UrlCrawlSessionManager,
+} from '@picstash/core';
 import { inject, injectable } from 'inversify';
-import { importFromUrlCrawl } from '@/application/url-crawl/index.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
-import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
-import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 /** Rate limit window in milliseconds (1 minute) */

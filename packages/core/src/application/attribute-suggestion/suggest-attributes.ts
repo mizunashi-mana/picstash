@@ -2,11 +2,11 @@
  * Use case for suggesting attributes for an image based on CLIP similarity.
  */
 
-import { EMBEDDING_DIMENSION } from '../ports/embedding-repository.js';
-import type { EmbeddingRepository } from '../ports/embedding-repository.js';
-import type { ImageAttributeRepository } from '../ports/image-attribute-repository.js';
-import type { ImageRepository } from '../ports/image-repository.js';
-import type { LabelRepository } from '../ports/label-repository.js';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { LabelRepository } from '@/application/ports/label-repository.js';
 
 /** Suggested keyword with frequency count */
 export interface SuggestedKeyword {

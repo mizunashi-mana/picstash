@@ -1,16 +1,20 @@
 # Picstash Server Configuration
+# All paths can be absolute or relative to current working directory (cwd).
+# When running `npm run dev` from packages/server, cwd is packages/server.
 
 server:
   port: 4000
   host: "0.0.0.0"
 
 database:
-  # SQLite database file path (relative to packages/server/)
-  url: "file:./prisma/data/picstash.db"
+  # SQLite database file path (default: ./data/picstash.db)
+  # For development with existing data (relative to packages/server):
+  path: "./data/picstash.db"
 
 storage:
-  # Image storage path (relative to packages/server/)
-  path: "../../storage"
+  # Image storage path (default: ./data/storage)
+  # For development with existing data (relative to packages/server):
+  path: "./data/storage"
 
 # Logging settings
 logging:
@@ -21,7 +25,7 @@ logging:
   # File output settings
   file:
     enabled: false
-    path: "./logs/server.log"
+    path: "./data/logs/server.log"
     rotation:
       enabled: true
       maxSize: "10M"

@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   CreateLabelInput,
   Label,
@@ -8,50 +8,58 @@ import type {
   LabelWithEmbedding,
   UpdateLabelEmbeddingInput,
   UpdateLabelInput,
-} from '../../application/ports/label-repository.js';
+} from '@/application/ports/label-repository.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()
 export class PrismaLabelRepository implements LabelRepository {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async create(input: CreateLabelInput): Promise<Label> {
-    return await prisma.attributeLabel.create({
+    return await this.prisma.attributeLabel.create({
       data: input,
     });
   }
 
   async findById(id: string): Promise<Label | null> {
-    return await prisma.attributeLabel.findUnique({
+    return await this.prisma.attributeLabel.findUnique({
       where: { id },
     });
   }
 
   async findByName(name: string): Promise<Label | null> {
-    return await prisma.attributeLabel.findUnique({
+    return await this.prisma.attributeLabel.findUnique({
       where: { name },
     });
   }
 
   async findAll(): Promise<Label[]> {
-    return await prisma.attributeLabel.findMany({
+    return await this.prisma.attributeLabel.findMany({
       orderBy: { name: 'asc' },
     });
   }
 
   async updateById(id: string, input: UpdateLabelInput): Promise<Label> {
-    return await prisma.attributeLabel.update({
+    return await this.prisma.attributeLabel.update({
       where: { id },
       data: input,
     });
   }
 
   async deleteById(id: string): Promise<Label> {
-    return await prisma.attributeLabel.delete({
+    return await this.prisma.attributeLabel.delete({
       where: { id },
     });
   }
 
   // Embedding-related methods
   async findAllWithEmbedding(): Promise<LabelWithEmbedding[]> {
-    return await prisma.attributeLabel.findMany({
+    return await this.prisma.attributeLabel.findMany({
       where: { embedding: { not: null } },
       select: { id: true, name: true, embedding: true },
       orderBy: { name: 'asc' },
@@ -59,14 +67,14 @@ export class PrismaLabelRepository implements LabelRepository {
   }
 
   async findIdsWithoutEmbedding(): Promise<Array<{ id: string; name: string }>> {
-    return await prisma.attributeLabel.findMany({
+    return await this.prisma.attributeLabel.findMany({
       where: { embedding: null },
       select: { id: true, name: true },
     });
   }
 
   async updateEmbedding(id: string, input: UpdateLabelEmbeddingInput): Promise<void> {
-    await prisma.attributeLabel.update({
+    await this.prisma.attributeLabel.update({
       where: { id },
       data: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Float32Array is compatible with Prisma's Bytes type
@@ -77,7 +85,7 @@ export class PrismaLabelRepository implements LabelRepository {
   }
 
   async clearAllEmbeddings(): Promise<void> {
-    await prisma.attributeLabel.updateMany({
+    await this.prisma.attributeLabel.updateMany({
       data: {
         embedding: null,
         embeddedAt: null,
@@ -86,7 +94,7 @@ export class PrismaLabelRepository implements LabelRepository {
   }
 
   async countWithEmbedding(): Promise<number> {
-    return await prisma.attributeLabel.count({
+    return await this.prisma.attributeLabel.count({
       where: { embedding: { not: null } },
     });
   }

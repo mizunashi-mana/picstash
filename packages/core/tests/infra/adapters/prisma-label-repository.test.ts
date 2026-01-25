@@ -1,21 +1,25 @@
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PrismaLabelRepository } from '@/infra/adapters/prisma-label-repository.js';
-import { prisma } from '@/infra/database/prisma.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 
-vi.mock('@/infra/database/prisma.js', () => ({
-  prisma: {
-    attributeLabel: {
-      create: vi.fn(),
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-      update: vi.fn(),
-      updateMany: vi.fn(),
-      delete: vi.fn(),
-      count: vi.fn(),
-    },
+const mockPrismaClient = {
+  attributeLabel: {
+    create: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
   },
-}));
+};
+
+const mockPrismaService = {
+  getClient: () => mockPrismaClient,
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+} as unknown as PrismaService;
 
 describe('PrismaLabelRepository', () => {
   let repository: PrismaLabelRepository;
@@ -32,17 +36,17 @@ describe('PrismaLabelRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    repository = new PrismaLabelRepository();
+    repository = new PrismaLabelRepository(mockPrismaService);
   });
 
   describe('create', () => {
     it('should create a new label', async () => {
-      vi.mocked(prisma.attributeLabel.create).mockResolvedValue(mockLabel);
+      vi.mocked(mockPrismaClient.attributeLabel.create).mockResolvedValue(mockLabel);
 
       const result = await repository.create({ name: 'character' });
 
       expect(result).toEqual(mockLabel);
-      expect(prisma.attributeLabel.create).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.create).toHaveBeenCalledWith({
         data: { name: 'character' },
       });
     });
@@ -50,18 +54,18 @@ describe('PrismaLabelRepository', () => {
 
   describe('findById', () => {
     it('should find label by id', async () => {
-      vi.mocked(prisma.attributeLabel.findUnique).mockResolvedValue(mockLabel);
+      vi.mocked(mockPrismaClient.attributeLabel.findUnique).mockResolvedValue(mockLabel);
 
       const result = await repository.findById('label-1');
 
       expect(result).toEqual(mockLabel);
-      expect(prisma.attributeLabel.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.findUnique).toHaveBeenCalledWith({
         where: { id: 'label-1' },
       });
     });
 
     it('should return null when not found', async () => {
-      vi.mocked(prisma.attributeLabel.findUnique).mockResolvedValue(null);
+      vi.mocked(mockPrismaClient.attributeLabel.findUnique).mockResolvedValue(null);
 
       const result = await repository.findById('non-existent');
 
@@ -71,18 +75,18 @@ describe('PrismaLabelRepository', () => {
 
   describe('findByName', () => {
     it('should find label by name', async () => {
-      vi.mocked(prisma.attributeLabel.findUnique).mockResolvedValue(mockLabel);
+      vi.mocked(mockPrismaClient.attributeLabel.findUnique).mockResolvedValue(mockLabel);
 
       const result = await repository.findByName('character');
 
       expect(result).toEqual(mockLabel);
-      expect(prisma.attributeLabel.findUnique).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.findUnique).toHaveBeenCalledWith({
         where: { name: 'character' },
       });
     });
 
     it('should return null when not found', async () => {
-      vi.mocked(prisma.attributeLabel.findUnique).mockResolvedValue(null);
+      vi.mocked(mockPrismaClient.attributeLabel.findUnique).mockResolvedValue(null);
 
       const result = await repository.findByName('non-existent');
 
@@ -93,12 +97,12 @@ describe('PrismaLabelRepository', () => {
   describe('findAll', () => {
     it('should find all labels ordered by name', async () => {
       const labels = [mockLabel, { ...mockLabel, id: 'label-2', name: 'series' }];
-      vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labels);
+      vi.mocked(mockPrismaClient.attributeLabel.findMany).mockResolvedValue(labels);
 
       const result = await repository.findAll();
 
       expect(result).toEqual(labels);
-      expect(prisma.attributeLabel.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.findMany).toHaveBeenCalledWith({
         orderBy: { name: 'asc' },
       });
     });
@@ -107,12 +111,12 @@ describe('PrismaLabelRepository', () => {
   describe('updateById', () => {
     it('should update label by id', async () => {
       const updatedLabel = { ...mockLabel, name: 'updated-name' };
-      vi.mocked(prisma.attributeLabel.update).mockResolvedValue(updatedLabel);
+      vi.mocked(mockPrismaClient.attributeLabel.update).mockResolvedValue(updatedLabel);
 
       const result = await repository.updateById('label-1', { name: 'updated-name' });
 
       expect(result).toEqual(updatedLabel);
-      expect(prisma.attributeLabel.update).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.update).toHaveBeenCalledWith({
         where: { id: 'label-1' },
         data: { name: 'updated-name' },
       });
@@ -121,12 +125,12 @@ describe('PrismaLabelRepository', () => {
 
   describe('deleteById', () => {
     it('should delete label by id', async () => {
-      vi.mocked(prisma.attributeLabel.delete).mockResolvedValue(mockLabel);
+      vi.mocked(mockPrismaClient.attributeLabel.delete).mockResolvedValue(mockLabel);
 
       const result = await repository.deleteById('label-1');
 
       expect(result).toEqual(mockLabel);
-      expect(prisma.attributeLabel.delete).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.delete).toHaveBeenCalledWith({
         where: { id: 'label-1' },
       });
     });
@@ -138,12 +142,12 @@ describe('PrismaLabelRepository', () => {
         { id: 'label-1', name: 'character', embedding: new Uint8Array([1, 2, 3]) },
       ];
 
-      vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithEmbedding as any);
+      vi.mocked(mockPrismaClient.attributeLabel.findMany).mockResolvedValue(labelsWithEmbedding as any);
 
       const result = await repository.findAllWithEmbedding();
 
       expect(result).toEqual(labelsWithEmbedding);
-      expect(prisma.attributeLabel.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.findMany).toHaveBeenCalledWith({
         where: { embedding: { not: null } },
         select: { id: true, name: true, embedding: true },
         orderBy: { name: 'asc' },
@@ -158,12 +162,12 @@ describe('PrismaLabelRepository', () => {
         { id: 'label-2', name: 'series' },
       ];
 
-      vi.mocked(prisma.attributeLabel.findMany).mockResolvedValue(labelsWithoutEmbedding as any);
+      vi.mocked(mockPrismaClient.attributeLabel.findMany).mockResolvedValue(labelsWithoutEmbedding as any);
 
       const result = await repository.findIdsWithoutEmbedding();
 
       expect(result).toEqual(labelsWithoutEmbedding);
-      expect(prisma.attributeLabel.findMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.findMany).toHaveBeenCalledWith({
         where: { embedding: null },
         select: { id: true, name: true },
       });
@@ -174,7 +178,7 @@ describe('PrismaLabelRepository', () => {
     it('should update label embedding', async () => {
       const embedding = new Uint8Array([1, 2, 3, 4]);
       const embeddedAt = new Date();
-      vi.mocked(prisma.attributeLabel.update).mockResolvedValue({
+      vi.mocked(mockPrismaClient.attributeLabel.update).mockResolvedValue({
         ...mockLabel,
         embedding,
         embeddedAt,
@@ -182,7 +186,7 @@ describe('PrismaLabelRepository', () => {
 
       await repository.updateEmbedding('label-1', { embedding, embeddedAt });
 
-      expect(prisma.attributeLabel.update).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.update).toHaveBeenCalledWith({
         where: { id: 'label-1' },
         data: {
           embedding,
@@ -194,11 +198,11 @@ describe('PrismaLabelRepository', () => {
 
   describe('clearAllEmbeddings', () => {
     it('should clear all embeddings', async () => {
-      vi.mocked(prisma.attributeLabel.updateMany).mockResolvedValue({ count: 5 });
+      vi.mocked(mockPrismaClient.attributeLabel.updateMany).mockResolvedValue({ count: 5 });
 
       await repository.clearAllEmbeddings();
 
-      expect(prisma.attributeLabel.updateMany).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.updateMany).toHaveBeenCalledWith({
         data: {
           embedding: null,
           embeddedAt: null,
@@ -209,12 +213,12 @@ describe('PrismaLabelRepository', () => {
 
   describe('countWithEmbedding', () => {
     it('should count labels with embeddings', async () => {
-      vi.mocked(prisma.attributeLabel.count).mockResolvedValue(10);
+      vi.mocked(mockPrismaClient.attributeLabel.count).mockResolvedValue(10);
 
       const result = await repository.countWithEmbedding();
 
       expect(result).toBe(10);
-      expect(prisma.attributeLabel.count).toHaveBeenCalledWith({
+      expect(mockPrismaClient.attributeLabel.count).toHaveBeenCalledWith({
         where: { embedding: { not: null } },
       });
     });

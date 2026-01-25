@@ -1,8 +1,8 @@
-import { normalizeKeywords } from '../../shared/normalizers/index.js';
+import { normalizeKeywords } from '@/shared/normalizers/index.js';
 import type {
   ImageAttribute,
   ImageAttributeRepository,
-} from '../ports/image-attribute-repository.js';
+} from '@/application/ports/image-attribute-repository.js';
 
 export interface UpdateAttributeInput {
   imageId: string;

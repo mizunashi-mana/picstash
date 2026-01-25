@@ -1,5 +1,5 @@
-import { LabelName, LABEL_NAME_MAX_LENGTH } from '../../domain/label/index.js';
-import type { Label, LabelRepository } from '../ports/label-repository.js';
+import { LabelName, LABEL_NAME_MAX_LENGTH } from '@/domain/label/index.js';
+import type { Label, LabelRepository } from '@/application/ports/label-repository.js';
 
 export interface CreateLabelInput {
   name: string;

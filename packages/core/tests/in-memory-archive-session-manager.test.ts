@@ -6,19 +6,19 @@ import { Readable } from 'node:stream';
 import AdmZip from 'adm-zip';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InMemoryArchiveSessionManager } from '@/index.js';
-import type { ArchiveHandler } from '@/index.js';
 import type { CoreConfig } from '@/config.js';
+import type { ArchiveHandler } from '@/index.js';
 
 function createTestConfig(tempDir: string): CoreConfig {
   return {
     storage: { path: tempDir },
-    database: { url: 'file:./test.db' },
+    database: { path: join(tempDir, 'test.db') },
     logging: {
       level: 'info',
       format: 'pretty',
       file: {
         enabled: false,
-        path: './logs/server.log',
+        path: join(tempDir, 'logs/server.log'),
         rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
       },
     },

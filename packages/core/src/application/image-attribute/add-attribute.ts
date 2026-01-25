@@ -1,11 +1,11 @@
-import { normalizeKeywords } from '../../shared/normalizers/index.js';
-import { isNonEmptyString } from '../../shared/validators/index.js';
+import { normalizeKeywords } from '@/shared/normalizers/index.js';
+import { isNonEmptyString } from '@/shared/validators/index.js';
 import type {
   ImageAttribute,
   ImageAttributeRepository,
-} from '../ports/image-attribute-repository.js';
-import type { ImageRepository } from '../ports/image-repository.js';
-import type { LabelRepository } from '../ports/label-repository.js';
+} from '@/application/ports/image-attribute-repository.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { LabelRepository } from '@/application/ports/label-repository.js';
 
 export interface AddAttributeInput {
   imageId: string;

@@ -1,7 +1,7 @@
-import { removeEmbedding } from '../embedding/generate-embedding.js';
-import type { EmbeddingRepository } from '../ports/embedding-repository.js';
-import type { FileStorage } from '../ports/file-storage.js';
-import type { ImageRepository } from '../ports/image-repository.js';
+import { removeEmbedding } from '@/application/embedding/generate-embedding.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { FileStorage } from '@/application/ports/file-storage.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
 
 export type DeleteImageResult
   = | { success: true }

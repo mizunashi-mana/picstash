@@ -3,14 +3,14 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { CoreConfig } from '@/config.js';
 
 const testConfig: CoreConfig = {
-  database: { url: 'file:./test.db' },
-  storage: { path: './storage' },
+  database: { path: '/tmp/test.db' },
+  storage: { path: '/tmp/storage' },
   logging: {
     level: 'info',
     format: 'pretty',
     file: {
       enabled: false,
-      path: './logs/server.log',
+      path: '/tmp/logs/server.log',
       rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
     },
   },

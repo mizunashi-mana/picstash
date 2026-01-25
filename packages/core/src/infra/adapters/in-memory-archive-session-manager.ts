@@ -2,26 +2,23 @@ import 'reflect-metadata';
 import { randomUUID } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
 import { mkdir, unlink } from 'node:fs/promises';
-import { dirname, extname, join, resolve } from 'node:path';
+import { extname, join } from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline as pipelinePromise } from 'node:stream/promises';
-import { fileURLToPath } from 'node:url';
 import { inject, injectable, multiInject } from 'inversify';
 import {
   MAX_ARCHIVE_SIZE,
   filterImageEntries,
-} from '../../domain/archive/index.js';
-import { TYPES } from '../di/types.js';
-import type { ArchiveHandler } from '../../application/ports/archive-handler.js';
+} from '@/domain/archive/index.js';
+import { TYPES } from '@/infra/di/types.js';
+import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
 import type {
   ArchiveSession,
   ArchiveSessionManager,
   CreateSessionInput,
   CreateSessionResult,
-} from '../../application/ports/archive-session-manager.js';
-import type { CoreConfig } from '../../config.js';
-
-const currentDir = dirname(fileURLToPath(import.meta.url));
+} from '@/application/ports/archive-session-manager.js';
+import type { CoreConfig } from '@/config.js';
 
 function createSizeLimitedStream(maxSize: number): Transform {
   let totalSize = 0;
@@ -46,8 +43,8 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
     @inject(TYPES.Config) config: CoreConfig,
     @multiInject(TYPES.ArchiveHandler) private readonly handlers: ArchiveHandler[],
   ) {
-    const storagePath = resolve(currentDir, '../../..', config.storage.path);
-    this.tempPath = join(storagePath, 'temp');
+    // storage.path must be an absolute path (resolved by server package)
+    this.tempPath = join(config.storage.path, 'temp');
   }
 
   private async ensureTempDirectory(): Promise<void> {

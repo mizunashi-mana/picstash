@@ -3,7 +3,7 @@ import type {
   CreateImpressionInput,
   RecordClickInput,
   ConversionStats,
-} from '../../domain/recommendation-conversion/index.js';
+} from '@/domain/recommendation-conversion/index.js';
 
 // Re-export domain types for convenience
 export type {

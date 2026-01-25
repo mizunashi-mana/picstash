@@ -1,6 +1,10 @@
-/coverage/
+/data/*
 /logs/*
+!/data/.keep
 !/logs/.keep
+
+# vitest
+/coverage/
 
 # Keep environment variables out of version control
 .env

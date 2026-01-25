@@ -1,4 +1,4 @@
-import type { Job, JobQueue } from '../../application/ports/job-queue.js';
+import type { Job, JobQueue } from '@/application/ports/job-queue.js';
 
 /** ジョブハンドラーの型定義 */
 export type JobHandler<TPayload, TResult> = (

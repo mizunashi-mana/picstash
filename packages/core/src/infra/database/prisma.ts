@@ -1,21 +1,50 @@
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import { PrismaClient } from '@~generated/prisma/client.js';
+import { Prisma, PrismaClient } from '@~generated/prisma/client.js';
 
-const currentDir = dirname(fileURLToPath(import.meta.url));
+// Re-export Prisma namespace for error handling (e.g., PrismaClientKnownRequestError)
+export { Prisma };
 
-// Prisma 7.x: SQLite requires driver adapter
-// Path is relative to this file's location in dist or src
-const dbPath = resolve(currentDir, '../../..', 'prisma/data/picstash.db');
-const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+let prismaClient: PrismaClient | null = null;
 
-export const prisma = new PrismaClient({ adapter });
-
-export async function connectDatabase(): Promise<void> {
-  await prisma.$connect();
+/**
+ * Get the Prisma client instance.
+ * Throws if initializeDatabase() has not been called.
+ */
+export function getPrisma(): PrismaClient {
+  if (prismaClient === null) {
+    throw new Error(
+      'Database not initialized. Call initializeDatabase(dbPath) first.',
+    );
+  }
+  return prismaClient;
 }
 
+/**
+ * Initialize the database with the given path.
+ * Must be called before using getPrisma() or connectDatabase().
+ * @param dbPath - Absolute path to the SQLite database file
+ */
+export function initializeDatabase(dbPath: string): void {
+  if (prismaClient !== null) {
+    return; // Already initialized
+  }
+  const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
+  prismaClient = new PrismaClient({ adapter });
+}
+
+/**
+ * Connect to the database.
+ * Requires initializeDatabase() to be called first.
+ */
+export async function connectDatabase(): Promise<void> {
+  await getPrisma().$connect();
+}
+
+/**
+ * Disconnect from the database.
+ */
 export async function disconnectDatabase(): Promise<void> {
-  await prisma.$disconnect();
+  if (prismaClient !== null) {
+    await prismaClient.$disconnect();
+  }
 }

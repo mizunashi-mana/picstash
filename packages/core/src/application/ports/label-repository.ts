@@ -2,7 +2,7 @@ import type {
   Label,
   CreateLabelInput,
   UpdateLabelInput,
-} from '../../domain/label/index.js';
+} from '@/domain/label/index.js';
 
 // Re-export domain types for backward compatibility
 export type { Label, CreateLabelInput, UpdateLabelInput };

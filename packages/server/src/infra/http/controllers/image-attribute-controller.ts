@@ -1,13 +1,13 @@
-import { inject, injectable } from 'inversify';
 import {
   addAttribute,
   deleteAttribute,
   updateAttribute,
-} from '@/application/image-attribute/index.js';
+  type ImageAttributeRepository,
+  type ImageRepository,
+  type LabelRepository,
+} from '@picstash/core';
+import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
-import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
-import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface CreateAttributeBody {

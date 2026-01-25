@@ -1,4 +1,4 @@
-import type { ArchiveEntry, ArchiveType } from '../../domain/archive/index.js';
+import type { ArchiveEntry, ArchiveType } from '@/domain/archive/index.js';
 
 // Re-export domain types for backward compatibility
 export type { ArchiveEntry };

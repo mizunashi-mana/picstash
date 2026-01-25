@@ -6,7 +6,7 @@ import { createExtractorFromData } from 'node-unrar-js';
 import type {
   ArchiveEntry,
   ArchiveHandler,
-} from '../../application/ports/archive-handler.js';
+} from '@/application/ports/archive-handler.js';
 
 const RAR_EXTENSIONS = ['.rar'];
 const RAR_MIME_TYPES = [

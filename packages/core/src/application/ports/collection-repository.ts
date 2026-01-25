@@ -6,7 +6,7 @@ import type {
   UpdateCollectionInput,
   AddImageToCollectionInput,
   UpdateImageOrderInput,
-} from '../../domain/collection/index.js';
+} from '@/domain/collection/index.js';
 
 // Re-export domain types for convenience
 export type {

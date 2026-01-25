@@ -2,9 +2,9 @@
  * Find duplicate images in the library using embedding similarity.
  */
 
-import { EMBEDDING_DIMENSION } from '../ports/embedding-repository.js';
-import type { EmbeddingRepository } from '../ports/embedding-repository.js';
-import type { ImageRepository } from '../ports/image-repository.js';
+import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
+import type { ImageRepository } from '@/application/ports/image-repository.js';
 
 /** Default distance threshold for duplicate detection */
 export const DEFAULT_DUPLICATE_THRESHOLD = 0.1;

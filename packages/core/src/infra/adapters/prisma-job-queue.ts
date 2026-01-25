@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { prisma } from '../database/prisma.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   AddJobOptions,
   Job,
@@ -8,7 +8,9 @@ import type {
   JobStatus,
   ListJobsOptions,
   ListJobsResult,
-} from '../../application/ports/job-queue.js';
+} from '@/application/ports/job-queue.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
+import type { PrismaClient } from '@~generated/prisma/client.js';
 
 /**
  * SQLite/Prisma ベースのジョブキュー実装
@@ -16,12 +18,18 @@ import type {
  */
 @injectable()
 export class PrismaJobQueue implements JobQueue {
+  private readonly prisma: PrismaClient;
+
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+    this.prisma = prismaService.getClient();
+  }
+
   async add<T>(
     type: string,
     payload: T,
     options?: AddJobOptions,
   ): Promise<Job<T>> {
-    const job = await prisma.job.create({
+    const job = await this.prisma.job.create({
       data: {
         type,
         payload: JSON.stringify(payload),
@@ -35,7 +43,7 @@ export class PrismaJobQueue implements JobQueue {
   async getJob<TPayload = unknown, TResult = unknown>(
     id: string,
   ): Promise<Job<TPayload, TResult> | null> {
-    const job = await prisma.job.findUnique({
+    const job = await this.prisma.job.findUnique({
       where: { id },
     });
 
@@ -64,13 +72,13 @@ export class PrismaJobQueue implements JobQueue {
     };
 
     const [jobs, total] = await Promise.all([
-      prisma.job.findMany({
+      this.prisma.job.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
       }),
-      prisma.job.count({ where }),
+      this.prisma.job.count({ where }),
     ]);
 
     return {
@@ -84,7 +92,7 @@ export class PrismaJobQueue implements JobQueue {
   ): Promise<Job<TPayload> | null> {
     // SQLite では SKIP LOCKED がないため、トランザクションで処理
     // 同時実行性は低いが、単一プロセスでの使用を想定
-    return await prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx) => {
       const job = await tx.job.findFirst({
         where: {
           type,
@@ -111,7 +119,7 @@ export class PrismaJobQueue implements JobQueue {
   }
 
   async completeJob<T>(id: string, result: T): Promise<void> {
-    await prisma.job.update({
+    await this.prisma.job.update({
       where: { id },
       data: {
         status: 'completed',
@@ -123,7 +131,7 @@ export class PrismaJobQueue implements JobQueue {
   }
 
   async failJob(id: string, error: string): Promise<boolean> {
-    const job = await prisma.job.findUnique({
+    const job = await this.prisma.job.findUnique({
       where: { id },
       select: { attempts: true, maxAttempts: true },
     });
@@ -134,7 +142,7 @@ export class PrismaJobQueue implements JobQueue {
 
     const shouldRetry = job.attempts < job.maxAttempts;
 
-    await prisma.job.update({
+    await this.prisma.job.update({
       where: { id },
       data: {
         status: shouldRetry ? 'waiting' : 'failed',
@@ -147,7 +155,7 @@ export class PrismaJobQueue implements JobQueue {
   }
 
   async updateProgress(id: string, progress: number): Promise<void> {
-    await prisma.job.update({
+    await this.prisma.job.update({
       where: { id },
       data: { progress: Math.min(100, Math.max(0, progress)) },
     });

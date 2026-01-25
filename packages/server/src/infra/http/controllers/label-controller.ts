@@ -1,7 +1,6 @@
+import { createLabel, updateLabel, type LabelRepository } from '@picstash/core';
 import { inject, injectable } from 'inversify';
-import { createLabel, updateLabel } from '@/application/label/index.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface CreateLabelBody {
