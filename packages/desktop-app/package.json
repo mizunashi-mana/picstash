@@ -21,7 +21,7 @@
     "@picstash/eslint-config": "*",
     "@playwright/test": "^1.57.0",
     "@types/node": "^22.15.21",
-    "electron": "^34.0.0",
+    "electron": "^35.7.5",
     "electron-builder": "^25.1.8",
     "esbuild": "^0.25.0",
     "typescript": "^5.8.0"
