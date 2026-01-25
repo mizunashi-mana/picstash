@@ -158,4 +158,170 @@ describe('ImageDescriptionSection', () => {
       expect(generateDescriptionJob).toHaveBeenCalledWith('img-1');
     });
   });
+
+  it('should not mix results when generating for multiple images concurrently', async () => {
+    // Setup mocks for two different jobs
+    vi.mocked(generateDescriptionJob)
+      .mockResolvedValueOnce({
+        jobId: 'job-A',
+        status: 'queued',
+        message: 'Job queued',
+      })
+      .mockResolvedValueOnce({
+        jobId: 'job-B',
+        status: 'queued',
+        message: 'Job queued',
+      });
+
+    // Job A completes first with "Description A"
+    // Job B completes second with "Description B"
+    vi.mocked(getJobStatus).mockImplementation(async (jobId) => {
+      if (jobId === 'job-A') {
+        return {
+          id: 'job-A',
+          type: 'caption-generation',
+          status: 'completed',
+          progress: 100,
+          result: { description: 'Description A', model: 'gpt-4' },
+          attempts: 1,
+          maxAttempts: 3,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
+          startedAt: '2024-01-01T00:00:00Z',
+          completedAt: '2024-01-01T00:00:01Z',
+        };
+      }
+      return {
+        id: 'job-B',
+        type: 'caption-generation',
+        status: 'completed',
+        progress: 100,
+        result: { description: 'Description B', model: 'gpt-4' },
+        attempts: 1,
+        maxAttempts: 3,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+        startedAt: '2024-01-01T00:00:00Z',
+        completedAt: '2024-01-01T00:00:02Z',
+      };
+    });
+
+    const user = userEvent.setup();
+
+    // Render component for Image A
+    const { rerender } = render(
+      <ImageDescriptionSection imageId="img-A" description={null} />,
+      { wrapper: createWrapper() },
+    );
+
+    // Start generation for Image A
+    await user.click(screen.getByRole('button', { name: '説明を追加' }));
+    await user.click(screen.getByRole('button', { name: 'AI で生成' }));
+
+    await waitFor(() => {
+      expect(generateDescriptionJob).toHaveBeenCalledWith('img-A');
+    });
+
+    // Switch to Image B while Image A is still generating
+    rerender(<ImageDescriptionSection imageId="img-B" description={null} />);
+
+    // The component should exit edit mode when imageId changes, showing empty state
+    await waitFor(() => {
+      expect(screen.getByText('説明がありません')).toBeInTheDocument();
+    });
+
+    // Enter edit mode for Image B and start generation
+    await user.click(screen.getByRole('button', { name: '説明を追加' }));
+    await user.click(screen.getByRole('button', { name: 'AI で生成' }));
+
+    await waitFor(() => {
+      expect(generateDescriptionJob).toHaveBeenCalledWith('img-B');
+    });
+
+    // Wait for jobs to complete
+    await waitFor(
+      () => {
+        const textarea = screen.queryByDisplayValue('Description B');
+        expect(textarea).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+
+    // Verify Description A is not shown
+    expect(screen.queryByDisplayValue('Description A')).not.toBeInTheDocument();
+  });
+
+  it('should ignore stale job results when imageId changes', async () => {
+    // Setup mock for slow job
+    vi.mocked(generateDescriptionJob).mockResolvedValue({
+      jobId: 'job-slow',
+      status: 'queued',
+      message: 'Job queued',
+    });
+
+    let callCount = 0;
+    vi.mocked(getJobStatus).mockImplementation(async () => {
+      callCount++;
+      // Return in-progress for first few calls, then completed
+      if (callCount < 3) {
+        return {
+          id: 'job-slow',
+          type: 'caption-generation',
+          status: 'active',
+          progress: 50,
+          attempts: 1,
+          maxAttempts: 3,
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
+          startedAt: '2024-01-01T00:00:00Z',
+          completedAt: null,
+        };
+      }
+      return {
+        id: 'job-slow',
+        type: 'caption-generation',
+        status: 'completed',
+        progress: 100,
+        result: { description: 'Stale description', model: 'gpt-4' },
+        attempts: 1,
+        maxAttempts: 3,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+        startedAt: '2024-01-01T00:00:00Z',
+        completedAt: '2024-01-01T00:00:03Z',
+      };
+    });
+
+    const user = userEvent.setup();
+
+    // Render component for Image A and start generation
+    const { rerender } = render(
+      <ImageDescriptionSection imageId="img-A" description={null} />,
+      { wrapper: createWrapper() },
+    );
+
+    await user.click(screen.getByRole('button', { name: '説明を追加' }));
+    await user.click(screen.getByRole('button', { name: 'AI で生成' }));
+
+    await waitFor(() => {
+      expect(generateDescriptionJob).toHaveBeenCalledWith('img-A');
+    });
+
+    // Switch to a different image before job completes
+    rerender(<ImageDescriptionSection imageId="img-B" description="Original B" />);
+
+    // Wait for the description to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('Original B')).toBeInTheDocument();
+    });
+
+    // Wait a bit for the job to complete in the background
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // The stale result should not be displayed (Original B should remain)
+    expect(screen.getByText('Original B')).toBeInTheDocument();
+    expect(screen.queryByText('Stale description')).not.toBeInTheDocument();
+    // Also check that it's not in edit mode with the stale value
+    expect(screen.queryByDisplayValue('Stale description')).not.toBeInTheDocument();
+  });
 });

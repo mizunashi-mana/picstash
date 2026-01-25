@@ -26,17 +26,10 @@ export function ImageDescriptionSection({
   const [generateProgress, setGenerateProgress] = useState(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const errorCountRef = useRef(0);
+  const currentJobIdRef = useRef<string | null>(null);
+  const previousImageIdRef = useRef<string>(imageId);
 
   const MAX_POLLING_ERRORS = 5;
-
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => {
-      if (pollingRef.current !== null) {
-        clearInterval(pollingRef.current);
-      }
-    };
-  }, []);
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current !== null) {
@@ -44,14 +37,55 @@ export function ImageDescriptionSection({
       pollingRef.current = null;
     }
     errorCountRef.current = 0;
+    currentJobIdRef.current = null;
   }, []);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current !== null) {
+        clearInterval(pollingRef.current);
+      }
+      currentJobIdRef.current = null;
+    };
+  }, []);
+
+  // Handle imageId changes: stop polling and reset state
+  useEffect(() => {
+    // Only reset when imageId actually changes
+    if (previousImageIdRef.current !== imageId) {
+      previousImageIdRef.current = imageId;
+      stopPolling();
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- We need to reset state when imageId changes
+      setIsGenerating(false);
+
+      setGenerateError(null);
+
+      setGenerateProgress(0);
+
+      setIsEditing(false);
+
+      setEditValue(description ?? '');
+    }
+  }, [imageId, description, stopPolling]);
 
   const pollJobStatus = useCallback(
     (jobId: string) => {
       const poll = async () => {
         try {
+          // Only process results for the current job
+          if (currentJobIdRef.current !== jobId) {
+            return;
+          }
+
           const status = await getJobStatus(jobId);
           errorCountRef.current = 0; // Reset error count on success
+
+          // Double-check after async operation
+          if (currentJobIdRef.current !== jobId) {
+            return;
+          }
+
           setGenerateProgress(status.progress);
 
           if (status.status === 'completed' && status.result !== undefined) {
@@ -107,6 +141,8 @@ export function ImageDescriptionSection({
       return await generateDescriptionJob(imageId);
     },
     onSuccess: (result) => {
+      // Set the current job ID to track this generation
+      currentJobIdRef.current = result.jobId;
       // Track job in global context for notifications
       trackJob(result.jobId);
       // Start polling for job status
@@ -135,6 +171,8 @@ export function ImageDescriptionSection({
   };
 
   const handleGenerate = () => {
+    // Stop any existing polling before starting a new generation
+    stopPolling();
     setIsGenerating(true);
     setGenerateError(null);
     generateMutation.mutate();
