@@ -1,0 +1,49 @@
+{
+  "$schema": "../../../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Picstash",
+  "version": "0.1.0",
+  "identifier": "com.picstash.app",
+  "build": {
+    "frontendDist": "../../web-client/dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "npm run -w @picstash/web-client dev",
+    "beforeBuildCommand": "npm run -w @picstash/web-client build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Picstash",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Photography",
+    "shortDescription": "Image management application",
+    "longDescription": "Picstash is a desktop application for managing and organizing your image collections.",
+    "copyright": "Copyright 2025 mizunashi-mana",
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    },
+    "linux": {
+      "deb": {}
+    }
+  }
+}

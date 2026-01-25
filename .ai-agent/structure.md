@@ -192,13 +192,24 @@ picstash/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   └── e2e-test/               # E2E テスト
-│       ├── tests/              # Playwright テストファイル
-│       ├── fixtures/           # テスト用フィクスチャ
-│       ├── playwright.config.ts
-│       ├── eslint.config.mjs
-│       ├── package.json
-│       └── tsconfig.json
+│   ├── e2e-test/               # E2E テスト
+│   │   ├── tests/              # Playwright テストファイル
+│   │   ├── fixtures/           # テスト用フィクスチャ
+│   │   ├── playwright.config.ts
+│   │   ├── eslint.config.mjs
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   └── desktop-app/            # デスクトップアプリ (@picstash/desktop-app)
+│       ├── src-tauri/          # Tauri (Rust) コード
+│       │   ├── src/            # Rust ソースコード
+│       │   │   ├── lib.rs      # ライブラリエントリポイント
+│       │   │   └── main.rs     # メインエントリポイント
+│       │   ├── capabilities/   # 権限設定
+│       │   ├── icons/          # アプリアイコン
+│       │   ├── Cargo.toml      # Rust 依存関係
+│       │   └── tauri.conf.json # Tauri 設定
+│       └── package.json
 │
 ├── storage/                    # 画像ストレージ（ローカル）
 │   ├── originals/              # オリジナル画像
@@ -267,6 +278,17 @@ Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エ
 
 ### `packages/e2e-test/`
 Playwright を使用した E2E テストパッケージ。アプリケーション全体の統合テストを実行。
+
+### `packages/desktop-app/`
+Tauri を使用したデスクトップアプリパッケージ (`@picstash/desktop-app`)。
+- **src-tauri/** - Rust コードと Tauri 設定
+  - **src/** - Rust ソースコード
+  - **capabilities/** - Tauri 権限設定
+  - **icons/** - アプリアイコン（各プラットフォーム向け）
+  - **tauri.conf.json** - Tauri 設定ファイル
+
+開発時: `npm run dev:desktop` で Tauri 開発サーバーを起動。
+ビルド: `npm run build:desktop` でネイティブインストーラを生成。
 
 ### `storage/`
 アップロードされた画像の保存先。オリジナル画像とサムネイルを分離して管理。
