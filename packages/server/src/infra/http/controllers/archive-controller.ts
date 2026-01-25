@@ -1,5 +1,6 @@
 import {
   ARCHIVE_IMPORT_JOB_TYPE,
+  type ArchiveEntry,
   type ArchiveImportJobPayload,
   type ArchiveImportJobResult,
   type ArchiveSessionManager,
@@ -100,7 +101,7 @@ export class ArchiveController {
           filename: session.filename,
           archiveType: session.archiveType,
           imageCount: session.imageEntries.length,
-          images: session.imageEntries.map(entry => ({
+          images: session.imageEntries.map((entry: ArchiveEntry) => ({
             index: entry.index,
             filename: entry.filename,
             path: entry.path,
@@ -132,7 +133,7 @@ export class ArchiveController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === entryIndex);
+        const entry = session.imageEntries.find((e: ArchiveEntry) => e.index === entryIndex);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',
@@ -187,7 +188,7 @@ export class ArchiveController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === entryIndex);
+        const entry = session.imageEntries.find((e: ArchiveEntry) => e.index === entryIndex);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',

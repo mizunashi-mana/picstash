@@ -84,9 +84,15 @@ export type {
   GenerateMissingLabelEmbeddingsOptions,
 } from './application/attribute-suggestion/generate-label-embeddings.js';
 
+// Domain types - Archive
+export type { ArchiveEntry, ArchiveSession, ArchiveType } from './domain/archive/index.js';
+
+// Domain types - URL Crawl
+export type { CrawledImageEntry, UrlCrawlSession } from './domain/url-crawl/index.js';
+
 // Application Ports
 export type { ArchiveHandler } from './application/ports/archive-handler.js';
-export type { ArchiveSessionManager, ArchiveSession } from './application/ports/archive-session-manager.js';
+export type { ArchiveSessionManager } from './application/ports/archive-session-manager.js';
 export type { CaptionService } from './application/ports/caption-service.js';
 export type { CollectionRepository } from './application/ports/collection-repository.js';
 export type { EmbeddingRepository } from './application/ports/embedding-repository.js';

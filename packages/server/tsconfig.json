@@ -14,5 +14,8 @@
     }
   },
   "include": ["src/**/*", "*.config.ts", "tests/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../core" }
+  ]
 }

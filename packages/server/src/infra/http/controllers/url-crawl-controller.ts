@@ -1,5 +1,6 @@
 import {
   importFromUrlCrawl,
+  type CrawledImageEntry,
   type FileStorage,
   type ImageProcessor,
   type ImageRepository,
@@ -183,7 +184,7 @@ export class UrlCrawlController {
           sourceUrl: session.sourceUrl,
           pageTitle: session.pageTitle,
           imageCount: session.imageEntries.length,
-          images: session.imageEntries.map(entry => ({
+          images: session.imageEntries.map((entry: CrawledImageEntry) => ({
             index: entry.index,
             url: entry.url,
             filename: entry.filename,
@@ -215,7 +216,7 @@ export class UrlCrawlController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === index);
+        const entry = session.imageEntries.find((e: CrawledImageEntry) => e.index === index);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',
@@ -265,7 +266,7 @@ export class UrlCrawlController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === index);
+        const entry = session.imageEntries.find((e: CrawledImageEntry) => e.index === index);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',

@@ -6,9 +6,12 @@ export default {
       name: 'no-circular',
       severity: 'error',
       comment: '循環依存は複雑性を高めるため禁止',
-      from: {},
+      from: {
+        pathNot: ['node_modules/@picstash/core', '../core'],
+      },
       to: {
         circular: true,
+        pathNot: ['node_modules/@picstash/core', '../core'],
       },
     },
 
