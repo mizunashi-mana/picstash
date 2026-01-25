@@ -9,16 +9,15 @@ import {
   Title,
 } from '@mantine/core';
 import {
-  IconArchive,
   IconChartBar,
   IconCopy,
+  IconDownload,
   IconFolder,
   IconHome,
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
   IconPhoto,
   IconTags,
-  IconWorld,
 } from '@tabler/icons-react';
 import { Link, useLocation } from 'react-router';
 
@@ -34,8 +33,7 @@ const navItems = [
   { label: 'コレクション', path: '/collections', icon: IconFolder },
   { label: 'ラベル', path: '/labels', icon: IconTags },
   { label: '重複検出', path: '/duplicates', icon: IconCopy },
-  { label: 'アーカイブ', path: '/archive-import', icon: IconArchive },
-  { label: 'URLから取り込み', path: '/url-crawl', icon: IconWorld },
+  { label: 'インポート', path: '/import', icon: IconDownload },
   { label: '統計', path: '/stats', icon: IconChartBar },
 ];
 

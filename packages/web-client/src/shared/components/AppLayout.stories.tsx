@@ -31,7 +31,7 @@ export const Default: Story = {
     // ナビゲーションリンクが表示されていることを確認
     await expect(canvas.getByRole('link', { name: 'ホーム' })).toBeInTheDocument();
     await expect(canvas.getByRole('link', { name: 'ラベル' })).toBeInTheDocument();
-    await expect(canvas.getByRole('link', { name: 'アーカイブ' })).toBeInTheDocument();
+    await expect(canvas.getByRole('link', { name: 'インポート' })).toBeInTheDocument();
 
     // コンテンツが表示されていることを確認
     await expect(canvas.getByText('Page Content')).toBeInTheDocument();

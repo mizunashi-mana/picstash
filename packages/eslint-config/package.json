@@ -11,6 +11,7 @@
     "postinstall": "npm run build",
     "lint:eslint": "eslint --cache --fix src *.ts",
     "test": "vitest run",
+    "test:coverage": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
