@@ -315,8 +315,17 @@ describe('ImageDescriptionSection', () => {
       expect(screen.getByText('Original B')).toBeInTheDocument();
     });
 
-    // Wait a bit for the job to complete in the background
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Give enough time for the background polling to complete
+    // (even though it should be stopped and not affect the UI)
+    await waitFor(
+      async () => {
+        // Just wait a bit to ensure any background activity has settled
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+      },
+      { timeout: 2500 },
+    );
 
     // The stale result should not be displayed (Original B should remain)
     expect(screen.getByText('Original B')).toBeInTheDocument();
