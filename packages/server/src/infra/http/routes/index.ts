@@ -8,6 +8,8 @@ export function registerRoutes(app: FastifyInstance, container: AppContainer): v
 
   // Register controllers with inversify DI
   container.getImageController().registerRoutes(app);
+  container.getImageSimilarityController().registerRoutes(app);
+  container.getImageSuggestionController().registerRoutes(app);
   container.getImageAttributeController().registerRoutes(app);
   container.getLabelController().registerRoutes(app);
   container.getCollectionController().registerRoutes(app);
