@@ -7,6 +7,7 @@ picstash/
 │   │   ├── product.md          # プロダクト概要
 │   │   ├── tech.md             # 技術概要
 │   │   ├── plan.md             # 実装計画
+│   │   ├── market.md           # 市場分析
 │   │   └── work.md             # 作業の進め方
 │   ├── tasks/                  # タスクドキュメント
 │   │   └── YYYYMMDD-タスク名/   # 各タスクのディレクトリ
@@ -24,6 +25,9 @@ picstash/
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
 │   │   │   │   │   └── api.ts
+│   │   │   │   ├── import/     # インポート機能
+│   │   │   │   │   ├── components/
+│   │   │   │   │   └── pages/
 │   │   │   │   ├── collections/ # コレクション機能
 │   │   │   │   │   ├── components/
 │   │   │   │   │   ├── pages/
@@ -95,13 +99,11 @@ picstash/
 │   │   │   ├── domain/         # ドメイン層
 │   │   │   │   ├── archive/    # アーカイブドメインモデル
 │   │   │   │   ├── collection/ # コレクションドメインモデル
-│   │   │   │   ├── embedding/  # 埋め込みドメインモデル
 │   │   │   │   ├── image/      # 画像ドメインモデル
 │   │   │   │   ├── image-attribute/ # 画像属性ドメインモデル
 │   │   │   │   ├── label/      # ラベルドメインモデル
 │   │   │   │   ├── recommendation-conversion/ # 推薦コンバージョンモデル
 │   │   │   │   ├── search-history/ # 検索履歴ドメインモデル
-│   │   │   │   ├── stats/      # 統計ドメインモデル
 │   │   │   │   ├── url-crawl/  # URLクロールドメインモデル
 │   │   │   │   └── view-history/ # 閲覧履歴ドメインモデル
 │   │   │   │
@@ -163,10 +165,15 @@ picstash/
 │   ├── api/                    # 共有 API 型定義 (@picstash/api)
 │   │   ├── src/
 │   │   │   ├── index.ts        # メインエクスポート
+│   │   │   ├── collections.ts  # コレクション API エンドポイント・型定義
+│   │   │   ├── image-attributes.ts # 画像属性 API エンドポイント・型定義
 │   │   │   ├── images.ts       # 画像 API エンドポイント定義
-│   │   │   ├── stats.ts        # 統計 API エンドポイント・型定義
+│   │   │   ├── jobs.ts         # ジョブ API エンドポイント・型定義
 │   │   │   ├── labels.ts       # ラベル API エンドポイント・型定義
-│   │   │   └── image-attributes.ts # 画像属性 API エンドポイント・型定義
+│   │   │   ├── search.ts       # 検索 API エンドポイント・型定義
+│   │   │   ├── stats.ts        # 統計 API エンドポイント・型定義
+│   │   │   ├── url.ts          # URL ヘルパー
+│   │   │   └── view-history.ts # 閲覧履歴 API エンドポイント・型定義
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │

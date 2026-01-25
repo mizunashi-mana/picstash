@@ -54,6 +54,7 @@
 │   ├── product.md    # プロダクト概要
 │   ├── tech.md       # 技術概要
 │   ├── plan.md       # 実装計画（セグメント一覧）
+│   ├── market.md     # 市場分析
 │   └── work.md       # 作業の進め方（本ファイル）
 ├── tasks/
 │   └── YYYYMMDD-タスク名/
