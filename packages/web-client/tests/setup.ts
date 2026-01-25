@@ -15,3 +15,20 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: () => false,
   }),
 });
+
+// Mock ResizeObserver for Mantine ScrollArea and other components
+class ResizeObserverMock {
+  observe(): void {
+    // Mock implementation - no-op
+  }
+
+  unobserve(): void {
+    // Mock implementation - no-op
+  }
+
+  disconnect(): void {
+    // Mock implementation - no-op
+  }
+}
+
+window.ResizeObserver = ResizeObserverMock;
