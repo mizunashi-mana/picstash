@@ -78,17 +78,14 @@ export default defineConfig({
         'src/features/duplicates/pages/DuplicatesPage.tsx',
 
         // features/gallery
+        // ImageAttributeSection.tsx - テスト未対応（container）
         'src/features/gallery/components/ImageAttributeSection.tsx',
-        'src/features/gallery/components/ImageAttributeSectionView.tsx',
-        'src/features/gallery/components/ImageCarousel.tsx',
+        // 以下はテスト追加済みだがカバレッジ70%未達
         'src/features/gallery/components/ImageCollectionsSection.tsx',
         'src/features/gallery/components/ImageDescriptionSection.tsx',
-        'src/features/gallery/components/ImageDescriptionSectionView.tsx',
         'src/features/gallery/components/ImageGallery.tsx',
-        'src/features/gallery/components/ImageGalleryView.tsx',
         'src/features/gallery/components/SearchBar.tsx',
-        'src/features/gallery/components/SimilarImagesSection.tsx',
-        'src/features/gallery/components/SimilarImagesSectionView.tsx',
+        // GalleryPage.tsx, ImageDetailPage.tsx - ページ全体テスト未対応
         'src/features/gallery/pages/GalleryPage.tsx',
         'src/features/gallery/pages/ImageDetailPage.tsx',
 
