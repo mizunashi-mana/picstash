@@ -60,7 +60,7 @@
 
 ## 完了条件
 
-- [x] `npm run dev:desktop` で開発サーバーが起動する（server 別途起動が必要）
+- [x] `npm run dev:desktop` でデスクトップアプリと開発サーバーが起動する（単一コマンドで起動できる）
 - [ ] `npm run build:desktop` でネイティブアプリがビルドされる
 - [ ] macOS で dmg が生成される
 - [ ] 生成されたアプリが正常に起動し、既存機能が動作する
