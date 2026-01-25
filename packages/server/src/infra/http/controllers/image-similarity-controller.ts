@@ -1,9 +1,12 @@
+import {
+  findDuplicates,
+  DEFAULT_DUPLICATE_THRESHOLD,
+  EMBEDDING_DIMENSION,
+  type EmbeddingRepository,
+  type ImageRepository,
+} from '@picstash/core';
 import { inject, injectable } from 'inversify';
-import { findDuplicates, DEFAULT_DUPLICATE_THRESHOLD } from '@/application/duplicate-detection/index.js';
-import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 @injectable()

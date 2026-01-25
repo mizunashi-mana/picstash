@@ -1,0 +1,35 @@
+{
+  "rules": {
+    "field-name-mapping-snake-case": [
+      "error",
+      {
+        "compoundWords": ["At", "Type"]
+      }
+    ],
+    "field-order": [
+      "error",
+      {
+        "order": ["id", "..."]
+      }
+    ],
+    "forbid-required-ignored-field": "error",
+    "model-name-grammatical-number": [
+      "error",
+      {
+        "style": "singular"
+      }
+    ],
+    "model-name-mapping-snake-case": "off",
+    "model-name-prefix": "off",
+    "require-field-type": [
+      "error",
+      {
+        "require": [
+          { "ifName": "id", "type": "String" },
+          { "ifName": "createdAt", "type": "DateTime" },
+          { "ifName": "updatedAt", "type": "DateTime" }
+        ]
+      }
+    ]
+  }
+}

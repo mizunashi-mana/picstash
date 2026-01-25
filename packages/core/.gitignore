@@ -1,0 +1,8 @@
+# TS build
+/dist/
+
+# vitest coverage
+/coverage/
+
+# Prisma generated client
+/generated/

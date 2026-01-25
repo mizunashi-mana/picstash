@@ -1,7 +1,10 @@
 import { inject, injectable } from 'inversify';
-import { prisma } from '@/infra/database/prisma.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
+import type {
+  LabelRepository,
+  PrismaService,
+  SearchHistoryRepository,
+} from '@picstash/core';
 import type { FastifyInstance } from 'fastify';
 
 interface SuggestionsQuery {
@@ -31,6 +34,10 @@ export class SearchController {
   constructor(
     @inject(TYPES.SearchHistoryRepository)
     private readonly searchHistoryRepository: SearchHistoryRepository,
+    @inject(TYPES.LabelRepository)
+    private readonly labelRepository: LabelRepository,
+    @inject(TYPES.PrismaService)
+    private readonly prismaService: PrismaService,
   ) {}
 
   registerRoutes(app: FastifyInstance): void {
@@ -69,10 +76,7 @@ export class SearchController {
 
         // 2. Search labels by name (prefix match, case-insensitive)
         // SQLite doesn't support case-insensitive mode, so we fetch all and filter in JS
-        const allLabels = await prisma.attributeLabel.findMany({
-          select: { name: true },
-          orderBy: { name: 'asc' },
-        });
+        const allLabels = await this.labelRepository.findAll();
 
         for (const label of allLabels) {
           if (label.name.toLowerCase().startsWith(query)) {
@@ -91,7 +95,7 @@ export class SearchController {
         // 3. Search keywords from image attributes
         // Keywords are stored as comma-separated strings
         if (suggestions.length < MAX_SUGGESTIONS) {
-          const attributes = await prisma.imageAttribute.findMany({
+          const attributes = await this.prismaService.getClient().imageAttribute.findMany({
             where: {
               keywords: {
                 not: null,

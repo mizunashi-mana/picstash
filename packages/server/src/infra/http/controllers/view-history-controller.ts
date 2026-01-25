@@ -1,7 +1,6 @@
+import { Prisma, type ViewHistoryRepository } from '@picstash/core';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
-import { Prisma } from '@~generated/prisma/client.js';
-import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface CreateViewHistoryBody {

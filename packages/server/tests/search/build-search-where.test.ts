@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
 import {
   buildSearchWhere,
   buildTermCondition,
-} from '@/application/search/build-search-where';
+} from '@picstash/core';
+import { describe, expect, it } from 'vitest';
 
 describe('buildTermCondition', () => {
   it('should build condition for a single term', () => {

@@ -1,6 +1,6 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
-import type { JobQueue, JobStatus } from '@/application/ports/job-queue.js';
+import type { JobQueue, JobStatus } from '@picstash/core';
 import type { FastifyInstance } from 'fastify';
 
 @injectable()

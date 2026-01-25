@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
 import {
   isEmptyQuery,
   parseSearchQuery,
-} from '@/application/search/query-parser';
+} from '@picstash/core';
+import { describe, expect, it } from 'vitest';
 
 describe('parseSearchQuery', () => {
   describe('empty and whitespace input', () => {

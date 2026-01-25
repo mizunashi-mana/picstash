@@ -1,10 +1,13 @@
+import {
+  importFromUrlCrawl,
+  type CrawledImageEntry,
+  type FileStorage,
+  type ImageProcessor,
+  type ImageRepository,
+  type UrlCrawlSessionManager,
+} from '@picstash/core';
 import { inject, injectable } from 'inversify';
-import { importFromUrlCrawl } from '@/application/url-crawl/index.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
-import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
-import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 /** Rate limit window in milliseconds (1 minute) */
@@ -181,7 +184,7 @@ export class UrlCrawlController {
           sourceUrl: session.sourceUrl,
           pageTitle: session.pageTitle,
           imageCount: session.imageEntries.length,
-          images: session.imageEntries.map(entry => ({
+          images: session.imageEntries.map((entry: CrawledImageEntry) => ({
             index: entry.index,
             url: entry.url,
             filename: entry.filename,
@@ -213,7 +216,7 @@ export class UrlCrawlController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === index);
+        const entry = session.imageEntries.find((e: CrawledImageEntry) => e.index === index);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',
@@ -263,7 +266,7 @@ export class UrlCrawlController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === index);
+        const entry = session.imageEntries.find((e: CrawledImageEntry) => e.index === index);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',

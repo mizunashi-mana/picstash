@@ -1,14 +1,17 @@
 import { createReadStream } from 'node:fs';
+import {
+  deleteImage,
+  uploadImage,
+  generateTitle,
+  fileExists,
+  type EmbeddingRepository,
+  type EmbeddingService,
+  type FileStorage,
+  type ImageProcessor,
+  type ImageRepository,
+} from '@picstash/core';
 import { inject, injectable } from 'inversify';
-import { deleteImage, uploadImage } from '@/application/image/index.js';
-import { generateTitle } from '@/domain/image/index.js';
 import { TYPES } from '@/infra/di/types.js';
-import { fileExists } from '@/shared/file-utils.js';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
-import type { EmbeddingService } from '@/application/ports/embedding-service.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
-import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 @injectable()

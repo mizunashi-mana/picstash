@@ -31,6 +31,11 @@
     entry = "./scripts/run-script.mjs --cwd packages/e2e-test -- npx eslint --cache --fix FILES";
     files = "^packages/e2e-test/.*\.[cm]?(js|ts)x?$";
   };
+  git-hooks.hooks.npx-eslint-pkg-core = {
+    enable = true;
+    entry = "./scripts/run-script.mjs --cwd packages/core -- npx eslint --cache --fix FILES";
+    files = "^packages/core/.*\.[cm]?(js|ts)x?$";
+  };
   git-hooks.hooks.npx-eslint-pkg-server = {
     enable = true;
     entry = "./scripts/run-script.mjs --cwd packages/server -- npx eslint --cache --fix FILES";
@@ -41,10 +46,10 @@
     entry = "./scripts/run-script.mjs --cwd packages/web-client -- npx eslint --cache --fix FILES";
     files = "^packages/web-client/.*\.[cm]?(js|ts)x?$";
   };
-  git-hooks.hooks.npx-prisma-lint-pkg-server = {
+  git-hooks.hooks.npx-prisma-lint-pkg-core = {
     enable = true;
-    entry = "./scripts/run-script.mjs --cwd packages/server -- npx prisma-lint FILES";
-    files = "^packages/server/.*\.prisma$";
+    entry = "./scripts/run-script.mjs --cwd packages/core -- npx prisma-lint FILES";
+    files = "^packages/core/.*\.prisma$";
   };
   git-hooks.hooks.actionlint = {
     enable = true;

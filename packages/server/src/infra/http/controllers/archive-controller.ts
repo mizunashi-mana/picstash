@@ -1,10 +1,15 @@
+import {
+  ARCHIVE_IMPORT_JOB_TYPE,
+  type ArchiveEntry,
+  type ArchiveImportJobPayload,
+  type ArchiveImportJobResult,
+  type ArchiveSessionManager,
+  type ImageProcessor,
+  type JobQueue,
+  type JobStatus,
+} from '@picstash/core';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
-import { ARCHIVE_IMPORT_JOB_TYPE } from '@/infra/workers/index.js';
-import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
-import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { JobQueue, JobStatus } from '@/application/ports/job-queue.js';
-import type { ArchiveImportJobPayload, ArchiveImportJobResult } from '@/infra/workers/index.js';
 import type { FastifyInstance } from 'fastify';
 
 function getMimeType(filename: string): string {
@@ -96,7 +101,7 @@ export class ArchiveController {
           filename: session.filename,
           archiveType: session.archiveType,
           imageCount: session.imageEntries.length,
-          images: session.imageEntries.map(entry => ({
+          images: session.imageEntries.map((entry: ArchiveEntry) => ({
             index: entry.index,
             filename: entry.filename,
             path: entry.path,
@@ -128,7 +133,7 @@ export class ArchiveController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === entryIndex);
+        const entry = session.imageEntries.find((e: ArchiveEntry) => e.index === entryIndex);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',
@@ -183,7 +188,7 @@ export class ArchiveController {
           });
         }
 
-        const entry = session.imageEntries.find(e => e.index === entryIndex);
+        const entry = session.imageEntries.find((e: ArchiveEntry) => e.index === entryIndex);
         if (entry === undefined) {
           return await reply.status(404).send({
             error: 'Not Found',

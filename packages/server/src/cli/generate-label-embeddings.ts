@@ -15,16 +15,20 @@ import {
   generateMissingLabelEmbeddings,
   regenerateAllLabelEmbeddings,
   type GenerateLabelEmbeddingDeps,
-} from '@/application/attribute-suggestion/generate-label-embeddings.js';
-import { type Config, initConfig, parseCliArgs } from '@/config.js';
-import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
-import { buildAppContainer } from '@/infra/di/index.js';
+  type PrismaService,
+} from '@picstash/core';
+import { initConfig, parseCliArgs } from '@/config.js';
+import { type AppContainer, buildAppContainer } from '@/infra/di/index.js';
 
-function getDeps(config: Config): GenerateLabelEmbeddingDeps {
-  const container = buildAppContainer(config);
+interface CliDeps extends GenerateLabelEmbeddingDeps {
+  prismaService: PrismaService;
+}
+
+function getDeps(container: AppContainer): CliDeps {
   return {
     labelRepository: container.getLabelRepository(),
     embeddingService: container.getEmbeddingService(),
+    prismaService: container.getPrismaService(),
   };
 }
 
@@ -33,11 +37,11 @@ async function main(): Promise<void> {
 
   // Initialize configuration
   const config = initConfig(configPath);
+  const container = buildAppContainer(config);
+  const deps = getDeps(container);
 
   console.log('Connecting to database...');
-  await connectDatabase();
-
-  const deps = getDeps(config);
+  await deps.prismaService.connect();
 
   try {
     switch (command) {
@@ -57,7 +61,7 @@ async function main(): Promise<void> {
     }
   }
   finally {
-    await disconnectDatabase();
+    await deps.prismaService.disconnect();
   }
 }
 

@@ -15,7 +15,7 @@
     "lint": "pre-commit run --all-files && npm run lint:deps",
     "lint:deps": "npm run lint:deps --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w @picstash/core -w @picstash/eslint-config && npm run build -w @picstash/server -w @picstash/web-client",
     "test": "npm run test --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",
     "test:e2e": "npm run test:e2e -w @picstash/e2e-test",

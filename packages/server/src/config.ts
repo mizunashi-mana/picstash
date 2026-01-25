@@ -1,11 +1,12 @@
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import yaml from 'js-yaml';
 import { z } from 'zod';
+import type { CoreConfig } from '@picstash/core';
 
-const currentDir = dirname(fileURLToPath(import.meta.url));
-const defaultConfigPath = resolve(currentDir, '../config.yaml');
+// =============================================================================
+// Zod Schemas
+// =============================================================================
 
 const rotationSchema = z
   .object({
@@ -53,17 +54,28 @@ const loggingSchema = z
     },
   }));
 
-const configSchema = z.object({
+/**
+ * Raw configuration schema (before path resolution).
+ * Paths can be relative or absolute.
+ */
+const rawConfigSchema = z.object({
   server: z.object({
     port: z.number().int().positive().default(4000),
     host: z.string().default('0.0.0.0'),
-  }),
+  }).optional().transform(val => ({
+    port: val?.port ?? 4000,
+    host: val?.host ?? '0.0.0.0',
+  })),
   database: z.object({
-    url: z.string().min(1, 'Database URL is required'),
-  }),
+    path: z.string().optional(),
+  }).optional().transform(val => ({
+    path: val?.path ?? './data/picstash.db',
+  })),
   storage: z.object({
-    path: z.string().min(1, 'Storage path is required'),
-  }),
+    path: z.string().optional(),
+  }).optional().transform(val => ({
+    path: val?.path ?? './data/storage',
+  })),
   logging: loggingSchema,
   ollama: z.object({
     url: z.string().default('http://localhost:11434'),
@@ -71,17 +83,109 @@ const configSchema = z.object({
   }).optional(),
 });
 
-export type Config = z.infer<typeof configSchema>;
+type RawConfig = z.infer<typeof rawConfigSchema>;
+
+/**
+ * Server configuration including HTTP server settings.
+ */
+export interface Config extends CoreConfig {
+  server: {
+    port: number;
+    host: string;
+  };
+}
+
+// =============================================================================
+// Path Resolution
+// =============================================================================
+
+/**
+ * Resolve a path to an absolute path.
+ * If the path is relative, it is resolved against cwd.
+ * @param path - Path to resolve (relative or absolute)
+ * @returns Absolute path
+ */
+function resolvePath(path: string): string {
+  if (isAbsolute(path)) {
+    return path;
+  }
+  return resolve(process.cwd(), path);
+}
+
+/**
+ * Ensure the parent directory exists for the given file path.
+ */
+function ensureParentDirectory(filePath: string): void {
+  const dir = dirname(filePath);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+}
+
+/**
+ * Transform raw config (with potentially relative paths) to resolved config (with absolute paths).
+ */
+function resolveConfig(raw: RawConfig): Config {
+  const databasePath = resolvePath(raw.database.path);
+  const storagePath = resolvePath(raw.storage.path);
+  const logFilePath = resolvePath(raw.logging.file.path);
+
+  // Ensure database directory exists
+  ensureParentDirectory(databasePath);
+
+  return {
+    server: raw.server,
+    database: {
+      path: databasePath,
+    },
+    storage: {
+      path: storagePath,
+    },
+    logging: {
+      level: raw.logging.level,
+      format: raw.logging.format,
+      file: {
+        enabled: raw.logging.file.enabled,
+        path: logFilePath,
+        rotation: raw.logging.file.rotation,
+      },
+    },
+    ollama: raw.ollama,
+  };
+}
+
+// =============================================================================
+// Configuration Loading
+// =============================================================================
 
 /**
  * Load configuration from a YAML file.
- * @param configPath - Path to the config file. If not provided, uses default path.
+ * @param configPath - Path to the config file. If not provided, tries to load from default locations.
  */
 export function loadConfig(configPath?: string): Config {
-  const path = configPath ?? defaultConfigPath;
-  const configFile = readFileSync(path, 'utf8');
-  const rawConfig = yaml.load(configFile);
-  return configSchema.parse(rawConfig);
+  let rawConfig: unknown;
+
+  // Determine the config file path
+  let resolvedConfigPath = configPath;
+  if (resolvedConfigPath === undefined) {
+    // Try default config file at cwd/config.yaml
+    const defaultPath = resolve(process.cwd(), 'config.yaml');
+    if (existsSync(defaultPath)) {
+      resolvedConfigPath = defaultPath;
+    }
+  }
+
+  if (resolvedConfigPath !== undefined) {
+    const configFile = readFileSync(resolvedConfigPath, 'utf8');
+    rawConfig = yaml.load(configFile);
+  }
+  else {
+    // Use default values (no config file found)
+    rawConfig = {};
+  }
+
+  const parsed = rawConfigSchema.parse(rawConfig);
+  return resolveConfig(parsed);
 }
 
 /**
@@ -89,12 +193,16 @@ export function loadConfig(configPath?: string): Config {
  * Config path resolution priority:
  * 1. Provided configPath argument
  * 2. Environment variable PICSTASH_CONFIG
- * 3. Default path (packages/server/config.yaml)
+ * 3. Default values (paths relative to cwd)
  */
 export function initConfig(configPath?: string): Config {
   const path = configPath ?? process.env.PICSTASH_CONFIG ?? undefined;
   return loadConfig(path);
 }
+
+// =============================================================================
+// CLI Argument Parsing
+// =============================================================================
 
 /**
  * Parse command line arguments for --config option.

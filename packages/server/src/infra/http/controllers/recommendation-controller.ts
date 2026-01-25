@@ -1,9 +1,11 @@
+import {
+  generateRecommendations,
+  type EmbeddingRepository,
+  type ImageRepository,
+  type ViewHistoryRepository,
+} from '@picstash/core';
 import { inject, injectable } from 'inversify';
-import { generateRecommendations } from '@/application/recommendation/generate-recommendations.js';
 import { TYPES } from '@/infra/di/types.js';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
-import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
 import type { FastifyInstance } from 'fastify';
 
 interface RecommendationsQuery {
