@@ -2,7 +2,9 @@ import { buildConfig } from '@picstash/eslint-config';
 
 export default [
   {
-    ignores: ['dist/**', 'release/**'],
+    ignores: ['dist/**', 'release/**', 'playwright-report/**', 'test-results/**'],
   },
-  ...buildConfig({}),
+  ...buildConfig({
+    ruleSets: ['common', 'node', 'playwright'],
+  }),
 ];
