@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
+    <title>Picstash</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+      }
+      h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+      }
+      .versions {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+      .versions p {
+        margin: 0.25rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Picstash</h1>
+    <p class="subtitle">Desktop App</p>
+    <div class="versions">
+      <p>Node.js: <span id="node-version"></span></p>
+      <p>Chrome: <span id="chrome-version"></span></p>
+      <p>Electron: <span id="electron-version"></span></p>
+    </div>
+    <script>
+      document.getElementById('node-version').textContent = window.picstash.versions.node;
+      document.getElementById('chrome-version').textContent = window.picstash.versions.chrome;
+      document.getElementById('electron-version').textContent = window.picstash.versions.electron;
+    </script>
+  </body>
+</html>
