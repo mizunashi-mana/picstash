@@ -129,9 +129,14 @@ describe('JobWorker', () => {
       await worker.stop();
 
       expect(worker.getIsShuttingDown()).toBe(false); // シャットダウン完了後はリセット
+
+      // stop 後はタイマーを進めても acquireJob が呼ばれない
+      vi.mocked(mockJobQueue.acquireJob).mockClear();
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(mockJobQueue.acquireJob).not.toHaveBeenCalled();
     });
 
-    it('should force stop after graceful shutdown timeout', async () => {
+    it('should return timedOut: true when graceful shutdown times out', async () => {
       worker = new JobWorker(mockJobQueue, {
         pollingInterval: 1000,
         gracefulShutdownTimeout: 100, // 100ms タイムアウト
@@ -168,11 +173,41 @@ describe('JobWorker', () => {
       // タイムアウトまで進める
       await vi.advanceTimersByTimeAsync(100);
 
-      // stop はタイムアウト後に完了する
-      await stopPromise;
+      // stop はタイムアウト後に完了し、timedOut: true を返す
+      const result = await stopPromise;
+      expect(result.timedOut).toBe(true);
 
       // ワーカーは停止している
       expect(worker.getIsShuttingDown()).toBe(false);
+    });
+
+    it('should return timedOut: false when job completes before timeout', async () => {
+      worker = new JobWorker(mockJobQueue, {
+        pollingInterval: 1000,
+        gracefulShutdownTimeout: 5000,
+      });
+
+      worker.registerHandler('test-job', async () => {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50);
+        });
+        return 'result';
+      });
+
+      const mockJob = createMockJob();
+      vi.mocked(mockJobQueue.acquireJob)
+        .mockResolvedValueOnce(mockJob)
+        .mockResolvedValue(null);
+      vi.mocked(mockJobQueue.completeJob).mockResolvedValue();
+
+      worker.start();
+      await vi.advanceTimersByTimeAsync(0);
+
+      const stopPromise = worker.stop();
+      await vi.advanceTimersByTimeAsync(50);
+
+      const result = await stopPromise;
+      expect(result.timedOut).toBe(false);
     });
 
     it('should return immediately if worker is not running', async () => {

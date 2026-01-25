@@ -47,26 +47,44 @@ async function main(): Promise<void> {
 
     app.log.info('Shutting down...');
 
+    // ジョブワーカーの graceful shutdown を待機
     try {
-      // ジョブワーカーの graceful shutdown を待機
-      await jobWorker.stop();
-      app.log.info('Job worker stopped');
+      const result = await jobWorker.stop();
+      if (result.timedOut) {
+        app.log.warn('Job worker shutdown timed out, some jobs may still be running');
+      }
+      else {
+        app.log.info('Job worker stopped');
+      }
+    }
+    catch (err: unknown) {
+      app.log.error({ err }, 'Job worker stop error');
+    }
 
-      // OCR ワーカーを終了（失敗してもシャットダウンをブロックしない）
-      await ocrService.terminate().catch((err: unknown) => {
-        app.log.error({ err }, 'OCR terminate error');
-      });
+    // OCR ワーカーを終了
+    try {
+      await ocrService.terminate();
+    }
+    catch (err: unknown) {
+      app.log.error({ err }, 'OCR terminate error');
+    }
 
-      // HTTP サーバーを閉じる
+    // HTTP サーバーを閉じる
+    try {
       await app.close();
       app.log.info('HTTP server closed');
+    }
+    catch (err: unknown) {
+      app.log.error({ err }, 'HTTP server close error');
+    }
 
-      // データベース接続を閉じる
+    // データベース接続を閉じる
+    try {
       await disconnectDatabase();
       app.log.info('Database disconnected');
     }
     catch (err: unknown) {
-      app.log.error({ err }, 'Error during shutdown');
+      app.log.error({ err }, 'Database disconnect error');
     }
   };
 
