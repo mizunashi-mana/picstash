@@ -2,29 +2,32 @@ import 'reflect-metadata';
 import { mkdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import sharp from 'sharp';
-import { getConfig } from '@/config.js';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   ImageMetadata,
   ImageProcessor,
   ThumbnailResult,
 } from '@/application/ports/image-processor.js';
+import type { Config } from '@/config.js';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-
-function getStoragePath(): string {
-  return resolve(currentDir, '../../..', getConfig().storage.path);
-}
-
-function getThumbnailsPath(): string {
-  return join(getStoragePath(), 'thumbnails');
-}
 
 const THUMBNAIL_SIZE = 300;
 
 @injectable()
 export class SharpImageProcessor implements ImageProcessor {
+  private readonly storagePath: string;
+
+  constructor(@inject(TYPES.Config) config: Config) {
+    this.storagePath = resolve(currentDir, '../../..', config.storage.path);
+  }
+
+  private getThumbnailsPath(): string {
+    return join(this.storagePath, 'thumbnails');
+  }
+
   private async ensureDirectory(dir: string): Promise<void> {
     await mkdir(dir, { recursive: true });
   }
@@ -46,13 +49,13 @@ export class SharpImageProcessor implements ImageProcessor {
     inputFilePath: string,
     outputFilename: string,
   ): Promise<ThumbnailResult> {
-    await this.ensureDirectory(getThumbnailsPath());
+    await this.ensureDirectory(this.getThumbnailsPath());
 
     let thumbnailFilename = outputFilename.replace(/\.[^.]+$/, '.jpg');
     if (thumbnailFilename === outputFilename) {
       thumbnailFilename = `${outputFilename}.jpg`;
     }
-    const thumbnailFilePath = join(getThumbnailsPath(), thumbnailFilename);
+    const thumbnailFilePath = join(this.getThumbnailsPath(), thumbnailFilename);
 
     await sharp(inputFilePath)
       .resize(THUMBNAIL_SIZE, THUMBNAIL_SIZE, {

@@ -17,12 +17,12 @@ import {
   syncEmbeddingsToVectorDb,
   type GenerateEmbeddingDeps,
 } from '@/application/embedding/generate-embedding.js';
-import { initConfig, parseCliArgs } from '@/config.js';
+import { type Config, initConfig, parseCliArgs } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 
-function getDeps(): GenerateEmbeddingDeps {
-  const container = buildAppContainer();
+function getDeps(config: Config): GenerateEmbeddingDeps {
+  const container = buildAppContainer(config);
   return {
     imageRepository: container.getImageRepository(),
     fileStorage: container.getFileStorage(),
@@ -35,12 +35,12 @@ async function main(): Promise<void> {
   const { command, configPath } = parseCliArgs(process.argv);
 
   // Initialize configuration
-  initConfig(configPath);
+  const config = initConfig(configPath);
 
   console.log('Connecting to database...');
   await connectDatabase();
 
-  const deps = getDeps();
+  const deps = getDeps(config);
 
   try {
     switch (command) {

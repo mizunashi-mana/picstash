@@ -7,6 +7,24 @@ import AdmZip from 'adm-zip';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { InMemoryArchiveSessionManager } from '@/infra/adapters/in-memory-archive-session-manager';
 import type { ArchiveHandler } from '@/application/ports/archive-handler';
+import type { Config } from '@/config.js';
+
+function createTestConfig(tempDir: string): Config {
+  return {
+    storage: { path: tempDir },
+    server: { port: 3000, host: '0.0.0.0' },
+    database: { url: 'file:./test.db' },
+    logging: {
+      level: 'info',
+      format: 'pretty',
+      file: {
+        enabled: false,
+        path: './logs/server.log',
+        rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
+      },
+    },
+  };
+}
 
 // Mock handler for testing
 class MockZipHandler implements ArchiveHandler {
@@ -56,8 +74,9 @@ describe('InMemoryArchiveSessionManager', () => {
   let testZipBuffer: Buffer;
 
   beforeEach(async () => {
-    manager = new InMemoryArchiveSessionManager([new MockZipHandler()]);
     tempDir = await mkdtemp(join(tmpdir(), 'session-test-'));
+    const config = createTestConfig(tempDir);
+    manager = new InMemoryArchiveSessionManager(config, [new MockZipHandler()]);
 
     // Create a test ZIP buffer with images
     const zip = new AdmZip();

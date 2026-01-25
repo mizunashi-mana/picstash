@@ -6,13 +6,14 @@
  */
 
 import 'reflect-metadata';
-import { injectable } from 'inversify';
-import { getConfig } from '@/config.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   LlmService,
   LlmGenerateResult,
   LlmGenerateOptions,
 } from '@/application/ports/llm-service.js';
+import type { Config } from '@/config.js';
 
 /** Default Ollama API URL */
 const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
@@ -38,8 +39,7 @@ export class OllamaLlmService implements LlmService {
   private readonly baseUrl: string;
   private readonly model: string;
 
-  constructor() {
-    const config = getConfig();
+  constructor(@inject(TYPES.Config) config: Config) {
     this.baseUrl = config.ollama?.url ?? DEFAULT_OLLAMA_URL;
     this.model = config.ollama?.model ?? DEFAULT_MODEL;
   }

@@ -16,12 +16,12 @@ import {
   regenerateAllLabelEmbeddings,
   type GenerateLabelEmbeddingDeps,
 } from '@/application/attribute-suggestion/generate-label-embeddings.js';
-import { initConfig, parseCliArgs } from '@/config.js';
+import { type Config, initConfig, parseCliArgs } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 
-function getDeps(): GenerateLabelEmbeddingDeps {
-  const container = buildAppContainer();
+function getDeps(config: Config): GenerateLabelEmbeddingDeps {
+  const container = buildAppContainer(config);
   return {
     labelRepository: container.getLabelRepository(),
     embeddingService: container.getEmbeddingService(),
@@ -32,12 +32,12 @@ async function main(): Promise<void> {
   const { command, configPath } = parseCliArgs(process.argv);
 
   // Initialize configuration
-  initConfig(configPath);
+  const config = initConfig(configPath);
 
   console.log('Connecting to database...');
   await connectDatabase();
 
-  const deps = getDeps();
+  const deps = getDeps(config);
 
   try {
     switch (command) {
