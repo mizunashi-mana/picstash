@@ -13,7 +13,7 @@ body:
     attributes:
       label: 課題
       description: どのような問題・不便さがあるかを記載してください
-      placeholder: 例: 大量の画像を扱うときにUIが重くなる
+      placeholder: "例: 大量の画像を扱うときにUIが重くなる"
     validations:
       required: true
 
@@ -22,7 +22,7 @@ body:
     attributes:
       label: 影響
       description: この課題によってどのような影響があるかを記載してください
-      placeholder: 例: 作業効率が下がる、ストレスを感じる
+      placeholder: "例: 作業効率が下がる、ストレスを感じる"
     validations:
       required: false
 

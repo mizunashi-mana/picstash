@@ -13,7 +13,7 @@ body:
     attributes:
       label: 概要
       description: 不具合の内容を簡潔に説明してください
-      placeholder: 例: 統計表示画面でグラフが正しく表示されない
+      placeholder: "例: 統計表示画面でグラフが正しく表示されない"
     validations:
       required: true
 
