@@ -17,12 +17,19 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock ResizeObserver for Mantine ScrollArea and other components
-class ResizeObserverMock {
-  observe(): void {
-    // Mock implementation - no-op
+class ResizeObserverMock implements ResizeObserver {
+  private readonly callback: ResizeObserverCallback;
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
   }
 
-  unobserve(): void {
+  observe(_target: Element, _options?: ResizeObserverOptions): void {
+    // Mock implementation - no-op (callback stored but not invoked)
+    void this.callback;
+  }
+
+  unobserve(_target: Element): void {
     // Mock implementation - no-op
   }
 
@@ -31,4 +38,7 @@ class ResizeObserverMock {
   }
 }
 
-window.ResizeObserver = ResizeObserverMock;
+Object.defineProperty(window, 'ResizeObserver', {
+  writable: true,
+  value: ResizeObserverMock,
+});
