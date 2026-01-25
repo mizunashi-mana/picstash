@@ -1,0 +1,15 @@
+# TS build
+/dist/
+
+# vitest coverage
+/coverage/
+
+# Prisma generated client
+/generated/
+
+# SQLite database files
+/prisma/data/*.db
+/prisma/data/*.db-wal
+/prisma/data/*.db-shm
+/prisma/data/*.sqlite
+/prisma/data/*.sqlite-journal

@@ -1,41 +1,10 @@
-export const TYPES = {
-  // Config
-  Config: Symbol.for('Config'),
+import { TYPES as CORE_TYPES } from '@picstash/core';
 
-  // Repositories
-  ImageRepository: Symbol.for('ImageRepository'),
-  LabelRepository: Symbol.for('LabelRepository'),
-  ImageAttributeRepository: Symbol.for('ImageAttributeRepository'),
-  CollectionRepository: Symbol.for('CollectionRepository'),
-  ViewHistoryRepository: Symbol.for('ViewHistoryRepository'),
-  RecommendationConversionRepository: Symbol.for(
-    'RecommendationConversionRepository',
-  ),
-  StatsRepository: Symbol.for('StatsRepository'),
-  SearchHistoryRepository: Symbol.for('SearchHistoryRepository'),
+// Re-export core types
+export { TYPES as CORE_TYPES } from '@picstash/core';
 
-  // Storage & Processing
-  FileStorage: Symbol.for('FileStorage'),
-  ImageProcessor: Symbol.for('ImageProcessor'),
-
-  // Archive
-  ArchiveHandler: Symbol.for('ArchiveHandler'),
-  ArchiveSessionManager: Symbol.for('ArchiveSessionManager'),
-
-  // URL Crawl
-  UrlCrawlSessionManager: Symbol.for('UrlCrawlSessionManager'),
-
-  // AI/Embedding
-  EmbeddingService: Symbol.for('EmbeddingService'),
-  EmbeddingRepository: Symbol.for('EmbeddingRepository'),
-  CaptionService: Symbol.for('CaptionService'),
-  LlmService: Symbol.for('LlmService'),
-  OcrService: Symbol.for('OcrService'),
-
-  // Job Queue
-  JobQueue: Symbol.for('JobQueue'),
-
-  // Controllers
+// Controller-specific types (HTTP layer only)
+export const CONTROLLER_TYPES = {
   ImageController: Symbol.for('ImageController'),
   ImageSimilarityController: Symbol.for('ImageSimilarityController'),
   ImageSuggestionController: Symbol.for('ImageSuggestionController'),
@@ -50,4 +19,10 @@ export const TYPES = {
   SearchController: Symbol.for('SearchController'),
   UrlCrawlController: Symbol.for('UrlCrawlController'),
   JobController: Symbol.for('JobController'),
+} as const;
+
+// Combined types for backward compatibility
+export const TYPES = {
+  ...CORE_TYPES,
+  ...CONTROLLER_TYPES,
 } as const;

@@ -18,7 +18,7 @@ import {
   type GenerateEmbeddingDeps,
 } from '@/application/embedding/generate-embedding.js';
 import { type Config, initConfig, parseCliArgs } from '@/config.js';
-import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
+import { connectDatabase, disconnectDatabase } from '@/infra/database/index.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 
 function getDeps(config: Config): GenerateEmbeddingDeps {

@@ -1,1 +1,2 @@
-export { TesseractOcrService } from './tesseract-ocr-service.js';
+// Re-export from core
+export { TesseractOcrService } from '@picstash/core';

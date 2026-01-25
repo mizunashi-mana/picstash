@@ -3,7 +3,7 @@
 
 import { buildApp } from '@/app.js';
 import { initConfig, parseConfigArg } from '@/config.js';
-import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
+import { connectDatabase, disconnectDatabase } from '@/infra/database/index.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 import { JobWorker } from '@/infra/queue/index.js';
 import {

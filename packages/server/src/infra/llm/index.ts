@@ -1,1 +1,2 @@
-export { OllamaLlmService } from './ollama-llm-service.js';
+// Re-export from core
+export { OllamaLlmService } from '@picstash/core';

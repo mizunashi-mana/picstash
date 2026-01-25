@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { prisma } from '@/infra/database/prisma.js';
+import { prisma } from '@/infra/database/index.js';
 import { TYPES } from '@/infra/di/types.js';
 import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
 import type { FastifyInstance } from 'fastify';

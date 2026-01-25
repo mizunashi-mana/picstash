@@ -1,4 +1,4 @@
-import { prisma } from '@/infra/database/prisma.js';
+import { prisma } from '@/infra/database/index.js';
 import type { FastifyInstance } from 'fastify';
 
 export function healthRoutes(app: FastifyInstance): void {

@@ -1,23 +1,6 @@
+import { CoreContainer } from '@picstash/core';
 import { createContainer } from './container.js';
-import { TYPES } from './types.js';
-import type { ArchiveHandler } from '@/application/ports/archive-handler.js';
-import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
-import type { CaptionService } from '@/application/ports/caption-service.js';
-import type { CollectionRepository } from '@/application/ports/collection-repository.js';
-import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
-import type { EmbeddingService } from '@/application/ports/embedding-service.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
-import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
-import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
-import type { JobQueue } from '@/application/ports/job-queue.js';
-import type { LabelRepository } from '@/application/ports/label-repository.js';
-import type { OcrService } from '@/application/ports/ocr-service.js';
-import type { RecommendationConversionRepository } from '@/application/ports/recommendation-conversion-repository.js';
-import type { SearchHistoryRepository } from '@/application/ports/search-history-repository.js';
-import type { StatsRepository } from '@/application/ports/stats-repository.js';
-import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
-import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
+import { CONTROLLER_TYPES } from './types.js';
 import type { Config } from '@/config.js';
 import type {
   ArchiveController,
@@ -35,161 +18,68 @@ import type {
   UrlCrawlController,
   ViewHistoryController,
 } from '@/infra/http/controllers/index.js';
-import type { Container } from 'inversify';
 
 /**
  * Application DI container wrapper.
- * Provides type-safe accessor methods for all registered services.
+ * Extends CoreContainer with HTTP controller accessor methods.
  */
-export class AppContainer {
-  private readonly container: Container;
-
-  constructor(container: Container) {
-    this.container = container;
-  }
-
-  // Repositories
-
-  getImageRepository(): ImageRepository {
-    return this.container.get<ImageRepository>(TYPES.ImageRepository);
-  }
-
-  getLabelRepository(): LabelRepository {
-    return this.container.get<LabelRepository>(TYPES.LabelRepository);
-  }
-
-  getImageAttributeRepository(): ImageAttributeRepository {
-    return this.container.get<ImageAttributeRepository>(TYPES.ImageAttributeRepository);
-  }
-
-  getCollectionRepository(): CollectionRepository {
-    return this.container.get<CollectionRepository>(TYPES.CollectionRepository);
-  }
-
-  getViewHistoryRepository(): ViewHistoryRepository {
-    return this.container.get<ViewHistoryRepository>(TYPES.ViewHistoryRepository);
-  }
-
-  getRecommendationConversionRepository(): RecommendationConversionRepository {
-    return this.container.get<RecommendationConversionRepository>(
-      TYPES.RecommendationConversionRepository,
-    );
-  }
-
-  getStatsRepository(): StatsRepository {
-    return this.container.get<StatsRepository>(TYPES.StatsRepository);
-  }
-
-  getSearchHistoryRepository(): SearchHistoryRepository {
-    return this.container.get<SearchHistoryRepository>(TYPES.SearchHistoryRepository);
-  }
-
-  // Storage & Processing
-
-  getFileStorage(): FileStorage {
-    return this.container.get<FileStorage>(TYPES.FileStorage);
-  }
-
-  getImageProcessor(): ImageProcessor {
-    return this.container.get<ImageProcessor>(TYPES.ImageProcessor);
-  }
-
-  // Archive
-
-  getArchiveHandlers(): ArchiveHandler[] {
-    return this.container.getAll<ArchiveHandler>(TYPES.ArchiveHandler);
-  }
-
-  getArchiveSessionManager(): ArchiveSessionManager {
-    return this.container.get<ArchiveSessionManager>(TYPES.ArchiveSessionManager);
-  }
-
-  // URL Crawl
-
-  getUrlCrawlSessionManager(): UrlCrawlSessionManager {
-    return this.container.get<UrlCrawlSessionManager>(TYPES.UrlCrawlSessionManager);
-  }
-
-  // AI/Embedding
-
-  getEmbeddingService(): EmbeddingService {
-    return this.container.get<EmbeddingService>(TYPES.EmbeddingService);
-  }
-
-  getEmbeddingRepository(): EmbeddingRepository {
-    return this.container.get<EmbeddingRepository>(TYPES.EmbeddingRepository);
-  }
-
-  getCaptionService(): CaptionService {
-    return this.container.get<CaptionService>(TYPES.CaptionService);
-  }
-
-  getOcrService(): OcrService {
-    return this.container.get<OcrService>(TYPES.OcrService);
-  }
-
-  // Job Queue
-
-  getJobQueue(): JobQueue {
-    return this.container.get<JobQueue>(TYPES.JobQueue);
-  }
-
+export class AppContainer extends CoreContainer {
   // Controllers
 
   getImageController(): ImageController {
-    return this.container.get<ImageController>(TYPES.ImageController);
+    return this.container.get<ImageController>(CONTROLLER_TYPES.ImageController);
   }
 
   getImageSimilarityController(): ImageSimilarityController {
-    return this.container.get<ImageSimilarityController>(TYPES.ImageSimilarityController);
+    return this.container.get<ImageSimilarityController>(CONTROLLER_TYPES.ImageSimilarityController);
   }
 
   getImageSuggestionController(): ImageSuggestionController {
-    return this.container.get<ImageSuggestionController>(TYPES.ImageSuggestionController);
+    return this.container.get<ImageSuggestionController>(CONTROLLER_TYPES.ImageSuggestionController);
   }
 
   getImageAttributeController(): ImageAttributeController {
-    return this.container.get<ImageAttributeController>(TYPES.ImageAttributeController);
+    return this.container.get<ImageAttributeController>(CONTROLLER_TYPES.ImageAttributeController);
   }
 
   getLabelController(): LabelController {
-    return this.container.get<LabelController>(TYPES.LabelController);
+    return this.container.get<LabelController>(CONTROLLER_TYPES.LabelController);
   }
 
   getCollectionController(): CollectionController {
-    return this.container.get<CollectionController>(TYPES.CollectionController);
+    return this.container.get<CollectionController>(CONTROLLER_TYPES.CollectionController);
   }
 
   getArchiveController(): ArchiveController {
-    return this.container.get<ArchiveController>(TYPES.ArchiveController);
+    return this.container.get<ArchiveController>(CONTROLLER_TYPES.ArchiveController);
   }
 
   getViewHistoryController(): ViewHistoryController {
-    return this.container.get<ViewHistoryController>(TYPES.ViewHistoryController);
+    return this.container.get<ViewHistoryController>(CONTROLLER_TYPES.ViewHistoryController);
   }
 
   getRecommendationController(): RecommendationController {
-    return this.container.get<RecommendationController>(TYPES.RecommendationController);
+    return this.container.get<RecommendationController>(CONTROLLER_TYPES.RecommendationController);
   }
 
   getRecommendationConversionController(): RecommendationConversionController {
-    return this.container.get<RecommendationConversionController>(TYPES.RecommendationConversionController);
+    return this.container.get<RecommendationConversionController>(CONTROLLER_TYPES.RecommendationConversionController);
   }
 
   getStatsController(): StatsController {
-    return this.container.get<StatsController>(TYPES.StatsController);
+    return this.container.get<StatsController>(CONTROLLER_TYPES.StatsController);
   }
 
   getSearchController(): SearchController {
-    return this.container.get<SearchController>(TYPES.SearchController);
+    return this.container.get<SearchController>(CONTROLLER_TYPES.SearchController);
   }
 
   getUrlCrawlController(): UrlCrawlController {
-    return this.container.get<UrlCrawlController>(TYPES.UrlCrawlController);
+    return this.container.get<UrlCrawlController>(CONTROLLER_TYPES.UrlCrawlController);
   }
 
   getJobController(): JobController {
-    return this.container.get<JobController>(TYPES.JobController);
+    return this.container.get<JobController>(CONTROLLER_TYPES.JobController);
   }
 }
 

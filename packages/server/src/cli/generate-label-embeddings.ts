@@ -17,7 +17,7 @@ import {
   type GenerateLabelEmbeddingDeps,
 } from '@/application/attribute-suggestion/generate-label-embeddings.js';
 import { type Config, initConfig, parseCliArgs } from '@/config.js';
-import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
+import { connectDatabase, disconnectDatabase } from '@/infra/database/index.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 
 function getDeps(config: Config): GenerateLabelEmbeddingDeps {

@@ -1,2 +1,3 @@
-export { JobWorker } from './job-worker.js';
-export type { JobHandler, JobWorkerConfig } from './job-worker.js';
+// Re-export from core
+export { JobWorker } from '@picstash/core';
+export type { JobHandler, JobWorkerConfig } from '@picstash/core';
