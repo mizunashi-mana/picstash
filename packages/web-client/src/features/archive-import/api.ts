@@ -92,10 +92,13 @@ export interface ImportResultItem {
   error?: string;
 }
 
+/** ジョブステータス型 */
+export type JobStatus = 'waiting' | 'active' | 'completed' | 'failed';
+
 /** インポートジョブ開始レスポンス */
 export interface ImportJobStartResponse {
   jobId: string;
-  status: string;
+  status: JobStatus;
   totalRequested: number;
   message: string;
 }

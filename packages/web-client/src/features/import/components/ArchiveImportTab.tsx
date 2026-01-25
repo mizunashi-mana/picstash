@@ -128,6 +128,85 @@ function ImportResultAlert({
   );
 }
 
+/** 選択コントロールコンポーネント */
+function SelectionControls({
+  selectedCount,
+  onSelectAll,
+  onDeselectAll,
+  onImport,
+  isImporting,
+}: {
+  selectedCount: number;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
+  onImport: () => void;
+  isImporting: boolean;
+}) {
+  return (
+    <Group justify="space-between" align="center">
+      <Group gap="sm">
+        <Button variant="light" size="sm" onClick={onSelectAll} disabled={isImporting}>
+          全選択
+        </Button>
+        <Button
+          variant="light"
+          size="sm"
+          onClick={onDeselectAll}
+          disabled={selectedCount === 0 || isImporting}
+        >
+          全解除
+        </Button>
+        <Text size="sm" c="dimmed">
+          {selectedCount}
+          {' '}
+          件選択中
+        </Text>
+      </Group>
+      <Button
+        onClick={onImport}
+        disabled={selectedCount === 0 || isImporting}
+        loading={isImporting}
+      >
+        インポート (
+        {selectedCount}
+        )
+      </Button>
+    </Group>
+  );
+}
+
+/** ステータス取得エラー表示コンポーネント */
+function JobStatusErrorAlert({
+  error,
+  onRetry,
+  onAbort,
+}: {
+  error: Error;
+  onRetry: () => void;
+  onAbort: () => void;
+}) {
+  return (
+    <Alert color="red" title="ステータス取得エラー">
+      <Stack gap="xs">
+        <Text size="sm">
+          インポートジョブの状態取得中にエラーが発生しました。再試行するか、インポートを中止してください。
+        </Text>
+        <Text size="xs" c="dimmed">
+          {error.message}
+        </Text>
+        <Group gap="xs">
+          <Button size="xs" variant="light" onClick={onRetry}>
+            再試行
+          </Button>
+          <Button size="xs" variant="subtle" onClick={onAbort}>
+            インポートを中止
+          </Button>
+        </Group>
+      </Stack>
+    </Alert>
+  );
+}
+
 /** ジョブステータスから完了結果を抽出 */
 function extractCompletedResult(data: ImportJobStatus): ImportResult | null {
   if (data.status !== 'completed') {
@@ -154,15 +233,26 @@ export function ArchiveImportTab() {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [importJobId, setImportJobId] = useState<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
+  const importJobIdRef = useRef<string | null>(null);
 
-  // Keep ref in sync with state for cleanup
+  // Keep refs in sync with state for cleanup
   useEffect(() => {
     sessionIdRef.current = sessionId;
   }, [sessionId]);
 
+  useEffect(() => {
+    importJobIdRef.current = importJobId;
+  }, [importJobId]);
+
   // Cleanup session on unmount
+  // ジョブ実行中はセッションを削除しない（ワーカーがセッションを使用中の可能性があるため）
   useEffect(() => {
     return () => {
+      // ジョブが実行中の場合はセッション削除をスキップ
+      // （サーバー側の TTL やクリーンアップに任せる）
+      if (importJobIdRef.current !== null) {
+        return;
+      }
       if (sessionIdRef.current !== null) {
         deleteArchiveSession(sessionIdRef.current).catch(() => {
           // Ignore errors during cleanup
@@ -237,8 +327,8 @@ export function ArchiveImportTab() {
         setSelectedIndices(failedIndices);
       }
     }
-
-    setImportJobId(null);
+    // importJobId は保持したまま（jobStatusQuery.data を維持するため）
+    // ポーリングは refetchInterval の isJobFinished チェックで自動停止
   }, [jobData, jobStatus]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -284,7 +374,9 @@ export function ArchiveImportTab() {
     }
   };
 
-  const isImporting = importMutation.isPending || importJobId !== null;
+  // ジョブがアクティブ（waiting または active）かどうか
+  const isJobActive = importJobId !== null && (jobStatus === 'waiting' || jobStatus === 'active');
+  const isImporting = importMutation.isPending || isJobActive;
   const jobProgress = jobStatusQuery.data?.progress ?? 0;
 
   if (sessionId === null) {
@@ -349,6 +441,15 @@ export function ArchiveImportTab() {
                     </Alert>
                   )}
 
+                  {/* Job status query error (network/server error) */}
+                  {jobStatusQuery.isError && (
+                    <JobStatusErrorAlert
+                      error={jobStatusQuery.error}
+                      onRetry={() => { void jobStatusQuery.refetch(); }}
+                      onAbort={() => { setImportJobId(null); }}
+                    />
+                  )}
+
                   {/* Import result alert */}
                   {importResult !== null && (
                     <ImportResultAlert
@@ -358,40 +459,13 @@ export function ArchiveImportTab() {
                   )}
 
                   {/* Selection controls */}
-                  <Group justify="space-between" align="center">
-                    <Group gap="sm">
-                      <Button
-                        variant="light"
-                        size="sm"
-                        onClick={handleSelectAll}
-                        disabled={isImporting}
-                      >
-                        全選択
-                      </Button>
-                      <Button
-                        variant="light"
-                        size="sm"
-                        onClick={handleDeselectAll}
-                        disabled={selectedIndices.size === 0 || isImporting}
-                      >
-                        全解除
-                      </Button>
-                      <Text size="sm" c="dimmed">
-                        {selectedIndices.size}
-                        {' '}
-                        件選択中
-                      </Text>
-                    </Group>
-                    <Button
-                      onClick={handleImport}
-                      disabled={selectedIndices.size === 0 || isImporting}
-                      loading={isImporting}
-                    >
-                      インポート (
-                      {selectedIndices.size}
-                      )
-                    </Button>
-                  </Group>
+                  <SelectionControls
+                    selectedCount={selectedIndices.size}
+                    onSelectAll={handleSelectAll}
+                    onDeselectAll={handleDeselectAll}
+                    onImport={handleImport}
+                    isImporting={isImporting}
+                  />
 
                   {/* Gallery */}
                   <ArchivePreviewGallery

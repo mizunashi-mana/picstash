@@ -70,13 +70,16 @@ export function createArchiveImportJobHandler(deps: {
     let successCount = 0;
     let failedCount = 0;
 
+    // O(1) 参照のため Map を作成
+    const entryMap = new Map(session.imageEntries.map(e => [e.index, e]));
+
     let processedCount = 0;
     for (const index of indices) {
       // 進捗を更新（0-100%）
       const progress = Math.round(((processedCount + 0.5) / indices.length) * 100);
       await updateProgress(progress);
 
-      const entry = session.imageEntries.find(e => e.index === index);
+      const entry = entryMap.get(index);
       if (entry === undefined) {
         results.push({
           index,
@@ -84,6 +87,7 @@ export function createArchiveImportJobHandler(deps: {
           error: `Entry ${index} not found in archive`,
         });
         failedCount++;
+        processedCount++;
         continue;
       }
 

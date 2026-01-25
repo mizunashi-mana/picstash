@@ -3,7 +3,7 @@ import { TYPES } from '@/infra/di/types.js';
 import { ARCHIVE_IMPORT_JOB_TYPE } from '@/infra/workers/index.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { JobQueue } from '@/application/ports/job-queue.js';
+import type { JobQueue, JobStatus } from '@/application/ports/job-queue.js';
 import type { ArchiveImportJobPayload, ArchiveImportJobResult } from '@/infra/workers/index.js';
 import type { FastifyInstance } from 'fastify';
 
@@ -293,7 +293,7 @@ export class ArchiveController {
 
         const response: {
           jobId: string;
-          status: string;
+          status: JobStatus;
           progress: number;
           totalRequested: number;
           successCount?: number;

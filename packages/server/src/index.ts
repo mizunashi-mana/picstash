@@ -26,7 +26,10 @@ async function main(): Promise<void> {
   app.log.info('Database connected');
 
   // Start job worker
-  const jobWorker = new JobWorker(container.getJobQueue());
+  // archive-import は大量画像で時間がかかるため、タイムアウトを15分に設定
+  const jobWorker = new JobWorker(container.getJobQueue(), {
+    jobTimeout: 900000, // 15 minutes
+  });
 
   // Register caption generation job handler
   const ocrService = container.getOcrService();
