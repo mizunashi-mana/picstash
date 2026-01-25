@@ -37,20 +37,45 @@ async function main(): Promise<void> {
   app.log.info('Job worker started');
 
   // Graceful shutdown
-  const shutdown = () => {
+  let isShuttingDown = false;
+  const shutdown = async (): Promise<void> => {
+    // 重複シャットダウンを防止
+    if (isShuttingDown) {
+      return;
+    }
+    isShuttingDown = true;
+
     app.log.info('Shutting down...');
-    jobWorker.stop();
-    // Terminate OCR worker (don't block shutdown on failure)
-    ocrService.terminate().catch((err: unknown) => {
-      app.log.error({ err }, 'OCR terminate error');
-    });
-    app.close()
-      .then(async () => { await disconnectDatabase(); })
-      .catch((err: unknown) => { app.log.error(err); });
+
+    try {
+      // ジョブワーカーの graceful shutdown を待機
+      await jobWorker.stop();
+      app.log.info('Job worker stopped');
+
+      // OCR ワーカーを終了（失敗してもシャットダウンをブロックしない）
+      await ocrService.terminate().catch((err: unknown) => {
+        app.log.error({ err }, 'OCR terminate error');
+      });
+
+      // HTTP サーバーを閉じる
+      await app.close();
+      app.log.info('HTTP server closed');
+
+      // データベース接続を閉じる
+      await disconnectDatabase();
+      app.log.info('Database disconnected');
+    }
+    catch (err: unknown) {
+      app.log.error({ err }, 'Error during shutdown');
+    }
   };
 
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', () => {
+    void shutdown();
+  });
+  process.on('SIGTERM', () => {
+    void shutdown();
+  });
 
   // Start server
   await app.listen({
