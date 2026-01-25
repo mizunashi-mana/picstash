@@ -241,8 +241,8 @@ describe('ImageSimilarityController', () => {
       const body = JSON.parse(response.body) as SimilarImagesResponse;
       expect(body.imageId).toBe('test-id');
       expect(body.similarImages).toHaveLength(2);
-      expect(body.similarImages[0].id).toBe('similar-1');
-      expect(body.similarImages[0].distance).toBe(0.1);
+      expect(body.similarImages[0]?.id).toBe('similar-1');
+      expect(body.similarImages[0]?.distance).toBe(0.1);
     });
 
     it('should use custom limit when provided', async () => {
@@ -326,7 +326,7 @@ describe('ImageSimilarityController', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body) as SimilarImagesResponse;
       expect(body.similarImages).toHaveLength(1);
-      expect(body.similarImages[0].id).toBe('existing');
+      expect(body.similarImages[0]?.id).toBe('existing');
     });
   });
 });

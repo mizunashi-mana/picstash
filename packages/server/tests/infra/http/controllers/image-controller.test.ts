@@ -57,7 +57,7 @@ function createMockImageRepository(): ImageRepository {
 
 function createMockFileStorage(): FileStorage {
   return {
-    saveFile: vi.fn(),
+    saveOriginalFromStream: vi.fn(),
     getAbsolutePath: vi.fn().mockReturnValue('/tmp/test.png'),
     deleteFile: vi.fn(),
   };
@@ -67,13 +67,19 @@ function createMockImageProcessor(): ImageProcessor {
   return {
     getMetadata: vi.fn(),
     generateThumbnail: vi.fn(),
+    generateThumbnailFromBuffer: vi.fn(),
   };
 }
 
 function createMockEmbeddingService(): EmbeddingService {
   return {
-    generateFromPath: vi.fn(),
+    generateFromFile: vi.fn(),
+    generateFromBuffer: vi.fn(),
     generateFromText: vi.fn(),
+    getDimension: vi.fn().mockReturnValue(512),
+    getModel: vi.fn().mockReturnValue('test-model'),
+    isReady: vi.fn().mockReturnValue(true),
+    initialize: vi.fn(),
   };
 }
 
@@ -376,7 +382,7 @@ describe('ImageController', () => {
     it('should delete image and return 204', async () => {
       const image = createImage('test-id');
       vi.mocked(mockImageRepository.findById).mockResolvedValue(image);
-      vi.mocked(mockImageRepository.deleteById).mockResolvedValue(undefined);
+      vi.mocked(mockImageRepository.deleteById).mockResolvedValue(image);
       vi.mocked(mockFileStorage.deleteFile).mockResolvedValue(undefined);
       vi.mocked(mockEmbeddingRepository.remove).mockResolvedValue(undefined);
 

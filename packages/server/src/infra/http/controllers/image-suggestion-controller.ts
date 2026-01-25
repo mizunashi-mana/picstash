@@ -1,8 +1,8 @@
-import { access } from 'node:fs/promises';
 import { inject, injectable } from 'inversify';
 import { suggestAttributes } from '@/application/attribute-suggestion/suggest-attributes.js';
 import { TYPES } from '@/infra/di/types.js';
 import { CAPTION_JOB_TYPE } from '@/infra/workers/index.js';
+import { fileExists } from '@/shared/file-utils.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageAttributeRepository } from '@/application/ports/image-attribute-repository.js';
@@ -11,16 +11,6 @@ import type { JobQueue } from '@/application/ports/job-queue.js';
 import type { LabelRepository } from '@/application/ports/label-repository.js';
 import type { CaptionJobPayload } from '@/infra/workers/index.js';
 import type { FastifyInstance } from 'fastify';
-
-async function fileExists(path: string): Promise<boolean> {
-  try {
-    await access(path);
-    return true;
-  }
-  catch {
-    return false;
-  }
-}
 
 @injectable()
 export class ImageSuggestionController {

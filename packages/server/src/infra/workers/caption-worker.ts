@@ -1,5 +1,5 @@
-import { access } from 'node:fs/promises';
 import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
+import { fileExists } from '@/shared/file-utils.js';
 import type {
   CaptionService,
   SimilarImageDescription,
@@ -24,16 +24,6 @@ export interface CaptionJobResult {
   description: string;
   model: string;
   usedContext: boolean;
-}
-
-async function fileExists(path: string): Promise<boolean> {
-  try {
-    await access(path);
-    return true;
-  }
-  catch {
-    return false;
-  }
 }
 
 /**

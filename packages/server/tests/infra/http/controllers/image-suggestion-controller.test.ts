@@ -49,14 +49,13 @@ function createMockLabelRepository(): LabelRepository {
     create: vi.fn(),
     findById: vi.fn(),
     findByName: vi.fn(),
-    findByNames: vi.fn(),
     findAll: vi.fn(),
-    findAllWithCounts: vi.fn(),
     findAllWithEmbedding: vi.fn(),
     findIdsWithoutEmbedding: vi.fn(),
     updateById: vi.fn(),
     deleteById: vi.fn(),
-    count: vi.fn(),
+    updateEmbedding: vi.fn(),
+    clearAllEmbeddings: vi.fn(),
     countWithEmbedding: vi.fn(),
   };
 }
@@ -66,13 +65,9 @@ function createMockImageAttributeRepository(): ImageAttributeRepository {
     create: vi.fn(),
     findById: vi.fn(),
     findByImageId: vi.fn(),
-    findByLabelId: vi.fn(),
     findByImageAndLabel: vi.fn(),
     updateById: vi.fn(),
     deleteById: vi.fn(),
-    deleteByImageId: vi.fn(),
-    deleteByLabelId: vi.fn(),
-    count: vi.fn(),
   };
 }
 
@@ -89,23 +84,32 @@ function createMockEmbeddingRepository(): EmbeddingRepository {
 
 function createMockFileStorage(): FileStorage {
   return {
-    saveFile: vi.fn(),
+    saveOriginalFromStream: vi.fn(),
     getAbsolutePath: vi.fn().mockReturnValue('/tmp/test.png'),
     deleteFile: vi.fn(),
   };
 }
 
 function createMockJobQueue(): JobQueue {
-  const mockJob: Job = { id: 'job-123', type: 'caption', status: 'pending' };
+  const mockJob: Job = {
+    id: 'job-123',
+    type: 'caption-generation',
+    status: 'waiting',
+    payload: { imageId: 'test-id' },
+    progress: 0,
+    attempts: 0,
+    maxAttempts: 3,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
   return {
     add: vi.fn().mockResolvedValue(mockJob),
     getJob: vi.fn(),
-    getAllJobs: vi.fn(),
-    getJobsByStatus: vi.fn(),
-    updateJob: vi.fn(),
-    deleteJob: vi.fn(),
-    cleanOldJobs: vi.fn(),
+    listJobs: vi.fn(),
     acquireJob: vi.fn(),
+    completeJob: vi.fn(),
+    failJob: vi.fn(),
+    updateProgress: vi.fn(),
   };
 }
 

@@ -1,25 +1,15 @@
 import { createReadStream } from 'node:fs';
-import { access } from 'node:fs/promises';
 import { inject, injectable } from 'inversify';
 import { deleteImage, uploadImage } from '@/application/image/index.js';
 import { generateTitle } from '@/domain/image/index.js';
 import { TYPES } from '@/infra/di/types.js';
+import { fileExists } from '@/shared/file-utils.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
 import type { ImageRepository } from '@/application/ports/image-repository.js';
 import type { FastifyInstance } from 'fastify';
-
-async function fileExists(path: string): Promise<boolean> {
-  try {
-    await access(path);
-    return true;
-  }
-  catch {
-    return false;
-  }
-}
 
 @injectable()
 export class ImageController {
