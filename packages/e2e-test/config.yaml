@@ -5,16 +5,16 @@ server:
   host: "0.0.0.0"
 
 database:
-  url: "file:./prisma/data/picstash.db"
+  url: "file:./data/picstash.db"
 
 storage:
-  path: "../../storage"
+  path: "./data/storage"
 
 logging:
   level: "info"
   format: "pretty"
   file:
     enabled: true
-    path: "./logs/server.log"
+    path: "./data/server.log"
     rotation:
       enabled: false

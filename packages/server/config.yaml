@@ -25,7 +25,7 @@ logging:
   # File output settings
   file:
     enabled: false
-    path: "./data/logs/server.log"
+    path: "./data/server.log"
     rotation:
       enabled: true
       maxSize: "10M"

@@ -1,7 +1,5 @@
-/data/*
-/logs/*
+/data/**/*
 !/data/.keep
-!/logs/.keep
 
 # vitest
 /coverage/
