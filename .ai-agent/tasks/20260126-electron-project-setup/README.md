@@ -50,6 +50,10 @@ packages/desktop-app/
 
 ## 作業ログ
 
+- 2026-01-26: E2E テスト環境追加
+  - Playwright + Electron 統合
+  - 8 つのテストケース（起動、preload、セキュリティ、UI）
+  - esbuild で preload を ESM バンドル
 - 2026-01-26: タスク完了
   - Electron v34.x で `packages/desktop-app` を作成
   - メインプロセス: BrowserWindow 作成、セキュリティ設定（contextIsolation, sandbox）
