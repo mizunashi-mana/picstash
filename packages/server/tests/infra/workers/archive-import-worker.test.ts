@@ -310,5 +310,91 @@ describe('archive-import-worker', () => {
       expect(result.results[0]?.error).toBe('Invalid image');
       expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('uploads/test.png');
     });
+
+    it('should cleanup files on database creation error', async () => {
+      const mockSessionManager = createMockArchiveSessionManager();
+      const mockSession: ArchiveSession = {
+        id: 'session-1',
+        filename: 'test.zip',
+        archiveType: 'zip',
+        archivePath: '/tmp/test.zip',
+        imageEntries: [
+          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000, isDirectory: false },
+        ],
+        createdAt: new Date(),
+      };
+      vi.mocked(mockSessionManager.getSession).mockReturnValue(mockSession);
+      vi.mocked(mockSessionManager.extractImage).mockResolvedValue(Buffer.from('image-data'));
+
+      const mockFileStorage = createMockFileStorage();
+      vi.mocked(mockFileStorage.saveOriginalFromStream).mockResolvedValue({
+        path: 'uploads/test.png',
+        filename: 'test.png',
+      });
+      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/abs/uploads/test.png');
+      vi.mocked(mockFileStorage.deleteFile).mockResolvedValue();
+
+      const mockImageProcessor = createMockImageProcessor();
+      vi.mocked(mockImageProcessor.getMetadata).mockResolvedValue({
+        width: 800,
+        height: 600,
+      });
+      vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue({
+        filename: 'test.png',
+        path: 'thumbnails/test.png',
+      });
+
+      const mockImageRepository = createMockImageRepository();
+      vi.mocked(mockImageRepository.create).mockRejectedValue(new Error('Database error'));
+
+      const handler = createArchiveImportJobHandler({
+        archiveSessionManager: mockSessionManager,
+        imageRepository: mockImageRepository,
+        fileStorage: mockFileStorage,
+        imageProcessor: mockImageProcessor,
+      });
+
+      const job = createMockJob({ sessionId: 'session-1', indices: [0] });
+      const updateProgress = vi.fn();
+
+      const result = await handler(job, updateProgress);
+
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.error).toBe('Database error');
+      // Both original file and thumbnail should be deleted
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('uploads/test.png');
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('thumbnails/test.png');
+    });
+
+    it('should handle non-Error thrown values', async () => {
+      const mockSessionManager = createMockArchiveSessionManager();
+      const mockSession: ArchiveSession = {
+        id: 'session-1',
+        filename: 'test.zip',
+        archiveType: 'zip',
+        archivePath: '/tmp/test.zip',
+        imageEntries: [
+          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000, isDirectory: false },
+        ],
+        createdAt: new Date(),
+      };
+      vi.mocked(mockSessionManager.getSession).mockReturnValue(mockSession);
+      vi.mocked(mockSessionManager.extractImage).mockRejectedValue('string error');
+
+      const handler = createArchiveImportJobHandler({
+        archiveSessionManager: mockSessionManager,
+        imageRepository: createMockImageRepository(),
+        fileStorage: createMockFileStorage(),
+        imageProcessor: createMockImageProcessor(),
+      });
+
+      const job = createMockJob({ sessionId: 'session-1', indices: [0] });
+      const updateProgress = vi.fn();
+
+      const result = await handler(job, updateProgress);
+
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.error).toBe('Unknown error');
+    });
   });
 });

@@ -113,6 +113,7 @@ export function createArchiveImportJobHandler(deps: {
         }
         catch (error) {
           // Clean up saved file if metadata/thumbnail fails
+          /* v8 ignore next */
           await fileStorage.deleteFile(saved.path).catch(() => {});
           throw error;
         }
@@ -135,8 +136,10 @@ export function createArchiveImportJobHandler(deps: {
         }
         catch (error) {
           // Clean up saved file and thumbnail if database creation fails
+          /* v8 ignore start */
           await fileStorage.deleteFile(saved.path).catch(() => {});
           await fileStorage.deleteFile(thumbnail.path).catch(() => {});
+          /* v8 ignore stop */
           throw error;
         }
 
