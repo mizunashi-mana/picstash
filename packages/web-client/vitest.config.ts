@@ -69,18 +69,15 @@ export default defineConfig({
         'src/features/archive-import/components/ArchivePreviewGallery.tsx',
 
         // features/collections
-        'src/features/collections/api.ts',
         'src/features/collections/pages/CollectionDetailPage.tsx',
         'src/features/collections/pages/CollectionViewerPage.tsx',
         'src/features/collections/pages/CollectionsPage.tsx',
 
         // features/duplicates
-        'src/features/duplicates/api.ts',
         'src/features/duplicates/components/DuplicateGroupCard.tsx',
         'src/features/duplicates/pages/DuplicatesPage.tsx',
 
         // features/gallery
-        'src/features/gallery/api.ts',
         'src/features/gallery/components/ImageAttributeSection.tsx',
         'src/features/gallery/components/ImageAttributeSectionView.tsx',
         'src/features/gallery/components/ImageCarousel.tsx',
@@ -106,18 +103,15 @@ export default defineConfig({
         'src/features/jobs/components/JobStatusButton.tsx',
 
         // features/labels
-        'src/features/labels/api.ts',
         'src/features/labels/components/LabelBadge.tsx',
         'src/features/labels/components/LabelForm.tsx',
         'src/features/labels/components/LabelList.tsx',
         'src/features/labels/pages/LabelsPage.tsx',
 
         // features/recommendations
-        'src/features/recommendations/api.ts',
         'src/features/recommendations/components/RecommendationSection.tsx',
 
         // features/stats
-        'src/features/stats/api.ts',
         'src/features/stats/components/PopularImagesList.tsx',
         'src/features/stats/components/RecommendationTrendsChart.tsx',
         'src/features/stats/components/StatsOverviewCards.tsx',
@@ -125,7 +119,6 @@ export default defineConfig({
         'src/features/stats/pages/StatsPage.tsx',
 
         // features/upload
-        'src/features/upload/api.ts',
         'src/features/upload/components/ImageDropzone.tsx',
         'src/features/upload/components/ImageDropzoneView.tsx',
 
