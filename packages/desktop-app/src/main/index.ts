@@ -12,6 +12,8 @@ function createWindow(): void {
       preload: path.join(currentDir, '../preload/index.mjs'),
       contextIsolation: true,
       nodeIntegration: false,
+      // NOTE: sandbox: false は preload で process.versions にアクセスするため。
+      // 将来的に IPC 経由でバージョン情報を取得するように変更し、sandbox: true に移行予定。
       sandbox: false,
     },
   });

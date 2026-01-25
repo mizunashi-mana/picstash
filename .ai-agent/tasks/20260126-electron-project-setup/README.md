@@ -23,12 +23,18 @@ packages/desktop-app/
 │   ├── preload/        # プリロードスクリプト
 │   │   └── index.ts    # contextBridge 設定
 │   └── renderer/       # レンダラープロセス（将来 web-client を組み込み）
-│       └── index.html  # 仮の HTML
+│       ├── index.html  # HTML
+│       ├── styles.css  # スタイル
+│       └── renderer.js # バージョン表示スクリプト
+├── tests/                 # E2E テスト
+│   └── electron.spec.ts
 ├── electron-builder.json  # Electron Builder 設定
 ├── eslint.config.mjs      # ESLint 設定
 ├── package.json
-├── tsconfig.json
-└── tsconfig.node.json     # main/preload 用 TypeScript 設定
+├── playwright.config.ts   # Playwright 設定
+├── tsconfig.main.json     # メインプロセス用 TypeScript 設定
+├── tsconfig.preload.json  # プリロード用 TypeScript 設定
+└── tsconfig.test.json     # テスト用 TypeScript 設定
 ```
 
 ### 技術選定
@@ -42,9 +48,13 @@ packages/desktop-app/
 
 ```json
 {
-  "dev": "electron .",
-  "build": "tsc && electron-builder",
-  "typecheck": "tsc --noEmit"
+  "dev": "npm run build:main && npm run build:preload && electron .",
+  "build": "npm run build:main && npm run build:preload",
+  "build:main": "tsc -p tsconfig.main.json",
+  "build:preload": "esbuild src/preload/index.ts --bundle --platform=node --format=esm --outfile=dist/preload/index.mjs --external:electron",
+  "package": "npm run build && electron-builder",
+  "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.preload.json --noEmit",
+  "test:e2e": "npm run build && playwright test"
 }
 ```
 
