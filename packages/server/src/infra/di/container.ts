@@ -25,6 +25,8 @@ import {
   CollectionController,
   ImageAttributeController,
   ImageController,
+  ImageSimilarityController,
+  ImageSuggestionController,
   JobController,
   LabelController,
   RecommendationController,
@@ -174,6 +176,8 @@ export function createContainer(config: Config): Container {
 
   // Bind Controllers
   container.bind<ImageController>(TYPES.ImageController).to(ImageController);
+  container.bind<ImageSimilarityController>(TYPES.ImageSimilarityController).to(ImageSimilarityController);
+  container.bind<ImageSuggestionController>(TYPES.ImageSuggestionController).to(ImageSuggestionController);
   container.bind<ImageAttributeController>(TYPES.ImageAttributeController).to(ImageAttributeController);
   container.bind<LabelController>(TYPES.LabelController).to(LabelController);
   container.bind<CollectionController>(TYPES.CollectionController).to(CollectionController);

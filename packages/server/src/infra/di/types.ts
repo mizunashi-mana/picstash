@@ -37,6 +37,8 @@ export const TYPES = {
 
   // Controllers
   ImageController: Symbol.for('ImageController'),
+  ImageSimilarityController: Symbol.for('ImageSimilarityController'),
+  ImageSuggestionController: Symbol.for('ImageSuggestionController'),
   ImageAttributeController: Symbol.for('ImageAttributeController'),
   LabelController: Symbol.for('LabelController'),
   CollectionController: Symbol.for('CollectionController'),

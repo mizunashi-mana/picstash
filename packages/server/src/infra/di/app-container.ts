@@ -24,6 +24,8 @@ import type {
   CollectionController,
   ImageAttributeController,
   ImageController,
+  ImageSimilarityController,
+  ImageSuggestionController,
   JobController,
   LabelController,
   RecommendationController,
@@ -136,6 +138,14 @@ export class AppContainer {
 
   getImageController(): ImageController {
     return this.container.get<ImageController>(TYPES.ImageController);
+  }
+
+  getImageSimilarityController(): ImageSimilarityController {
+    return this.container.get<ImageSimilarityController>(TYPES.ImageSimilarityController);
+  }
+
+  getImageSuggestionController(): ImageSuggestionController {
+    return this.container.get<ImageSuggestionController>(TYPES.ImageSuggestionController);
   }
 
   getImageAttributeController(): ImageAttributeController {
