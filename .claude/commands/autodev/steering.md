@@ -1,6 +1,6 @@
 ---
 description: Update steering documents to reflect current project state
-allowed-tools: Read, Write, Edit, MultiEdit, Bash, Glob, Grep
+allowed-tools: Read, Write, Edit, MultiEdit, Bash, Glob, Grep, mcp__github__list_issues, mcp__github__search_issues
 ---
 
 # Steering ドキュメント更新
@@ -39,6 +39,19 @@ ls packages/server/src/
 cat package.json | jq '.scripts'
 ```
 
+### 1.5. GitHub イシュー確認
+
+GitHub イシューを確認し、未対応の課題や進行中のタスクを把握:
+
+- `mcp__github__list_issues` でオープンイシューを取得
+- 機能追加・バグ修正・改善などのラベルで分類
+- plan.md のセグメントと関連するイシューを特定
+
+確認ポイント:
+- オープンイシューに対応する plan.md のタスクがあるか
+- クローズ済みだが plan.md で完了になっていないタスク
+- イシューで議論された仕様変更が product.md に反映されているか
+
 ### 2. ドキュメント読み込み
 
 各ドキュメントを読み込み、現状と比較:
@@ -58,6 +71,7 @@ cat package.json | jq '.scripts'
 |---------|------|------|-----------------|
 | tech.md | shared パッケージ | 作成済み | 「未作成」 |
 | structure.md | client/shared/ | 存在しない | 記載あり |
+| plan.md | 認証機能 | Issue #42 完了 | 「進行中」 |
 ```
 
 ### 4. ユーザー確認
@@ -99,6 +113,11 @@ git commit -m "Update steering documents to reflect current project state"
 ### structure.md
 - ディレクトリ構成が実態と一致するか
 - 各ディレクトリの説明が正確か
+
+### GitHub イシューとの整合性
+- オープンイシューが plan.md に反映されているか
+- 完了済みタスクに対応するイシューがクローズされているか
+- 機能要求イシューが product.md の機能一覧と整合しているか
 
 ## 注意事項
 
