@@ -1,20 +1,16 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: http://localhost:*; connect-src 'self' http://localhost:*"
+    />
     <title>Picstash</title>
-    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Picstash</h1>
-    <p class="subtitle">Desktop App</p>
-    <div class="versions">
-      <p>Node.js: <span id="node-version"></span></p>
-      <p>Chrome: <span id="chrome-version"></span></p>
-      <p>Electron: <span id="electron-version"></span></p>
-    </div>
-    <script src="renderer.js"></script>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
   </body>
 </html>
