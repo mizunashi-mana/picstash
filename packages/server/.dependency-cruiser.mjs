@@ -58,7 +58,7 @@ export default {
       comment:
         'エントリポイントから到達できないモジュールはデッドコードの可能性がある',
       from: {
-        path: '^src/index\\.ts$',
+        path: '^src/(index\\.ts|cli/.+\\.ts)$',
       },
       to: {
         path: '^src/',
@@ -66,9 +66,9 @@ export default {
           '\\.test\\.tsx?$',
           '__tests__/',
           '__mocks__/',
+          // エントリポイント自体は除外（相互に到達可能である必要はない）
+          '^src/index\\.ts$',
           '^src/cli/',
-          // CLI からのみ使用されるモジュール
-          '^src/application/attribute-suggestion/generate-label-embeddings\\.ts$',
         ],
         reachable: false,
       },
