@@ -1,4 +1,7 @@
 export const TYPES = {
+  // Config
+  Config: Symbol.for('Config'),
+
   // Repositories
   ImageRepository: Symbol.for('ImageRepository'),
   LabelRepository: Symbol.for('LabelRepository'),

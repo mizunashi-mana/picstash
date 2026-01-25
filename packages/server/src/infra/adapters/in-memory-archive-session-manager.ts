@@ -6,8 +6,7 @@ import { dirname, extname, join, resolve } from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline as pipelinePromise } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
-import { injectable, multiInject } from 'inversify';
-import { getConfig } from '@/config.js';
+import { inject, injectable, multiInject } from 'inversify';
 import {
   MAX_ARCHIVE_SIZE,
   filterImageEntries,
@@ -20,16 +19,9 @@ import type {
   CreateSessionInput,
   CreateSessionResult,
 } from '@/application/ports/archive-session-manager.js';
+import type { Config } from '@/config.js';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-
-function getStoragePath(): string {
-  return resolve(currentDir, '../../..', getConfig().storage.path);
-}
-
-function getTempPath(): string {
-  return join(getStoragePath(), 'temp');
-}
 
 function createSizeLimitedStream(maxSize: number): Transform {
   let totalSize = 0;
@@ -48,13 +40,18 @@ function createSizeLimitedStream(maxSize: number): Transform {
 @injectable()
 export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
   private readonly sessions = new Map<string, ArchiveSession>();
+  private readonly tempPath: string;
 
   constructor(
+    @inject(TYPES.Config) config: Config,
     @multiInject(TYPES.ArchiveHandler) private readonly handlers: ArchiveHandler[],
-  ) {}
+  ) {
+    const storagePath = resolve(currentDir, '../../..', config.storage.path);
+    this.tempPath = join(storagePath, 'temp');
+  }
 
   private async ensureTempDirectory(): Promise<void> {
-    await mkdir(getTempPath(), { recursive: true });
+    await mkdir(this.tempPath, { recursive: true });
   }
 
   private findHandler(
@@ -82,7 +79,7 @@ export class InMemoryArchiveSessionManager implements ArchiveSessionManager {
 
     const sessionId = randomUUID();
     const ext = extname(filename);
-    const archivePath = join(getTempPath(), `${sessionId}${ext}`);
+    const archivePath = join(this.tempPath, `${sessionId}${ext}`);
 
     const writeStream = createWriteStream(archivePath);
     const sizeLimitedStream = createSizeLimitedStream(MAX_ARCHIVE_SIZE);

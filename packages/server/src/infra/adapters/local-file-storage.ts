@@ -5,26 +5,29 @@ import { mkdir, unlink } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
-import { injectable } from 'inversify';
-import { getConfig } from '@/config.js';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type {
   FileStorage,
   SaveFileResult,
 } from '@/application/ports/file-storage.js';
+import type { Config } from '@/config.js';
 import type { Readable } from 'node:stream';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
-function getStoragePath(): string {
-  return resolve(currentDir, '../../..', getConfig().storage.path);
-}
-
-function getOriginalsPath(): string {
-  return join(getStoragePath(), 'originals');
-}
-
 @injectable()
 export class LocalFileStorage implements FileStorage {
+  private readonly storagePath: string;
+
+  constructor(@inject(TYPES.Config) config: Config) {
+    this.storagePath = resolve(currentDir, '../../..', config.storage.path);
+  }
+
+  private getOriginalsPath(): string {
+    return join(this.storagePath, 'originals');
+  }
+
   private generateFilename(extension: string): string {
     const uuid = randomUUID();
     return `${uuid}${extension}`;
@@ -38,10 +41,10 @@ export class LocalFileStorage implements FileStorage {
     stream: Readable,
     extension: string,
   ): Promise<SaveFileResult> {
-    await this.ensureDirectory(getOriginalsPath());
+    await this.ensureDirectory(this.getOriginalsPath());
 
     const filename = this.generateFilename(extension);
-    const filePath = join(getOriginalsPath(), filename);
+    const filePath = join(this.getOriginalsPath(), filename);
 
     const writeStream = createWriteStream(filePath);
     try {
@@ -62,11 +65,11 @@ export class LocalFileStorage implements FileStorage {
   }
 
   async deleteFile(relativePath: string): Promise<void> {
-    const filePath = join(getStoragePath(), relativePath);
+    const filePath = join(this.storagePath, relativePath);
     await unlink(filePath);
   }
 
   getAbsolutePath(relativePath: string): string {
-    return join(getStoragePath(), relativePath);
+    return join(this.storagePath, relativePath);
   }
 }

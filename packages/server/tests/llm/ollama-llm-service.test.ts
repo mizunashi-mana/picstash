@@ -1,15 +1,25 @@
 import 'reflect-metadata';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import type { Config } from '@/config.js';
 
-// Mock getConfig to return test configuration
-vi.mock('@/config.js', () => ({
-  getConfig: vi.fn().mockReturnValue({
-    ollama: {
-      url: 'http://localhost:11434',
-      model: 'llama3.2',
+const testConfig: Config = {
+  server: { port: 3000, host: '0.0.0.0' },
+  database: { url: 'file:./test.db' },
+  storage: { path: './storage' },
+  logging: {
+    level: 'info',
+    format: 'pretty',
+    file: {
+      enabled: false,
+      path: './logs/server.log',
+      rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
     },
-  }),
-}));
+  },
+  ollama: {
+    url: 'http://localhost:11434',
+    model: 'llama3.2',
+  },
+};
 
 // Store original fetch
 const originalFetch = globalThis.fetch;
@@ -17,9 +27,8 @@ const originalFetch = globalThis.fetch;
 describe('OllamaLlmService', () => {
   let mockFetch: ReturnType<typeof vi.fn<typeof fetch>>;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
-    vi.resetModules();
 
     // Create mock fetch with proper type
     mockFetch = vi.fn<typeof fetch>();
@@ -43,7 +52,7 @@ describe('OllamaLlmService', () => {
         }),
       } as unknown as Response);
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       const result = await service.generate('Test prompt');
 
       expect(result.text).toBe('Generated text response');
@@ -69,7 +78,7 @@ describe('OllamaLlmService', () => {
         }),
       } as unknown as Response);
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       await service.generate('User prompt', {
         systemPrompt: 'You are a helpful assistant',
         maxTokens: 100,
@@ -99,7 +108,7 @@ describe('OllamaLlmService', () => {
         text: async () => 'Internal Server Error',
       } as unknown as Response);
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       await expect(service.generate('Test prompt')).rejects.toThrow(
         'Ollama API error: 500 - Internal Server Error',
       );
@@ -117,7 +126,7 @@ describe('OllamaLlmService', () => {
         }),
       } as unknown as Response);
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       const result = await service.generate('Test prompt');
 
       expect(result.text).toBe('Trimmed response');
@@ -128,7 +137,7 @@ describe('OllamaLlmService', () => {
     it('should return configured model name', async () => {
       const { OllamaLlmService } = await import('@/infra/llm/ollama-llm-service');
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       expect(service.getModel()).toBe('llama3.2');
     });
   });
@@ -141,7 +150,7 @@ describe('OllamaLlmService', () => {
         ok: true,
       } as unknown as Response);
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       const available = await service.isAvailable();
 
       expect(available).toBe(true);
@@ -159,7 +168,7 @@ describe('OllamaLlmService', () => {
         status: 503,
       } as unknown as Response);
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       const available = await service.isAvailable();
 
       expect(available).toBe(false);
@@ -170,7 +179,7 @@ describe('OllamaLlmService', () => {
 
       mockFetch.mockRejectedValue(new Error('Network error'));
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       const available = await service.isAvailable();
 
       expect(available).toBe(false);
@@ -181,7 +190,7 @@ describe('OllamaLlmService', () => {
 
       mockFetch.mockRejectedValue(new DOMException('Aborted', 'AbortError'));
 
-      const service = new OllamaLlmService();
+      const service = new OllamaLlmService(testConfig);
       const available = await service.isAvailable();
 
       expect(available).toBe(false);
