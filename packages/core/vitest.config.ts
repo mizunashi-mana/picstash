@@ -17,28 +17,30 @@ export default defineConfig({
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.ts'],
       exclude: [
-        // エントリーポイント・設定
-        'src/index.ts',
-        'src/config.ts',
-        // インフラ層: DI
+        // インフラ層: DI（コンテナ設定）
         'src/infra/di/core-container.ts',
-        // インフラ層: Database
+        // インフラ層: Database（DB接続）
         'src/infra/database/prisma.ts',
-        'src/infra/database/sqlite-vec.ts',
-        // インフラ層: Adapters（テスト未実装または外部依存が強い）
+        'src/infra/database/prisma-service.ts',
+        // インフラ層: 外部サービス依存（モック困難）
+        'src/infra/caption/transformers-caption-service.ts',
+        'src/infra/embedding/clip-embedding-service.ts',
+        'src/infra/llm/ollama-llm-service.ts',
+        'src/infra/ocr/tesseract-ocr-service.ts',
+        // インフラ層: Prismaリポジトリ（DB統合テスト向け）
         'src/infra/adapters/prisma-collection-repository.ts',
+        'src/infra/adapters/prisma-image-attribute-repository.ts',
         'src/infra/adapters/prisma-image-repository.ts',
         'src/infra/adapters/prisma-job-queue.ts',
+        'src/infra/adapters/prisma-label-repository.ts',
+        'src/infra/adapters/prisma-recommendation-conversion-repository.ts',
+        'src/infra/adapters/prisma-search-history-repository.ts',
         'src/infra/adapters/prisma-stats-repository.ts',
-        'src/infra/adapters/sharp-image-processor.ts',
+        'src/infra/adapters/prisma-view-history-repository.ts',
         'src/infra/adapters/sqlite-vec-embedding-repository.ts',
-        'src/infra/adapters/in-memory-url-crawl-session-manager.ts',
-        // インフラ層: Archive（RARファイル生成ツール依存のためテスト困難）
+        // インフラ層: その他外部依存
+        'src/infra/adapters/sharp-image-processor.ts',
         'src/infra/adapters/rar-archive-handler.ts',
-        // インフラ層: Embedding
-        'src/infra/embedding/clip-embedding-service.ts',
-        // インデックスファイル（再エクスポートのみ）
-        'src/**/index.ts',
       ],
     },
   },
