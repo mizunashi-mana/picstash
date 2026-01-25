@@ -166,8 +166,8 @@ describe('gallery/api', () => {
 
   describe('updateImageAttribute', () => {
     it('should update an attribute', async () => {
-      const input = { value: 'updated' };
-      const mockAttr = { id: 'attr-1', value: 'updated' };
+      const input = { keywords: 'updated keywords' };
+      const mockAttr = { id: 'attr-1', keywords: 'updated keywords' };
       vi.mocked(apiClient).mockResolvedValue(mockAttr);
 
       const result = await updateImageAttribute('img-1', 'attr-1', input);
