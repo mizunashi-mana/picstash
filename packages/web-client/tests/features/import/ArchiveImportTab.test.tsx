@@ -15,6 +15,7 @@ vi.mock('@/features/archive-import', () => ({
   getArchiveSession: vi.fn(),
   deleteArchiveSession: vi.fn().mockResolvedValue(undefined),
   importFromArchive: vi.fn(),
+  getImportJobStatus: vi.fn(),
   ArchiveDropzone: ({ onDrop, isPending }: {
     onDrop: (files: File[]) => void;
     isPending: boolean;

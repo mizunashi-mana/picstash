@@ -5,6 +5,7 @@ import {
   Button,
   Group,
   Loader,
+  Progress,
   Stack,
   Text,
 } from '@mantine/core';
@@ -15,15 +16,143 @@ import {
   ArchivePreviewGallery,
   deleteArchiveSession,
   getArchiveSession,
+  getImportJobStatus,
   importFromArchive,
   uploadArchive,
 } from '@/features/archive-import';
-import type { ImportResult } from '@/features/archive-import';
+import type { ImportJobStatus, ImportResult } from '@/features/archive-import';
+
+/** ジョブが完了したかどうかを判定 */
+function isJobFinished(status: string | undefined): boolean {
+  return status === 'completed' || status === 'failed';
+}
+
+/** セッション表示コンポーネント */
+function SessionHeader({
+  filename,
+  archiveType,
+  imageCount,
+  onClose,
+  isClosing,
+  isImporting,
+}: {
+  filename: string;
+  archiveType: string;
+  imageCount: number;
+  onClose: () => void;
+  isClosing: boolean;
+  isImporting: boolean;
+}) {
+  return (
+    <Group justify="space-between" align="center">
+      <Group gap="sm">
+        <Text fw={500}>{filename}</Text>
+        <Badge variant="light">
+          {archiveType.toUpperCase()}
+        </Badge>
+        <Text size="sm" c="dimmed">
+          {imageCount}
+          件の画像
+        </Text>
+      </Group>
+      <Button
+        variant="outline"
+        color="red"
+        onClick={onClose}
+        loading={isClosing}
+        disabled={isImporting}
+      >
+        閉じる
+      </Button>
+    </Group>
+  );
+}
+
+/** 進捗表示コンポーネント */
+function ImportProgress({ progress, status }: { progress: number; status: string | undefined }) {
+  return (
+    <Alert color="blue" title="インポート中...">
+      <Stack gap="xs">
+        <Progress value={progress} size="lg" animated />
+        <Text size="sm" c="dimmed">
+          {status === 'waiting' && 'キュー待機中...'}
+          {status === 'active' && `${progress}% 完了`}
+          {status === undefined && 'ジョブを開始中...'}
+        </Text>
+      </Stack>
+    </Alert>
+  );
+}
+
+/** 結果表示コンポーネント */
+function ImportResultAlert({
+  result,
+  onClose,
+}: {
+  result: ImportResult;
+  onClose: () => void;
+}) {
+  return (
+    <Alert
+      color={result.failedCount === 0 ? 'green' : 'yellow'}
+      title="インポート完了"
+      withCloseButton
+      onClose={onClose}
+    >
+      <Stack gap="xs">
+        <Text>
+          {result.successCount}
+          {' '}
+          件インポート成功
+          {result.failedCount > 0 && (
+            <>
+              、
+              {result.failedCount}
+              {' '}
+              件失敗
+            </>
+          )}
+        </Text>
+        {result.successCount > 0 && (
+          <Button
+            variant="light"
+            size="sm"
+            component={Link}
+            to="/gallery"
+          >
+            ギャラリーを見る
+          </Button>
+        )}
+      </Stack>
+    </Alert>
+  );
+}
+
+/** ジョブステータスから完了結果を抽出 */
+function extractCompletedResult(data: ImportJobStatus): ImportResult | null {
+  if (data.status !== 'completed') {
+    return null;
+  }
+  if (
+    data.successCount === undefined
+    || data.failedCount === undefined
+    || data.results === undefined
+  ) {
+    return null;
+  }
+  return {
+    totalRequested: data.totalRequested,
+    successCount: data.successCount,
+    failedCount: data.failedCount,
+    results: data.results,
+  };
+}
 
 export function ArchiveImportTab() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importJobId, setImportJobId] = useState<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
   // Keep ref in sync with state for cleanup
@@ -48,6 +177,7 @@ export function ArchiveImportTab() {
       setSessionId(data.sessionId);
       setSelectedIndices(new Set());
       setImportResult(null);
+      setImportJobId(null);
     },
   });
 
@@ -66,8 +196,51 @@ export function ArchiveImportTab() {
       setSessionId(null);
       setSelectedIndices(new Set());
       setImportResult(null);
+      setImportJobId(null);
     },
   });
+
+  // ジョブステータスのポーリング
+  const jobStatusQuery = useQuery({
+    queryKey: ['import-job-status', importJobId],
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures importJobId is not null
+    queryFn: async () => await getImportJobStatus(importJobId!),
+    enabled: importJobId !== null,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      // 完了または失敗したらポーリング停止
+      if (isJobFinished(data?.status)) {
+        return false;
+      }
+      return 1000; // 1秒間隔でポーリング
+    },
+  });
+
+  const jobData = jobStatusQuery.data;
+  const jobStatus = jobData?.status;
+
+  // ジョブ完了時の処理
+  // This effect synchronizes external async job state with component state
+  /* eslint-disable react-hooks/set-state-in-effect -- Intentionally updating state based on async job completion */
+  useEffect(() => {
+    if (jobData === undefined || !isJobFinished(jobStatus)) {
+      return;
+    }
+
+    if (jobStatus === 'completed') {
+      const completedResult = extractCompletedResult(jobData);
+      if (completedResult !== null) {
+        setImportResult(completedResult);
+        const failedIndices = new Set(
+          completedResult.results.filter(r => !r.success).map(r => r.index),
+        );
+        setSelectedIndices(failedIndices);
+      }
+    }
+
+    setImportJobId(null);
+  }, [jobData, jobStatus]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const importMutation = useMutation({
     mutationFn: async (indices: number[]) => {
@@ -77,15 +250,8 @@ export function ArchiveImportTab() {
       return await importFromArchive(sessionId, indices);
     },
     onSuccess: (result) => {
-      setImportResult(result);
-      // Clear selection after successful import
-      if (result.successCount > 0) {
-        // Remove successfully imported indices from selection
-        const failedIndices = new Set(
-          result.results.filter(r => !r.success).map(r => r.index),
-        );
-        setSelectedIndices(failedIndices);
-      }
+      // ジョブIDを設定してポーリング開始
+      setImportJobId(result.jobId);
     },
   });
 
@@ -117,6 +283,9 @@ export function ArchiveImportTab() {
       importMutation.mutate(Array.from(selectedIndices));
     }
   };
+
+  const isImporting = importMutation.isPending || importJobId !== null;
+  const jobProgress = jobStatusQuery.data?.progress ?? 0;
 
   if (sessionId === null) {
     return (
@@ -152,62 +321,40 @@ export function ArchiveImportTab() {
           : session !== undefined
             ? (
                 <>
-                  {/* Header with file info and close button */}
-                  <Group justify="space-between" align="center">
-                    <Group gap="sm">
-                      <Text fw={500}>{session.filename}</Text>
-                      <Badge variant="light">
-                        {session.archiveType.toUpperCase()}
-                      </Badge>
-                      <Text size="sm" c="dimmed">
-                        {session.imageCount}
-                        件の画像
-                      </Text>
-                    </Group>
-                    <Button
-                      variant="outline"
-                      color="red"
-                      onClick={handleClose}
-                      loading={deleteMutation.isPending}
-                    >
-                      閉じる
-                    </Button>
-                  </Group>
+                  <SessionHeader
+                    filename={session.filename}
+                    archiveType={session.archiveType}
+                    imageCount={session.imageCount}
+                    onClose={handleClose}
+                    isClosing={deleteMutation.isPending}
+                    isImporting={isImporting}
+                  />
+
+                  {/* Import progress */}
+                  {isImporting && (
+                    <ImportProgress progress={jobProgress} status={jobStatus} />
+                  )}
+
+                  {/* Import error */}
+                  {importMutation.isError && (
+                    <Alert color="red" title="エラー">
+                      {importMutation.error.message}
+                    </Alert>
+                  )}
+
+                  {/* Job failed error */}
+                  {jobStatusQuery.data?.status === 'failed' && (
+                    <Alert color="red" title="インポート失敗">
+                      {jobStatusQuery.data.error ?? 'ジョブの処理中にエラーが発生しました'}
+                    </Alert>
+                  )}
 
                   {/* Import result alert */}
                   {importResult !== null && (
-                    <Alert
-                      color={importResult.failedCount === 0 ? 'green' : 'yellow'}
-                      title="インポート完了"
-                      withCloseButton
+                    <ImportResultAlert
+                      result={importResult}
                       onClose={() => { setImportResult(null); }}
-                    >
-                      <Stack gap="xs">
-                        <Text>
-                          {importResult.successCount}
-                          {' '}
-                          件インポート成功
-                          {importResult.failedCount > 0 && (
-                            <>
-                              、
-                              {importResult.failedCount}
-                              {' '}
-                              件失敗
-                            </>
-                          )}
-                        </Text>
-                        {importResult.successCount > 0 && (
-                          <Button
-                            variant="light"
-                            size="sm"
-                            component={Link}
-                            to="/gallery"
-                          >
-                            ギャラリーを見る
-                          </Button>
-                        )}
-                      </Stack>
-                    </Alert>
+                    />
                   )}
 
                   {/* Selection controls */}
@@ -217,6 +364,7 @@ export function ArchiveImportTab() {
                         variant="light"
                         size="sm"
                         onClick={handleSelectAll}
+                        disabled={isImporting}
                       >
                         全選択
                       </Button>
@@ -224,7 +372,7 @@ export function ArchiveImportTab() {
                         variant="light"
                         size="sm"
                         onClick={handleDeselectAll}
-                        disabled={selectedIndices.size === 0}
+                        disabled={selectedIndices.size === 0 || isImporting}
                       >
                         全解除
                       </Button>
@@ -236,8 +384,8 @@ export function ArchiveImportTab() {
                     </Group>
                     <Button
                       onClick={handleImport}
-                      disabled={selectedIndices.size === 0}
-                      loading={importMutation.isPending}
+                      disabled={selectedIndices.size === 0 || isImporting}
+                      loading={isImporting}
                     >
                       インポート (
                       {selectedIndices.size}

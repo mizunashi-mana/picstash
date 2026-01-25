@@ -1,10 +1,10 @@
 import { inject, injectable } from 'inversify';
-import { importFromArchive } from '@/application/archive/index.js';
 import { TYPES } from '@/infra/di/types.js';
+import { ARCHIVE_IMPORT_JOB_TYPE } from '@/infra/workers/index.js';
 import type { ArchiveSessionManager } from '@/application/ports/archive-session-manager.js';
-import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { ImageRepository } from '@/application/ports/image-repository.js';
+import type { JobQueue } from '@/application/ports/job-queue.js';
+import type { ArchiveImportJobPayload, ArchiveImportJobResult } from '@/infra/workers/index.js';
 import type { FastifyInstance } from 'fastify';
 
 function getMimeType(filename: string): string {
@@ -25,8 +25,7 @@ export class ArchiveController {
   constructor(
     @inject(TYPES.ArchiveSessionManager) private readonly sessionManager: ArchiveSessionManager,
     @inject(TYPES.ImageProcessor) private readonly imageProcessor: ImageProcessor,
-    @inject(TYPES.ImageRepository) private readonly imageRepository: ImageRepository,
-    @inject(TYPES.FileStorage) private readonly fileStorage: FileStorage,
+    @inject(TYPES.JobQueue) private readonly jobQueue: JobQueue,
   ) {}
 
   registerRoutes(app: FastifyInstance): void {
@@ -215,7 +214,7 @@ export class ArchiveController {
       },
     );
 
-    // Import selected images from archive to library
+    // Import selected images from archive to library (async)
     app.post<{
       Params: { sessionId: string };
       Body: { indices: number[] };
@@ -249,35 +248,81 @@ export class ArchiveController {
         }
 
         try {
-          const result = await importFromArchive(
-            { sessionId, indices },
-            {
-              archiveSessionManager: this.sessionManager,
-              imageRepository: this.imageRepository,
-              fileStorage: this.fileStorage,
-              imageProcessor: this.imageProcessor,
-            },
-          );
+          // ジョブをキューに追加して即座にレスポンスを返す
+          const payload: ArchiveImportJobPayload = { sessionId, indices };
+          const job = await this.jobQueue.add(ARCHIVE_IMPORT_JOB_TYPE, payload);
 
-          return await reply.send({
-            totalRequested: result.totalRequested,
-            successCount: result.successCount,
-            failedCount: result.failedCount,
-            results: result.results.map(r => ({
-              index: r.index,
-              success: r.success,
-              imageId: r.image?.id,
-              error: r.error,
-            })),
+          return await reply.status(202).send({
+            jobId: job.id,
+            status: job.status,
+            totalRequested: indices.length,
+            message: 'Import job queued successfully',
           });
         }
         catch (error) {
-          request.log.error(error, 'Failed to import images from archive');
+          request.log.error(error, 'Failed to queue archive import job');
           return await reply.status(500).send({
             error: 'Internal Server Error',
-            message: 'Failed to import images from archive',
+            message: 'Failed to queue archive import job',
           });
         }
+      },
+    );
+
+    // Get import job status
+    app.get<{ Params: { jobId: string } }>(
+      '/api/import-jobs/:jobId',
+      async (request, reply) => {
+        const { jobId } = request.params;
+
+        const job = await this.jobQueue.getJob<ArchiveImportJobPayload, ArchiveImportJobResult>(jobId);
+        if (job === null) {
+          return await reply.status(404).send({
+            error: 'Not Found',
+            message: 'Import job not found',
+          });
+        }
+
+        // ジョブタイプを確認
+        if (job.type !== ARCHIVE_IMPORT_JOB_TYPE) {
+          return await reply.status(404).send({
+            error: 'Not Found',
+            message: 'Import job not found',
+          });
+        }
+
+        const response: {
+          jobId: string;
+          status: string;
+          progress: number;
+          totalRequested: number;
+          successCount?: number;
+          failedCount?: number;
+          results?: Array<{
+            index: number;
+            success: boolean;
+            imageId?: string;
+            error?: string;
+          }>;
+          error?: string;
+        } = {
+          jobId: job.id,
+          status: job.status,
+          progress: job.progress,
+          totalRequested: job.payload.indices.length,
+        };
+
+        if (job.status === 'completed' && job.result !== undefined) {
+          response.successCount = job.result.successCount;
+          response.failedCount = job.result.failedCount;
+          response.results = job.result.results;
+        }
+
+        if (job.status === 'failed' && job.error !== undefined) {
+          response.error = job.error;
+        }
+
+        return await reply.send(response);
       },
     );
 
