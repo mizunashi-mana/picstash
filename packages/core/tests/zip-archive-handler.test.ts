@@ -1,7 +1,7 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import AdmZip from 'adm-zip';
+import JSZip from 'jszip';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ZipArchiveHandler } from '@/index.js';
 
@@ -15,14 +15,15 @@ describe('ZipArchiveHandler', () => {
     tempDir = await mkdtemp(join(tmpdir(), 'zip-test-'));
 
     // Create a test ZIP file with some images
-    const zip = new AdmZip();
-    zip.addFile('image1.png', Buffer.from('fake png data 1'));
-    zip.addFile('image2.jpg', Buffer.from('fake jpg data 2'));
-    zip.addFile('subfolder/image3.gif', Buffer.from('fake gif data 3'));
-    zip.addFile('readme.txt', Buffer.from('not an image'));
+    const zip = new JSZip();
+    zip.file('image1.png', Buffer.from('fake png data 1'));
+    zip.file('image2.jpg', Buffer.from('fake jpg data 2'));
+    zip.file('subfolder/image3.gif', Buffer.from('fake gif data 3'));
+    zip.file('readme.txt', Buffer.from('not an image'));
 
     testZipPath = join(tempDir, 'test.zip');
-    await writeFile(testZipPath, zip.toBuffer());
+    const buffer = await zip.generateAsync({ type: 'nodebuffer' });
+    await writeFile(testZipPath, buffer);
   });
 
   afterEach(async () => {
@@ -106,9 +107,9 @@ describe('ZipArchiveHandler', () => {
     beforeEach(async () => {
       // Create a valid ZIP first
       // ZIP structure: [Local File Headers + Data] [Central Directory] [EOCD]
-      const zip = new AdmZip();
-      zip.addFile('image.png', Buffer.from(testContent));
-      const validZipBuffer = zip.toBuffer();
+      const zip = new JSZip();
+      zip.file('image.png', Buffer.from(testContent));
+      const validZipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
 
       // Find EOCD signature from the end (PK\x05\x06 = 0x50 0x4B 0x05 0x06)
       // Search backwards from the end of the file
@@ -157,10 +158,10 @@ describe('ZipArchiveHandler', () => {
 
     it('should throw error when extracting directory entry in fallback mode', async () => {
       // Create a corrupted ZIP with a directory entry
-      const zipWithDir = new AdmZip();
-      zipWithDir.addFile('folder/', Buffer.alloc(0));
-      zipWithDir.addFile('folder/file.txt', Buffer.from('content'));
-      const validBuffer = zipWithDir.toBuffer();
+      const zipWithDir = new JSZip();
+      zipWithDir.folder('folder');
+      zipWithDir.file('folder/file.txt', Buffer.from('content'));
+      const validBuffer = await zipWithDir.generateAsync({ type: 'nodebuffer' });
 
       // Truncate to remove EOCD
       const truncatedBuffer = validBuffer.subarray(0, validBuffer.length - 22);
