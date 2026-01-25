@@ -25,16 +25,20 @@ function createMockImageRepository(): ImageRepository {
   return {
     create: vi.fn(),
     findById: vi.fn(),
-    findByIdWithEmbedding: vi.fn(),
     findByIds: vi.fn(),
-    list: vi.fn(),
-    count: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
+    findAll: vi.fn(),
+    findAllPaginated: vi.fn(),
     search: vi.fn(),
-    findByAttribute: vi.fn(),
-    findUnprocessedImages: vi.fn(),
-    listByIds: vi.fn(),
+    searchPaginated: vi.fn(),
+    updateById: vi.fn(),
+    deleteById: vi.fn(),
+    findIdsWithoutEmbedding: vi.fn(),
+    findByIdWithEmbedding: vi.fn(),
+    findWithEmbedding: vi.fn(),
+    updateEmbedding: vi.fn(),
+    clearAllEmbeddings: vi.fn(),
+    count: vi.fn(),
+    countWithEmbedding: vi.fn(),
   };
 }
 
@@ -105,9 +109,9 @@ describe('archive-import-worker', () => {
         id: 'session-1',
         filename: 'test.zip',
         archiveType: 'zip',
-        tempPath: '/tmp/test.zip',
+        archivePath: '/tmp/test.zip',
         imageEntries: [
-          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000 },
+          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000, isDirectory: false },
         ],
         createdAt: new Date(),
       };
@@ -137,10 +141,10 @@ describe('archive-import-worker', () => {
         id: 'session-1',
         filename: 'test.zip',
         archiveType: 'zip',
-        tempPath: '/tmp/test.zip',
+        archivePath: '/tmp/test.zip',
         imageEntries: [
-          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000 },
-          { index: 1, filename: 'img2.jpg', path: '/img2.jpg', size: 2000 },
+          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000, isDirectory: false },
+          { index: 1, filename: 'img2.jpg', path: '/img2.jpg', size: 2000, isDirectory: false },
         ],
         createdAt: new Date(),
       };
@@ -158,12 +162,10 @@ describe('archive-import-worker', () => {
       vi.mocked(mockImageProcessor.getMetadata).mockResolvedValue({
         width: 800,
         height: 600,
-        format: 'png',
       });
       vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue({
+        filename: 'test.png',
         path: 'thumbnails/test.png',
-        width: 200,
-        height: 150,
       });
 
       const mockImageRepository = createMockImageRepository();
@@ -177,8 +179,6 @@ describe('archive-import-worker', () => {
         height: 600,
         title: 'Image 2026-01-25',
         description: null,
-        labels: [],
-        collections: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -209,10 +209,10 @@ describe('archive-import-worker', () => {
         id: 'session-1',
         filename: 'test.zip',
         archiveType: 'zip',
-        tempPath: '/tmp/test.zip',
+        archivePath: '/tmp/test.zip',
         imageEntries: [
-          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000 },
-          { index: 1, filename: 'img2.png', path: '/img2.png', size: 2000 },
+          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000, isDirectory: false },
+          { index: 1, filename: 'img2.png', path: '/img2.png', size: 2000, isDirectory: false },
         ],
         createdAt: new Date(),
       };
@@ -230,12 +230,10 @@ describe('archive-import-worker', () => {
       vi.mocked(mockImageProcessor.getMetadata).mockResolvedValue({
         width: 800,
         height: 600,
-        format: 'png',
       });
       vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue({
+        filename: 'test.png',
         path: 'thumbnails/test.png',
-        width: 200,
-        height: 150,
       });
 
       const mockImageRepository = createMockImageRepository();
@@ -249,8 +247,6 @@ describe('archive-import-worker', () => {
         height: 600,
         title: 'Image 2026-01-25',
         description: null,
-        labels: [],
-        collections: [],
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -278,9 +274,9 @@ describe('archive-import-worker', () => {
         id: 'session-1',
         filename: 'test.zip',
         archiveType: 'zip',
-        tempPath: '/tmp/test.zip',
+        archivePath: '/tmp/test.zip',
         imageEntries: [
-          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000 },
+          { index: 0, filename: 'img1.png', path: '/img1.png', size: 1000, isDirectory: false },
         ],
         createdAt: new Date(),
       };
