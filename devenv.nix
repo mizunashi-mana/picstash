@@ -36,6 +36,11 @@
     entry = "./scripts/run-script.mjs --cwd packages/core -- npx eslint --cache --fix FILES";
     files = "^packages/core/.*\.[cm]?(js|ts)x?$";
   };
+  git-hooks.hooks.npx-eslint-pkg-api = {
+    enable = true;
+    entry = "./scripts/run-script.mjs --cwd packages/api -- npx eslint --cache --fix FILES";
+    files = "^packages/api/.*\.[cm]?(js|ts)x?$";
+  };
   git-hooks.hooks.npx-eslint-pkg-server = {
     enable = true;
     entry = "./scripts/run-script.mjs --cwd packages/server -- npx eslint --cache --fix FILES";

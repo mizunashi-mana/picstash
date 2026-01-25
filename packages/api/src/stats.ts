@@ -4,7 +4,6 @@
  * client と server で共有する統計関連の API 定義
  */
 import { z } from 'zod';
-
 import { buildUrl } from './url.js';
 
 /**

@@ -1,5 +1,3 @@
-/storage/*
-!/storage/.keep
 /tmp/
 config.local.yaml
 
