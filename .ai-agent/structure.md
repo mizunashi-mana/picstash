@@ -89,7 +89,7 @@ picstash/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   ├── server/                 # バックエンド
+│   ├── server/                 # バックエンド（HTTP 層）
 │   │   ├── src/
 │   │   │   ├── index.ts        # サーバーエントリポイント
 │   │   │   ├── app.ts          # Fastify アプリ構成
@@ -99,9 +99,27 @@ picstash/
 │   │   │   │   ├── generate-embeddings.ts       # 画像埋め込み生成コマンド
 │   │   │   │   └── generate-label-embeddings.ts # ラベル埋め込み生成コマンド
 │   │   │   │
+│   │   │   └── infra/          # サーバー固有インフラ層
+│   │   │       ├── di/         # サーバー用 DI 設定
+│   │   │       ├── http/       # Fastify ルート、プラグイン
+│   │   │       │   ├── routes/ # API ルート（images, labels, image-attributes, archives 等）
+│   │   │       │   └── plugins/
+│   │   │       └── logging/    # ロギングサービス
+│   │   │
+│   │   ├── tests/              # server のテスト
+│   │   ├── eslint.config.mjs   # ESLint 設定（node 環境）
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   ├── core/                   # コアロジック (@picstash/core)
+│   │   ├── src/
+│   │   │   ├── index.ts        # メインエクスポート
+│   │   │   ├── config.ts       # 設定型定義
+│   │   │   │
 │   │   │   ├── domain/         # ドメイン層
 │   │   │   │   ├── archive/    # アーカイブドメインモデル
 │   │   │   │   ├── collection/ # コレクションドメインモデル
+│   │   │   │   ├── embedding/  # 埋め込みドメインモデル
 │   │   │   │   ├── image/      # 画像ドメインモデル
 │   │   │   │   ├── image-attribute/ # 画像属性ドメインモデル
 │   │   │   │   ├── label/      # ラベルドメインモデル
@@ -111,7 +129,6 @@ picstash/
 │   │   │   │   └── view-history/ # 閲覧履歴ドメインモデル
 │   │   │   │
 │   │   │   ├── application/    # アプリケーション層
-│   │   │   │   ├── archive/    # アーカイブ処理
 │   │   │   │   ├── attribute-suggestion/ # 属性推薦
 │   │   │   │   ├── duplicate-detection/ # 重複画像検出
 │   │   │   │   ├── embedding/  # 埋め込み生成
@@ -129,17 +146,12 @@ picstash/
 │   │   │   │   ├── database/   # Prisma Client、sqlite-vec
 │   │   │   │   ├── di/         # 依存性注入コンテナ
 │   │   │   │   ├── embedding/  # CLIP 埋め込みサービス
-│   │   │   │   ├── http/       # Fastify ルート、プラグイン
-│   │   │   │   │   ├── routes/ # API ルート（images, labels, image-attributes, archives 等）
-│   │   │   │   │   └── plugins/
 │   │   │   │   ├── llm/        # LLM サービス（Ollama 連携）
-│   │   │   │   ├── logging/    # ロギングサービス
 │   │   │   │   ├── ocr/        # OCR サービス（Tesseract.js）
 │   │   │   │   ├── queue/      # ジョブキュー
-│   │   │   │   ├── storage/    # ファイルストレージ
 │   │   │   │   └── workers/    # バックグラウンドワーカー
 │   │   │   │
-│   │   │   └── shared/         # サーバー内共通
+│   │   │   └── shared/         # コア内共通
 │   │   │
 │   │   ├── generated/          # Prisma 生成ファイル
 │   │   │   └── prisma/         # Prisma Client
@@ -147,7 +159,7 @@ picstash/
 │   │   │   ├── schema.prisma
 │   │   │   ├── data/           # SQLite データベースファイル
 │   │   │   └── migrations/
-│   │   ├── tests/              # server のテスト
+│   │   ├── tests/              # core のテスト
 │   │   ├── eslint.config.mjs   # ESLint 設定（node 環境）
 │   │   ├── prisma.config.ts    # Prisma 設定
 │   │   ├── package.json
@@ -215,8 +227,15 @@ picstash/
 - **routes/** - React Router 設定
 
 ### `packages/server/`
-バックエンドのパッケージ。クリーンアーキテクチャを採用：
+バックエンドの HTTP サーバーパッケージ。Fastify による API 提供に特化：
 - **cli/** - CLI コマンド（埋め込み生成等）
+- **infra/** - サーバー固有のインフラ層
+  - **di/** - サーバー用 DI 設定
+  - **http/** - Fastify ルート、プラグイン
+  - **logging/** - ロギングサービス
+
+### `packages/core/`
+コアロジックパッケージ (`@picstash/core`)。クリーンアーキテクチャを採用：
 - **domain/** - ドメイン層（ビジネスルール、エンティティ、バリューオブジェクト）
 - **application/** - アプリケーション層（ユースケース、ポート定義）
 - **infra/** - インフラ層（外部システム連携）
@@ -225,8 +244,10 @@ picstash/
   - **di/** - 依存性注入コンテナ
   - **caption/** - キャプション生成サービス（ViT-GPT2 + NLLB翻訳）
   - **embedding/** - CLIP 埋め込みサービス
-  - **http/** - Fastify ルート、プラグイン
-  - **storage/** - ファイルストレージ
+  - **llm/** - LLM サービス（Ollama 連携）
+  - **ocr/** - OCR サービス（Tesseract.js）
+  - **queue/** - ジョブキュー
+  - **workers/** - バックグラウンドワーカー
 
 Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エイリアスでインポート。
 

@@ -45,7 +45,7 @@ inversify を使用した DI コンテナで依存性を管理。`AppContainer` 
 
 ```typescript
 // main (index.ts)
-import { buildAppContainer } from '@/infra/di/index.js';
+import { buildAppContainer } from '@picstash/core';
 
 const container = buildAppContainer();
 const app = await buildApp(container);
@@ -60,7 +60,7 @@ export function imageRoutes(app: FastifyInstance, container: AppContainer): void
 
 **ファイル構成:**
 ```
-packages/server/src/infra/di/
+packages/core/src/infra/di/
 ├── index.ts           # エクスポート（buildAppContainer, AppContainer）
 ├── container.ts       # createContainer() - inversify Container 設定
 ├── types.ts           # TYPES 定義（内部使用）
@@ -73,9 +73,10 @@ packages/server/src/infra/di/
 |-----------|------|------|
 | `packages/web-client` | React フロントエンド | セットアップ済み |
 | `packages/server` | Fastify バックエンド API | セットアップ済み |
+| `packages/core` | コアロジック（domain, application, infra）(`@picstash/core`) | セットアップ済み |
+| `packages/api` | 共有 API 型定義・エンドポイント (`@picstash/api`) | セットアップ済み |
 | `packages/e2e-test` | Playwright E2E テスト | セットアップ済み |
 | `packages/eslint-config` | 共有 ESLint 設定 | セットアップ済み |
-| `packages/api` | 共有 API 型定義・エンドポイント (`@picstash/api`) | セットアップ済み |
 
 詳細は [structure.md](../structure.md) を参照。
 
