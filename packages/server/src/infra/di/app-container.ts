@@ -18,6 +18,7 @@ import type { SearchHistoryRepository } from '@/application/ports/search-history
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
+import type { Config } from '@/config.js';
 import type {
   ArchiveController,
   CollectionController,
@@ -184,8 +185,9 @@ export class AppContainer {
 
 /**
  * Creates a new AppContainer instance with all dependencies configured.
+ * @param config - Application configuration
  */
-export function buildAppContainer(): AppContainer {
-  const container = createContainer();
+export function buildAppContainer(config: Config): AppContainer {
+  const container = createContainer(config);
   return new AppContainer(container);
 }

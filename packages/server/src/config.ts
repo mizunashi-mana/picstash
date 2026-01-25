@@ -73,8 +73,6 @@ const configSchema = z.object({
 
 export type Config = z.infer<typeof configSchema>;
 
-let loadedConfig: Config | null = null;
-
 /**
  * Load configuration from a YAML file.
  * @param configPath - Path to the config file. If not provided, uses default path.
@@ -95,17 +93,7 @@ export function loadConfig(configPath?: string): Config {
  */
 export function initConfig(configPath?: string): Config {
   const path = configPath ?? process.env.PICSTASH_CONFIG ?? undefined;
-  loadedConfig = loadConfig(path);
-  return loadedConfig;
-}
-
-/**
- * Get the current configuration.
- * If not initialized, loads from default path or PICSTASH_CONFIG env var.
- */
-export function getConfig(): Config {
-  loadedConfig ??= loadConfig(process.env.PICSTASH_CONFIG ?? undefined);
-  return loadedConfig;
+  return loadConfig(path);
 }
 
 /**

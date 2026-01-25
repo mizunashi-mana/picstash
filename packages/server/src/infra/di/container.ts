@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
-import { getConfig } from '@/config.js';
 import {
   InMemoryArchiveSessionManager,
   InMemoryUrlCrawlSessionManager,
@@ -57,12 +56,17 @@ import type { SearchHistoryRepository } from '@/application/ports/search-history
 import type { StatsRepository } from '@/application/ports/stats-repository.js';
 import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 import type { ViewHistoryRepository } from '@/application/ports/view-history-repository.js';
+import type { Config } from '@/config.js';
 
 /**
  * Creates and configures a new inversify Container with all dependencies.
+ * @param config - Application configuration
  */
-export function createContainer(): Container {
+export function createContainer(config: Config): Container {
   const container = new Container();
+
+  // Bind config
+  container.bind<Config>(TYPES.Config).toConstantValue(config);
 
   // Bind repositories as singletons
   container
@@ -161,7 +165,6 @@ export function createContainer(): Container {
     .inSingletonScope();
 
   // Bind LLM service only if ollama is configured
-  const config = getConfig();
   if (config.ollama !== undefined) {
     container
       .bind<LlmService>(TYPES.LlmService)

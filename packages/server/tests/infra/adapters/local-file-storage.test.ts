@@ -3,14 +3,26 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getConfig } from '@/config.js';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { LocalFileStorage } from '@/infra/adapters/local-file-storage';
+import type { Config } from '@/config.js';
 
-// Mock the config module
-vi.mock('@/config.js', () => ({
-  getConfig: vi.fn(),
-}));
+function createTestConfig(tempDir: string): Config {
+  return {
+    storage: { path: tempDir },
+    server: { port: 3000, host: '0.0.0.0' },
+    database: { url: 'file:./test.db' },
+    logging: {
+      level: 'info',
+      format: 'pretty',
+      file: {
+        enabled: false,
+        path: './logs/server.log',
+        rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
+      },
+    },
+  };
+}
 
 describe('LocalFileStorage', () => {
   let storage: LocalFileStorage;
@@ -18,21 +30,8 @@ describe('LocalFileStorage', () => {
 
   beforeEach(async () => {
     tempDir = await mkdtemp(join(tmpdir(), 'storage-test-'));
-    vi.mocked(getConfig).mockReturnValue({
-      storage: { path: tempDir },
-      server: { port: 3000, host: '0.0.0.0' },
-      database: { url: 'file:./test.db' },
-      logging: {
-        level: 'info',
-        format: 'pretty',
-        file: {
-          enabled: false,
-          path: './logs/server.log',
-          rotation: { enabled: true, maxSize: '10M', maxFiles: 5 },
-        },
-      },
-    });
-    storage = new LocalFileStorage();
+    const config = createTestConfig(tempDir);
+    storage = new LocalFileStorage(config);
   });
 
   afterEach(async () => {
