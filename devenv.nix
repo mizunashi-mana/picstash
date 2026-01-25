@@ -51,6 +51,11 @@
     entry = "./scripts/run-script.mjs --cwd packages/web-client -- npx eslint --cache --fix FILES";
     files = "^packages/web-client/.*\.[cm]?(js|ts)x?$";
   };
+  git-hooks.hooks.npx-eslint-pkg-desktop-app = {
+    enable = true;
+    entry = "./scripts/run-script.mjs --cwd packages/desktop-app -- npx eslint --cache --fix FILES";
+    files = "^packages/desktop-app/.*\.[cm]?(js|ts)x?$";
+  };
   git-hooks.hooks.npx-prisma-lint-pkg-core = {
     enable = true;
     entry = "./scripts/run-script.mjs --cwd packages/core -- npx prisma-lint FILES";

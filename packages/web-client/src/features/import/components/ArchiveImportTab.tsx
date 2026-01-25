@@ -21,6 +21,7 @@ import {
   uploadArchive,
 } from '@/features/archive-import';
 import type { ImportJobStatus, ImportResult } from '@/features/archive-import';
+import type { FileWithPath } from '@mantine/dropzone';
 
 /** ジョブが完了したかどうかを判定 */
 function isJobFinished(status: string | undefined): boolean {
@@ -345,7 +346,7 @@ export function ArchiveImportTab() {
     },
   });
 
-  const handleDrop = (files: File[]) => {
+  const handleDrop = (files: FileWithPath[]) => {
     const file = files[0];
     if (file !== undefined) {
       uploadMutation.mutate(file);

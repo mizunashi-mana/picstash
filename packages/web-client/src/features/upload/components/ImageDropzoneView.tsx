@@ -1,8 +1,8 @@
 import { Group, Text } from '@mantine/core';
-import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { Dropzone, IMAGE_MIME_TYPE, type FileWithPath } from '@mantine/dropzone';
 
 export interface ImageDropzoneViewProps {
-  onDrop: (files: File[]) => void;
+  onDrop: (files: FileWithPath[]) => void;
   isPending: boolean;
   isError: boolean;
   isSuccess: boolean;

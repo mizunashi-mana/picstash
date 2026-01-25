@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { uploadImage } from '@/features/upload/api';
 import { ImageDropzoneView } from './ImageDropzoneView';
+import type { FileWithPath } from '@mantine/dropzone';
 
 interface ImageDropzoneProps {
   onUploadSuccess?: () => void;
@@ -14,7 +15,7 @@ export function ImageDropzone({ onUploadSuccess }: ImageDropzoneProps) {
     },
   });
 
-  const handleDrop = (files: File[]) => {
+  const handleDrop = (files: FileWithPath[]) => {
     files.forEach((file) => {
       mutation.mutate(file);
     });
