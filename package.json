@@ -8,7 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently -n client,server,ollama -c blue,green,yellow \"npm:dev:client\" \"npm:dev:server\" \"npm:dev:ollama\"",
+    "dev": "concurrently -n core,client,server,ollama -c magenta,blue,green,yellow \"npm:dev:core\" \"npm:dev:client\" \"npm:dev:server\" \"npm:dev:ollama\"",
+    "dev:core": "npm run dev -w @picstash/core",
     "dev:client": "npm run dev -w @picstash/web-client",
     "dev:server": "npm run dev -w @picstash/server",
     "dev:ollama": "ollama serve || true",
