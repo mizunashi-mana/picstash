@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "npm run db:generate && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "dev": "npm run db:generate && concurrently -n tsc,alias -c cyan,magenta \"tsc -w -p tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -50,6 +51,7 @@
     "@types/yauzl-promise": "^4.0.1",
     "@vitest/coverage-v8": "^4.0.16",
     "adm-zip": "^0.5.16",
+    "concurrently": "^9.2.1",
     "dependency-cruiser": "^17.3.6",
     "eslint": "^9.39.2",
     "pino-pretty": "^13.1.3",
