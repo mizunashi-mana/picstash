@@ -3,6 +3,7 @@ import { Alert, Button, Stack, Text } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { ImageDropzoneView, uploadImage } from '@/features/upload';
+import type { FileWithPath } from '@mantine/dropzone';
 
 interface UploadResult {
   successCount: number;
@@ -13,7 +14,7 @@ export function ImageUploadTab() {
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
 
   const mutation = useMutation({
-    mutationFn: async (files: File[]) => {
+    mutationFn: async (files: Blob[]) => {
       let successCount = 0;
       let failedCount = 0;
 
@@ -34,7 +35,7 @@ export function ImageUploadTab() {
     },
   });
 
-  const handleDrop = (files: File[]) => {
+  const handleDrop = (files: FileWithPath[]) => {
     setUploadResult(null);
     mutation.mutate(files);
   };

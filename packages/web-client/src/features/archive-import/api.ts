@@ -20,7 +20,7 @@ interface ErrorResponse {
   message?: string;
 }
 
-export async function uploadArchive(file: File): Promise<ArchiveSession> {
+export async function uploadArchive(file: Blob): Promise<ArchiveSession> {
   const formData = new FormData();
   formData.append('file', file);
 

@@ -1,5 +1,5 @@
 import { Group, Text } from '@mantine/core';
-import { Dropzone } from '@mantine/dropzone';
+import { Dropzone, type FileWithPath } from '@mantine/dropzone';
 
 const ARCHIVE_MIME_TYPES = [
   'application/zip',
@@ -10,7 +10,7 @@ const ARCHIVE_MIME_TYPES = [
 ];
 
 export interface ArchiveDropzoneProps {
-  onDrop: (files: File[]) => void;
+  onDrop: (files: FileWithPath[]) => void;
   isPending: boolean;
   isError: boolean;
   errorMessage?: string;

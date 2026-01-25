@@ -14,7 +14,7 @@ interface ErrorResponse {
   message?: string;
 }
 
-export async function uploadImage(file: File): Promise<Image> {
+export async function uploadImage(file: Blob): Promise<Image> {
   const formData = new FormData();
   formData.append('file', file);
 
