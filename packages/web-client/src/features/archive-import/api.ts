@@ -92,6 +92,30 @@ export interface ImportResultItem {
   error?: string;
 }
 
+/** ジョブステータス型 */
+export type JobStatus = 'waiting' | 'active' | 'completed' | 'failed';
+
+/** インポートジョブ開始レスポンス */
+export interface ImportJobStartResponse {
+  jobId: string;
+  status: JobStatus;
+  totalRequested: number;
+  message: string;
+}
+
+/** インポートジョブステータスレスポンス */
+export interface ImportJobStatus {
+  jobId: string;
+  status: 'waiting' | 'active' | 'completed' | 'failed';
+  progress: number;
+  totalRequested: number;
+  successCount?: number;
+  failedCount?: number;
+  results?: ImportResultItem[];
+  error?: string;
+}
+
+/** 完了したインポートジョブの結果 */
 export interface ImportResult {
   totalRequested: number;
   successCount: number;
@@ -99,10 +123,13 @@ export interface ImportResult {
   results: ImportResultItem[];
 }
 
+/**
+ * アーカイブから画像をインポート（ジョブをキューに追加）
+ */
 export async function importFromArchive(
   sessionId: string,
   indices: number[],
-): Promise<ImportResult> {
+): Promise<ImportJobStartResponse> {
   const response = await fetch(`/api/archives/${sessionId}/import`, {
     method: 'POST',
     headers: {
@@ -114,9 +141,25 @@ export async function importFromArchive(
   if (!response.ok) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
     const error = (await response.json()) as ErrorResponse;
-    throw new Error(error.message ?? 'Failed to import images');
+    throw new Error(error.message ?? 'Failed to queue import job');
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response
-  return (await response.json()) as ImportResult;
+  return (await response.json()) as ImportJobStartResponse;
+}
+
+/**
+ * インポートジョブのステータスを取得
+ */
+export async function getImportJobStatus(jobId: string): Promise<ImportJobStatus> {
+  const response = await fetch(`/api/import-jobs/${jobId}`);
+
+  if (!response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
+    const error = (await response.json()) as ErrorResponse;
+    throw new Error(error.message ?? 'Failed to get import job status');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response
+  return (await response.json()) as ImportJobStatus;
 }

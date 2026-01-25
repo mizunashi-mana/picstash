@@ -6,7 +6,12 @@ import { initConfig, parseConfigArg } from '@/config.js';
 import { connectDatabase, disconnectDatabase } from '@/infra/database/prisma.js';
 import { buildAppContainer } from '@/infra/di/index.js';
 import { JobWorker } from '@/infra/queue/index.js';
-import { createCaptionJobHandler, CAPTION_JOB_TYPE } from '@/infra/workers/index.js';
+import {
+  createCaptionJobHandler,
+  CAPTION_JOB_TYPE,
+  createArchiveImportJobHandler,
+  ARCHIVE_IMPORT_JOB_TYPE,
+} from '@/infra/workers/index.js';
 
 async function main(): Promise<void> {
   // Parse --config argument and initialize configuration
@@ -21,7 +26,10 @@ async function main(): Promise<void> {
   app.log.info('Database connected');
 
   // Start job worker
-  const jobWorker = new JobWorker(container.getJobQueue());
+  // archive-import は大量画像で時間がかかるため、タイムアウトを15分に設定
+  const jobWorker = new JobWorker(container.getJobQueue(), {
+    jobTimeout: 900000, // 15 minutes
+  });
 
   // Register caption generation job handler
   const ocrService = container.getOcrService();
@@ -33,6 +41,16 @@ async function main(): Promise<void> {
     ocrService,
   });
   jobWorker.registerHandler(CAPTION_JOB_TYPE, captionHandler);
+
+  // Register archive import job handler
+  const archiveImportHandler = createArchiveImportJobHandler({
+    archiveSessionManager: container.getArchiveSessionManager(),
+    imageRepository: container.getImageRepository(),
+    fileStorage: container.getFileStorage(),
+    imageProcessor: container.getImageProcessor(),
+  });
+  jobWorker.registerHandler(ARCHIVE_IMPORT_JOB_TYPE, archiveImportHandler);
+
   jobWorker.start();
   app.log.info('Job worker started');
 

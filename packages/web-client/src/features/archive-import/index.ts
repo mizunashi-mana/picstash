@@ -5,5 +5,10 @@ export {
   getArchiveSession,
   deleteArchiveSession,
   importFromArchive,
+  getImportJobStatus,
 } from './api';
-export type { ImportResult } from './api';
+export type {
+  ImportResult,
+  ImportJobStartResponse,
+  ImportJobStatus,
+} from './api';
