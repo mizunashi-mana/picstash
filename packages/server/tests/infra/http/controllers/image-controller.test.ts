@@ -60,9 +60,15 @@ function createMockImageRepository(): ImageRepository {
 
 function createMockFileStorage(): FileStorage {
   return {
+    saveFile: vi.fn(),
+    saveFileFromBuffer: vi.fn(),
     saveOriginalFromStream: vi.fn(),
-    getAbsolutePath: vi.fn().mockReturnValue('/tmp/test.png'),
+    readFile: vi.fn(),
+    readFileAsStream: vi.fn(),
+    getFileSize: vi.fn(),
+    fileExists: vi.fn().mockResolvedValue(true),
     deleteFile: vi.fn(),
+    getAbsolutePath: vi.fn().mockReturnValue('/tmp/test.png'),
   };
 }
 
@@ -70,7 +76,6 @@ function createMockImageProcessor(): ImageProcessor {
   return {
     getMetadata: vi.fn(),
     generateThumbnail: vi.fn(),
-    generateThumbnailFromBuffer: vi.fn(),
   };
 }
 
@@ -282,7 +287,7 @@ describe('ImageController', () => {
     it('should return 404 when file not found on disk', async () => {
       const image = createImage('test-id');
       vi.mocked(mockImageRepository.findById).mockResolvedValue(image);
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/non/existent/path.png');
+      vi.mocked(mockFileStorage.fileExists).mockResolvedValue(false);
 
       const response = await app.inject({
         method: 'GET',
@@ -312,7 +317,7 @@ describe('ImageController', () => {
     it('should return 404 when thumbnail file not found on disk', async () => {
       const image = createImage('test-id');
       vi.mocked(mockImageRepository.findById).mockResolvedValue(image);
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/non/existent/thumb.jpg');
+      vi.mocked(mockFileStorage.fileExists).mockResolvedValue(false);
 
       const response = await app.inject({
         method: 'GET',

@@ -147,7 +147,7 @@ export class ArchiveController {
             entryIndex,
           );
 
-          const thumbnail = await this.imageProcessor.generateThumbnailFromBuffer(
+          const thumbnail = await this.imageProcessor.generateThumbnail(
             imageBuffer,
           );
 

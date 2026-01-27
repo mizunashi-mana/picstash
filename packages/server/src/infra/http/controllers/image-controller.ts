@@ -1,9 +1,7 @@
-import { createReadStream } from 'node:fs';
 import {
   deleteImage,
   uploadImage,
   generateTitle,
-  fileExists,
   type EmbeddingRepository,
   type EmbeddingService,
   type FileStorage,
@@ -142,15 +140,14 @@ export class ImageController {
           });
         }
 
-        const absolutePath = this.fileStorage.getAbsolutePath(image.path);
-        if (!(await fileExists(absolutePath))) {
+        if (!(await this.fileStorage.fileExists(image.path))) {
           return await reply.status(404).send({
             error: 'Not Found',
             message: 'Image file not found on disk',
           });
         }
 
-        const stream = createReadStream(absolutePath);
+        const stream = await this.fileStorage.readFileAsStream(image.path);
         return await reply
           .header('Content-Type', image.mimeType)
           .header('Cache-Control', 'public, max-age=31536000, immutable')
@@ -175,16 +172,15 @@ export class ImageController {
         const filePath = image.thumbnailPath ?? image.path;
         const contentType
           = image.thumbnailPath !== null ? 'image/jpeg' : image.mimeType;
-        const absolutePath = this.fileStorage.getAbsolutePath(filePath);
 
-        if (!(await fileExists(absolutePath))) {
+        if (!(await this.fileStorage.fileExists(filePath))) {
           return await reply.status(404).send({
             error: 'Not Found',
             message: 'Thumbnail file not found on disk',
           });
         }
 
-        const stream = createReadStream(absolutePath);
+        const stream = await this.fileStorage.readFileAsStream(filePath);
         return await reply
           .header('Content-Type', contentType)
           .header('Cache-Control', 'public, max-age=31536000, immutable')

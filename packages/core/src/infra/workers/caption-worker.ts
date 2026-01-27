@@ -1,5 +1,4 @@
 import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
-import { fileExists } from '@/shared/file-utils.js';
 import type {
   CaptionService,
   SimilarImageDescription,
@@ -57,8 +56,7 @@ export function createCaptionJobHandler(deps: {
     await updateProgress(20);
 
     // ファイル存在確認
-    const absolutePath = fileStorage.getAbsolutePath(image.path);
-    if (!(await fileExists(absolutePath))) {
+    if (!(await fileStorage.fileExists(image.path))) {
       throw new Error(`Image file not found on disk: ${image.path}`);
     }
 
@@ -66,6 +64,9 @@ export function createCaptionJobHandler(deps: {
     await updateProgress(30);
 
     // OCR でテキストを抽出（オプション）
+    // NOTE: ocrService/captionService はパスベースのため getAbsolutePath を引き続き使用
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- OCR/Caption サービスのインターフェースがパスベースのため
+    const absolutePath = fileStorage.getAbsolutePath(image.path);
     let ocrText: string | undefined;
     if (ocrService !== undefined) {
       try {

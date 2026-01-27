@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import { readFile } from 'node:fs/promises';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import {
   generateEmbedding,
@@ -13,11 +12,6 @@ import type { EmbeddingRepository } from '@/application/ports/embedding-reposito
 import type { EmbeddingService, EmbeddingResult } from '@/application/ports/embedding-service';
 import type { FileStorage } from '@/application/ports/file-storage';
 import type { Image, ImageRepository } from '@/application/ports/image-repository';
-
-// Mock node:fs/promises
-vi.mock('node:fs/promises', () => ({
-  readFile: vi.fn(),
-}));
 
 function createMockImage(overrides: Partial<Image> = {}): Image {
   return {
@@ -65,9 +59,15 @@ function createMockDeps(): GenerateEmbeddingDeps {
   };
 
   const mockFileStorage: FileStorage = {
+    saveFile: vi.fn(),
+    saveFileFromBuffer: vi.fn(),
     saveOriginalFromStream: vi.fn(),
-    getAbsolutePath: vi.fn(),
+    readFile: vi.fn(),
+    readFileAsStream: vi.fn(),
+    getFileSize: vi.fn(),
+    fileExists: vi.fn(),
     deleteFile: vi.fn(),
+    getAbsolutePath: vi.fn(),
   };
 
   const mockEmbeddingService: EmbeddingService = {
@@ -110,8 +110,7 @@ describe('generateEmbedding', () => {
       const mockEmbeddingResult = createMockEmbeddingResult();
 
       vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
       vi.mocked(deps.embeddingService.generateFromBuffer).mockResolvedValue(mockEmbeddingResult);
 
       const result = await generateEmbedding({ imageId: 'test-image-id' }, deps);
@@ -126,6 +125,9 @@ describe('generateEmbedding', () => {
         expect(result.model).toBe('openai/clip-vit-base-patch16');
         expect(result.generatedAt).toBeInstanceOf(Date);
       }
+
+      // Verify readFile was called with the image path
+      expect(deps.fileStorage.readFile).toHaveBeenCalledWith('originals/test-image.png');
 
       // Verify embedding was stored
       expect(deps.imageRepository.updateEmbedding).toHaveBeenCalledWith(
@@ -161,8 +163,7 @@ describe('generateEmbedding', () => {
       const mockImage = createMockImage();
 
       vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(readFile).mockRejectedValue(new Error('File not found'));
+      vi.mocked(deps.fileStorage.readFile).mockRejectedValue(new Error('File not found'));
 
       const result = await generateEmbedding({ imageId: 'test-image-id' }, deps);
 
@@ -175,8 +176,7 @@ describe('generateEmbedding', () => {
       const mockImage = createMockImage();
 
       vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
       vi.mocked(deps.embeddingService.generateFromBuffer).mockRejectedValue(
         new Error('Model failed'),
       );
@@ -223,8 +223,7 @@ describe('generateMissingEmbeddings', () => {
     vi.mocked(deps.imageRepository.findById)
       .mockResolvedValueOnce(createMockImage({ id: 'img-1' }))
       .mockResolvedValueOnce(createMockImage({ id: 'img-2' }));
-    vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test.png');
-    vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+    vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
     vi.mocked(deps.embeddingService.generateFromBuffer).mockResolvedValue(mockEmbeddingResult);
 
     const result = await generateMissingEmbeddings(deps);
@@ -263,8 +262,7 @@ describe('generateMissingEmbeddings', () => {
       { id: 'img-2' },
     ]);
     vi.mocked(deps.imageRepository.findById).mockResolvedValue(createMockImage());
-    vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test.png');
-    vi.mocked(readFile).mockResolvedValue(Buffer.from('fake image data'));
+    vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
     vi.mocked(deps.embeddingService.generateFromBuffer).mockResolvedValue(mockEmbeddingResult);
 
     await generateMissingEmbeddings(deps, { onProgress });

@@ -44,7 +44,13 @@ function createMockFileStorage(
   overrides: Partial<FileStorage> = {},
 ): FileStorage {
   return {
+    saveFile: vi.fn(),
+    saveFileFromBuffer: vi.fn(),
     saveOriginalFromStream: vi.fn(),
+    readFile: vi.fn(),
+    readFileAsStream: vi.fn(),
+    getFileSize: vi.fn(),
+    fileExists: vi.fn(),
     deleteFile: vi.fn().mockResolvedValue(undefined),
     getAbsolutePath: vi.fn(path => `/absolute/${path}`),
     ...overrides,

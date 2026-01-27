@@ -1,4 +1,3 @@
-import { stat } from 'node:fs/promises';
 import { generateEmbedding, type GenerateEmbeddingDeps } from '@/application/embedding/generate-embedding.js';
 import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES, generateTitle } from '@/domain/image/index.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
@@ -53,22 +52,26 @@ export async function uploadImage(
   const extension = extFromFilename !== '' ? extFromFilename : `.${extFromMime}`;
 
   // Save file from stream to storage
-  const saved = await fileStorage.saveOriginalFromStream(stream, extension);
-  const absolutePath = fileStorage.getAbsolutePath(saved.path);
+  const saved = await fileStorage.saveFile(stream, { category: 'originals', extension });
 
   // Get file size from saved file
-  const fileStat = await stat(absolutePath);
-  const fileSize = fileStat.size;
+  const fileSize = await fileStorage.getFileSize(saved.path);
+
+  // Read image data for processing
+  const imageData = await fileStorage.readFile(saved.path);
 
   // Get image metadata and generate thumbnail from saved file
   let metadata;
-  let thumbnail;
+  let thumbnailSaved;
   try {
-    metadata = await imageProcessor.getMetadata(absolutePath);
-    thumbnail = await imageProcessor.generateThumbnail(
-      absolutePath,
-      saved.filename,
-    );
+    metadata = await imageProcessor.getMetadata(imageData);
+    const thumbnailBuffer = await imageProcessor.generateThumbnail(imageData);
+    const thumbnailFilename = saved.filename.replace(/\.[^.]+$/, '.jpg');
+    thumbnailSaved = await fileStorage.saveFileFromBuffer(thumbnailBuffer, {
+      category: 'thumbnails',
+      extension: '.jpg',
+      filename: thumbnailFilename,
+    });
   }
   catch (error) {
     // Clean up the saved file if metadata/thumbnail generation fails
@@ -83,7 +86,7 @@ export async function uploadImage(
   const title = generateTitle(null, createdAt);
   const image = await imageRepository.create({
     path: saved.path,
-    thumbnailPath: thumbnail.path,
+    thumbnailPath: thumbnailSaved.path,
     mimeType: mimetype,
     size: fileSize,
     width: metadata.width,
