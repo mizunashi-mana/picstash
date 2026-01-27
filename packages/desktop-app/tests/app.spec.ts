@@ -106,8 +106,7 @@ test.describe('UI 表示', () => {
   test('React アプリが読み込まれる', async () => {
     // React アプリのルート要素が存在することを確認
     await expect(window.locator('#root')).toBeVisible();
-    // root の子要素が存在する（React がマウントされている）
-    const rootChildren = await window.locator('#root > *').count();
-    expect(rootChildren).toBeGreaterThan(0);
+    // root の子要素が存在する（React がマウントされている）まで待つ
+    await expect.poll(async () => await window.locator('#root > *').count()).toBeGreaterThan(0);
   });
 });

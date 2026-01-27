@@ -15,7 +15,7 @@
     "build:preload": "esbuild src/preload/index.ts --bundle --platform=node --format=esm --outfile=dist/preload/index.mjs --external:electron",
     "package": "npm run build && electron-builder",
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.preload.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
-    "lint": "eslint src/main src/preload tests *.mjs playwright.config.ts",
+    "lint": "eslint src tests *.mjs playwright.config.ts",
     "test:e2e": "npm run build && playwright test",
     "test:headed": "npm run build && playwright test --headed",
     "test:debug": "npm run build && playwright test --debug"

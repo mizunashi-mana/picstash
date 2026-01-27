@@ -33,6 +33,8 @@ function createWindow(): void {
   }
   else {
     // 本番モード: ビルド済み HTML を読み込む
+    // NOTE: file:// プロトコルでは /api への fetch が動作しない。
+    // 後続タスク（T3〜T6）で @picstash/core をメインプロセスで直接利用する形に移行予定。
     const htmlPath = path.join(currentDir, '../renderer/index.html');
     void mainWindow.loadFile(htmlPath);
   }

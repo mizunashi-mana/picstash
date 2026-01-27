@@ -23,7 +23,7 @@
 開発モード:
   Electron Main Process
        │
-       └─→ BrowserWindow.loadURL('http://localhost:5173')
+       └─→ BrowserWindow.loadURL('http://localhost:5174')
               │
               └─→ Vite Dev Server (web-client)
 
@@ -60,7 +60,7 @@
 {
   "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:main\"",
   "dev:renderer": "vite --config vite.renderer.config.ts",
-  "dev:main": "wait-on http://localhost:5173 && npm run build:main && electron .",
+  "dev:main": "wait-on http://localhost:5174 && npm run build:main && electron .",
   "build": "npm run build:renderer && npm run build:main",
   "build:renderer": "vite build --config vite.renderer.config.ts",
   "build:main": "tsc -p tsconfig.main.json"
