@@ -252,7 +252,7 @@ export function buildTsConfig() {
       },
     },
     {
-      files: ['**/*.test.{ts,tsx}'],
+      files: ['**/*.{test,spec}.{ts,tsx}'],
       rules: {
         // Non-null assertions are often used in tests to shorthand assertions
         '@typescript-eslint/no-non-null-assertion': 'off',

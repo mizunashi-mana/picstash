@@ -4,6 +4,13 @@ import { app, BrowserWindow } from 'electron';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
+// 開発モードかどうかを判定
+// eslint-disable-next-line @typescript-eslint/dot-notation -- NODE_ENV は予約語ではないのでブラケット記法が必要
+const isDev = process.env['NODE_ENV'] === 'development';
+
+// 開発サーバーの URL
+const DEV_SERVER_URL = 'http://localhost:5174';
+
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -18,9 +25,19 @@ function createWindow(): void {
     },
   });
 
-  // 開発中は仮の HTML を読み込む（src/renderer から直接）
-  const htmlPath = path.join(currentDir, '../../src/renderer/index.html');
-  void mainWindow.loadFile(htmlPath);
+  if (isDev) {
+    // 開発モード: Vite dev server を読み込む
+    void mainWindow.loadURL(DEV_SERVER_URL);
+    // DevTools を開く
+    mainWindow.webContents.openDevTools();
+  }
+  else {
+    // 本番モード: ビルド済み HTML を読み込む
+    // NOTE: file:// プロトコルでは /api への fetch が動作しない。
+    // 後続タスク（T3〜T6）で @picstash/core をメインプロセスで直接利用する形に移行予定。
+    const htmlPath = path.join(currentDir, '../renderer/index.html');
+    void mainWindow.loadFile(htmlPath);
+  }
 }
 
 void app.whenReady().then(() => {

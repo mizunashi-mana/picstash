@@ -1,9 +1,15 @@
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const appPath = path.join(currentDir, '..');
+
+// npm ワークスペースの node_modules 配置により、Playwright が electron バイナリを自動検出できないため
+// テストファイルのコンテキストから明示的にパスを解決する
+const nodeRequire = createRequire(import.meta.url);
+const electronBinaryPath: string = nodeRequire('electron');
 
 let electronApp: ElectronApplication;
 let window: Page;
@@ -17,6 +23,7 @@ test.beforeAll(async () => {
   }
   electronApp = await electron.launch({
     args,
+    executablePath: electronBinaryPath,
   });
 
   // 最初のウィンドウを取得
@@ -36,6 +43,7 @@ test.describe('Electron アプリの起動', () => {
     expect(title).toBe('Picstash');
   });
 
+  /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions -- Playwright の ElectronType がモノレポのルート node_modules から electron モジュールを解決できないため evaluate() の戻り値型が error 型になる */
   test('ウィンドウサイズが正しい', async () => {
     const windowSize = await electronApp.evaluate(({ BrowserWindow }) => {
       const [mainWindow] = BrowserWindow.getAllWindows();
@@ -52,6 +60,7 @@ test.describe('Electron アプリの起動', () => {
     const appName = await electronApp.evaluate(({ app }) => app.getName());
     expect(appName).toBe('@picstash/desktop-app');
   });
+  /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
 });
 
 test.describe('プリロードスクリプト', () => {
@@ -73,7 +82,6 @@ test.describe('プリロードスクリプト', () => {
       };
     }
     const versions = await window.evaluate(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- preload で公開した picstash API にアクセス
       const win = window as unknown as PicstashWindow;
       return win.picstash?.versions;
     });
@@ -103,7 +111,10 @@ test.describe('セキュリティ設定', () => {
 });
 
 test.describe('UI 表示', () => {
-  test('タイトルが表示される', async () => {
-    await expect(window.locator('h1')).toHaveText('Picstash');
+  test('React アプリが読み込まれる', async () => {
+    // React アプリのルート要素が存在することを確認
+    await expect(window.locator('#root')).toBeVisible();
+    // root の子要素が存在する（React がマウントされている）まで待つ
+    await expect.poll(async () => await window.locator('#root > *').count()).toBeGreaterThan(0);
   });
 });
