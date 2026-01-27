@@ -9,7 +9,6 @@ const appPath = path.join(currentDir, '..');
 // npm ワークスペースの node_modules 配置により、Playwright が electron バイナリを自動検出できないため
 // テストファイルのコンテキストから明示的にパスを解決する
 const nodeRequire = createRequire(import.meta.url);
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- electron パッケージは実行時にバイナリパスの文字列を返す
 const electronBinaryPath: string = nodeRequire('electron');
 
 let electronApp: ElectronApplication;
@@ -44,7 +43,7 @@ test.describe('Electron アプリの起動', () => {
     expect(title).toBe('Picstash');
   });
 
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions -- Playwright の ElectronType がモノレポのルート node_modules から electron モジュールを解決できないため evaluate() の戻り値型が error 型になる */
+  /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions -- Playwright の ElectronType がモノレポのルート node_modules から electron モジュールを解決できないため evaluate() の戻り値型が error 型になる */
   test('ウィンドウサイズが正しい', async () => {
     const windowSize = await electronApp.evaluate(({ BrowserWindow }) => {
       const [mainWindow] = BrowserWindow.getAllWindows();
@@ -61,7 +60,7 @@ test.describe('Electron アプリの起動', () => {
     const appName = await electronApp.evaluate(({ app }) => app.getName());
     expect(appName).toBe('@picstash/desktop-app');
   });
-  /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
+  /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
 });
 
 test.describe('プリロードスクリプト', () => {
@@ -83,7 +82,6 @@ test.describe('プリロードスクリプト', () => {
       };
     }
     const versions = await window.evaluate(() => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- preload で公開した picstash API にアクセス
       const win = window as unknown as PicstashWindow;
       return win.picstash?.versions;
     });
