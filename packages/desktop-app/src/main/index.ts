@@ -1,6 +1,8 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { app, BrowserWindow } from 'electron';
+import { registerIpcHandlers } from './ipc-handlers.js';
+import { storageManager } from './storage-manager.js';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,7 +42,13 @@ function createWindow(): void {
   }
 }
 
-void app.whenReady().then(() => {
+void app.whenReady().then(async () => {
+  // 設定を読み込み
+  await storageManager.loadConfig();
+
+  // IPC ハンドラを登録
+  registerIpcHandlers();
+
   createWindow();
 
   app.on('activate', () => {

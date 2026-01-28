@@ -16,4 +16,27 @@ export default [
       'import-x/no-unresolved': 'off',
     },
   },
+  {
+    // main/preload は @desktop-app/shared エイリアスで shared ディレクトリを参照
+    // esbuild が解決するため import-x/no-unresolved を無効化
+    files: ['src/main/**/*.ts', 'src/preload/**/*.ts'],
+    rules: {
+      'import-x/no-unresolved': 'off',
+    },
+  },
+  {
+    // preload は ipcRenderer.invoke が any を返すため、unsafe 関連ルールを緩和
+    files: ['src/preload/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
+  {
+    // tests/main は Vitest のユニットテストのため、Playwright ルールを無効化
+    files: ['tests/main/**/*.ts'],
+    rules: {
+      'playwright/no-standalone-expect': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+    },
+  },
 ];
