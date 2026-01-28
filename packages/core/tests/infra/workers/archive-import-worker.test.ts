@@ -2,11 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { createArchiveImportJobHandler, ARCHIVE_IMPORT_JOB_TYPE } from '@/index.js';
 import type { ArchiveSessionManager, ArchiveSession, FileStorage, ImageProcessor, ImageRepository, Job, ArchiveImportJobPayload } from '@/index.js';
 
-// Mock fs/promises to avoid actual file system operations
-vi.mock('node:fs/promises', () => ({
-  stat: vi.fn().mockResolvedValue({ size: 1000 }),
-}));
-
 function createMockArchiveSessionManager(): ArchiveSessionManager {
   return {
     createSession: vi.fn(),
@@ -39,9 +34,15 @@ function createMockImageRepository(): ImageRepository {
 
 function createMockFileStorage(): FileStorage {
   return {
+    saveFile: vi.fn(),
+    saveFileFromBuffer: vi.fn(),
     saveOriginalFromStream: vi.fn(),
-    getAbsolutePath: vi.fn(),
+    readFile: vi.fn(),
+    readFileAsStream: vi.fn(),
+    getFileSize: vi.fn(),
+    fileExists: vi.fn(),
     deleteFile: vi.fn(),
+    getAbsolutePath: vi.fn(),
   };
 }
 
@@ -49,7 +50,6 @@ function createMockImageProcessor(): ImageProcessor {
   return {
     getMetadata: vi.fn(),
     generateThumbnail: vi.fn(),
-    generateThumbnailFromBuffer: vi.fn(),
   };
 }
 
@@ -147,27 +147,29 @@ describe('archive-import-worker', () => {
       vi.mocked(mockSessionManager.extractImage).mockResolvedValue(Buffer.from('image-data'));
 
       const mockFileStorage = createMockFileStorage();
-      vi.mocked(mockFileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'uploads/test.png',
+      vi.mocked(mockFileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test.png',
         filename: 'test.png',
       });
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/abs/uploads/test.png');
+      vi.mocked(mockFileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(mockFileStorage.readFile).mockResolvedValue(Buffer.from('image-data'));
+      vi.mocked(mockFileStorage.saveFileFromBuffer).mockResolvedValue({
+        filename: 'test.jpg',
+        path: 'thumbnails/test.jpg',
+      });
 
       const mockImageProcessor = createMockImageProcessor();
       vi.mocked(mockImageProcessor.getMetadata).mockResolvedValue({
         width: 800,
         height: 600,
       });
-      vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue({
-        filename: 'test.png',
-        path: 'thumbnails/test.png',
-      });
+      vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
 
       const mockImageRepository = createMockImageRepository();
       vi.mocked(mockImageRepository.create).mockResolvedValue({
         id: 'img-id-1',
-        path: 'uploads/test.png',
-        thumbnailPath: 'thumbnails/test.png',
+        path: 'originals/test.png',
+        thumbnailPath: 'thumbnails/test.jpg',
         mimeType: 'image/png',
         size: 1000,
         width: 800,
@@ -215,27 +217,29 @@ describe('archive-import-worker', () => {
       vi.mocked(mockSessionManager.extractImage).mockResolvedValue(Buffer.from('image-data'));
 
       const mockFileStorage = createMockFileStorage();
-      vi.mocked(mockFileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'uploads/test.png',
+      vi.mocked(mockFileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test.png',
         filename: 'test.png',
       });
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/abs/uploads/test.png');
+      vi.mocked(mockFileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(mockFileStorage.readFile).mockResolvedValue(Buffer.from('image-data'));
+      vi.mocked(mockFileStorage.saveFileFromBuffer).mockResolvedValue({
+        filename: 'test.jpg',
+        path: 'thumbnails/test.jpg',
+      });
 
       const mockImageProcessor = createMockImageProcessor();
       vi.mocked(mockImageProcessor.getMetadata).mockResolvedValue({
         width: 800,
         height: 600,
       });
-      vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue({
-        filename: 'test.png',
-        path: 'thumbnails/test.png',
-      });
+      vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
 
       const mockImageRepository = createMockImageRepository();
       vi.mocked(mockImageRepository.create).mockResolvedValue({
         id: 'img-id-1',
-        path: 'uploads/test.png',
-        thumbnailPath: 'thumbnails/test.png',
+        path: 'originals/test.png',
+        thumbnailPath: 'thumbnails/test.jpg',
         mimeType: 'image/png',
         size: 1000,
         width: 800,
@@ -279,11 +283,12 @@ describe('archive-import-worker', () => {
       vi.mocked(mockSessionManager.extractImage).mockResolvedValue(Buffer.from('image-data'));
 
       const mockFileStorage = createMockFileStorage();
-      vi.mocked(mockFileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'uploads/test.png',
+      vi.mocked(mockFileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test.png',
         filename: 'test.png',
       });
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/abs/uploads/test.png');
+      vi.mocked(mockFileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(mockFileStorage.readFile).mockResolvedValue(Buffer.from('image-data'));
       vi.mocked(mockFileStorage.deleteFile).mockResolvedValue();
 
       const mockImageProcessor = createMockImageProcessor();
@@ -303,7 +308,7 @@ describe('archive-import-worker', () => {
 
       expect(result.failedCount).toBe(1);
       expect(result.results[0]?.error).toBe('Invalid image');
-      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('uploads/test.png');
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('originals/test.png');
     });
 
     it('should cleanup files on database creation error', async () => {
@@ -322,11 +327,16 @@ describe('archive-import-worker', () => {
       vi.mocked(mockSessionManager.extractImage).mockResolvedValue(Buffer.from('image-data'));
 
       const mockFileStorage = createMockFileStorage();
-      vi.mocked(mockFileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'uploads/test.png',
+      vi.mocked(mockFileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test.png',
         filename: 'test.png',
       });
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/abs/uploads/test.png');
+      vi.mocked(mockFileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(mockFileStorage.readFile).mockResolvedValue(Buffer.from('image-data'));
+      vi.mocked(mockFileStorage.saveFileFromBuffer).mockResolvedValue({
+        filename: 'test.jpg',
+        path: 'thumbnails/test.jpg',
+      });
       vi.mocked(mockFileStorage.deleteFile).mockResolvedValue();
 
       const mockImageProcessor = createMockImageProcessor();
@@ -334,10 +344,7 @@ describe('archive-import-worker', () => {
         width: 800,
         height: 600,
       });
-      vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue({
-        filename: 'test.png',
-        path: 'thumbnails/test.png',
-      });
+      vi.mocked(mockImageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
 
       const mockImageRepository = createMockImageRepository();
       vi.mocked(mockImageRepository.create).mockRejectedValue(new Error('Database error'));
@@ -357,8 +364,8 @@ describe('archive-import-worker', () => {
       expect(result.failedCount).toBe(1);
       expect(result.results[0]?.error).toBe('Database error');
       // Both original file and thumbnail should be deleted
-      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('uploads/test.png');
-      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('thumbnails/test.png');
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('originals/test.png');
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledWith('thumbnails/test.jpg');
     });
 
     it('should handle non-Error thrown values', async () => {

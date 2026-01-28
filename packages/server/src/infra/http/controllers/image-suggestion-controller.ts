@@ -1,7 +1,6 @@
 import {
   CAPTION_JOB_TYPE,
   suggestAttributes,
-  fileExists,
   type CaptionJobPayload,
   type EmbeddingRepository,
   type FileStorage,
@@ -89,8 +88,7 @@ export class ImageSuggestionController {
           });
         }
 
-        const absolutePath = this.fileStorage.getAbsolutePath(image.path);
-        if (!(await fileExists(absolutePath))) {
+        if (!(await this.fileStorage.fileExists(image.path))) {
           return await reply.status(404).send({
             error: 'Not Found',
             message: 'Image file not found on disk',

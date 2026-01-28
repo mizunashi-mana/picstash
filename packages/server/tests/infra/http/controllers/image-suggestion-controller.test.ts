@@ -90,9 +90,15 @@ function createMockEmbeddingRepository(): EmbeddingRepository {
 
 function createMockFileStorage(): FileStorage {
   return {
+    saveFile: vi.fn(),
+    saveFileFromBuffer: vi.fn(),
     saveOriginalFromStream: vi.fn(),
-    getAbsolutePath: vi.fn().mockReturnValue('/tmp/test.png'),
+    readFile: vi.fn(),
+    readFileAsStream: vi.fn(),
+    getFileSize: vi.fn(),
+    fileExists: vi.fn().mockResolvedValue(true),
     deleteFile: vi.fn(),
+    getAbsolutePath: vi.fn().mockReturnValue('/tmp/test.png'),
   };
 }
 
@@ -324,7 +330,7 @@ describe('ImageSuggestionController', () => {
     it('should return 404 when image file not found on disk', async () => {
       const image = createImage('test-id');
       vi.mocked(mockImageRepository.findById).mockResolvedValue(image);
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/non/existent/path.png');
+      vi.mocked(mockFileStorage.fileExists).mockResolvedValue(false);
 
       const response = await app.inject({
         method: 'POST',
@@ -339,8 +345,7 @@ describe('ImageSuggestionController', () => {
     it('should queue caption generation job successfully', async () => {
       const image = createImage('test-id');
       vi.mocked(mockImageRepository.findById).mockResolvedValue(image);
-      // Mock file exists by returning a path that exists
-      vi.mocked(mockFileStorage.getAbsolutePath).mockReturnValue('/tmp');
+      vi.mocked(mockFileStorage.fileExists).mockResolvedValue(true);
 
       const response = await app.inject({
         method: 'POST',

@@ -1,4 +1,3 @@
-import { stat } from 'node:fs/promises';
 import { generateEmbedding, type GenerateEmbeddingDeps } from '@/application/embedding/generate-embedding.js';
 import { ImageMimeType, ALLOWED_IMAGE_MIME_TYPES, generateTitle } from '@/domain/image/index.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
@@ -53,22 +52,33 @@ export async function uploadImage(
   const extension = extFromFilename !== '' ? extFromFilename : `.${extFromMime}`;
 
   // Save file from stream to storage
-  const saved = await fileStorage.saveOriginalFromStream(stream, extension);
-  const absolutePath = fileStorage.getAbsolutePath(saved.path);
+  const saved = await fileStorage.saveFile(stream, { category: 'originals', extension });
 
-  // Get file size from saved file
-  const fileStat = await stat(absolutePath);
-  const fileSize = fileStat.size;
+  // Get file size and read image data for processing
+  // If these fail, clean up the saved file
+  let fileSize: number;
+  let imageData: Buffer;
+  try {
+    fileSize = await fileStorage.getFileSize(saved.path);
+    imageData = await fileStorage.readFile(saved.path);
+  }
+  catch (error) {
+    await fileStorage.deleteFile(saved.path).catch(() => {});
+    throw error;
+  }
 
   // Get image metadata and generate thumbnail from saved file
   let metadata;
-  let thumbnail;
+  let thumbnailSaved;
   try {
-    metadata = await imageProcessor.getMetadata(absolutePath);
-    thumbnail = await imageProcessor.generateThumbnail(
-      absolutePath,
-      saved.filename,
-    );
+    metadata = await imageProcessor.getMetadata(imageData);
+    const thumbnailBuffer = await imageProcessor.generateThumbnail(imageData);
+    const thumbnailFilename = saved.filename.replace(/\.[^.]+$/, '.jpg');
+    thumbnailSaved = await fileStorage.saveFileFromBuffer(thumbnailBuffer, {
+      category: 'thumbnails',
+      extension: '.jpg',
+      filename: thumbnailFilename,
+    });
   }
   catch (error) {
     // Clean up the saved file if metadata/thumbnail generation fails
@@ -79,18 +89,27 @@ export async function uploadImage(
   }
 
   // Create database record with auto-generated title
-  const createdAt = new Date();
-  const title = generateTitle(null, createdAt);
-  const image = await imageRepository.create({
-    path: saved.path,
-    thumbnailPath: thumbnail.path,
-    mimeType: mimetype,
-    size: fileSize,
-    width: metadata.width,
-    height: metadata.height,
-    title,
-    createdAt,
-  });
+  let image;
+  try {
+    const createdAt = new Date();
+    const title = generateTitle(null, createdAt);
+    image = await imageRepository.create({
+      path: saved.path,
+      thumbnailPath: thumbnailSaved.path,
+      mimeType: mimetype,
+      size: fileSize,
+      width: metadata.width,
+      height: metadata.height,
+      title,
+      createdAt,
+    });
+  }
+  catch (error) {
+    // Clean up saved file and thumbnail if database creation fails
+    await fileStorage.deleteFile(saved.path).catch(() => {});
+    await fileStorage.deleteFile(thumbnailSaved.path).catch(() => {});
+    throw error;
+  }
 
   // Generate embedding in background (non-blocking)
   // This allows the upload to complete quickly while embedding is generated async

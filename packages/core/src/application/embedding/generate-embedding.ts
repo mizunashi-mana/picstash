@@ -7,7 +7,6 @@
  * 3. Store embedding in database (Prisma + sqlite-vec)
  */
 
-import { readFile } from 'node:fs/promises';
 import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository.js';
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
@@ -55,11 +54,8 @@ export async function generateEmbedding(
   }
 
   try {
-    // Get full path to image file
-    const imagePath = fileStorage.getAbsolutePath(image.path);
-
-    // Read image data
-    const imageData = await readFile(imagePath);
+    // Read image data via FileStorage
+    const imageData = await fileStorage.readFile(image.path);
 
     // Generate embedding
     const result = await embeddingService.generateFromBuffer(imageData);

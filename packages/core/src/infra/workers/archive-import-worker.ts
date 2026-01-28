@@ -1,4 +1,3 @@
-import { stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { Readable } from 'node:stream';
 import { getMimeTypeFromExtension } from '@/domain/archive/index.js';
@@ -101,19 +100,33 @@ export function createArchiveImportJobHandler(deps: {
 
         // Convert buffer to stream and save to storage
         const stream = Readable.from(imageBuffer);
-        const saved = await fileStorage.saveOriginalFromStream(stream, extension);
-        const absolutePath = fileStorage.getAbsolutePath(saved.path);
+        const saved = await fileStorage.saveFile(stream, { category: 'originals', extension });
 
-        // Get file size
-        const fileStat = await stat(absolutePath);
-        const fileSize = fileStat.size;
+        // Get file size and read image data for processing
+        // If these fail, clean up the saved file
+        let fileSize: number;
+        let imageData: Buffer;
+        try {
+          fileSize = await fileStorage.getFileSize(saved.path);
+          imageData = await fileStorage.readFile(saved.path);
+        }
+        catch (error) {
+          await fileStorage.deleteFile(saved.path).catch(() => {});
+          throw error;
+        }
 
         // Get metadata and generate thumbnail
         let metadata;
-        let thumbnail;
+        let thumbnailSaved;
         try {
-          metadata = await imageProcessor.getMetadata(absolutePath);
-          thumbnail = await imageProcessor.generateThumbnail(absolutePath, saved.filename);
+          metadata = await imageProcessor.getMetadata(imageData);
+          const thumbnailBuffer = await imageProcessor.generateThumbnail(imageData);
+          const thumbnailFilename = saved.filename.replace(/\.[^.]+$/, '.jpg');
+          thumbnailSaved = await fileStorage.saveFileFromBuffer(thumbnailBuffer, {
+            category: 'thumbnails',
+            extension: '.jpg',
+            filename: thumbnailFilename,
+          });
         }
         catch (error) {
           // Clean up saved file if metadata/thumbnail fails
@@ -129,7 +142,7 @@ export function createArchiveImportJobHandler(deps: {
           const title = generateTitle(null, createdAt);
           image = await imageRepository.create({
             path: saved.path,
-            thumbnailPath: thumbnail.path,
+            thumbnailPath: thumbnailSaved.path,
             mimeType,
             size: fileSize,
             width: metadata.width,
@@ -142,7 +155,7 @@ export function createArchiveImportJobHandler(deps: {
           // Clean up saved file and thumbnail if database creation fails
           /* v8 ignore start */
           await fileStorage.deleteFile(saved.path).catch(() => {});
-          await fileStorage.deleteFile(thumbnail.path).catch(() => {});
+          await fileStorage.deleteFile(thumbnailSaved.path).catch(() => {});
           /* v8 ignore stop */
           throw error;
         }

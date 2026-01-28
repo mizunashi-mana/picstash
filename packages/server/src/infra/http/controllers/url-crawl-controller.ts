@@ -227,7 +227,7 @@ export class UrlCrawlController {
         try {
           const { data: imageBuffer } = await this.sessionManager.fetchImage(sessionId, index);
 
-          const thumbnail = await this.imageProcessor.generateThumbnailFromBuffer(imageBuffer);
+          const thumbnail = await this.imageProcessor.generateThumbnail(imageBuffer);
 
           return await reply
             .header('Content-Type', 'image/jpeg')

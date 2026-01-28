@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import { stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { generateEmbedding } from '@/application/embedding/generate-embedding';
@@ -14,18 +13,9 @@ import type { FileStorage } from '@/application/ports/file-storage';
 import type { ImageProcessor } from '@/application/ports/image-processor';
 import type { Image, ImageRepository } from '@/application/ports/image-repository';
 
-vi.mock('node:fs/promises', () => ({
-  stat: vi.fn(),
-}));
-
 vi.mock('@/application/embedding/generate-embedding', () => ({
   generateEmbedding: vi.fn().mockResolvedValue({ imageId: 'test-id', success: true }),
 }));
-
-function createMockStats(size: number): Awaited<ReturnType<typeof stat>> {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- stat returns Stats or BigIntStats, we only use size property
-  return { size } as Awaited<ReturnType<typeof stat>>;
-}
 
 function createMockImageRepository(): ImageRepository {
   return {
@@ -50,9 +40,15 @@ function createMockImageRepository(): ImageRepository {
 
 function createMockFileStorage(): FileStorage {
   return {
+    saveFile: vi.fn(),
+    saveFileFromBuffer: vi.fn(),
     saveOriginalFromStream: vi.fn(),
-    getAbsolutePath: vi.fn(),
+    readFile: vi.fn(),
+    readFileAsStream: vi.fn(),
+    getFileSize: vi.fn(),
+    fileExists: vi.fn(),
     deleteFile: vi.fn(),
+    getAbsolutePath: vi.fn(),
   };
 }
 
@@ -60,7 +56,6 @@ function createMockImageProcessor(): ImageProcessor {
   return {
     getMetadata: vi.fn(),
     generateThumbnail: vi.fn(),
-    generateThumbnailFromBuffer: vi.fn(),
   };
 }
 
@@ -124,6 +119,23 @@ function createMockInput(overrides: Partial<UploadImageInput> = {}): UploadImage
   };
 }
 
+function setupSuccessMocks(deps: UploadImageDeps, mockImage: Image): void {
+  vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+    path: 'originals/test-image.png',
+    filename: 'test-image.png',
+  });
+  vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+  vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
+  vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+  vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
+  vi.mocked(deps.fileStorage.saveFileFromBuffer).mockResolvedValue({
+    path: 'thumbnails/test-image.jpg',
+    filename: 'test-image.jpg',
+  });
+  vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+  vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+}
+
 describe('uploadImage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -135,19 +147,7 @@ describe('uploadImage', () => {
       const input = createMockInput();
       const mockImage = createMockImage();
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'originals/test-image.png',
-        filename: 'test-image.png',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        path: 'thumbnails/test-image.jpg',
-        filename: 'test-image.jpg',
-      });
-      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
-      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+      setupSuccessMocks(deps, mockImage);
 
       const result = await uploadImage(input, deps);
 
@@ -155,14 +155,15 @@ describe('uploadImage', () => {
       if (result.success) {
         expect(result.image).toEqual(mockImage);
       }
-      expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
         input.stream,
-        '.png',
+        { category: 'originals', extension: '.png' },
       );
-      expect(deps.imageProcessor.getMetadata).toHaveBeenCalledWith('/absolute/path/test-image.png');
-      expect(deps.imageProcessor.generateThumbnail).toHaveBeenCalledWith(
-        '/absolute/path/test-image.png',
-        'test-image.png',
+      expect(deps.imageProcessor.getMetadata).toHaveBeenCalledWith(expect.any(Buffer));
+      expect(deps.imageProcessor.generateThumbnail).toHaveBeenCalledWith(expect.any(Buffer));
+      expect(deps.fileStorage.saveFileFromBuffer).toHaveBeenCalledWith(
+        expect.any(Buffer),
+        { category: 'thumbnails', extension: '.jpg', filename: 'test-image.jpg' },
       );
       expect(deps.imageRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -181,26 +182,14 @@ describe('uploadImage', () => {
       const input = createMockInput({ filename: 'test-image' });
       const mockImage = createMockImage();
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'originals/test-image.png',
-        filename: 'test-image.png',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        path: 'thumbnails/test-image.jpg',
-        filename: 'test-image.jpg',
-      });
-      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
-      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+      setupSuccessMocks(deps, mockImage);
 
       const result = await uploadImage(input, deps);
 
       expect(result.success).toBe(true);
-      expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
         input.stream,
-        '.png',
+        { category: 'originals', extension: '.png' },
       );
     });
 
@@ -209,26 +198,14 @@ describe('uploadImage', () => {
       const input = createMockInput({ filename: 'test-image', mimetype: 'image/jpeg' });
       const mockImage = createMockImage({ mimeType: 'image/jpeg' });
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'originals/test-image.jpg',
-        filename: 'test-image.jpg',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.jpg');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        path: 'thumbnails/test-image.jpg',
-        filename: 'test-image.jpg',
-      });
-      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
-      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+      setupSuccessMocks(deps, mockImage);
 
       const result = await uploadImage(input, deps);
 
       expect(result.success).toBe(true);
-      expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
         input.stream,
-        '.jpg',
+        { category: 'originals', extension: '.jpg' },
       );
     });
 
@@ -240,26 +217,14 @@ describe('uploadImage', () => {
       });
       const mockImage = createMockImage({ mimeType: 'image/jpeg' });
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'originals/photo.jpg',
-        filename: 'photo.jpg',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/photo.jpg');
-      vi.mocked(stat).mockResolvedValue(createMockStats(2000));
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 200, height: 150 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        path: 'thumbnails/photo.jpg',
-        filename: 'photo.jpg',
-      });
-      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
-      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+      setupSuccessMocks(deps, mockImage);
 
       const result = await uploadImage(input, deps);
 
       expect(result.success).toBe(true);
-      expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
         input.stream,
-        '.jpg',
+        { category: 'originals', extension: '.jpg' },
       );
     });
 
@@ -268,19 +233,7 @@ describe('uploadImage', () => {
       const input = createMockInput();
       const mockImage = createMockImage({ id: 'generated-image-id' });
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'originals/test-image.png',
-        filename: 'test-image.png',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        path: 'thumbnails/test-image.jpg',
-        filename: 'test-image.jpg',
-      });
-      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
-      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+      setupSuccessMocks(deps, mockImage);
 
       const result = await uploadImage(input, deps);
 
@@ -313,7 +266,7 @@ describe('uploadImage', () => {
         expect(result.message).toContain('Invalid file type');
         expect(result.message).toContain('application/pdf');
       }
-      expect(deps.fileStorage.saveOriginalFromStream).not.toHaveBeenCalled();
+      expect(deps.fileStorage.saveFile).not.toHaveBeenCalled();
     });
 
     it('should return INVALID_MIME_TYPE for text/plain', async () => {
@@ -335,12 +288,12 @@ describe('uploadImage', () => {
       const deps = createMockDeps();
       const input = createMockInput();
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
         path: 'originals/test-image.png',
         filename: 'test-image.png',
       });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
       vi.mocked(deps.imageProcessor.getMetadata).mockRejectedValue(new Error('Corrupt image'));
       vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
 
@@ -352,12 +305,12 @@ describe('uploadImage', () => {
       const deps = createMockDeps();
       const input = createMockInput();
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
         path: 'originals/test-image.png',
         filename: 'test-image.png',
       });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
       vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
       vi.mocked(deps.imageProcessor.generateThumbnail).mockRejectedValue(new Error('Thumbnail failed'));
       vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
@@ -370,12 +323,12 @@ describe('uploadImage', () => {
       const deps = createMockDeps();
       const input = createMockInput();
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
         path: 'originals/test-image.png',
         filename: 'test-image.png',
       });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
       vi.mocked(deps.imageProcessor.getMetadata).mockRejectedValue(new Error('Corrupt image'));
       vi.mocked(deps.fileStorage.deleteFile).mockRejectedValue(new Error('Cleanup failed'));
 
@@ -389,19 +342,7 @@ describe('uploadImage', () => {
       const input = createMockInput();
       const mockImage = createMockImage();
 
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        path: 'originals/test-image.png',
-        filename: 'test-image.png',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/absolute/path/test-image.png');
-      vi.mocked(stat).mockResolvedValue(createMockStats(1000));
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        path: 'thumbnails/test-image.jpg',
-        filename: 'test-image.jpg',
-      });
-      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
-      vi.mocked(deps.imageRepository.findById).mockResolvedValue(mockImage);
+      setupSuccessMocks(deps, mockImage);
 
       const result = await uploadImage(input, deps);
 

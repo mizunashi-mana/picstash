@@ -6,10 +6,6 @@ import type { ImageProcessor } from '@/application/ports/image-processor';
 import type { Image, ImageRepository } from '@/application/ports/image-repository';
 import type { UrlCrawlSessionManager, UrlCrawlSession } from '@/application/ports/url-crawl-session-manager';
 
-vi.mock('node:fs/promises', () => ({
-  stat: vi.fn().mockResolvedValue({ size: 1000 }),
-}));
-
 function createMockSession(overrides: Partial<UrlCrawlSession> = {}): UrlCrawlSession {
   return {
     id: 'test-session-id',
@@ -69,15 +65,20 @@ function createMockDeps() {
   };
 
   const mockFileStorage: FileStorage = {
+    saveFile: vi.fn(),
+    saveFileFromBuffer: vi.fn(),
     saveOriginalFromStream: vi.fn(),
-    getAbsolutePath: vi.fn(),
+    readFile: vi.fn(),
+    readFileAsStream: vi.fn(),
+    getFileSize: vi.fn(),
+    fileExists: vi.fn(),
     deleteFile: vi.fn(),
+    getAbsolutePath: vi.fn(),
   };
 
   const mockImageProcessor: ImageProcessor = {
     getMetadata: vi.fn(),
     generateThumbnail: vi.fn(),
-    generateThumbnailFromBuffer: vi.fn(),
   };
 
   return {
@@ -128,6 +129,21 @@ describe('importFromUrlCrawl', () => {
   });
 
   describe('when import succeeds', () => {
+    function setupSuccessMocks(deps: ReturnType<typeof createMockDeps>): void {
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        filename: 'saved.png',
+        path: 'originals/saved.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('image data'));
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
+      vi.mocked(deps.fileStorage.saveFileFromBuffer).mockResolvedValue({
+        filename: 'saved.jpg',
+        path: 'thumbnails/saved.jpg',
+      });
+    }
+
     it('should return success with created image', async () => {
       const deps = createMockDeps();
       const session = createMockSession();
@@ -138,16 +154,7 @@ describe('importFromUrlCrawl', () => {
         data: Buffer.from('image data'),
         contentType: 'image/png',
       });
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        filename: 'saved.png',
-        path: 'originals/saved.png',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.png');
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        filename: 'saved.jpg',
-        path: 'thumbnails/saved.jpg',
-      });
+      setupSuccessMocks(deps);
       vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
 
       const result = await importFromUrlCrawl(
@@ -172,16 +179,7 @@ describe('importFromUrlCrawl', () => {
         data: Buffer.from('image data'),
         contentType: 'image/jpeg',
       });
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        filename: 'saved.jpg',
-        path: 'originals/saved.jpg',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.jpg');
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        filename: 'saved.jpg',
-        path: 'thumbnails/saved.jpg',
-      });
+      setupSuccessMocks(deps);
       vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
 
       const result = await importFromUrlCrawl(
@@ -204,16 +202,7 @@ describe('importFromUrlCrawl', () => {
         data: Buffer.from('image data'),
         contentType: 'image/png; charset=utf-8',
       });
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        filename: 'saved.png',
-        path: 'originals/saved.png',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.png');
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        filename: 'saved.jpg',
-        path: 'thumbnails/saved.jpg',
-      });
+      setupSuccessMocks(deps);
       vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
 
       const result = await importFromUrlCrawl(
@@ -234,16 +223,7 @@ describe('importFromUrlCrawl', () => {
         data: Buffer.from('image data'),
         contentType: 'application/octet-stream',
       });
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
-        filename: 'saved.jpg',
-        path: 'originals/saved.jpg',
-      });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.jpg');
-      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
-        filename: 'saved.jpg',
-        path: 'thumbnails/saved.jpg',
-      });
+      setupSuccessMocks(deps);
       vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
 
       const result = await importFromUrlCrawl(
@@ -252,9 +232,9 @@ describe('importFromUrlCrawl', () => {
       );
 
       expect(result.successCount).toBe(1);
-      expect(deps.fileStorage.saveOriginalFromStream).toHaveBeenCalledWith(
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
         expect.anything(),
-        '.jpg',
+        expect.objectContaining({ extension: '.jpg' }),
       );
     });
   });
@@ -289,11 +269,12 @@ describe('importFromUrlCrawl', () => {
         data: Buffer.from('image data'),
         contentType: 'image/png',
       });
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
       });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.png');
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('image data'));
       vi.mocked(deps.imageProcessor.getMetadata).mockRejectedValue(new Error('Invalid image'));
       vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
 
@@ -318,11 +299,12 @@ describe('importFromUrlCrawl', () => {
         data: Buffer.from('image data'),
         contentType: 'image/png',
       });
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
       });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.png');
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('image data'));
       vi.mocked(deps.imageProcessor.getMetadata).mockRejectedValue(new Error('Invalid image'));
       vi.mocked(deps.fileStorage.deleteFile).mockRejectedValue(new Error('Cleanup failed'));
 
@@ -347,13 +329,15 @@ describe('importFromUrlCrawl', () => {
         data: Buffer.from('image data'),
         contentType: 'image/png',
       });
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
       });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.png');
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('image data'));
       vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
+      vi.mocked(deps.fileStorage.saveFileFromBuffer).mockResolvedValue({
         filename: 'saved.jpg',
         path: 'thumbnails/saved.jpg',
       });
@@ -384,13 +368,15 @@ describe('importFromUrlCrawl', () => {
       vi.mocked(deps.urlCrawlSessionManager.fetchImage)
         .mockResolvedValueOnce({ data: Buffer.from('image data'), contentType: 'image/png' })
         .mockRejectedValueOnce(new Error('Network error'));
-      vi.mocked(deps.fileStorage.saveOriginalFromStream).mockResolvedValue({
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
         filename: 'saved.png',
         path: 'originals/saved.png',
       });
-      vi.mocked(deps.fileStorage.getAbsolutePath).mockReturnValue('/tmp/storage/originals/saved.png');
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('image data'));
       vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
-      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue({
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
+      vi.mocked(deps.fileStorage.saveFileFromBuffer).mockResolvedValue({
         filename: 'saved.jpg',
         path: 'thumbnails/saved.jpg',
       });
