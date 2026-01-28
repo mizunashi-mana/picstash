@@ -90,6 +90,53 @@ test.describe('プリロードスクリプト', () => {
     expect(versions?.chrome).toBeTruthy();
     expect(versions?.electron).toBeTruthy();
   });
+
+  test('Storage API が公開されている', async () => {
+    interface PicstashWindow {
+      picstash?: {
+        storage: {
+          readFile: unknown;
+          saveFile: unknown;
+          deleteFile: unknown;
+          fileExists: unknown;
+          getFileSize: unknown;
+          getPath: unknown;
+          setPath: unknown;
+          selectPath: unknown;
+          isInitialized: unknown;
+        };
+      };
+    }
+    const storageApi = await window.evaluate(() => {
+      const win = window as unknown as PicstashWindow;
+      const storage = win.picstash?.storage;
+      if (storage === undefined) {
+        return null;
+      }
+      return {
+        hasReadFile: typeof storage.readFile === 'function',
+        hasSaveFile: typeof storage.saveFile === 'function',
+        hasDeleteFile: typeof storage.deleteFile === 'function',
+        hasFileExists: typeof storage.fileExists === 'function',
+        hasGetFileSize: typeof storage.getFileSize === 'function',
+        hasGetPath: typeof storage.getPath === 'function',
+        hasSetPath: typeof storage.setPath === 'function',
+        hasSelectPath: typeof storage.selectPath === 'function',
+        hasIsInitialized: typeof storage.isInitialized === 'function',
+      };
+    });
+
+    expect(storageApi).not.toBeNull();
+    expect(storageApi?.hasReadFile).toBe(true);
+    expect(storageApi?.hasSaveFile).toBe(true);
+    expect(storageApi?.hasDeleteFile).toBe(true);
+    expect(storageApi?.hasFileExists).toBe(true);
+    expect(storageApi?.hasGetFileSize).toBe(true);
+    expect(storageApi?.hasGetPath).toBe(true);
+    expect(storageApi?.hasSetPath).toBe(true);
+    expect(storageApi?.hasSelectPath).toBe(true);
+    expect(storageApi?.hasIsInitialized).toBe(true);
+  });
 });
 
 test.describe('セキュリティ設定', () => {

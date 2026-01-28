@@ -16,4 +16,18 @@ export default [
       'import-x/no-unresolved': 'off',
     },
   },
+  {
+    // main/preload は shared ディレクトリを相対パスで参照するため、no-restricted-imports を緩和
+    files: ['src/main/**/*.ts', 'src/preload/**/*.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
+    },
+  },
+  {
+    // preload は ipcRenderer.invoke が any を返すため、unsafe 関連ルールを緩和
+    files: ['src/preload/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
 ];

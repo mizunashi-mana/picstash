@@ -3,8 +3,8 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "noEmit": false,
-    "outDir": "dist/preload",
-    "rootDir": "src/preload"
+    "outDir": "dist",
+    "rootDir": "src"
   },
-  "include": ["src/preload/**/*"]
+  "include": ["src/preload/**/*", "src/shared/**/*"]
 }

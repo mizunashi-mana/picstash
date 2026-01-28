@@ -4,6 +4,10 @@
   "description": "Picstash Desktop Application",
   "private": true,
   "main": "dist/main/index.js",
+  "exports": {
+    ".": "./dist/main/index.js",
+    "./shared/*": "./dist/shared/*"
+  },
   "type": "module",
   "scripts": {
     "dev": "concurrently -k \"npm run dev:renderer\" \"npm run dev:main\"",
