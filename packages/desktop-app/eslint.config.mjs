@@ -17,10 +17,11 @@ export default [
     },
   },
   {
-    // main/preload は shared ディレクトリを相対パスで参照するため、no-restricted-imports を緩和
+    // main/preload は @desktop-app/shared エイリアスで shared ディレクトリを参照
+    // esbuild が解決するため import-x/no-unresolved を無効化
     files: ['src/main/**/*.ts', 'src/preload/**/*.ts'],
     rules: {
-      'no-restricted-imports': 'off',
+      'import-x/no-unresolved': 'off',
     },
   },
   {
@@ -28,6 +29,14 @@ export default [
     files: ['src/preload/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
+  {
+    // tests/main は Vitest のユニットテストのため、Playwright ルールを無効化
+    files: ['tests/main/**/*.ts'],
+    rules: {
+      'playwright/no-standalone-expect': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
     },
   },
 ];

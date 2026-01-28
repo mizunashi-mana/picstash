@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { access, mkdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename, join, resolve, sep } from 'node:path';
 import { app, dialog } from 'electron';
-import type { FileCategory, SaveFileOptions, SaveFileResult } from '../shared/types.js';
+import type { FileCategory, SaveFileOptions, SaveFileResult } from '@desktop-app/shared/types.js';
 
 /**
  * 設定ファイルの構造
@@ -133,9 +133,21 @@ export class StorageManager {
   }
 
   /**
+   * 拡張子を検証する
+   * @throws 無効な拡張子の場合
+   */
+  private validateExtension(extension: string): void {
+    // 拡張子の検証: 先頭がドットで、その後に英数字のみを許可
+    if (!/^\.[a-zA-Z0-9]+$/.test(extension)) {
+      throw new Error('Invalid file extension');
+    }
+  }
+
+  /**
    * UUID ベースのファイル名を生成
    */
   private generateFilename(extension: string): string {
+    this.validateExtension(extension);
     const uuid = randomUUID();
     return `${uuid}${extension}`;
   }
@@ -163,8 +175,8 @@ export class StorageManager {
     const absolutePath = resolve(basePath, relativePath);
     const normalizedBasePath = resolve(basePath);
 
-    // ストレージパス内に収まっていることを確認
-    if (!absolutePath.startsWith(normalizedBasePath + '/') && absolutePath !== normalizedBasePath) {
+    // ストレージパス内に収まっていることを確認（Windows/POSIX 両対応）
+    if (!absolutePath.startsWith(normalizedBasePath + sep) && absolutePath !== normalizedBasePath) {
       throw new Error('Path traversal detected: path escapes storage directory');
     }
 

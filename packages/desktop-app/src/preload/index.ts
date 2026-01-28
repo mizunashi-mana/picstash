@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { IPC_CHANNELS } from '../shared/types.js';
-import type { PicstashAPI, SaveFileOptions, SaveFileResult, StorageAPI } from '../shared/types.js';
+import { IPC_CHANNELS } from '@desktop-app/shared/types.js';
+import type { PicstashAPI, SaveFileOptions, SaveFileResult, StorageAPI } from '@desktop-app/shared/types.js';
 
 // Storage API の実装
 const storageAPI: StorageAPI = {

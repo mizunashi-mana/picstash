@@ -4,7 +4,11 @@
     "moduleResolution": "node",
     "noEmit": false,
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@desktop-app/shared/*": ["src/shared/*"]
+    }
   },
   "include": ["src/preload/**/*", "src/shared/**/*"]
 }

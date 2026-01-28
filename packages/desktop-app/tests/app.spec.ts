@@ -43,7 +43,6 @@ test.describe('Electron アプリの起動', () => {
     expect(title).toBe('Picstash');
   });
 
-  /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions -- Playwright の ElectronType がモノレポのルート node_modules から electron モジュールを解決できないため evaluate() の戻り値型が error 型になる */
   test('ウィンドウサイズが正しい', async () => {
     const windowSize = await electronApp.evaluate(({ BrowserWindow }) => {
       const [mainWindow] = BrowserWindow.getAllWindows();
@@ -60,7 +59,6 @@ test.describe('Electron アプリの起動', () => {
     const appName = await electronApp.evaluate(({ app }) => app.getName());
     expect(appName).toBe('@picstash/desktop-app');
   });
-  /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
 });
 
 test.describe('プリロードスクリプト', () => {
