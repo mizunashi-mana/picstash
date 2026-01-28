@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { randomUUID } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { access, mkdir, stat, readFile, unlink, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
@@ -36,6 +36,31 @@ export class LocalFileStorage implements FileStorage {
     await mkdir(dir, { recursive: true });
   }
 
+  /**
+   * Sanitize filename to prevent path traversal attacks.
+   * Extracts only the base filename, removing any directory components.
+   */
+  private sanitizeFilename(filename: string): string {
+    // Use basename to strip any directory components (including ../)
+    return basename(filename);
+  }
+
+  /**
+   * Resolve and validate a relative path to ensure it stays within storagePath.
+   * Throws an error if the path would escape the storage directory.
+   */
+  private resolveAndValidatePath(relativePath: string): string {
+    const absolutePath = resolve(this.storagePath, relativePath);
+    const normalizedStoragePath = resolve(this.storagePath);
+
+    // Ensure the resolved path starts with the storage path
+    if (!absolutePath.startsWith(normalizedStoragePath + '/') && absolutePath !== normalizedStoragePath) {
+      throw new Error('Path traversal detected: path escapes storage directory');
+    }
+
+    return absolutePath;
+  }
+
   async saveFile(
     stream: Readable,
     options: SaveFileOptions,
@@ -43,7 +68,10 @@ export class LocalFileStorage implements FileStorage {
     const categoryPath = this.getCategoryPath(options.category);
     await this.ensureDirectory(categoryPath);
 
-    const filename = options.filename ?? this.generateFilename(options.extension);
+    // Sanitize filename to prevent path traversal
+    const filename = options.filename !== undefined
+      ? this.sanitizeFilename(options.filename)
+      : this.generateFilename(options.extension);
     const filePath = join(categoryPath, filename);
 
     const writeStream = createWriteStream(filePath);
@@ -71,10 +99,22 @@ export class LocalFileStorage implements FileStorage {
     const categoryPath = this.getCategoryPath(options.category);
     await this.ensureDirectory(categoryPath);
 
-    const filename = options.filename ?? this.generateFilename(options.extension);
+    // Sanitize filename to prevent path traversal
+    const filename = options.filename !== undefined
+      ? this.sanitizeFilename(options.filename)
+      : this.generateFilename(options.extension);
     const filePath = join(categoryPath, filename);
 
-    await writeFile(filePath, buffer);
+    try {
+      await writeFile(filePath, buffer);
+    }
+    catch (error) {
+      // Clean up partial file on error (e.g., disk full, permission error)
+      await unlink(filePath).catch(() => {
+        // Ignore cleanup errors to avoid masking the original failure
+      });
+      throw error;
+    }
 
     return {
       filename,
@@ -91,23 +131,23 @@ export class LocalFileStorage implements FileStorage {
   }
 
   async readFile(relativePath: string): Promise<Buffer> {
-    const filePath = join(this.storagePath, relativePath);
+    const filePath = this.resolveAndValidatePath(relativePath);
     return await readFile(filePath);
   }
 
   async readFileAsStream(relativePath: string): Promise<Readable> {
-    const filePath = join(this.storagePath, relativePath);
+    const filePath = this.resolveAndValidatePath(relativePath);
     return await Promise.resolve(createReadStream(filePath));
   }
 
   async getFileSize(relativePath: string): Promise<number> {
-    const filePath = join(this.storagePath, relativePath);
+    const filePath = this.resolveAndValidatePath(relativePath);
     const fileStat = await stat(filePath);
     return fileStat.size;
   }
 
   async fileExists(relativePath: string): Promise<boolean> {
-    const filePath = join(this.storagePath, relativePath);
+    const filePath = this.resolveAndValidatePath(relativePath);
     try {
       await access(filePath);
       return true;
@@ -118,12 +158,12 @@ export class LocalFileStorage implements FileStorage {
   }
 
   async deleteFile(relativePath: string): Promise<void> {
-    const filePath = join(this.storagePath, relativePath);
+    const filePath = this.resolveAndValidatePath(relativePath);
     await unlink(filePath);
   }
 
   /** @deprecated readFile/readFileAsStream を使用してください */
   getAbsolutePath(relativePath: string): string {
-    return join(this.storagePath, relativePath);
+    return this.resolveAndValidatePath(relativePath);
   }
 }

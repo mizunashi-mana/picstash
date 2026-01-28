@@ -100,11 +100,18 @@ export async function importFromUrlCrawl(
       const stream = Readable.from(imageBuffer);
       const saved = await fileStorage.saveFile(stream, { category: 'originals', extension });
 
-      // Get file size
-      const fileSize = await fileStorage.getFileSize(saved.path);
-
-      // Read image data for processing
-      const imageData = await fileStorage.readFile(saved.path);
+      // Get file size and read image data for processing
+      // If these fail, clean up the saved file
+      let fileSize: number;
+      let imageData: Buffer;
+      try {
+        fileSize = await fileStorage.getFileSize(saved.path);
+        imageData = await fileStorage.readFile(saved.path);
+      }
+      catch (error) {
+        await fileStorage.deleteFile(saved.path).catch(() => {});
+        throw error;
+      }
 
       // Get metadata and generate thumbnail
       let metadata;

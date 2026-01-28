@@ -54,11 +54,18 @@ export async function uploadImage(
   // Save file from stream to storage
   const saved = await fileStorage.saveFile(stream, { category: 'originals', extension });
 
-  // Get file size from saved file
-  const fileSize = await fileStorage.getFileSize(saved.path);
-
-  // Read image data for processing
-  const imageData = await fileStorage.readFile(saved.path);
+  // Get file size and read image data for processing
+  // If these fail, clean up the saved file
+  let fileSize: number;
+  let imageData: Buffer;
+  try {
+    fileSize = await fileStorage.getFileSize(saved.path);
+    imageData = await fileStorage.readFile(saved.path);
+  }
+  catch (error) {
+    await fileStorage.deleteFile(saved.path).catch(() => {});
+    throw error;
+  }
 
   // Get image metadata and generate thumbnail from saved file
   let metadata;
@@ -82,18 +89,27 @@ export async function uploadImage(
   }
 
   // Create database record with auto-generated title
-  const createdAt = new Date();
-  const title = generateTitle(null, createdAt);
-  const image = await imageRepository.create({
-    path: saved.path,
-    thumbnailPath: thumbnailSaved.path,
-    mimeType: mimetype,
-    size: fileSize,
-    width: metadata.width,
-    height: metadata.height,
-    title,
-    createdAt,
-  });
+  let image;
+  try {
+    const createdAt = new Date();
+    const title = generateTitle(null, createdAt);
+    image = await imageRepository.create({
+      path: saved.path,
+      thumbnailPath: thumbnailSaved.path,
+      mimeType: mimetype,
+      size: fileSize,
+      width: metadata.width,
+      height: metadata.height,
+      title,
+      createdAt,
+    });
+  }
+  catch (error) {
+    // Clean up saved file and thumbnail if database creation fails
+    await fileStorage.deleteFile(saved.path).catch(() => {});
+    await fileStorage.deleteFile(thumbnailSaved.path).catch(() => {});
+    throw error;
+  }
 
   // Generate embedding in background (non-blocking)
   // This allows the upload to complete quickly while embedding is generated async
