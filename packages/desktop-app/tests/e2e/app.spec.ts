@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const appPath = path.join(currentDir, '..');
+const appPath = path.join(currentDir, '..', '..');
 
 // npm ワークスペースの node_modules 配置により、Playwright が electron バイナリを自動検出できないため
 // テストファイルのコンテキストから明示的にパスを解決する
