@@ -32,9 +32,9 @@ export default [
     },
   },
   {
-    // tests/main は Vitest のユニットテストのため、Playwright ルールを無効化
+    // tests/unit は Vitest のユニットテストのため、Playwright ルールを無効化
     // 動的インポートにより型が解決されないため unsafe 関連ルールも緩和
-    files: ['tests/main/**/*.ts'],
+    files: ['tests/unit/**/*.ts'],
     rules: {
       'playwright/no-standalone-expect': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',

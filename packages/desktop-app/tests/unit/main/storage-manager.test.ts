@@ -14,7 +14,7 @@ vi.mock('electron', () => ({
 }));
 
 // モック後にインポート
-const { StorageManager } = await import('../../src/main/storage-manager.js');
+const { StorageManager } = await import('../../../src/main/storage-manager.js');
 
 describe('StorageManager', () => {
   let storageManager: InstanceType<typeof StorageManager>;
