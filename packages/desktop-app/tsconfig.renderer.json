@@ -5,9 +5,9 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../web-client/src/*"]
+      "@/*": ["src/renderer/*"]
     }
   },
-  "include": ["src/renderer/**/*", "../web-client/src/vite-env.d.ts"],
+  "include": ["src/renderer/**/*"],
   "exclude": ["node_modules", "dist"]
 }
