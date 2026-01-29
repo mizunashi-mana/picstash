@@ -1,6 +1,7 @@
 import {
   deleteImage,
   uploadImage,
+  generateEmbedding,
   generateTitle,
   type EmbeddingRepository,
   type EmbeddingService,
@@ -210,6 +211,64 @@ export class ImageController {
         const title = generateTitle(description ?? null, existing.createdAt);
         const updated = await this.imageRepository.updateById(id, { description, title });
         return await reply.send(updated);
+      },
+    );
+
+    // Create image from local file (desktop app only)
+    // This endpoint creates a DB record for an image that was already saved locally
+    app.post<{
+      Body: {
+        path: string;
+        thumbnailPath: string;
+        mimeType: string;
+        size: number;
+        width: number;
+        height: number;
+      };
+    }>(
+      '/api/images/from-local',
+      async (request, reply) => {
+        const { path, thumbnailPath, mimeType, size, width, height } = request.body;
+
+        // Validate required fields
+        if (path === '' || thumbnailPath === '' || mimeType === '') {
+          return await reply.status(400).send({
+            error: 'Bad Request',
+            message: 'Missing required fields: path, thumbnailPath, mimeType, size, width, height',
+          });
+        }
+
+        const createdAt = new Date();
+        const title = generateTitle(null, createdAt);
+
+        const image = await this.imageRepository.create({
+          path,
+          thumbnailPath,
+          mimeType,
+          size,
+          width,
+          height,
+          title,
+          createdAt,
+        });
+
+        // Generate embedding in background (non-blocking)
+        // Note: This will fail if file is not accessible from server
+        // For desktop-only mode, embedding generation should be handled locally
+        generateEmbedding(
+          { imageId: image.id },
+          {
+            imageRepository: this.imageRepository,
+            fileStorage: this.fileStorage,
+            embeddingService: this.embeddingService,
+            embeddingRepository: this.embeddingRepository,
+          },
+        ).catch((error: unknown) => {
+          // eslint-disable-next-line no-console -- Background task error logging
+          console.error(`Background embedding generation failed for ${image.id}:`, error);
+        });
+
+        return await reply.status(201).send(image);
       },
     );
 

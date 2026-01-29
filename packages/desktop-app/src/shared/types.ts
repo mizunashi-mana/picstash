@@ -35,7 +35,65 @@ export const IPC_CHANNELS = {
   STORAGE_SET_PATH: 'storage:setPath',
   STORAGE_SELECT_PATH: 'storage:selectPath',
   STORAGE_IS_INITIALIZED: 'storage:isInitialized',
+  // 画像操作
+  IMAGE_UPLOAD: 'image:upload',
+  IMAGE_GET_DATA_URL: 'image:getDataUrl',
 } as const;
+
+/**
+ * 画像アップロード入力
+ */
+export interface ImageUploadInput {
+  data: ArrayBuffer;
+  filename: string;
+  mimetype: string;
+}
+
+/**
+ * アップロード成功結果
+ */
+export interface UploadSuccessResult {
+  success: true;
+  path: string;
+  thumbnailPath: string;
+  mimeType: string;
+  size: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * アップロード失敗結果
+ */
+export interface UploadErrorResult {
+  success: false;
+  error: 'INVALID_MIME_TYPE' | 'STORAGE_NOT_INITIALIZED';
+  message: string;
+}
+
+/**
+ * アップロード結果
+ */
+export type UploadResult = UploadSuccessResult | UploadErrorResult;
+
+/**
+ * レンダラープロセスに公開する Image API の型定義
+ */
+export interface ImageAPI {
+  /**
+   * 画像をローカルストレージにアップロード
+   * @param input アップロード入力
+   * @returns アップロード結果
+   */
+  upload: (input: ImageUploadInput) => Promise<UploadResult>;
+
+  /**
+   * ファイルパスからデータ URL を取得
+   * @param relativePath ストレージルートからの相対パス
+   * @returns data URL 形式の文字列
+   */
+  getDataUrl: (relativePath: string) => Promise<string>;
+}
 
 /**
  * レンダラープロセスに公開する Storage API の型定義
@@ -111,4 +169,5 @@ export interface PicstashAPI {
     electron: string;
   };
   storage: StorageAPI;
+  image: ImageAPI;
 }
