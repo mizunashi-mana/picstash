@@ -17,6 +17,7 @@ export type Env = {
   disableFixedRules?: boolean;
   ruleSets?: RuleSet[];
   entrypointFiles?: string[];
+  e2eTestFiles?: string[];
 };
 
 export function buildConfig(env: Env) {
@@ -54,7 +55,9 @@ export function buildConfig(env: Env) {
         rules.push(buildStorybookConfig());
         break;
       case 'playwright':
-        rules.push(buildPlaywrightConfig());
+        rules.push(buildPlaywrightConfig({
+          files: env.e2eTestFiles,
+        }));
         break;
     }
   }
