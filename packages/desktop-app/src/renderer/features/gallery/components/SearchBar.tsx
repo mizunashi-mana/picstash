@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActionIcon,
   Autocomplete,
@@ -24,20 +24,16 @@ const MIN_QUERY_LENGTH = 1;
 const DEBOUNCE_MS = 300;
 
 export function SearchBar({ value, onChange }: SearchBarProps) {
-  // Track the previous prop value to detect external changes (e.g., URL navigation)
-  const [prevValue, setPrevValue] = useState(value);
   const [inputValue, setInputValue] = useState(value);
   const queryClient = useQueryClient();
 
   // Debounced value for suggestions query only
   const [debouncedInputForSuggestions] = useDebouncedValue(inputValue, DEBOUNCE_MS);
 
-  // Sync from parent (render-time pattern)
-  // Handles browser back/forward, URL changes, etc.
-  if (value !== prevValue) {
-    setPrevValue(value);
+  // Sync from parent when value prop changes (e.g., URL navigation, browser back/forward)
+  useEffect(() => {
     setInputValue(value);
-  }
+  }, [value]);
 
   // Handle user typing - only update local state, don't notify parent
   const handleInputChange = (newValue: string) => {
@@ -47,7 +43,6 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
   // Handle search submission (button click or Enter key)
   const handleSubmit = () => {
     if (inputValue !== value) {
-      setPrevValue(inputValue);
       onChange(inputValue);
     }
   };
@@ -55,14 +50,12 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
   // Handle clear button - immediate notification
   const handleClear = () => {
     setInputValue('');
-    setPrevValue('');
     onChange('');
   };
 
   // Handle option selection - immediate notification
   const handleOptionSubmit = (selectedValue: string) => {
     setInputValue(selectedValue);
-    setPrevValue(selectedValue);
     onChange(selectedValue);
   };
 

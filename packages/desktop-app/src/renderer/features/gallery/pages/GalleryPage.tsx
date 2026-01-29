@@ -162,8 +162,7 @@ export function GalleryPage() {
         saveHistoryMutation.mutate(value);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mutate is stable
-    [setSearchParams],
+    [setSearchParams, saveHistoryMutation],
   );
 
   const handleDeleteAllHistory = useCallback(() => {
