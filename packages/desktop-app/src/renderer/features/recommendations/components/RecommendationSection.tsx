@@ -13,10 +13,10 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import { imageEndpoints } from '@picstash/api';
 import { IconSparkles } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { getThumbnailUrl } from '@/features/gallery';
 import {
   fetchRecommendations,
   recordImpressions,
@@ -183,7 +183,7 @@ function RecommendationCard({ image, conversionId }: RecommendationCardProps) {
       >
         <AspectRatio ratio={1}>
           <Image
-            src={getThumbnailUrl(image.id)}
+            src={imageEndpoints.thumbnail(image.id)}
             alt={image.title}
             fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3C/svg%3E"
           />

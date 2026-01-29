@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { recordViewEnd, recordViewStart } from './api';
-import { recordRecommendationClick } from '@/features/recommendations/api';
+import { recordRecommendationClick } from '@/features/recommendations';
 
 interface UseViewHistoryOptions {
   enabled?: boolean;
