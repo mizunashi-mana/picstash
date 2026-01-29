@@ -10,10 +10,11 @@ export default [
     ],
   }),
   {
-    // renderer は @/ エイリアスで web-client のソースを参照するため、import 解決を無効化
+    // renderer はブラウザ環境で動作するため、node-builtins チェックと import 解決を無効化
     files: ['src/renderer/**/*.{ts,tsx}'],
     rules: {
       'import-x/no-unresolved': 'off',
+      'n/no-unsupported-features/node-builtins': 'off',
     },
   },
   {

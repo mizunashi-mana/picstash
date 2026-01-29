@@ -2,8 +2,8 @@ import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-// web-client のソースディレクトリを参照
-const webClientSrc = resolve(__dirname, '../web-client/src');
+// desktop-app 独自の renderer ディレクトリを参照
+const rendererSrc = resolve(__dirname, 'src/renderer');
 
 export default defineConfig({
   plugins: [
@@ -17,7 +17,7 @@ export default defineConfig({
   base: './', // Electron で file:// プロトコルを使うため相対パスに
   resolve: {
     alias: {
-      '@': webClientSrc,
+      '@': rendererSrc,
     },
   },
   build: {
