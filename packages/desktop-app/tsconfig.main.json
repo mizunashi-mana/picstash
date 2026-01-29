@@ -3,8 +3,12 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "noEmit": false,
-    "outDir": "dist/main",
-    "rootDir": "src/main"
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@desktop-app/shared/*": ["src/shared/*"]
+    }
   },
-  "include": ["src/main/**/*"]
+  "include": ["src/main/**/*", "src/shared/**/*"]
 }

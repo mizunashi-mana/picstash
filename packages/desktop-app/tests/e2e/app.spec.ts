@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
-const appPath = path.join(currentDir, '..');
+const appPath = path.join(currentDir, '..', '..');
 
 // npm ワークスペースの node_modules 配置により、Playwright が electron バイナリを自動検出できないため
 // テストファイルのコンテキストから明示的にパスを解決する
@@ -43,7 +43,6 @@ test.describe('Electron アプリの起動', () => {
     expect(title).toBe('Picstash');
   });
 
-  /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions -- Playwright の ElectronType がモノレポのルート node_modules から electron モジュールを解決できないため evaluate() の戻り値型が error 型になる */
   test('ウィンドウサイズが正しい', async () => {
     const windowSize = await electronApp.evaluate(({ BrowserWindow }) => {
       const [mainWindow] = BrowserWindow.getAllWindows();
@@ -60,7 +59,6 @@ test.describe('Electron アプリの起動', () => {
     const appName = await electronApp.evaluate(({ app }) => app.getName());
     expect(appName).toBe('@picstash/desktop-app');
   });
-  /* eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/strict-boolean-expressions */
 });
 
 test.describe('プリロードスクリプト', () => {
@@ -89,6 +87,53 @@ test.describe('プリロードスクリプト', () => {
     expect(versions?.node).toBeTruthy();
     expect(versions?.chrome).toBeTruthy();
     expect(versions?.electron).toBeTruthy();
+  });
+
+  test('Storage API が公開されている', async () => {
+    interface PicstashWindow {
+      picstash?: {
+        storage: {
+          readFile: unknown;
+          saveFile: unknown;
+          deleteFile: unknown;
+          fileExists: unknown;
+          getFileSize: unknown;
+          getPath: unknown;
+          setPath: unknown;
+          selectPath: unknown;
+          isInitialized: unknown;
+        };
+      };
+    }
+    const storageApi = await window.evaluate(() => {
+      const win = window as unknown as PicstashWindow;
+      const storage = win.picstash?.storage;
+      if (storage === undefined) {
+        return null;
+      }
+      return {
+        hasReadFile: typeof storage.readFile === 'function',
+        hasSaveFile: typeof storage.saveFile === 'function',
+        hasDeleteFile: typeof storage.deleteFile === 'function',
+        hasFileExists: typeof storage.fileExists === 'function',
+        hasGetFileSize: typeof storage.getFileSize === 'function',
+        hasGetPath: typeof storage.getPath === 'function',
+        hasSetPath: typeof storage.setPath === 'function',
+        hasSelectPath: typeof storage.selectPath === 'function',
+        hasIsInitialized: typeof storage.isInitialized === 'function',
+      };
+    });
+
+    expect(storageApi).not.toBeNull();
+    expect(storageApi?.hasReadFile).toBe(true);
+    expect(storageApi?.hasSaveFile).toBe(true);
+    expect(storageApi?.hasDeleteFile).toBe(true);
+    expect(storageApi?.hasFileExists).toBe(true);
+    expect(storageApi?.hasGetFileSize).toBe(true);
+    expect(storageApi?.hasGetPath).toBe(true);
+    expect(storageApi?.hasSetPath).toBe(true);
+    expect(storageApi?.hasSelectPath).toBe(true);
+    expect(storageApi?.hasIsInitialized).toBe(true);
   });
 });
 

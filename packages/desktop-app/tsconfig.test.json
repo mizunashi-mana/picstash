@@ -1,7 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@desktop-app/shared/*": ["src/shared/*"]
+    }
   },
-  "include": ["tests/**/*", "playwright.config.ts"]
+  "include": ["tests/**/*", "playwright.config.ts", "vitest.config.ts", "vite.renderer.config.ts"]
 }
