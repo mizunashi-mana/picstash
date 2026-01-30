@@ -66,9 +66,14 @@ void app.whenReady().then(async () => {
   });
 });
 
-app.on('before-quit', () => {
-  // @picstash/core のリソースを解放
-  void coreManager.teardown();
+app.on('before-quit', (event) => {
+  if (coreManager.isInitialized()) {
+    // teardown 完了まで終了を遅延させる
+    event.preventDefault();
+    void coreManager.teardown().finally(() => {
+      app.exit(0);
+    });
+  }
 });
 
 app.on('window-all-closed', () => {

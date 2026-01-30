@@ -16,6 +16,18 @@ import type { CoreContainer } from '@picstash/core';
 class CoreManager {
   private container: CoreContainer | null = null;
 
+  /** initialize/teardown の直列化用 Promise チェーン */
+  private pending: Promise<void> = Promise.resolve();
+
+  /**
+   * 排他制御付きで操作を直列実行する。
+   * IPC 経由の短時間連続発火でもレースコンディションを防ぐ。
+   */
+  private async enqueue(fn: () => Promise<void>): Promise<void> {
+    this.pending = this.pending.then(fn, fn);
+    await this.pending;
+  }
+
   /**
    * @picstash/core を初期化する。
    * CoreConfig を構築 → マイグレーション実行 → コンテナ構築 → DB 接続。
@@ -23,6 +35,12 @@ class CoreManager {
    * @param storagePath - ユーザーが選択したストレージディレクトリの絶対パス
    */
   async initialize(storagePath: string): Promise<void> {
+    await this.enqueue(async () => {
+      await this.doInitialize(storagePath);
+    });
+  }
+
+  private async doInitialize(storagePath: string): Promise<void> {
     // 重量級の依存を遅延ロード（起動時間を短縮するため）
     await import('reflect-metadata');
     const { buildCoreContainer } = await import('@picstash/core');
@@ -37,7 +55,7 @@ class CoreManager {
         format: 'pretty' as const,
         file: {
           enabled: false,
-          path: '',
+          path: join(storagePath, 'logs', 'picstash.log'),
           rotation: { enabled: false, maxSize: '10M', maxFiles: 5 },
         },
       },
@@ -60,6 +78,12 @@ class CoreManager {
    * DB 切断 → EmbeddingRepository クローズ → コンテナ破棄。
    */
   async teardown(): Promise<void> {
+    await this.enqueue(async () => {
+      await this.doTeardown();
+    });
+  }
+
+  private async doTeardown(): Promise<void> {
     if (this.container === null) {
       return;
     }
