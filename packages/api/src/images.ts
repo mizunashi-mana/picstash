@@ -90,6 +90,9 @@ export const imageEndpoints = {
       `/api/images/${imageId}/attributes/${attributeId}` as const,
   },
 
+  /** ローカルファイルから画像レコードを作成（デスクトップアプリ用） */
+  fromLocal: '/api/images/from-local' as const,
+
   /**
    * server 側のルート登録用パターン
    * Fastify のパラメータ形式（:param）を使用
@@ -104,6 +107,7 @@ export const imageEndpoints = {
     generateDescription: '/api/images/:imageId/generate-description',
     duplicates: '/api/images/duplicates',
     collections: '/api/images/:imageId/collections',
+    fromLocal: '/api/images/from-local',
     attributes: {
       list: '/api/images/:imageId/attributes',
       detail: '/api/images/:imageId/attributes/:attributeId',

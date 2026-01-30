@@ -1,6 +1,14 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC_CHANNELS } from '@desktop-app/shared/types.js';
-import type { PicstashAPI, SaveFileOptions, SaveFileResult, StorageAPI } from '@desktop-app/shared/types.js';
+import type {
+  ImageAPI,
+  ImageUploadInput,
+  PicstashAPI,
+  SaveFileOptions,
+  SaveFileResult,
+  StorageAPI,
+  UploadResult,
+} from '@desktop-app/shared/types.js';
 
 // Storage API の実装
 const storageAPI: StorageAPI = {
@@ -41,6 +49,17 @@ const storageAPI: StorageAPI = {
   },
 };
 
+// Image API の実装
+const imageAPI: ImageAPI = {
+  upload: async (input: ImageUploadInput): Promise<UploadResult> => {
+    return await ipcRenderer.invoke(IPC_CHANNELS.IMAGE_UPLOAD, input);
+  },
+
+  getDataUrl: async (relativePath: string): Promise<string> => {
+    return await ipcRenderer.invoke(IPC_CHANNELS.IMAGE_GET_DATA_URL, relativePath);
+  },
+};
+
 // レンダラープロセスに公開する API
 const api: PicstashAPI = {
   versions: {
@@ -49,6 +68,7 @@ const api: PicstashAPI = {
     electron: process.versions.electron,
   },
   storage: storageAPI,
+  image: imageAPI,
 };
 
 contextBridge.exposeInMainWorld('picstash', api);

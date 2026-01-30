@@ -1,7 +1,8 @@
 import { ipcMain } from 'electron';
 import { IPC_CHANNELS } from '@desktop-app/shared/types.js';
+import { uploadService } from './services/index.js';
 import { storageManager } from './storage-manager.js';
-import type { FileCategory, SaveFileOptions } from '@desktop-app/shared/types.js';
+import type { FileCategory, ImageUploadInput, SaveFileOptions } from '@desktop-app/shared/types.js';
 
 /**
  * 許可されたファイルカテゴリ
@@ -74,6 +75,28 @@ function validatePath(value: unknown): asserts value is string {
 }
 
 /**
+ * ImageUploadInput の入力を検証
+ * @throws 無効な入力の場合
+ */
+function validateImageUploadInput(value: unknown): asserts value is ImageUploadInput {
+  if (typeof value !== 'object' || value === null) {
+    throw new Error('input must be an object');
+  }
+
+  if (!('data' in value) || !(value.data instanceof ArrayBuffer)) {
+    throw new Error('input.data must be an ArrayBuffer');
+  }
+
+  if (!('filename' in value) || typeof value.filename !== 'string') {
+    throw new Error('input.filename must be a string');
+  }
+
+  if (!('mimetype' in value) || typeof value.mimetype !== 'string') {
+    throw new Error('input.mimetype must be a string');
+  }
+}
+
+/**
  * IPC ハンドラを登録する
  */
 export function registerIpcHandlers(): void {
@@ -132,5 +155,22 @@ export function registerIpcHandlers(): void {
   // ストレージ初期化確認
   ipcMain.handle(IPC_CHANNELS.STORAGE_IS_INITIALIZED, (_event) => {
     return storageManager.isInitialized();
+  });
+
+  // 画像アップロード
+  ipcMain.handle(IPC_CHANNELS.IMAGE_UPLOAD, async (_event, input: unknown) => {
+    validateImageUploadInput(input);
+    const buffer = Buffer.from(input.data);
+    return await uploadService.uploadImage({
+      data: buffer,
+      filename: input.filename,
+      mimetype: input.mimetype,
+    });
+  });
+
+  // 画像データ URL 取得
+  ipcMain.handle(IPC_CHANNELS.IMAGE_GET_DATA_URL, async (_event, relativePath: unknown) => {
+    validateRelativePath(relativePath);
+    return await uploadService.getDataUrl(relativePath);
   });
 }
