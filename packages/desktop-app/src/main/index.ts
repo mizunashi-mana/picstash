@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { app, BrowserWindow } from 'electron';
+import { coreManager } from './core-manager.js';
 import { registerIpcHandlers } from './ipc-handlers.js';
 import { storageManager } from './storage-manager.js';
 
@@ -46,6 +47,12 @@ void app.whenReady().then(async () => {
   // 設定を読み込み
   await storageManager.loadConfig();
 
+  // ストレージパスが設定済みなら @picstash/core を初期化
+  const storagePath = storageManager.getPath();
+  if (storagePath !== null) {
+    await coreManager.initialize(storagePath);
+  }
+
   // IPC ハンドラを登録
   registerIpcHandlers();
 
@@ -57,6 +64,16 @@ void app.whenReady().then(async () => {
       createWindow();
     }
   });
+});
+
+app.on('before-quit', (event) => {
+  if (coreManager.isInitialized()) {
+    // teardown 完了まで終了を遅延させる
+    event.preventDefault();
+    void coreManager.teardown().finally(() => {
+      app.exit(0);
+    });
+  }
 });
 
 app.on('window-all-closed', () => {
