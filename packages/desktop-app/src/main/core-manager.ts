@@ -1,13 +1,14 @@
 /**
  * @picstash/core ライフサイクル管理のシングルトン。
  * CoreContainer の初期化・破棄・取得を一元管理する。
+ *
+ * NOTE: @picstash/core は重量級の依存（transformers, tesseract.js 等）を含むため、
+ * 静的インポートではなく initialize() 内で動的インポートし、起動時間を短縮する。
  */
 
-import 'reflect-metadata';
 import { join } from 'node:path';
-import { buildCoreContainer } from '@picstash/core';
 import { runMigrations } from './migration-runner.js';
-import type { CoreConfig, CoreContainer } from '@picstash/core';
+import type { CoreContainer } from '@picstash/core';
 
 /**
  * Core ライフサイクルマネージャー
@@ -22,14 +23,18 @@ class CoreManager {
    * @param storagePath - ユーザーが選択したストレージディレクトリの絶対パス
    */
   async initialize(storagePath: string): Promise<void> {
+    // 重量級の依存を遅延ロード（起動時間を短縮するため）
+    await import('reflect-metadata');
+    const { buildCoreContainer } = await import('@picstash/core');
+
     const dbPath = join(storagePath, 'picstash.db');
 
-    const config: CoreConfig = {
+    const config = {
       database: { path: dbPath },
       storage: { path: storagePath },
       logging: {
-        level: 'info',
-        format: 'pretty',
+        level: 'info' as const,
+        format: 'pretty' as const,
         file: {
           enabled: false,
           path: '',
