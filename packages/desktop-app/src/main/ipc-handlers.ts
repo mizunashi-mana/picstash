@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import { IPC_CHANNELS } from '@desktop-app/shared/types.js';
+import { coreManager } from './core-manager.js';
 import { uploadService } from './services/index.js';
 import { storageManager } from './storage-manager.js';
 import type { FileCategory, ImageUploadInput, SaveFileOptions } from '@desktop-app/shared/types.js';
@@ -145,16 +146,25 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.STORAGE_SET_PATH, async (_event, path: unknown) => {
     validatePath(path);
     await storageManager.setPath(path);
+    // @picstash/core を再初期化
+    await coreManager.teardown();
+    await coreManager.initialize(path);
   });
 
   // ストレージパス選択（ダイアログ）
   ipcMain.handle(IPC_CHANNELS.STORAGE_SELECT_PATH, async (_event) => {
-    return await storageManager.selectPath();
+    const selectedPath = await storageManager.selectPath();
+    if (selectedPath !== null) {
+      // @picstash/core を再初期化
+      await coreManager.teardown();
+      await coreManager.initialize(selectedPath);
+    }
+    return selectedPath;
   });
 
   // ストレージ初期化確認
   ipcMain.handle(IPC_CHANNELS.STORAGE_IS_INITIALIZED, (_event) => {
-    return storageManager.isInitialized();
+    return storageManager.isInitialized() && coreManager.isInitialized();
   });
 
   // 画像アップロード
