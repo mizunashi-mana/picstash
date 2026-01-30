@@ -1,5 +1,5 @@
 import { imageEndpoints } from '@picstash/api';
-import type { Image } from './api.js';
+import type { Image } from './types.js';
 
 /**
  * ローカルからの画像作成用リクエストボディ

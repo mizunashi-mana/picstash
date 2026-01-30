@@ -1,16 +1,7 @@
 import { uploadImageLocal } from './local-api.js';
+import type { Image } from './types.js';
 
-export interface Image {
-  id: string;
-  path: string;
-  mimeType: string;
-  size: number;
-  width: number | null;
-  height: number | null;
-  title: string;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Image };
 
 interface ErrorResponse {
   message?: string;
