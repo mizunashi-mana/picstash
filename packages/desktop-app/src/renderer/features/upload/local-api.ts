@@ -1,3 +1,4 @@
+import { imageEndpoints } from '@picstash/api';
 import type { Image } from './api.js';
 
 /**
@@ -51,7 +52,7 @@ export async function uploadImageLocal(file: Blob): Promise<Image> {
     height: result.height,
   };
 
-  const response = await fetch('/api/images/from-local', {
+  const response = await fetch(imageEndpoints.fromLocal, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -65,7 +66,20 @@ export async function uploadImageLocal(file: Blob): Promise<Image> {
     await storage.deleteFile(result.thumbnailPath).catch(() => {
       // クリーンアップエラーは無視
     });
-    throw new Error('Failed to create database record');
+
+    // レスポンスからエラーメッセージを取得
+    let errorMessage = `Failed to create database record (status ${String(response.status)})`;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
+      const errorBody = (await response.json()) as { message?: string };
+      if (typeof errorBody.message === 'string' && errorBody.message !== '') {
+        errorMessage = errorBody.message;
+      }
+    }
+    catch {
+      // JSON パース失敗時はデフォルトメッセージを使用
+    }
+    throw new Error(errorMessage);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response

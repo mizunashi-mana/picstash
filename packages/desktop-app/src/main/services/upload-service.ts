@@ -38,14 +38,14 @@ function getExtensionFromMimeType(mimeType: string): string {
 }
 
 /**
- * ファイル名から拡張子を取得
+ * ファイル名から拡張子を取得（小文字に正規化）
  */
 function getExtensionFromFilename(filename: string): string | null {
   const lastDot = filename.lastIndexOf('.');
   if (lastDot === -1) {
     return null;
   }
-  return filename.slice(lastDot);
+  return filename.slice(lastDot).toLowerCase();
 }
 
 /**
@@ -137,12 +137,16 @@ export class UploadService {
         filename: thumbnailFilename,
       });
     }
-    catch (error) {
+    catch (error: unknown) {
       // エラー時はオリジナルファイルをクリーンアップ
       await storageManager.deleteFile(originalSaved.path).catch(() => {
         // クリーンアップエラーは無視
       });
-      throw error;
+      if (error instanceof Error) {
+        // eslint-disable-next-line no-console -- Background task error logging
+        console.error('Failed to process image:', error);
+      }
+      throw new Error('Failed to process image for upload. Please try again with a different file.');
     }
 
     return {

@@ -238,6 +238,14 @@ export class ImageController {
           });
         }
 
+        // Validate numeric fields
+        if (size <= 0 || width <= 0 || height <= 0) {
+          return await reply.status(400).send({
+            error: 'Bad Request',
+            message: 'Invalid numeric fields: size, width, and height must be positive numbers',
+          });
+        }
+
         const createdAt = new Date();
         const title = generateTitle(null, createdAt);
 

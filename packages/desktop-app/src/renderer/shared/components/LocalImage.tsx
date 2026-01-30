@@ -1,4 +1,4 @@
-import { Box, Image, Skeleton, type ImageProps } from '@mantine/core';
+import { Box, Image, Skeleton, Text, type ImageProps } from '@mantine/core';
 import { useLocalImageUrl } from '@/shared/hooks';
 
 export interface LocalImageProps extends Omit<ImageProps, 'src'> {
@@ -13,9 +13,9 @@ export interface LocalImageProps extends Omit<ImageProps, 'src'> {
  * データ URL への変換を自動で行う
  */
 export function LocalImage({ path, alt, w, h, ...props }: LocalImageProps) {
-  const url = useLocalImageUrl(path);
+  const state = useLocalImageUrl(path);
 
-  if (url === null) {
+  if (state.status === 'loading' || state.status === 'idle') {
     return (
       <Box w={w} h={h}>
         <Skeleton w="100%" h="100%" />
@@ -23,5 +23,13 @@ export function LocalImage({ path, alt, w, h, ...props }: LocalImageProps) {
     );
   }
 
-  return <Image src={url} alt={alt} w={w} h={h} {...props} />;
+  if (state.status === 'error') {
+    return (
+      <Box w={w} h={h} bg="gray.1" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Text size="xs" c="dimmed">Failed to load image</Text>
+      </Box>
+    );
+  }
+
+  return <Image src={state.url} alt={alt} w={w} h={h} {...props} />;
 }

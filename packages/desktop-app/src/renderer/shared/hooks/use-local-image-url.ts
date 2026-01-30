@@ -1,26 +1,34 @@
 import { useEffect, useState } from 'react';
 
+export type LocalImageUrlState
+  = { status: 'idle' }
+    | { status: 'loading' }
+    | { status: 'success'; url: string }
+    | { status: 'error' };
+
 /**
  * ローカルストレージの画像パスからデータ URL を取得するフック
  * @param path ストレージルートからの相対パス（null の場合は何もしない）
- * @returns データ URL（読み込み中または失敗時は null）
+ * @returns 読み込み状態と URL
  */
-export function useLocalImageUrl(path: string | null): string | null {
-  const [url, setUrl] = useState<string | null>(null);
+export function useLocalImageUrl(path: string | null): LocalImageUrlState {
+  const [state, setState] = useState<LocalImageUrlState>({ status: 'idle' });
 
   useEffect(() => {
-    // パスが null の場合は URL をリセット
+    // パスが null の場合はリセット
     if (path === null) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Reset state when path changes to null
-      setUrl(null);
+      setState({ status: 'idle' });
       return;
     }
 
-    // picstash API が存在しない場合は何もしない
+    // picstash API が存在しない場合はエラー
     if (window.picstash === undefined) {
-      setUrl(null);
+      setState({ status: 'error' });
       return;
     }
+
+    setState({ status: 'loading' });
 
     let cancelled = false;
 
@@ -28,12 +36,12 @@ export function useLocalImageUrl(path: string | null): string | null {
       .getDataUrl(path)
       .then((dataUrl: string) => {
         if (!cancelled) {
-          setUrl(dataUrl);
+          setState({ status: 'success', url: dataUrl });
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setUrl(null);
+          setState({ status: 'error' });
         }
       });
 
@@ -42,5 +50,5 @@ export function useLocalImageUrl(path: string | null): string | null {
     };
   }, [path]);
 
-  return url;
+  return state;
 }
