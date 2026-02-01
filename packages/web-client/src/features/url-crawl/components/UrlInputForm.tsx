@@ -11,7 +11,7 @@ export interface UrlInputFormProps {
 export function UrlInputForm({ onSubmit, isPending, isError, errorMessage }: UrlInputFormProps) {
   const [url, setUrl] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (url.trim() !== '') {
       onSubmit(url.trim());

@@ -29,7 +29,7 @@ const mockBuildCoreContainer = vi.fn().mockReturnValue(mockContainer);
 
 vi.mock('reflect-metadata', () => ({}));
 vi.mock('@picstash/core', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- mock wrapper
+
   buildCoreContainer: (...args: unknown[]) => mockBuildCoreContainer(...args),
 }));
 
