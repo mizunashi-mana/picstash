@@ -49,7 +49,7 @@ packages/web-client/src/
 │   ├── components/   (AppLayout)
 │   ├── hooks/         (useViewMode)
 │   └── helpers/       (url builder)
-└── features/          (15 モジュール)
+└── features/          (13 モジュール)
     ├── gallery/       (api.ts, components/, pages/)
     ├── labels/        (api.ts, components/, pages/)
     ├── upload/        (api.ts, components/)

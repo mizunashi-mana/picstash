@@ -8,7 +8,7 @@
 
 ## 背景
 
-Picstash の web-client は現在 15 のフィーチャーモジュールを持ち、Phase 1〜8 のロードマップに沿って機能拡充が続く。コードベースの成長に伴い、以下の課題が顕在化し得る:
+Picstash の web-client は現在 13 のフィーチャーモジュールを持ち、Phase 1〜8 のロードマップに沿って機能拡充が続く。コードベースの成長に伴い、以下の課題が顕在化し得る:
 
 - フィーチャー間の暗黙的な依存関係の増加
 - コンポーネント内でのビューロジックと状態管理の混在
@@ -261,7 +261,7 @@ src/
 │   ├── components/   (AppLayout)
 │   ├── hooks/         (useViewMode)
 │   └── helpers/       (url builder)
-└── features/          (15 モジュール)
+└── features/          (13 モジュール)
     ├── gallery/       (api.ts, components/, pages/)
     ├── labels/
     ├── upload/
