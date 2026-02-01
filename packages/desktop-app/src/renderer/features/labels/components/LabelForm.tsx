@@ -78,7 +78,7 @@ export function LabelForm({
     setUserSetColor(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     const trimmedName = name.trim();
     const colorValue = color !== '' ? color : undefined;
