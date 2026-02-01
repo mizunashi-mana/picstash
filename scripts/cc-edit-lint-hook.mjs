@@ -55,7 +55,7 @@ function runPreCommit(cwd) {
       cwd,
       env: {
         ...process.env,
-        DISABLE_FIXED_RULES: "true",
+        DISABLED_FIXED_RULES: "true",
       },
     });
 
@@ -71,6 +71,10 @@ function runPreCommit(cwd) {
 }
 
 async function main() {
+  if (process.env.SKIP_LINT_HOOK === "true") {
+    process.exit(0);
+  }
+
   const projectRoot = getProjectRoot();
   const statusLines = getGitStatus(projectRoot);
 
