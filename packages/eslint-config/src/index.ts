@@ -22,7 +22,7 @@ export type Env = {
 
 export function buildConfig(env: Env) {
   const ruleSets = env.ruleSets ?? ['common', 'node'];
-  const disableFixedRules = env.disableFixedRules ?? process.env.DISABLED_FIXED_RULES === 'true';
+  const disableFixedRules = env.disableFixedRules ?? process.env.DISABLE_FIXED_RULES === 'true';
   const entrypointFiles = env.entrypointFiles ?? ['src/index.ts'];
 
   const rules: Parameters<typeof defineConfig>[0] = [

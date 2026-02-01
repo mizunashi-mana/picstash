@@ -55,7 +55,7 @@ function runPreCommit(cwd) {
       cwd,
       env: {
         ...process.env,
-        DISABLED_FIXED_RULES: "true",
+        DISABLE_FIXED_RULES: "true",
       },
     });
 
