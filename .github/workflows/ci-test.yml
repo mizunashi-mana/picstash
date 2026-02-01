@@ -25,7 +25,7 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload coverage reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ !cancelled() }}
         with:
           name: coverage-reports
@@ -79,7 +79,7 @@ jobs:
           PICSTASH_CONFIG: ${{ github.workspace }}/packages/e2e-test/config.yaml
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -87,7 +87,7 @@ jobs:
           retention-days: 3
 
       - name: Upload server logs
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ !cancelled() }}
         with:
           name: server-logs
@@ -109,7 +109,7 @@ jobs:
         run: xvfb-run --auto-servernum npm run test:e2e -w @picstash/desktop-app
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: ${{ !cancelled() }}
         with:
           name: desktop-playwright-report
