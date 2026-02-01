@@ -1,5 +1,5 @@
 import { viewHistoryEndpoints } from '@picstash/api';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 export interface ViewHistory {
   id: string;

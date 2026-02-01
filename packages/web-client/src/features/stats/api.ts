@@ -7,7 +7,7 @@ import {
   type StatsQueryOptions,
   type PopularImagesQueryOptions,
 } from '@picstash/api';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 // Re-export types for convenience
 export type {

@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from '@/api/client';
 import { fetchDuplicates, deleteDuplicateImage } from '@/features/duplicates/api';
+import { apiClient } from '@/shared/api/client';
 
-vi.mock('@/api/client');
+vi.mock('@/shared/api/client');
 
 describe('duplicates/api', () => {
   beforeEach(() => {

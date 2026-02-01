@@ -1,5 +1,5 @@
 import { jobsEndpoints } from '@picstash/api';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 export type JobStatus = 'waiting' | 'active' | 'completed' | 'failed';
 

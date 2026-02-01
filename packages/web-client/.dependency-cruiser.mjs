@@ -36,7 +36,7 @@ export default {
         path: '^src/shared/',
       },
       to: {
-        path: '^src/(features|api|routes)/',
+        path: '^src/(app|features)/',
       },
     },
 
@@ -47,7 +47,7 @@ export default {
       comment:
         'main.tsx から到達できないモジュールはデッドコードの可能性がある',
       from: {
-        path: '^src/main\\.tsx$',
+        path: '^src/app/main\\.tsx$',
       },
       to: {
         path: '^src/',

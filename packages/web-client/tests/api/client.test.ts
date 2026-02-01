@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 describe('apiClient', () => {
   const mockFetch = vi.fn();

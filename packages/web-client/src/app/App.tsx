@@ -1,5 +1,5 @@
+import { AppRoutes } from '@/app/routes';
 import { JobStatusButton } from '@/features/jobs';
-import { AppRoutes } from '@/routes';
 import { AppLayout } from '@/shared';
 
 export function App() {

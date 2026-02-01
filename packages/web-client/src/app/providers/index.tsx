@@ -2,9 +2,7 @@ import { StrictMode } from 'react';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
-import { App } from '@/App';
 import { JobsProvider } from '@/features/jobs';
 
 import '@mantine/core/styles.css';
@@ -20,22 +18,19 @@ const queryClient = new QueryClient({
   },
 });
 
-const rootElement = document.getElementById('root');
-if (!rootElement) {
-  throw new Error('Root element not found');
+export function AppProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <MantineProvider>
+          <Notifications position="top-right" />
+          <BrowserRouter>
+            <JobsProvider>
+              {children}
+            </JobsProvider>
+          </BrowserRouter>
+        </MantineProvider>
+      </QueryClientProvider>
+    </StrictMode>
+  );
 }
-
-createRoot(rootElement).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <MantineProvider>
-        <Notifications position="top-right" />
-        <BrowserRouter>
-          <JobsProvider>
-            <App />
-          </JobsProvider>
-        </BrowserRouter>
-      </MantineProvider>
-    </QueryClientProvider>
-  </StrictMode>,
-);

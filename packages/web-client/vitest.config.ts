@@ -49,16 +49,18 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         // エントリーポイント（テスト不要）
-        'src/main.tsx',
+        'src/app/main.tsx',
         'src/vite-env.d.ts',
         // Storybook（別途 Storybook テストで対応）
         'src/**/*.stories.tsx',
         // index.ts（エクスポートのみ）
         'src/**/index.ts',
         // App（プロバイダー構成のみ）
-        'src/App.tsx',
+        'src/app/App.tsx',
+        // Providers（プロバイダー構成のみ）
+        'src/app/providers/index.tsx',
         // ルーティング（React Router 設定のみ）
-        'src/routes/index.tsx',
+        'src/app/routes/index.tsx',
 
         // === 未テストファイル（個別指定） ===
         // 新規ファイルはここに含まれないため、自動的にカバレッジ対象になる

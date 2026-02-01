@@ -4,7 +4,7 @@ import {
   type CreateLabelInput,
   type UpdateLabelInput,
 } from '@picstash/api';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 export async function fetchLabels(): Promise<Label[]> {
   return await apiClient<Label[]>(labelsEndpoints.list);

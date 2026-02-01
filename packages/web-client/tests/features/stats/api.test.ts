@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from '@/api/client';
 import {
   fetchOverviewStats,
   fetchViewTrends,
   fetchRecommendationTrends,
   fetchPopularImages,
 } from '@/features/stats/api';
+import { apiClient } from '@/shared/api/client';
 
-vi.mock('@/api/client');
+vi.mock('@/shared/api/client');
 
 describe('stats/api', () => {
   beforeEach(() => {

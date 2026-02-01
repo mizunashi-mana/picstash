@@ -22,7 +22,7 @@ import {
   recordImpressions,
   type RecommendedImage,
 } from '@/features/recommendations/api';
-import { buildUrl } from '@/shared/helpers';
+import { buildUrl } from '@/shared/lib';
 
 /** Maps imageId to conversionId */
 type ConversionMap = Map<string, string>;

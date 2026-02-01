@@ -6,7 +6,7 @@ import {
   type ImageAttribute,
   type UpdateImageAttributeInput,
 } from '@picstash/api';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 export interface Image {
   id: string;
