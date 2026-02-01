@@ -1,5 +1,5 @@
 import { collectionsEndpoints, imageEndpoints } from '@picstash/api';
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 export interface Collection {
   id: string;

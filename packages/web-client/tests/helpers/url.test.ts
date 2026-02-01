@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildUrl } from '@/shared/helpers/url';
+import { buildUrl } from '@/shared/lib/url';
 
 describe('buildUrl', () => {
   it('should return path as-is when no params provided', () => {

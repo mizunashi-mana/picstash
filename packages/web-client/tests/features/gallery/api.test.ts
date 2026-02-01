@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from '@/api/client';
 import {
   fetchImages,
   fetchImagesPaginated,
@@ -22,8 +21,9 @@ import {
   deleteSearchHistory,
   deleteAllSearchHistory,
 } from '@/features/gallery/api';
+import { apiClient } from '@/shared/api/client';
 
-vi.mock('@/api/client');
+vi.mock('@/shared/api/client');
 
 describe('gallery/api', () => {
   beforeEach(() => {

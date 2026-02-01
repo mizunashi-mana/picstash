@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from '@/api/client';
 import {
   fetchCollections,
   fetchCollection,
@@ -11,8 +10,9 @@ import {
   updateImageOrder,
   fetchImageCollections,
 } from '@/features/collections/api';
+import { apiClient } from '@/shared/api/client';
 
-vi.mock('@/api/client');
+vi.mock('@/shared/api/client');
 
 describe('collections/api', () => {
   beforeEach(() => {

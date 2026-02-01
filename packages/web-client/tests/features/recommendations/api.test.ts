@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from '@/api/client';
 import {
   fetchRecommendations,
   recordImpressions,
   recordRecommendationClick,
 } from '@/features/recommendations/api';
+import { apiClient } from '@/shared/api/client';
 
-vi.mock('@/api/client');
+vi.mock('@/shared/api/client');
 
 describe('recommendations/api', () => {
   beforeEach(() => {

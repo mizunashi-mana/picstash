@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiClient } from '@/api/client';
 import {
   fetchLabels,
   fetchLabel,
@@ -7,8 +6,9 @@ import {
   updateLabel,
   deleteLabel,
 } from '@/features/labels/api';
+import { apiClient } from '@/shared/api/client';
 
-vi.mock('@/api/client');
+vi.mock('@/shared/api/client');
 
 describe('labels/api', () => {
   beforeEach(() => {

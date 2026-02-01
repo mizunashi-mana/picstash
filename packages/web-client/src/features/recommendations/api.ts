@@ -1,4 +1,4 @@
-import { apiClient } from '@/api/client';
+import { apiClient } from '@/shared/api/client';
 
 export interface RecommendedImage {
   id: string;
