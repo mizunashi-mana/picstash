@@ -36,7 +36,35 @@ export default {
         path: '^src/shared/',
       },
       to: {
+        path: '^src/(app|entities|features)/',
+      },
+    },
+
+    // entities は shared のみに依存可能
+    {
+      name: 'entities-no-upper-deps',
+      severity: 'error',
+      comment: 'entities/ は features/ や app/ に依存してはいけない',
+      from: {
+        path: '^src/entities/',
+      },
+      to: {
         path: '^src/(app|features)/',
+      },
+    },
+
+    // entities 間の内部実装への直接依存を禁止（index.ts 経由のみ許可）
+    {
+      name: 'no-cross-entity-deps',
+      severity: 'error',
+      comment:
+        'entities/ 間の内部実装への直接依存は禁止（index.ts 経由で公開 API を利用する）',
+      from: {
+        path: '^src/entities/([^/]+)/',
+      },
+      to: {
+        path: '^src/entities/([^/]+)/',
+        pathNot: ['^src/entities/$1/', '^src/entities/[^/]+/index\\.ts$'],
       },
     },
 

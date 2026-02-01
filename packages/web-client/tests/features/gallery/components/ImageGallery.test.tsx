@@ -5,14 +5,17 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { fetchImages } from '@/features/gallery/api';
+import { fetchImages } from '@/entities/image';
 import { ImageGallery } from '@/features/gallery/components/ImageGallery';
 
-vi.mock('@/features/gallery/api', () => ({
+vi.mock('@/entities/image', () => ({
   fetchImages: vi.fn(),
+  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
+}));
+
+vi.mock('@/features/gallery/api', () => ({
   saveSearchHistory: vi.fn(),
   deleteAllSearchHistory: vi.fn(),
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
 }));
 
 vi.mock('@/features/gallery/components/SearchBar', () => ({

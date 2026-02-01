@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateImage } from '@/entities/image';
 import {
   generateDescriptionJob,
   getJobStatus,
-  updateImage,
 } from '@/features/gallery/api';
 import { useJobs } from '@/features/jobs';
 import { ImageDescriptionSectionView } from './ImageDescriptionSectionView';

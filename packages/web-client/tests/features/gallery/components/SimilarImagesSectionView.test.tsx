@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { SimilarImagesSectionView } from '@/features/gallery/components/SimilarImagesSectionView';
 import type { SimilarImage } from '@/features/gallery/api';
 
-vi.mock('@/features/gallery/api', () => ({
+vi.mock('@/entities/image', () => ({
   getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
 }));
 

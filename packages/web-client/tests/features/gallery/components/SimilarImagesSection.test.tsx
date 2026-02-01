@@ -7,9 +7,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { fetchSimilarImages } from '@/features/gallery/api';
 import { SimilarImagesSection } from '@/features/gallery/components/SimilarImagesSection';
 
+vi.mock('@/entities/image', () => ({
+  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
+}));
+
 vi.mock('@/features/gallery/api', () => ({
   fetchSimilarImages: vi.fn(),
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
 }));
 
 function createWrapper() {
