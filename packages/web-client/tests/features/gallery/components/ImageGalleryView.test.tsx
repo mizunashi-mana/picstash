@@ -6,9 +6,9 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ImageGalleryView } from '@/features/gallery/components/ImageGalleryView';
-import type { Image } from '@/features/gallery/api';
+import type { Image } from '@/entities/image';
 
-vi.mock('@/features/gallery/api', () => ({
+vi.mock('@/entities/image', () => ({
   getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
 }));
 

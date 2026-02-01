@@ -27,10 +27,9 @@ import {
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams, Link } from 'react-router';
+import { fetchImagesPaginated, getThumbnailUrl } from '@/entities/image';
 import {
   deleteAllSearchHistory,
-  fetchImagesPaginated,
-  getThumbnailUrl,
   saveSearchHistory,
 } from '@/features/gallery/api';
 import { ImageCarousel } from '@/features/gallery/components/ImageCarousel';

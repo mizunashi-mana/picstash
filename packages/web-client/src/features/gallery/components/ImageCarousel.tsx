@@ -18,8 +18,7 @@ import {
   IconExternalLink,
 } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getImageUrl, getThumbnailUrl } from '@/features/gallery/api';
-import type { Image as ImageType } from '@/features/gallery/api';
+import { getImageUrl, getThumbnailUrl, type Image as ImageType } from '@/entities/image';
 
 export interface ImageCarouselProps {
   images: ImageType[];

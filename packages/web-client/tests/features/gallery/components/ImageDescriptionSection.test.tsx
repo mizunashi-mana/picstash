@@ -4,11 +4,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { generateDescriptionJob, getJobStatus, updateImage } from '@/features/gallery/api';
+import { updateImage } from '@/entities/image';
+import { generateDescriptionJob, getJobStatus } from '@/features/gallery/api';
 import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
 
-vi.mock('@/features/gallery/api', () => ({
+vi.mock('@/entities/image', () => ({
   updateImage: vi.fn(),
+}));
+
+vi.mock('@/features/gallery/api', () => ({
   generateDescriptionJob: vi.fn(),
   getJobStatus: vi.fn(),
 }));

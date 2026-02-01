@@ -18,7 +18,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
-import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
+import { deleteImage, fetchImage, getImageUrl } from '@/entities/image';
 import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
 import { ImageCollectionsSection } from '@/features/gallery/components/ImageCollectionsSection';
 import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';

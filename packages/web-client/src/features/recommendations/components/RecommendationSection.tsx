@@ -16,7 +16,7 @@ import {
 import { IconSparkles } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { getThumbnailUrl } from '@/features/gallery';
+import { getThumbnailUrl } from '@/entities/image';
 import {
   fetchRecommendations,
   recordImpressions,

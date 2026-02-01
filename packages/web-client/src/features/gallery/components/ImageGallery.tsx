@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router';
+import { fetchImages } from '@/entities/image';
 import {
   deleteAllSearchHistory,
-  fetchImages,
   saveSearchHistory,
 } from '@/features/gallery/api';
 import { ImageGalleryView } from './ImageGalleryView';

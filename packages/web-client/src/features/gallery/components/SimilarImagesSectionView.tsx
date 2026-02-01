@@ -12,7 +12,7 @@ import {
 } from '@mantine/core';
 import { IconPhoto } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getThumbnailUrl } from '@/features/gallery/api';
+import { getThumbnailUrl } from '@/entities/image';
 import type { SimilarImage } from '@/features/gallery/api';
 
 export interface SimilarImagesSectionViewProps {

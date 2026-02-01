@@ -24,9 +24,8 @@ import {
   IconTrash,
 } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getThumbnailUrl } from '@/features/gallery/api';
+import { getThumbnailUrl, type Image as ImageType } from '@/entities/image';
 import { SearchBar } from './SearchBar';
-import type { Image as ImageType } from '@/features/gallery/api';
 
 export interface ImageGalleryViewProps {
   images: ImageType[] | undefined;
