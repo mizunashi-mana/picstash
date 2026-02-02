@@ -9,12 +9,12 @@ import {
   removeImageFromCollection,
   updateImageOrder,
   fetchImageCollections,
-} from '@/features/collections/api';
+} from '@/entities/collection';
 import { apiClient } from '@/shared/api/client';
 
 vi.mock('@/shared/api/client');
 
-describe('collections/api', () => {
+describe('entities/collection/api', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });

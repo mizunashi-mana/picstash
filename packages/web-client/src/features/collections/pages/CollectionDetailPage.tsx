@@ -33,8 +33,8 @@ import {
   fetchCollection,
   removeImageFromCollection,
   updateCollection,
-} from '@/features/collections/api';
-import type { UpdateCollectionInput } from '@/features/collections/api';
+  type UpdateCollectionInput,
+} from '@/entities/collection';
 
 export function CollectionDetailPage(): React.JSX.Element {
   const { id } = useParams<{ id: string }>();

@@ -102,10 +102,15 @@ export default defineConfig({
         'src/features/jobs/components/JobStatusButton.tsx',
 
         // features/labels
-        'src/features/labels/components/LabelBadge.tsx',
-        'src/features/labels/components/LabelForm.tsx',
-        'src/features/labels/components/LabelList.tsx',
         'src/features/labels/pages/LabelsPage.tsx',
+
+        // features/collections（api.ts は entities からの re-export のみ）
+        'src/features/collections/api.ts',
+
+        // entities/label（UI コンポーネントは Storybook テストで対応）
+        'src/entities/label/ui/LabelBadge.tsx',
+        'src/entities/label/ui/LabelForm.tsx',
+        'src/entities/label/ui/LabelList.tsx',
 
         // features/recommendations
         'src/features/recommendations/components/RecommendationSection.tsx',

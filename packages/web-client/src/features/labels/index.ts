@@ -1,3 +1,2 @@
-export * from './api';
-export * from './components';
+export * from '@/entities/label';
 export { LabelsPage } from './pages/LabelsPage';

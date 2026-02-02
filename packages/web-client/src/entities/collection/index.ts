@@ -1,4 +1,3 @@
-// Re-export from entities for backward compatibility within collections feature
 export type {
   Collection,
   CollectionWithCount,
@@ -8,7 +7,7 @@ export type {
   UpdateCollectionInput,
   AddImageInput,
   UpdateOrderInput,
-} from '@/entities/collection';
+} from './model/types';
 export {
   fetchCollections,
   fetchCollection,
@@ -19,4 +18,4 @@ export {
   removeImageFromCollection,
   updateImageOrder,
   fetchImageCollections,
-} from '@/entities/collection';
+} from './api/collection';
