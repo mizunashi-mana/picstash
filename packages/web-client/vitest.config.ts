@@ -102,7 +102,6 @@ export default defineConfig({
         'src/features/jobs/components/JobStatusButton.tsx',
 
         // features/labels
-        'src/features/labels/api.ts',
         'src/features/labels/pages/LabelsPage.tsx',
 
         // features/collections（api.ts は entities からの re-export のみ）
