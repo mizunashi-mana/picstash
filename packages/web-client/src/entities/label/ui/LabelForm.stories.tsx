@@ -3,7 +3,7 @@ import { LabelForm } from './LabelForm';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'Features/Labels/LabelForm',
+  title: 'Entities/Label/LabelForm',
   component: LabelForm,
   args: {
     onSubmit: fn(),

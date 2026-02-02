@@ -14,9 +14,11 @@ import {
   deleteLabel,
   fetchLabels,
   updateLabel,
-} from '@/features/labels/api';
-import { LabelForm, LabelList } from '@/features/labels/components';
-import type { CreateLabelInput, UpdateLabelInput } from '@picstash/api';
+  LabelForm,
+  LabelList,
+  type CreateLabelInput,
+  type UpdateLabelInput,
+} from '@/entities/label';
 
 export function LabelsPage() {
   const queryClient = useQueryClient();

@@ -1,3 +1,3 @@
 export * from './api';
-export * from './components';
+export { LabelBadge, LabelForm, LabelList } from '@/entities/label';
 export { LabelsPage } from './pages/LabelsPage';

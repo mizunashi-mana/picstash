@@ -5,12 +5,12 @@ import {
   createLabel,
   updateLabel,
   deleteLabel,
-} from '@/features/labels/api';
+} from '@/entities/label';
 import { apiClient } from '@/shared/api/client';
 
 vi.mock('@/shared/api/client');
 
-describe('labels/api', () => {
+describe('entities/label/api', () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });

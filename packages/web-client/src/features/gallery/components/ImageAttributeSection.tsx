@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchLabels } from '@/entities/label';
 import {
   createImageAttribute,
   deleteImageAttribute,
@@ -8,7 +9,6 @@ import {
   updateImageAttribute,
   type AttributeSuggestion,
 } from '@/features/gallery/api';
-import { fetchLabels } from '@/features/labels';
 import { ImageAttributeSectionView } from './ImageAttributeSectionView';
 import type { ImageAttribute } from '@picstash/api';
 

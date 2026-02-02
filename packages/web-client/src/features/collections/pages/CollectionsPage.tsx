@@ -24,8 +24,9 @@ import {
   createCollection,
   deleteCollection,
   fetchCollections,
-} from '@/features/collections/api';
-import type { CollectionWithCount, CreateCollectionInput } from '@/features/collections/api';
+  type CollectionWithCount,
+  type CreateCollectionInput,
+} from '@/entities/collection';
 
 interface CollectionCardProps {
   collection: CollectionWithCount;

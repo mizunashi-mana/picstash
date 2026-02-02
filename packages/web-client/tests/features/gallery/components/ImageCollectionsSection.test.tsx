@@ -7,10 +7,10 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   fetchCollections,
   fetchImageCollections,
-} from '@/features/collections';
+} from '@/entities/collection';
 import { ImageCollectionsSection } from '@/features/gallery/components/ImageCollectionsSection';
 
-vi.mock('@/features/collections', () => ({
+vi.mock('@/entities/collection', () => ({
   fetchCollections: vi.fn(),
   fetchImageCollections: vi.fn(),
   addImageToCollection: vi.fn(),

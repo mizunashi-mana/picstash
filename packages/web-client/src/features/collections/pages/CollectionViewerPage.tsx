@@ -21,7 +21,7 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
-import { fetchCollection } from '@/features/collections/api';
+import { fetchCollection } from '@/entities/collection';
 
 export function CollectionViewerPage(): React.JSX.Element {
   const { id, imageId: initialImageId } = useParams<{ id: string; imageId?: string }>();
