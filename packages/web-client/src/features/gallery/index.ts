@@ -1,2 +1,2 @@
+export { ImageCarousel } from './components/ImageCarousel';
 export { ImageGallery } from './components/ImageGallery';
-export { GalleryPage } from './pages/GalleryPage';

@@ -81,9 +81,14 @@ export default defineConfig({
 
         // features/gallery
         'src/features/gallery/components/ImageGallery.tsx',
-        // GalleryPage.tsx, ImageDetailPage.tsx - ページ全体テスト未対応
-        'src/features/gallery/pages/GalleryPage.tsx',
-        'src/features/gallery/pages/ImageDetailPage.tsx',
+
+        // pages/gallery - ページ全体テスト未対応
+        'src/pages/gallery/ui/GalleryPage.tsx',
+        'src/pages/gallery/ui/GalleryPageView.tsx',
+
+        // pages/image-detail - ページ全体テスト未対応
+        'src/pages/image-detail/ui/ImageDetailPage.tsx',
+        'src/pages/image-detail/ui/ImageDetailPageView.tsx',
 
         // features/manage-image-attributes
         // ImageAttributeSection.tsx - テスト未対応（container）
