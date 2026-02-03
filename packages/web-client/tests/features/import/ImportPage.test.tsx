@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { ImportPage } from '@/features/import/pages/ImportPage';
+import { ImportPage } from '@/pages/import';
 
 // Mock child components to isolate ImportPage testing
 vi.mock('@/features/import/components/ImageUploadTab', () => ({

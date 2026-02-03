@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   ActionIcon,
   Alert,
@@ -26,93 +25,56 @@ import {
   IconPlayerPlay,
   IconTrash,
 } from '@tabler/icons-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useParams } from 'react-router';
-import {
-  deleteCollection,
-  fetchCollection,
-  removeImageFromCollection,
-  updateCollection,
-  type UpdateCollectionInput,
-} from '@/entities/collection';
+import { Link } from 'react-router';
+import type { CollectionWithImages } from '@/entities/collection';
 
-export function CollectionDetailPage(): React.JSX.Element {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+export interface CollectionDetailPageViewProps {
+  id: string | undefined;
+  collection: CollectionWithImages | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  editModalOpen: boolean;
+  deleteModalOpen: boolean;
+  editName: string;
+  editDescription: string;
+  isUpdating: boolean;
+  isDeleting: boolean;
+  isRemovingImage: boolean;
+  updateError: string | null;
+  onOpenEdit: () => void;
+  onCloseEditModal: () => void;
+  onEditNameChange: (value: string) => void;
+  onEditDescriptionChange: (value: string) => void;
+  onUpdate: () => void;
+  onOpenDeleteModal: () => void;
+  onCloseDeleteModal: () => void;
+  onDelete: () => void;
+  onRemoveImage: (imageId: string) => void;
+}
 
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-
-  const { data: collection, isLoading, error } = useQuery({
-    queryKey: ['collection', id],
-    queryFn: async () => {
-      if (id === undefined) throw new Error('Collection ID is required');
-      return await fetchCollection(id);
-    },
-    enabled: id !== undefined,
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: async (input: UpdateCollectionInput) => {
-      if (id === undefined) throw new Error('Collection ID is required');
-      return await updateCollection(id, input);
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      await queryClient.invalidateQueries({ queryKey: ['collections'] });
-      setEditModalOpen(false);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      if (id === undefined) throw new Error('Collection ID is required');
-      await deleteCollection(id);
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['collections'] });
-      void navigate('/collections');
-    },
-  });
-
-  const removeImageMutation = useMutation({
-    mutationFn: async (imageId: string) => {
-      if (id === undefined) throw new Error('Collection ID is required');
-      await removeImageFromCollection(id, imageId);
-    },
-    onSuccess: async (_data, imageId) => {
-      await queryClient.invalidateQueries({ queryKey: ['collection', id] });
-      await queryClient.invalidateQueries({ queryKey: ['collections'] });
-      await queryClient.invalidateQueries({ queryKey: ['imageCollections', imageId] });
-    },
-  });
-
-  const handleOpenEdit = (): void => {
-    if (collection === undefined) return;
-    setEditName(collection.name);
-    setEditDescription(collection.description ?? '');
-    setEditModalOpen(true);
-  };
-
-  const handleUpdate = (): void => {
-    if (editName.trim() === '') return;
-    updateMutation.mutate({
-      name: editName.trim(),
-      description: editDescription.trim() !== '' ? editDescription.trim() : null,
-    });
-  };
-
-  const handleDelete = (): void => {
-    deleteMutation.mutate();
-  };
-
-  const handleRemoveImage = (imageId: string): void => {
-    removeImageMutation.mutate(imageId);
-  };
-
+export function CollectionDetailPageView({
+  id,
+  collection,
+  isLoading,
+  error,
+  editModalOpen,
+  deleteModalOpen,
+  editName,
+  editDescription,
+  isUpdating,
+  isDeleting,
+  isRemovingImage,
+  updateError,
+  onOpenEdit,
+  onCloseEditModal,
+  onEditNameChange,
+  onEditDescriptionChange,
+  onUpdate,
+  onOpenDeleteModal,
+  onCloseDeleteModal,
+  onDelete,
+  onRemoveImage,
+}: CollectionDetailPageViewProps): React.JSX.Element {
   if (isLoading) {
     return (
       <Center h={400}>
@@ -165,7 +127,7 @@ export function CollectionDetailPage(): React.JSX.Element {
             <Button
               variant="light"
               leftSection={<IconEdit size={16} />}
-              onClick={handleOpenEdit}
+              onClick={onOpenEdit}
             >
               編集
             </Button>
@@ -173,7 +135,7 @@ export function CollectionDetailPage(): React.JSX.Element {
               variant="light"
               color="red"
               leftSection={<IconTrash size={16} />}
-              onClick={() => { setDeleteModalOpen(true); }}
+              onClick={onOpenDeleteModal}
             >
               削除
             </Button>
@@ -219,8 +181,8 @@ export function CollectionDetailPage(): React.JSX.Element {
                         pos="absolute"
                         top={4}
                         right={4}
-                        onClick={() => { handleRemoveImage(img.imageId); }}
-                        loading={removeImageMutation.isPending}
+                        onClick={() => { onRemoveImage(img.imageId); }}
+                        loading={isRemovingImage}
                       >
                         <IconTrash size={14} />
                       </ActionIcon>
@@ -234,7 +196,7 @@ export function CollectionDetailPage(): React.JSX.Element {
       {/* Edit Modal */}
       <Modal
         opened={editModalOpen}
-        onClose={() => { setEditModalOpen(false); }}
+        onClose={onCloseEditModal}
         title="コレクションを編集"
       >
         <Stack>
@@ -242,30 +204,28 @@ export function CollectionDetailPage(): React.JSX.Element {
             label="名前"
             placeholder="コレクション名を入力"
             value={editName}
-            onChange={(e) => { setEditName(e.target.value); }}
+            onChange={(e) => { onEditNameChange(e.target.value); }}
             required
           />
           <Textarea
             label="説明"
             placeholder="説明を入力（オプション）"
             value={editDescription}
-            onChange={(e) => { setEditDescription(e.target.value); }}
+            onChange={(e) => { onEditDescriptionChange(e.target.value); }}
             rows={3}
           />
-          {updateMutation.isError && (
+          {updateError !== null && (
             <Alert icon={<IconAlertCircle size={16} />} color="red">
-              {updateMutation.error instanceof Error
-                ? updateMutation.error.message
-                : 'コレクションの更新に失敗しました'}
+              {updateError}
             </Alert>
           )}
           <Group justify="flex-end">
-            <Button variant="light" onClick={() => { setEditModalOpen(false); }}>
+            <Button variant="light" onClick={onCloseEditModal}>
               キャンセル
             </Button>
             <Button
-              onClick={handleUpdate}
-              loading={updateMutation.isPending}
+              onClick={onUpdate}
+              loading={isUpdating}
               disabled={editName.trim() === ''}
             >
               保存
@@ -277,7 +237,7 @@ export function CollectionDetailPage(): React.JSX.Element {
       {/* Delete Modal */}
       <Modal
         opened={deleteModalOpen}
-        onClose={() => { setDeleteModalOpen(false); }}
+        onClose={onCloseDeleteModal}
         title="コレクションを削除"
       >
         <Stack>
@@ -287,13 +247,13 @@ export function CollectionDetailPage(): React.JSX.Element {
             」を削除しますか？画像自体は削除されません。
           </Text>
           <Group justify="flex-end">
-            <Button variant="light" onClick={() => { setDeleteModalOpen(false); }}>
+            <Button variant="light" onClick={onCloseDeleteModal}>
               キャンセル
             </Button>
             <Button
               color="red"
-              onClick={handleDelete}
-              loading={deleteMutation.isPending}
+              onClick={onDelete}
+              loading={isDeleting}
             >
               削除
             </Button>
