@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateImage } from '@/entities/image';
-import { useJobs } from '@/features/jobs';
 import {
   generateDescriptionJob,
   getJobStatus,
 } from '@/features/manage-image-description/api/description';
+import { useJobs } from '@/widgets/job-status';
 import { ImageDescriptionSectionView } from './ImageDescriptionSectionView';
 
 interface ImageDescriptionSectionProps {

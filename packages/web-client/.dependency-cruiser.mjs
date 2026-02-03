@@ -36,7 +36,7 @@ export default {
         path: '^src/shared/',
       },
       to: {
-        path: '^src/(app|entities|features)/',
+        path: '^src/(app|entities|features|widgets)/',
       },
     },
 
@@ -44,12 +44,55 @@ export default {
     {
       name: 'entities-no-upper-deps',
       severity: 'error',
-      comment: 'entities/ は features/ や app/ に依存してはいけない',
+      comment: 'entities/ は features/, widgets/, app/ に依存してはいけない',
       from: {
         path: '^src/entities/',
       },
       to: {
-        path: '^src/(app|features)/',
+        path: '^src/(app|features|widgets)/',
+      },
+    },
+
+    // features は shared, entities のみに依存可能（widgets, app は不可）
+    // ただし widgets/job-status の useJobs は features から利用可能（FSD の緩和ルール）
+    {
+      name: 'features-no-upper-deps',
+      severity: 'error',
+      comment: 'features/ は widgets/ や app/ に依存してはいけない（widgets の公開 API は例外）',
+      from: {
+        path: '^src/features/',
+      },
+      to: {
+        path: '^src/(app|widgets)/',
+        pathNot: ['^src/widgets/[^/]+/index\\.ts$'],
+      },
+    },
+
+    // widgets は shared, entities, features のみに依存可能（app は不可）
+    {
+      name: 'widgets-no-upper-deps',
+      severity: 'error',
+      comment: 'widgets/ は app/ に依存してはいけない',
+      from: {
+        path: '^src/widgets/',
+      },
+      to: {
+        path: '^src/app/',
+      },
+    },
+
+    // widgets 間の内部実装への直接依存を禁止（index.ts 経由のみ許可）
+    {
+      name: 'no-cross-widget-deps',
+      severity: 'error',
+      comment:
+        'widgets/ 間の内部実装への直接依存は禁止（index.ts 経由で公開 API を利用する）',
+      from: {
+        path: '^src/widgets/([^/]+)/',
+      },
+      to: {
+        path: '^src/widgets/([^/]+)/',
+        pathNot: ['^src/widgets/$1/', '^src/widgets/[^/]+/index\\.ts$'],
       },
     },
 

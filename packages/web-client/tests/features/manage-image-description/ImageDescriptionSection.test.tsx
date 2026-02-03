@@ -17,7 +17,7 @@ vi.mock('@/features/manage-image-description/api/description', () => ({
   getJobStatus: vi.fn(),
 }));
 
-vi.mock('@/features/jobs', () => ({
+vi.mock('@/widgets/job-status', () => ({
   useJobs: () => ({
     trackJob: vi.fn(),
   }),

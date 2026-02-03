@@ -3,7 +3,7 @@ import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router';
-import { JobsProvider } from '@/features/jobs';
+import { JobsProvider } from '@/widgets/job-status';
 
 import '@mantine/core/styles.css';
 import '@mantine/dropzone/styles.css';

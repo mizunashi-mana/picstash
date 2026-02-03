@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { getImageId, getJobTargetDescription, getJobTypeName } from '@/features/jobs/utils';
-import type { Job } from '@/features/jobs/api';
+import { getImageId, getJobTargetDescription, getJobTypeName } from '@/widgets/job-status/lib/utils';
+import type { Job } from '@/widgets/job-status/api/jobs';
 
 describe('getJobTypeName', () => {
   it('should return Japanese name for caption-generation type', () => {

@@ -3,7 +3,7 @@ import { AppLayout } from './AppLayout';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'Shared/AppLayout',
+  title: 'Widgets/AppLayout',
   component: AppLayout,
   parameters: {
     layout: 'fullscreen',
