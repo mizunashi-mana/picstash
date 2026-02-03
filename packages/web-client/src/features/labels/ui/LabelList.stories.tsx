@@ -3,7 +3,7 @@ import { LabelList } from './LabelList';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'Entities/Label/LabelList',
+  title: 'Features/Labels/LabelList',
   component: LabelList,
   args: {
     onUpdate: fn(async () => { await Promise.resolve(); }),

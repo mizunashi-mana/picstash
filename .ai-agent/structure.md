@@ -18,70 +18,48 @@ picstash/
 │   └── structure.md            # ディレクトリ構成（本ファイル）
 │
 ├── packages/                   # ソースコード
-│   ├── web-client/             # フロントエンド
+│   ├── web-client/             # フロントエンド（FSD アーキテクチャ）
 │   │   ├── src/
-│   │   │   ├── main.tsx        # エントリポイント
-│   │   │   ├── App.tsx         # ルートコンポーネント（Providers）
+│   │   │   ├── app/            # App レイヤー
+│   │   │   │   ├── main.tsx    # エントリポイント
+│   │   │   │   ├── App.tsx     # ルートコンポーネント（Providers）
+│   │   │   │   ├── providers/  # プロバイダー設定
+│   │   │   │   └── routes/     # React Router 設定
 │   │   │   │
-│   │   │   ├── features/       # 機能ごとのモジュール
-│   │   │   │   ├── archive-import/ # アーカイブインポート機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── import/     # インポート機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   └── pages/
-│   │   │   │   ├── collections/ # コレクション機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── duplicates/ # 重複画像検出機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── gallery/    # ギャラリー機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── home/       # ホーム画面
-│   │   │   │   │   └── pages/
-│   │   │   │   ├── labels/     # 属性ラベル管理機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── recommendations/ # 画像推薦機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── stats/      # 統計ダッシュボード機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── upload/     # アップロード機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── url-crawl/  # URLクロール機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   ├── view-history/ # 閲覧履歴機能
-│   │   │   │   │   ├── components/
-│   │   │   │   │   ├── pages/
-│   │   │   │   │   └── api.ts
-│   │   │   │   └── jobs/        # ジョブ管理機能
-│   │   │   │       ├── components/
-│   │   │   │       ├── context.tsx
-│   │   │   │       └── api.ts
+│   │   │   ├── pages/          # Pages レイヤー
+│   │   │   │   ├── gallery/    # ギャラリーページ（View Props パターン）
+│   │   │   │   └── image-detail/ # 画像詳細ページ（View Props パターン）
 │   │   │   │
-│   │   │   ├── shared/         # 共通部品
-│   │   │   │   ├── index.ts    # エクスポート
-│   │   │   │   ├── components/ # 共通コンポーネント（AppLayout 等）
-│   │   │   │   ├── helpers/    # ヘルパー関数
-│   │   │   │   └── hooks/      # 共通フック
+│   │   │   ├── widgets/        # Widgets レイヤー
+│   │   │   │   ├── app-layout/ # AppLayout
+│   │   │   │   └── job-status/ # JobStatusButton + Provider
 │   │   │   │
-│   │   │   ├── api/            # 共通 API クライアント
+│   │   │   ├── features/       # Features レイヤー（ユーザーアクション単位）
+│   │   │   │   ├── gallery/        # ギャラリー表示
+│   │   │   │   ├── labels/         # ラベル管理（UI + ページ）
+│   │   │   │   ├── collections/    # コレクション管理
+│   │   │   │   ├── upload-image/   # 画像アップロード
+│   │   │   │   ├── import-archive/ # アーカイブインポート
+│   │   │   │   ├── import-url/     # URLクロール
+│   │   │   │   ├── search-images/  # 画像検索
+│   │   │   │   ├── find-duplicates/ # 重複画像検出
+│   │   │   │   ├── find-similar-images/ # 類似画像検索
+│   │   │   │   ├── manage-image-attributes/ # 画像属性管理
+│   │   │   │   ├── manage-image-description/ # 画像説明文管理
+│   │   │   │   ├── manage-image-collections/ # 画像コレクション管理
+│   │   │   │   ├── view-recommendations/ # おすすめ表示
+│   │   │   │   ├── track-view-history/ # 閲覧履歴追跡
+│   │   │   │   └── view-stats/     # 統計表示
 │   │   │   │
-│   │   │   └── routes/         # React Router 設定
+│   │   │   ├── entities/       # Entities レイヤー（型定義 + API のみ）
+│   │   │   │   ├── image/      # 画像エンティティ（api/, model/)
+│   │   │   │   ├── label/      # ラベルエンティティ（api/, model/)
+│   │   │   │   └── collection/ # コレクションエンティティ（api/, model/)
+│   │   │   │
+│   │   │   └── shared/         # Shared レイヤー
+│   │   │       ├── api/        # 共通 API クライアント
+│   │   │       ├── lib/        # ヘルパー関数
+│   │   │       └── hooks/      # 共通フック
 │   │   │
 │   │   ├── public/             # 静的ファイル
 │   │   ├── tests/              # web-client のテスト
@@ -236,16 +214,16 @@ picstash/
 ## 主要ディレクトリの説明
 
 ### `packages/web-client/`
-フロントエンドのパッケージ。feature-sliced アーキテクチャを採用：
-- **features/** - 機能ごとのモジュール
-  - 各機能は components/, pages/, api.ts を含む
+フロントエンドのパッケージ。Feature-Sliced Design (FSD) を採用：
+- **app/** - アプリケーションレイヤー（エントリポイント、プロバイダー、ルーティング）
+- **pages/** - ページコンポーネント（View Props パターン適用）
+- **widgets/** - 自己完結した UI ブロック（AppLayout, JobStatus 等）
+- **features/** - 機能ごとのモジュール（ユーザーアクション単位）
+  - 各機能は ui/, api/ 等のセグメントを含む
   - 機能間は index.ts 経由でのみ依存可能（dependency-cruiser で検証）
-- **shared/** - 共通部品
-  - **components/** - 共通コンポーネント（AppLayout 等）
-  - **helpers/** - ヘルパー関数
-  - **hooks/** - 共通フック
-- **api/** - 共通 API クライアント
-- **routes/** - React Router 設定
+- **entities/** - ビジネスエンティティ（型定義 + API のみ、UI は持たない）
+- **shared/** - 共通部品（API クライアント、ヘルパー、フック）
+- レイヤー間の依存方向: shared ← entities ← features ← widgets ← pages ← app
 
 ### `packages/server/`
 バックエンドの HTTP サーバーパッケージ。Fastify による API 提供に特化：

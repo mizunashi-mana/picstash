@@ -227,30 +227,20 @@ packages/web-client/src/
 │       │   └── PopularImagesList.tsx
 │       └── index.ts
 │
-├── entities/                     # Entities レイヤー
+├── entities/                     # Entities レイヤー（型定義 + API のみ、UI は持たない）
 │   ├── image/
-│   │   ├── ui/
-│   │   │   ├── ImageCard.tsx
-│   │   │   ├── ImageGallery.tsx
-│   │   │   └── ImageCarousel.tsx
 │   │   ├── api/
 │   │   │   └── image.ts          # fetchImages, fetchImage, deleteImage, updateImage, getImageUrl, getThumbnailUrl
 │   │   ├── model/
 │   │   │   └── types.ts          # Image, PaginatedResult, PaginationOptions
 │   │   └── index.ts
 │   ├── label/
-│   │   ├── ui/
-│   │   │   ├── LabelBadge.tsx
-│   │   │   ├── LabelForm.tsx
-│   │   │   └── LabelList.tsx
 │   │   ├── api/
 │   │   │   └── label.ts          # fetchLabels, fetchLabel, createLabel, updateLabel, deleteLabel
 │   │   ├── model/
 │   │   │   └── types.ts          # Label 型（@picstash/api から re-export）
 │   │   └── index.ts
 │   └── collection/
-│       ├── ui/
-│       │   └── CollectionCard.tsx
 │       ├── api/
 │       │   └── collection.ts     # CRUD
 │       ├── model/
@@ -280,8 +270,7 @@ packages/web-client/src/
 | T5 | Widgets レイヤーの導入 | T1 | 中 | 完了 |
 | T6 | Pages レイヤーの分離 + View Props 適用（Gallery, ImageDetail） | T4 | 高 | 完了 |
 | T7 | Pages レイヤーの分離 + View Props 適用（その他ページ） | T4, T5 | 中 | 未着手 |
-| T8 | 依存関係ルールの ESLint 自動化 | T6, T7 | 高 | 未着手 |
-| T9 | dependency-cruiser ルールの FSD 対応 | T6, T7 | 高 | 未着手 |
+| T9 | dependency-cruiser ルールの FSD 対応 | T4 | 高 | 完了 |
 
 ### 依存関係図
 
@@ -293,12 +282,10 @@ T1 (Shared + App)
 │   └──┤
 │      T4 (Features 再構成)
 │      ├── T6 (Pages: Gallery + ImageDetail + View Props)
-│      │   └──┐
-├── T5 (Widgets)                                         │
-│   └── T7 (Pages: その他 + View Props)                  │
-│       └──┤                                             │
-│          T8 (ESLint 依存関係ルール)  ←─────────────────┤
-│          T9 (dependency-cruiser ルール) ←──────────────┘
+│      ├── T9 (dependency-cruiser ルール) ✅
+│      │
+├── T5 (Widgets)
+│   └── T7 (Pages: その他 + View Props)
 ```
 
 ### 各タスクの詳細
@@ -322,7 +309,7 @@ T1 (Shared + App)
 - **作業内容**:
   - `entities/image/model/types.ts` — Image, PaginatedResult, PaginationOptions 型を移動
   - `entities/image/api/image.ts` — fetchImages, fetchImage, deleteImage, updateImage, getImageUrl, getThumbnailUrl を移動
-  - `entities/image/ui/` — ImageCard（gallery のグリッドアイテム）を移動（ImageGallery, ImageCarousel は gallery の表示ロジックを含むため Features 側に残すか判断）
+  - UI コンポーネント（ImageCard 等）は entities に配置せず features 側に残す
   - `entities/image/index.ts` — Public API 定義
   - 既存の `features/gallery/api.ts` から移動分を削除し、entities からの re-import に変更
   - `features/recommendations` の `getThumbnailUrl` インポートを entities に変更
@@ -333,10 +320,11 @@ T1 (Shared + App)
 
 - **概要**: Label と Collection のエンティティを `entities/` に抽出する
 - **作業内容**:
-  - `entities/label/` — Label 型（@picstash/api から）、CRUD API、LabelBadge / LabelForm / LabelList コンポーネント
-  - `entities/collection/` — Collection 型、CRUD API、CollectionCard 等の基本 UI
+  - `entities/label/` — Label 型（@picstash/api から）、CRUD API
+  - `entities/collection/` — Collection 型、CRUD API
   - 既存の `features/labels/api.ts`, `features/collections/api.ts` から基本 CRUD を移動
   - クロスフィーチャー参照（gallery → labels, gallery → collections）を entities 参照に変更
+  - UI コンポーネント（LabelBadge, LabelForm, LabelList）は `features/labels/ui/` に配置
 - **完了条件**: Label / Collection の基本操作が entities に抽出され、features から正しく参照されている
 - **依存理由**: T1 と同じ
 
@@ -402,18 +390,6 @@ T1 (Shared + App)
 - **完了条件**: 全ページが Pages レイヤーに存在し、routes から正しく参照されている
 - **依存理由**: T4 で features、T5 で widgets が整理されている必要がある
 
-#### T8: 依存関係ルールの ESLint 自動化
-
-- **概要**: FSD のレイヤー間依存方向を ESLint で自動的に強制する
-- **作業内容**:
-  - `eslint-plugin-boundaries` または `eslint-plugin-import` のカスタムルールを導入
-  - レイヤー間ルール定義: shared ← entities ← features ← widgets ← pages ← app
-  - 同一レイヤー内スライス間のインポート禁止ルール
-  - `@picstash/eslint-config` にルールを追加
-  - 既存の違反がないことを確認
-- **完了条件**: ESLint で依存方向違反が検出される。CI でも実行される
-- **依存理由**: T6, T7 で全レイヤーが移行完了している必要がある
-
 #### T9: dependency-cruiser ルールの FSD 対応
 
 - **概要**: 既存の `.dependency-cruiser.mjs` を FSD レイヤー構造に合わせて全面的に書き直す
@@ -431,8 +407,8 @@ T1 (Shared + App)
   - `no-circular` は維持
   - `npm run lint:deps` で全ルール通過を確認
 - **完了条件**: FSD のレイヤー依存方向が dependency-cruiser で強制され、`npm run lint:deps` が通る
-- **依存理由**: T6, T7 で全レイヤーの移行が完了していないとルールが正しく検証できない
-- **参考**: 現在の設定は `packages/web-client/.dependency-cruiser.mjs` にある（`no-cross-feature-deps`, `shared-no-deps`, `not-reachable-from-main` の3ルール + `no-circular`）
+- **依存理由**: T4 で features が整理されていればルールの追加・検証が可能
+- **結果**: T4 完了時に全ルールを `.dependency-cruiser.mjs` に追加済み。`npm run lint:deps` で全パス確認済み
 
 ## 進捗
 
@@ -443,6 +419,9 @@ T1 (Shared + App)
 - 2026-02-03: T4 完了（Features レイヤーの再構成）
 - 2026-02-03: T5 完了（Widgets レイヤーの導入）
 - 2026-02-03: T6 完了（Pages レイヤーの分離 + View Props 適用: Gallery, ImageDetail）
+- 2026-02-04: T9 完了（dependency-cruiser ルールの FSD 対応 — T4 完了時に既に設定済みであることを確認）
+- 2026-02-04: entities レイヤーから UI コンポーネントを features/labels/ui/ に移動（FSD 準拠）
+- 2026-02-04: T8（ESLint 依存関係ルール）を計画から削除 — dependency-cruiser で十分にカバー
 
 ## メモ
 
@@ -450,4 +429,5 @@ T1 (Shared + App)
 - desktop-app の renderer は web-client と 85-90% のコードが重複しているが、本プロジェクトでは web-client のみ対象とする。desktop-app は別プロジェクトで対応する
 - View Props パターンの適用基準: 「状態遷移が複数あり、ハンドラが3つ以上」のコンポーネント
 - FSD の完全準拠は目指さず、プロジェクト規模に合った粒度で適用する
+- entities レイヤーには型定義（model）と API のみを配置し、UI コンポーネントは features に配置する
 - 各タスクは機能的に動作する状態を維持しながら進める（ビッグバンリファクタリングは避ける）
