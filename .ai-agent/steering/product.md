@@ -206,7 +206,7 @@ Picstash は、イラストや画像作品を効率的に整理・管理する�
 
 ### プラットフォーム戦略
 - **Phase 1**: Web アプリ（現在）
-- **Phase 2**: ネイティブアプリ化（Tauri / Electron 等）
+- **Phase 2**: ネイティブアプリ化（Electron で Phase 1-1 完了済み）
   - デスクトップ（Windows / macOS / Linux）
   - モバイル（iOS / Android）は将来検討
 

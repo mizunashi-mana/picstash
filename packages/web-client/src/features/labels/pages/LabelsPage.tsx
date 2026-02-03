@@ -14,11 +14,11 @@ import {
   deleteLabel,
   fetchLabels,
   updateLabel,
-  LabelForm,
-  LabelList,
   type CreateLabelInput,
   type UpdateLabelInput,
 } from '@/entities/label';
+import { LabelForm } from '@/features/labels/ui/LabelForm';
+import { LabelList } from '@/features/labels/ui/LabelList';
 
 export function LabelsPage() {
   const queryClient = useQueryClient();

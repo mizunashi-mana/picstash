@@ -3,7 +3,7 @@ import { LabelBadge } from './LabelBadge';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'Entities/Label/LabelBadge',
+  title: 'Features/Labels/LabelBadge',
   component: LabelBadge,
 } satisfies Meta<typeof LabelBadge>;
 
