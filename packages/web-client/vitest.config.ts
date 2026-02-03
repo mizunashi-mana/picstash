@@ -122,10 +122,10 @@ export default defineConfig({
         // features/collections（api.ts は entities からの re-export のみ）
         'src/features/collections/api.ts',
 
-        // entities/label（UI コンポーネントは Storybook テストで対応）
-        'src/entities/label/ui/LabelBadge.tsx',
-        'src/entities/label/ui/LabelForm.tsx',
-        'src/entities/label/ui/LabelList.tsx',
+        // features/labels/ui（UI コンポーネントは Storybook テストで対応）
+        'src/features/labels/ui/LabelBadge.tsx',
+        'src/features/labels/ui/LabelForm.tsx',
+        'src/features/labels/ui/LabelList.tsx',
 
         // features/view-recommendations
         'src/features/view-recommendations/ui/RecommendationSection.tsx',
