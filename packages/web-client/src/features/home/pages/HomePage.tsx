@@ -1,7 +1,7 @@
 import { Container, Divider, Stack, Text, Title } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
-import { RecommendationSection } from '@/features/recommendations';
-import { ImageDropzone } from '@/features/upload';
+import { ImageDropzone } from '@/features/upload-image';
+import { RecommendationSection } from '@/features/view-recommendations';
 
 export function HomePage() {
   const queryClient = useQueryClient();

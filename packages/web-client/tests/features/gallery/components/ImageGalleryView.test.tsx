@@ -12,7 +12,7 @@ vi.mock('@/entities/image', () => ({
   getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
 }));
 
-vi.mock('@/features/gallery/components/SearchBar', () => ({
+vi.mock('@/features/search-images', () => ({
   SearchBar: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <input
       data-testid="search-bar"

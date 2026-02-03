@@ -4,13 +4,13 @@ import {
   CollectionsPage,
   CollectionViewerPage,
 } from '@/features/collections';
-import { DuplicatesPage } from '@/features/duplicates';
+import { DuplicatesPage } from '@/features/find-duplicates';
 import { GalleryPage } from '@/features/gallery';
 import { ImageDetailPage } from '@/features/gallery/pages/ImageDetailPage';
 import { HomePage } from '@/features/home/pages/HomePage';
 import { ImportPage } from '@/features/import';
 import { LabelsPage } from '@/features/labels';
-import { StatsPage } from '@/features/stats';
+import { StatsPage } from '@/features/view-stats';
 
 export function AppRoutes() {
   return (

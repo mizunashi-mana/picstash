@@ -17,8 +17,8 @@ import {
   getCrawlSession,
   importFromCrawl,
   UrlInputForm,
-} from '@/features/url-crawl';
-import type { ImportResult } from '@/features/url-crawl';
+} from '@/features/import-url';
+import type { ImportResult } from '@/features/import-url';
 
 export function UrlCrawlTab() {
   const [sessionId, setSessionId] = useState<string | null>(null);

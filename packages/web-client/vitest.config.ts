@@ -65,31 +65,41 @@ export default defineConfig({
         // === 未テストファイル（個別指定） ===
         // 新規ファイルはここに含まれないため、自動的にカバレッジ対象になる
 
-        // features/archive-import
-        'src/features/archive-import/api.ts',
-        'src/features/archive-import/components/ArchiveDropzone.tsx',
-        'src/features/archive-import/components/ArchivePreviewGallery.tsx',
+        // features/import-archive
+        'src/features/import-archive/api/archive.ts',
+        'src/features/import-archive/ui/ArchiveDropzone.tsx',
+        'src/features/import-archive/ui/ArchivePreviewGallery.tsx',
 
         // features/collections
         'src/features/collections/pages/CollectionDetailPage.tsx',
         'src/features/collections/pages/CollectionViewerPage.tsx',
         'src/features/collections/pages/CollectionsPage.tsx',
 
-        // features/duplicates
-        'src/features/duplicates/components/DuplicateGroupCard.tsx',
-        'src/features/duplicates/pages/DuplicatesPage.tsx',
+        // features/find-duplicates
+        'src/features/find-duplicates/ui/DuplicateGroupCard.tsx',
+        'src/features/find-duplicates/pages/DuplicatesPage.tsx',
 
         // features/gallery
-        // ImageAttributeSection.tsx - テスト未対応（container）
-        'src/features/gallery/components/ImageAttributeSection.tsx',
-        // 以下はテスト追加済みだがカバレッジ70%未達
-        'src/features/gallery/components/ImageCollectionsSection.tsx',
-        'src/features/gallery/components/ImageDescriptionSection.tsx',
         'src/features/gallery/components/ImageGallery.tsx',
-        'src/features/gallery/components/SearchBar.tsx',
         // GalleryPage.tsx, ImageDetailPage.tsx - ページ全体テスト未対応
         'src/features/gallery/pages/GalleryPage.tsx',
         'src/features/gallery/pages/ImageDetailPage.tsx',
+
+        // features/manage-image-attributes
+        // ImageAttributeSection.tsx - テスト未対応（container）
+        'src/features/manage-image-attributes/ui/ImageAttributeSection.tsx',
+
+        // features/manage-image-collections
+        // カバレッジ70%未達
+        'src/features/manage-image-collections/ui/ImageCollectionsSection.tsx',
+
+        // features/manage-image-description
+        // カバレッジ70%未達
+        'src/features/manage-image-description/ui/ImageDescriptionSection.tsx',
+
+        // features/search-images
+        // カバレッジ70%未達
+        'src/features/search-images/ui/SearchBar.tsx',
 
         // features/home
         'src/features/home/pages/HomePage.tsx',
@@ -112,24 +122,24 @@ export default defineConfig({
         'src/entities/label/ui/LabelForm.tsx',
         'src/entities/label/ui/LabelList.tsx',
 
-        // features/recommendations
-        'src/features/recommendations/components/RecommendationSection.tsx',
+        // features/view-recommendations
+        'src/features/view-recommendations/ui/RecommendationSection.tsx',
 
-        // features/stats
-        'src/features/stats/components/PopularImagesList.tsx',
-        'src/features/stats/components/RecommendationTrendsChart.tsx',
-        'src/features/stats/components/StatsOverviewCards.tsx',
-        'src/features/stats/components/ViewTrendsChart.tsx',
-        'src/features/stats/pages/StatsPage.tsx',
+        // features/view-stats
+        'src/features/view-stats/ui/PopularImagesList.tsx',
+        'src/features/view-stats/ui/RecommendationTrendsChart.tsx',
+        'src/features/view-stats/ui/StatsOverviewCards.tsx',
+        'src/features/view-stats/ui/ViewTrendsChart.tsx',
+        'src/features/view-stats/pages/StatsPage.tsx',
 
-        // features/upload
-        'src/features/upload/components/ImageDropzone.tsx',
-        'src/features/upload/components/ImageDropzoneView.tsx',
+        // features/upload-image
+        'src/features/upload-image/ui/ImageDropzone.tsx',
+        'src/features/upload-image/ui/ImageDropzoneView.tsx',
 
-        // features/url-crawl
-        'src/features/url-crawl/api.ts',
-        'src/features/url-crawl/components/CrawlPreviewGallery.tsx',
-        'src/features/url-crawl/components/UrlInputForm.tsx',
+        // features/import-url
+        'src/features/import-url/api/crawl.ts',
+        'src/features/import-url/ui/CrawlPreviewGallery.tsx',
+        'src/features/import-url/ui/UrlInputForm.tsx',
 
         // shared/components（AppLayout はテスト未実装）
         'src/shared/components/AppLayout.tsx',

@@ -19,11 +19,11 @@ import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { deleteImage, fetchImage, getImageUrl } from '@/entities/image';
-import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
-import { ImageCollectionsSection } from '@/features/gallery/components/ImageCollectionsSection';
-import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
-import { SimilarImagesSection } from '@/features/gallery/components/SimilarImagesSection';
-import { useViewHistory } from '@/features/view-history';
+import { SimilarImagesSection } from '@/features/find-similar-images';
+import { ImageAttributeSection } from '@/features/manage-image-attributes';
+import { ImageCollectionsSection } from '@/features/manage-image-collections';
+import { ImageDescriptionSection } from '@/features/manage-image-description';
+import { useViewHistory } from '@/features/track-view-history';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {

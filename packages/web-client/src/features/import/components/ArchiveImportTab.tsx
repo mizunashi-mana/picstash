@@ -19,8 +19,8 @@ import {
   getImportJobStatus,
   importFromArchive,
   uploadArchive,
-} from '@/features/archive-import';
-import type { ImportJobStatus, ImportResult } from '@/features/archive-import';
+} from '@/features/import-archive';
+import type { ImportJobStatus, ImportResult } from '@/features/import-archive';
 import type { FileWithPath } from '@mantine/dropzone';
 
 /** ジョブが完了したかどうかを判定 */

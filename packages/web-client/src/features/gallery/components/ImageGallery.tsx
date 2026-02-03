@@ -5,7 +5,7 @@ import { fetchImages } from '@/entities/image';
 import {
   deleteAllSearchHistory,
   saveSearchHistory,
-} from '@/features/gallery/api';
+} from '@/features/search-images';
 import { ImageGalleryView } from './ImageGalleryView';
 
 export function ImageGallery() {

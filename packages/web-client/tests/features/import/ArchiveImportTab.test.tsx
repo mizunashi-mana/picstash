@@ -4,13 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
+import { ArchiveImportTab } from '@/features/import/components/ArchiveImportTab';
 import {
   getArchiveSession,
   uploadArchive,
-} from '@/features/archive-import';
-import { ArchiveImportTab } from '@/features/import/components/ArchiveImportTab';
+} from '@/features/import-archive';
 
-vi.mock('@/features/archive-import', () => ({
+vi.mock('@/features/import-archive', () => ({
   uploadArchive: vi.fn(),
   getArchiveSession: vi.fn(),
   deleteArchiveSession: vi.fn().mockResolvedValue(undefined),
