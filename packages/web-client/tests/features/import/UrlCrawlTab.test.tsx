@@ -8,9 +8,9 @@ import { UrlCrawlTab } from '@/features/import/components/UrlCrawlTab';
 import {
   crawlUrl,
   getCrawlSession,
-} from '@/features/url-crawl';
+} from '@/features/import-url';
 
-vi.mock('@/features/url-crawl', () => ({
+vi.mock('@/features/import-url', () => ({
   crawlUrl: vi.fn(),
   getCrawlSession: vi.fn(),
   deleteCrawlSession: vi.fn().mockResolvedValue(undefined),

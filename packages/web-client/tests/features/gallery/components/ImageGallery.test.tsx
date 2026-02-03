@@ -13,12 +13,9 @@ vi.mock('@/entities/image', () => ({
   getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
 }));
 
-vi.mock('@/features/gallery/api', () => ({
+vi.mock('@/features/search-images', () => ({
   saveSearchHistory: vi.fn(),
   deleteAllSearchHistory: vi.fn(),
-}));
-
-vi.mock('@/features/gallery/components/SearchBar', () => ({
   SearchBar: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <input
       data-testid="search-bar"

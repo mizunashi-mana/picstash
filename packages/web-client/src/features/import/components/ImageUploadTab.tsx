@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, Button, Stack, Text } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { ImageDropzoneView, uploadImage } from '@/features/upload';
+import { ImageDropzoneView, uploadImage } from '@/features/upload-image';
 import type { FileWithPath } from '@mantine/dropzone';
 
 interface UploadResult {

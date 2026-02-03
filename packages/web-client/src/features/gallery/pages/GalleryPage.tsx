@@ -28,12 +28,12 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams, Link } from 'react-router';
 import { fetchImagesPaginated, getThumbnailUrl } from '@/entities/image';
+import { ImageCarousel } from '@/features/gallery/components/ImageCarousel';
 import {
   deleteAllSearchHistory,
   saveSearchHistory,
-} from '@/features/gallery/api';
-import { ImageCarousel } from '@/features/gallery/components/ImageCarousel';
-import { SearchBar } from '@/features/gallery/components/SearchBar';
+  SearchBar,
+} from '@/features/search-images';
 import { useViewMode } from '@/shared';
 
 const PAGE_SIZE = 50;

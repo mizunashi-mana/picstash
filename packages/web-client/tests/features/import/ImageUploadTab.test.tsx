@@ -5,9 +5,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ImageUploadTab } from '@/features/import/components/ImageUploadTab';
-import { uploadImage } from '@/features/upload';
+import { uploadImage } from '@/features/upload-image';
 
-vi.mock('@/features/upload', () => ({
+vi.mock('@/features/upload-image', () => ({
   uploadImage: vi.fn(),
   ImageDropzoneView: ({ onDrop, isPending, isError, errorMessage }: {
     onDrop: (files: File[]) => void;
