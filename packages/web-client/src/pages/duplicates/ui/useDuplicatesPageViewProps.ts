@@ -54,7 +54,7 @@ export function useDuplicatesPageViewProps(): DuplicatesPageViewProps {
 
       if (result.failedIds.length > 0) {
         setDeleteError(
-          `Failed to delete ${result.failedIds.length.toString()} image(s). Successfully deleted ${result.successIds.length.toString()}.`,
+          `${result.failedIds.length.toString()}件の画像の削除に失敗しました。${result.successIds.length.toString()}件は正常に削除されました。`,
         );
       }
       else {
