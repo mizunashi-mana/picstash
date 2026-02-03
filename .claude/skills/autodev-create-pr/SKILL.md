@@ -26,6 +26,7 @@ allowed-tools: Bash, Read, Glob, mcp__github__create_pull_request
    - ボディ: テンプレートに沿って記載
      - 目的: 変更の背景・目的
      - 変更概要: 主な変更点を箇条書き
+  - 注意点：改行のエスケープは不要。PR 説明の改行がエスケープされていないか確認する
 
 5. **PR URL を報告**:
    - 作成した PR の URL をユーザーに伝える
@@ -51,4 +52,3 @@ allowed-tools: Bash, Read, Glob, mcp__github__create_pull_request
 - コミットが済んでいない変更がある場合は、先にコミットするか確認する
 - main ブランチへの直接プッシュは避ける
 - PR タイトルは日本語で簡潔に（50文字以内推奨）
-- 改行のエスケープは不要。PR 説明の改行がエスケープされていないか確認する
