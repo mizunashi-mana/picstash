@@ -278,7 +278,7 @@ packages/web-client/src/
 | T3 | Entities レイヤーの抽出（Label, Collection） | T1 | 高 | 完了 |
 | T4 | Features レイヤーの再構成 | T2, T3 | 高 | 完了 |
 | T5 | Widgets レイヤーの導入 | T1 | 中 | 完了 |
-| T6 | Pages レイヤーの分離 + View Props 適用（Gallery, ImageDetail） | T4 | 高 | 未着手 |
+| T6 | Pages レイヤーの分離 + View Props 適用（Gallery, ImageDetail） | T4 | 高 | 完了 |
 | T7 | Pages レイヤーの分離 + View Props 適用（その他ページ） | T4, T5 | 中 | 未着手 |
 | T8 | 依存関係ルールの ESLint 自動化 | T6, T7 | 高 | 未着手 |
 | T9 | dependency-cruiser ルールの FSD 対応 | T6, T7 | 高 | 未着手 |
@@ -442,6 +442,7 @@ T1 (Shared + App)
 - 2026-02-02: T3 完了（Entities レイヤー: Label, Collection 抽出）
 - 2026-02-03: T4 完了（Features レイヤーの再構成）
 - 2026-02-03: T5 完了（Widgets レイヤーの導入）
+- 2026-02-03: T6 完了（Pages レイヤーの分離 + View Props 適用: Gallery, ImageDetail）
 
 ## メモ
 

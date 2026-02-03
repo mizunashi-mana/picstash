@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   ActionIcon,
   Alert,
@@ -14,77 +13,45 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
-import { deleteImage, fetchImage, getImageUrl } from '@/entities/image';
+import { Link } from 'react-router';
+import { getImageUrl } from '@/entities/image';
 import { SimilarImagesSection } from '@/features/find-similar-images';
 import { ImageAttributeSection } from '@/features/manage-image-attributes';
 import { ImageCollectionsSection } from '@/features/manage-image-collections';
 import { ImageDescriptionSection } from '@/features/manage-image-description';
-import { useViewHistory } from '@/features/track-view-history';
+import { formatDate, formatFileSize } from '@/pages/image-detail/lib/format';
+import type { Image as ImageType } from '@/entities/image';
 
-function formatFileSize(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes < 0) {
-    return 'N/A';
-  }
-  if (bytes < 1024) {
-    return `${bytes} B`;
-  }
-  if (bytes < 1024 * 1024) {
-    return `${(bytes / 1024).toFixed(1)} KB`;
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+export interface ImageDetailPageViewProps {
+  /** 画像データ */
+  image: ImageType | undefined;
+  /** ローディング中 */
+  isLoading: boolean;
+  /** エラー */
+  error: Error | null;
+  /** 削除確認モーダルの開閉状態 */
+  deleteModalOpened: boolean;
+  /** 削除処理中 */
+  isDeleting: boolean;
+  /** 削除モーダルを開く */
+  onOpenDeleteModal: () => void;
+  /** 削除モーダルを閉じる */
+  onCloseDeleteModal: () => void;
+  /** 削除実行 */
+  onDelete: () => void;
 }
 
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-export function ImageDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const [searchParams] = useSearchParams();
-  const conversionId = searchParams.get('conversionId');
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [opened, { open, close }] = useDisclosure(false);
-  const [isDeleted, setIsDeleted] = useState(false);
-
-  const { data: image, isLoading, error } = useQuery({
-    queryKey: ['image', id],
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures id is defined
-    queryFn: async () => await fetchImage(id!),
-    enabled: id !== undefined && id !== '',
-  });
-
-  const deleteMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- button is disabled when id is undefined
-    mutationFn: async () => { await deleteImage(id!); },
-    onSuccess: async () => {
-      // Mark as deleted before navigation to prevent view history update
-      setIsDeleted(true);
-      close();
-      // Invalidate caches that may contain the deleted image
-      await queryClient.invalidateQueries({ queryKey: ['images'] });
-      await queryClient.invalidateQueries({ queryKey: ['images-paginated'] });
-      await queryClient.invalidateQueries({ queryKey: ['recommendations'] });
-      await navigate('/gallery');
-    },
-  });
-
-  // Track view history for this image
-  // If conversionId is present, also record the recommendation click
-  // Skip cleanup if image was deleted (view history is cascade deleted)
-  useViewHistory(id, { conversionId, isDeleted });
-
+export function ImageDetailPageView({
+  image,
+  isLoading,
+  error,
+  deleteModalOpened,
+  isDeleting,
+  onOpenDeleteModal,
+  onCloseDeleteModal,
+  onDelete,
+}: ImageDetailPageViewProps) {
   if (isLoading) {
     return (
       <Container size="lg" py="xl">
@@ -138,7 +105,7 @@ export function ImageDetailPage() {
             variant="subtle"
             size="lg"
             color="red"
-            onClick={open}
+            onClick={onOpenDeleteModal}
             aria-label="画像を削除"
           >
             <IconTrash size={20} />
@@ -199,17 +166,17 @@ export function ImageDetailPage() {
         </Paper>
       </Stack>
 
-      <Modal opened={opened} onClose={close} title="画像を削除" centered>
+      <Modal opened={deleteModalOpened} onClose={onCloseDeleteModal} title="画像を削除" centered>
         <Stack>
           <Text>この画像を削除しますか？この操作は取り消せません。</Text>
           <Group justify="flex-end">
-            <Button variant="default" onClick={close}>
+            <Button variant="default" onClick={onCloseDeleteModal}>
               キャンセル
             </Button>
             <Button
               color="red"
-              onClick={() => { deleteMutation.mutate(); }}
-              loading={deleteMutation.isPending}
+              onClick={onDelete}
+              loading={isDeleting}
             >
               削除
             </Button>
