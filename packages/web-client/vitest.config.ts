@@ -70,14 +70,22 @@ export default defineConfig({
         'src/features/import-archive/ui/ArchiveDropzone.tsx',
         'src/features/import-archive/ui/ArchivePreviewGallery.tsx',
 
-        // features/collections
-        'src/features/collections/pages/CollectionDetailPage.tsx',
-        'src/features/collections/pages/CollectionViewerPage.tsx',
-        'src/features/collections/pages/CollectionsPage.tsx',
+        // pages/collections - ページ全体テスト未対応
+        'src/pages/collections/ui/CollectionsPage.tsx',
+        'src/pages/collections/ui/CollectionDetailPage.tsx',
+        'src/pages/collections/ui/CollectionDetailPageView.tsx',
+        'src/pages/collections/ui/useCollectionDetailPageViewProps.ts',
+        'src/pages/collections/ui/CollectionViewerPage.tsx',
+        'src/pages/collections/ui/CollectionViewerPageView.tsx',
+        'src/pages/collections/ui/useCollectionViewerPageViewProps.ts',
+
+        // pages/duplicates - ページ全体テスト未対応
+        'src/pages/duplicates/ui/DuplicatesPage.tsx',
+        'src/pages/duplicates/ui/DuplicatesPageView.tsx',
+        'src/pages/duplicates/ui/useDuplicatesPageViewProps.ts',
 
         // features/find-duplicates
         'src/features/find-duplicates/ui/DuplicateGroupCard.tsx',
-        'src/features/find-duplicates/pages/DuplicatesPage.tsx',
 
         // features/gallery
         'src/features/gallery/components/ImageGallery.tsx',
@@ -106,8 +114,8 @@ export default defineConfig({
         // カバレッジ70%未達
         'src/features/search-images/ui/SearchBar.tsx',
 
-        // features/home
-        'src/features/home/pages/HomePage.tsx',
+        // pages/home - ページ全体テスト未対応
+        'src/pages/home/ui/HomePage.tsx',
 
         // features/import（既存ページのロジック流用のため除外）
         'src/features/import/components/ArchiveImportTab.tsx',
@@ -116,11 +124,8 @@ export default defineConfig({
         // widgets/job-status（context.tsx, api, utils はテスト済み）
         'src/widgets/job-status/ui/JobStatusButton.tsx',
 
-        // features/labels
-        'src/features/labels/pages/LabelsPage.tsx',
-
-        // features/collections（api.ts は entities からの re-export のみ）
-        'src/features/collections/api.ts',
+        // pages/labels - ページ全体テスト未対応
+        'src/pages/labels/ui/LabelsPage.tsx',
 
         // features/labels/ui（UI コンポーネントは Storybook テストで対応）
         'src/features/labels/ui/LabelBadge.tsx',
@@ -135,7 +140,9 @@ export default defineConfig({
         'src/features/view-stats/ui/RecommendationTrendsChart.tsx',
         'src/features/view-stats/ui/StatsOverviewCards.tsx',
         'src/features/view-stats/ui/ViewTrendsChart.tsx',
-        'src/features/view-stats/pages/StatsPage.tsx',
+
+        // pages/stats - ページ全体テスト未対応
+        'src/pages/stats/ui/StatsPage.tsx',
 
         // features/upload-image
         'src/features/upload-image/ui/ImageDropzone.tsx',

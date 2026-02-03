@@ -3,14 +3,14 @@ import {
   CollectionDetailPage,
   CollectionsPage,
   CollectionViewerPage,
-} from '@/features/collections';
-import { DuplicatesPage } from '@/features/find-duplicates';
-import { HomePage } from '@/features/home/pages/HomePage';
-import { ImportPage } from '@/features/import';
-import { LabelsPage } from '@/features/labels';
-import { StatsPage } from '@/features/view-stats';
+} from '@/pages/collections';
+import { DuplicatesPage } from '@/pages/duplicates';
 import { GalleryPage } from '@/pages/gallery';
+import { HomePage } from '@/pages/home';
 import { ImageDetailPage } from '@/pages/image-detail';
+import { ImportPage } from '@/pages/import';
+import { LabelsPage } from '@/pages/labels';
+import { StatsPage } from '@/pages/stats';
 
 export function AppRoutes() {
   return (

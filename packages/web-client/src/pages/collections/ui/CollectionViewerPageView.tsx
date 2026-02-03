@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActionIcon,
   Alert,
@@ -19,95 +18,36 @@ import {
   IconChevronRight,
   IconX,
 } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
-import { Link, useNavigate, useParams } from 'react-router';
-import { fetchCollection } from '@/entities/collection';
+import { Link } from 'react-router';
+import type { CollectionImage, CollectionWithImages } from '@/entities/collection';
 
-export function CollectionViewerPage(): React.JSX.Element {
-  const { id, imageId: initialImageId } = useParams<{ id: string; imageId?: string }>();
-  const navigate = useNavigate();
-  const { data: collection, isLoading, error } = useQuery({
-    queryKey: ['collection', id],
-    queryFn: async () => {
-      if (id === undefined) throw new Error('Collection ID is required');
-      return await fetchCollection(id);
-    },
-    enabled: id !== undefined,
-  });
+export interface CollectionViewerPageViewProps {
+  id: string | undefined;
+  collection: CollectionWithImages | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  currentIndex: number;
+  currentImage: CollectionImage | null;
+  canGoPrev: boolean;
+  canGoNext: boolean;
+  onGoPrev: () => void;
+  onGoNext: () => void;
+  onClose: () => void;
+}
 
-  // Calculate initial index based on imageId parameter
-  const initialIndex = useMemo(() => {
-    if (collection === undefined || initialImageId === undefined) return 0;
-    const index = collection.images.findIndex(img => img.imageId === initialImageId);
-    return index !== -1 ? index : 0;
-  }, [collection, initialImageId]);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Sync initial index when collection loads
-  useEffect(() => {
-    setCurrentIndex(initialIndex);
-  }, [initialIndex]);
-
-  const currentImage = useMemo(() => {
-    if (collection === undefined || collection.images.length === 0) return null;
-    return collection.images[currentIndex] ?? null;
-  }, [collection, currentIndex]);
-
-  const canGoPrev = currentIndex > 0;
-  const canGoNext = collection !== undefined && currentIndex < collection.images.length - 1;
-
-  const goToPrev = useCallback(() => {
-    if (canGoPrev && collection !== undefined) {
-      const newIndex = currentIndex - 1;
-      const newImageId = collection.images[newIndex]?.imageId;
-      setCurrentIndex(newIndex);
-      if (newImageId !== undefined) {
-        void navigate(`/collections/${id}/view/${newImageId}`, { replace: true });
-      }
-    }
-  }, [canGoPrev, collection, currentIndex, id, navigate]);
-
-  const goToNext = useCallback(() => {
-    // canGoNext guarantees collection is defined
-    if (canGoNext) {
-      const newIndex = currentIndex + 1;
-      const newImageId = collection.images[newIndex]?.imageId;
-      setCurrentIndex(newIndex);
-      if (newImageId !== undefined) {
-        void navigate(`/collections/${id}/view/${newImageId}`, { replace: true });
-      }
-    }
-  }, [canGoNext, collection, currentIndex, id, navigate]);
-
-  const handleClose = useCallback(() => {
-    void navigate(`/collections/${id}`);
-  }, [navigate, id]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          goToPrev();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          goToNext();
-          break;
-        case 'Escape':
-          handleClose();
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [goToPrev, goToNext, handleClose]);
-
+export function CollectionViewerPageView({
+  id,
+  collection,
+  isLoading,
+  error,
+  currentIndex,
+  currentImage,
+  canGoPrev,
+  canGoNext,
+  onGoPrev,
+  onGoNext,
+  onClose,
+}: CollectionViewerPageViewProps): React.JSX.Element {
   if (isLoading) {
     return (
       <Center h="100vh">
@@ -181,7 +121,7 @@ export function CollectionViewerPage(): React.JSX.Element {
             variant="subtle"
             color="gray"
             size="lg"
-            onClick={handleClose}
+            onClick={onClose}
             aria-label="ビューアを閉じる"
           >
             <IconX size={20} />
@@ -196,7 +136,7 @@ export function CollectionViewerPage(): React.JSX.Element {
           variant="subtle"
           color="gray"
           size="xl"
-          onClick={goToPrev}
+          onClick={onGoPrev}
           disabled={!canGoPrev}
           aria-label="前の画像"
           style={{
@@ -228,7 +168,7 @@ export function CollectionViewerPage(): React.JSX.Element {
           variant="subtle"
           color="gray"
           size="xl"
-          onClick={goToNext}
+          onClick={onGoNext}
           disabled={!canGoNext}
           aria-label="次の画像"
           style={{
