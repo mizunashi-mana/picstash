@@ -39,8 +39,12 @@ describe('formatDate', () => {
   });
 
   it('should include hours and minutes', () => {
-    const result = formatDate('2026-06-01T14:05:00+09:00');
-    expect(result).toMatch(/14/);
-    expect(result).toMatch(/05/);
+    const input = '2026-06-01T14:05:00+09:00';
+    const date = new Date(input);
+    const result = formatDate(input);
+    const expectedHour = String(date.getHours()).padStart(2, '0');
+    const expectedMinute = String(date.getMinutes()).padStart(2, '0');
+    expect(result).toContain(expectedHour);
+    expect(result).toContain(expectedMinute);
   });
 });
