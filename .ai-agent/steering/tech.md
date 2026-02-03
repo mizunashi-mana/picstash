@@ -17,7 +17,10 @@
 | AI/埋め込み | @huggingface/transformers | 3.x | CLIP モデルで画像ベクトル生成 |
 | AI/キャプション | @huggingface/transformers | 3.x | ViT-GPT2 でキャプション生成 |
 | AI/翻訳 | @huggingface/transformers | 3.x | NLLB-200 で日本語翻訳 |
+| バリデーション | Zod | 4.x | スキーマバリデーション（core, api） |
 | テスト | Vitest | 4.x | Vite ネイティブで高速 |
+| コンポーネント開発 | Storybook | 10.x | addon-vitest でインタラクティブテスト |
+| 依存関係検証 | dependency-cruiser | - | FSD レイヤー間の依存方向を検証 |
 | リンター | ESLint | 9.x | Flat Config 形式 |
 
 ## アーキテクチャ
@@ -80,6 +83,53 @@ packages/core/src/infra/di/
 | `packages/eslint-config` | 共有 ESLint 設定 | セットアップ済み |
 
 詳細は [structure.md](../structure.md) を参照。
+
+### フロントエンドアーキテクチャ（FSD）
+
+web-client パッケージは Feature-Sliced Design (FSD) を採用：
+
+```
+app → pages → widgets → features → entities → shared
+（依存方向: 右のレイヤーのみインポート可能）
+```
+
+- **app** — エントリポイント、プロバイダー、ルーティング
+- **pages** — ページコンポーネント（View Props パターン適用）
+- **widgets** — 自己完結した UI ブロック（AppLayout, JobStatus）
+- **features** — 機能単位のモジュール（ユーザーアクション）
+- **entities** — ビジネスエンティティ（型定義 + API のみ、UI は持たない）
+- **shared** — 共通部品（API クライアント、ヘルパー、フック）
+
+dependency-cruiser（`.dependency-cruiser.mjs`）でレイヤー間の依存方向とスライス間の分離を自動検証。
+
+### View Props パターン
+
+複雑なページコンポーネントに View Props パターンを適用：
+
+```
+Page.tsx            — useViewProps + View の統合（Container）
+PageView.tsx        — ViewProps のみを受け取る純粋な描画（View）
+usePageViewProps.ts — State / Handler / Selector を提供（Hook）
+```
+
+- 適用基準: 状態遷移が複数あり、ハンドラが3つ以上のコンポーネント
+- 適用済み: GalleryPage, ImageDetailPage
+- Stories は View コンポーネントに対してのみ作成
+
+### Storybook
+
+Storybook 10 + `@storybook/addon-vitest` を使用：
+
+```bash
+# Storybook 開発サーバー起動
+npm run storybook -w @picstash/web-client
+
+# Storybook テスト（play 関数のインタラクティブテスト）
+npm run test:storybook -w @picstash/web-client
+```
+
+- Stories は FSD レイヤーに対応した title（例: `Pages/Gallery/GalleryPageView`）で整理
+- `play` 関数でユーザーインタラクションのテストを記述
 
 ### ESLint 設定
 
@@ -148,7 +198,7 @@ storage:
 ### 開発
 
 ```bash
-# 開発サーバー起動（フロント + バック同時）
+# 開発サーバー起動（フロント + バック + コア監視 + Ollama 同時）
 npm run dev
 
 # フロントエンドのみ
@@ -157,11 +207,17 @@ npm run dev:client
 # バックエンドのみ
 npm run dev:server
 
+# コアパッケージの監視ビルド
+npm run dev:core
+
 # TypeScript 型チェック
 npm run typecheck
 
-# リンター実行
+# リンター実行（ESLint + pre-commit hooks + dependency-cruiser）
 npm run lint
+
+# 依存関係ルールのみ検証
+npm run lint:deps
 ```
 
 ### ビルド
@@ -179,13 +235,19 @@ npm run test
 
 # カバレッジ付きテスト
 npm run test:coverage
+
+# Storybook インタラクティブテスト
+npm run test:storybook -w @picstash/web-client
+
+# E2E テスト
+npm run test:e2e
 ```
 
 ### データベース
 
 ```bash
 # Prisma Client 生成
-npm run db:generate -w @picstash/server
+npm run db:generate -w @picstash/core
 
 # マイグレーション作成・適用（開発）
 npm run db:migrate -w @picstash/server
@@ -234,7 +296,7 @@ npm run label:embedding:status -w @picstash/server
 Prisma 7.x では Driver Adapter パターンを使用：
 
 ```typescript
-// packages/server/src/infra/database/prisma.ts
+// packages/core/src/infra/database/prisma.ts
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaClient } from '@~generated/prisma/client.js';
 
