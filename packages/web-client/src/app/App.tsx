@@ -1,6 +1,6 @@
 import { AppRoutes } from '@/app/routes';
-import { JobStatusButton } from '@/features/jobs';
-import { AppLayout } from '@/shared';
+import { AppLayout } from '@/widgets/app-layout';
+import { JobStatusButton } from '@/widgets/job-status';
 
 export function App() {
   return (

@@ -3,12 +3,12 @@ import { notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { listJobs } from '@/features/jobs/api';
-import { JobsProvider, useJobs } from '@/features/jobs/context';
-import type { Job } from '@/features/jobs/api';
+import { listJobs } from '@/widgets/job-status/api/jobs';
+import { JobsProvider, useJobs } from '@/widgets/job-status/model/context';
+import type { Job } from '@/widgets/job-status/api/jobs';
 
 // Mock API
-vi.mock('@/features/jobs/api', () => ({
+vi.mock('@/widgets/job-status/api/jobs', () => ({
   listJobs: vi.fn(),
 }));
 

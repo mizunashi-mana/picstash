@@ -1,4 +1,4 @@
-import type { Job } from './api';
+import type { Job } from '@/widgets/job-status/api/jobs';
 
 /** ジョブタイプの日本語表示名を取得 */
 export function getJobTypeName(type: string): string {

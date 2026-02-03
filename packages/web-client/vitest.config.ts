@@ -108,8 +108,8 @@ export default defineConfig({
         'src/features/import/components/ArchiveImportTab.tsx',
         'src/features/import/components/UrlCrawlTab.tsx',
 
-        // features/jobs（context.tsx, api.ts, utils.ts はテスト済み）
-        'src/features/jobs/components/JobStatusButton.tsx',
+        // widgets/job-status（context.tsx, api, utils はテスト済み）
+        'src/widgets/job-status/ui/JobStatusButton.tsx',
 
         // features/labels
         'src/features/labels/pages/LabelsPage.tsx',
@@ -141,8 +141,8 @@ export default defineConfig({
         'src/features/import-url/ui/CrawlPreviewGallery.tsx',
         'src/features/import-url/ui/UrlInputForm.tsx',
 
-        // shared/components（AppLayout はテスト未実装）
-        'src/shared/components/AppLayout.tsx',
+        // widgets/app-layout（AppLayout はテスト未実装）
+        'src/widgets/app-layout/ui/AppLayout.tsx',
       ],
       thresholds: {
         perFile: true,

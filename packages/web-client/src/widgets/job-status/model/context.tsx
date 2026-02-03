@@ -9,8 +9,8 @@ import {
 } from 'react';
 import { notifications } from '@mantine/notifications';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { listJobs, type Job, type JobStatus } from './api';
-import { getJobTypeName, getJobTargetDescription } from './utils';
+import { listJobs, type Job, type JobStatus } from '@/widgets/job-status/api/jobs';
+import { getJobTypeName, getJobTargetDescription } from '@/widgets/job-status/lib/utils';
 
 interface JobsContextValue {
   /** 監視中のジョブ一覧 */

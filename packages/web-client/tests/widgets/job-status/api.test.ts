@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getJob, listJobs } from '@/features/jobs/api';
+import { getJob, listJobs } from '@/widgets/job-status/api/jobs';
 
 describe('jobs/api', () => {
   const mockFetch = vi.fn();
