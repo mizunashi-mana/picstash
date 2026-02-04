@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { ArchiveImportTab } from '@/features/import/components/ArchiveImportTab';
+import { ArchiveImportTab } from '@/features/import/ui/ArchiveImportTab';
 import {
   getArchiveSession,
   uploadArchive,

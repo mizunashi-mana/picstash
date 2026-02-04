@@ -1,45 +1,30 @@
-import { useState } from 'react';
 import { Alert, Button, Stack, Text } from '@mantine/core';
-import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { ImageDropzoneView, uploadImage } from '@/features/upload-image';
+import { ImageDropzoneView } from '@/features/upload-image';
 import type { FileWithPath } from '@mantine/dropzone';
 
-interface UploadResult {
+export interface UploadResult {
   successCount: number;
   failedCount: number;
 }
 
-export function ImageUploadTab() {
-  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
+export interface ImageUploadTabViewProps {
+  uploadResult: UploadResult | null;
+  isPending: boolean;
+  isError: boolean;
+  errorMessage: string | undefined;
+  onDrop: (files: FileWithPath[]) => void;
+  onClearResult: () => void;
+}
 
-  const mutation = useMutation({
-    mutationFn: async (files: Blob[]) => {
-      let successCount = 0;
-      let failedCount = 0;
-
-      for (const file of files) {
-        try {
-          await uploadImage(file);
-          successCount++;
-        }
-        catch {
-          failedCount++;
-        }
-      }
-
-      return { successCount, failedCount };
-    },
-    onSuccess: (result) => {
-      setUploadResult(result);
-    },
-  });
-
-  const handleDrop = (files: FileWithPath[]) => {
-    setUploadResult(null);
-    mutation.mutate(files);
-  };
-
+export function ImageUploadTabView({
+  uploadResult,
+  isPending,
+  isError,
+  errorMessage,
+  onDrop,
+  onClearResult,
+}: ImageUploadTabViewProps) {
   return (
     <Stack gap="md">
       <Text size="sm" c="dimmed" ta="center">
@@ -51,7 +36,7 @@ export function ImageUploadTab() {
           color={uploadResult.failedCount === 0 ? 'green' : 'yellow'}
           title="アップロード完了"
           withCloseButton
-          onClose={() => { setUploadResult(null); }}
+          onClose={onClearResult}
         >
           <Stack gap="xs">
             <Text>
@@ -77,11 +62,11 @@ export function ImageUploadTab() {
       )}
 
       <ImageDropzoneView
-        onDrop={handleDrop}
-        isPending={mutation.isPending}
-        isError={mutation.isError}
+        onDrop={onDrop}
+        isPending={isPending}
+        isError={isError}
         isSuccess={false}
-        errorMessage={mutation.error?.message}
+        errorMessage={errorMessage}
       />
     </Stack>
   );

@@ -1,8 +1,8 @@
 import { Container, Stack, Tabs, Text, Title } from '@mantine/core';
 import { IconArchive, IconPhoto, IconWorld } from '@tabler/icons-react';
-import { ArchiveImportTab } from '@/features/import/components/ArchiveImportTab';
-import { ImageUploadTab } from '@/features/import/components/ImageUploadTab';
-import { UrlCrawlTab } from '@/features/import/components/UrlCrawlTab';
+import { ArchiveImportTab } from '@/features/import/ui/ArchiveImportTab';
+import { ImageUploadTab } from '@/features/import/ui/ImageUploadTab';
+import { UrlCrawlTab } from '@/features/import/ui/UrlCrawlTab';
 
 export function ImportPage() {
   return (

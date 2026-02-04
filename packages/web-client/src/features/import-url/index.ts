@@ -6,4 +6,4 @@ export {
   deleteCrawlSession,
   importFromCrawl,
 } from './api/crawl';
-export type { ImportResult } from './api/crawl';
+export type { ImportResult, UrlCrawlSessionDetail } from './api/crawl';

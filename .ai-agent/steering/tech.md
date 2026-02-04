@@ -104,17 +104,21 @@ dependency-cruiser（`.dependency-cruiser.mjs`）でレイヤー間の依存方�
 
 ### View Props パターン
 
-複雑なページコンポーネントに View Props パターンを適用：
+状態管理と描画を分離する View Props パターンを全 pages および主要 features に適用：
 
 ```
-Page.tsx            — useViewProps + View の統合（Container）
-PageView.tsx        — ViewProps のみを受け取る純粋な描画（View）
-usePageViewProps.ts — State / Handler / Selector を提供（Hook）
+Xxx.tsx               — useViewProps + View の統合（Container、7 LOC 程度）
+XxxView.tsx           — ViewProps のみを受け取る純粋な描画（View）
+useXxxViewProps.ts    — State / Queries / Mutations / Selectors / Handlers を提供（Hook）
+XxxView.stories.tsx   — Storybook ストーリー（View に対して作成）
 ```
 
 - 適用基準: 状態遷移が複数あり、ハンドラが3つ以上のコンポーネント
-- 適用済み: GalleryPage, ImageDetailPage
+- 適用済み（Pages）: GalleryPage, ImageDetailPage, LabelsPage, CollectionsPage, StatsPage, DuplicatesPage, CollectionDetailPage, CollectionViewerPage
+- 適用済み（Features）: ArchiveImportTab, UrlCrawlTab, ImageUploadTab, ImageCollectionsSection, RecommendationSection, CrawlPreviewGallery, ImageAttributeSection, ImageDescriptionSection, SimilarImagesSection
 - Stories は View コンポーネントに対してのみ作成
+- Container は薄いグルーコード: `const viewProps = useXxxViewProps(); return <XxxView {...viewProps} />;`
+- インライン sub-components（CollectionCard, RecommendationCard 等）は View ファイル内に配置
 
 ### Storybook
 
