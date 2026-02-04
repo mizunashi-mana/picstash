@@ -7,6 +7,37 @@
 import { buildUrl } from './url.js';
 
 // ============================================================
+// レスポンス型
+// ============================================================
+
+/** 検索サジェスト */
+export interface SearchSuggestion {
+  type: 'label' | 'keyword' | 'history';
+  value: string;
+  /** 履歴 ID（削除用） */
+  id?: string;
+}
+
+/** 検索サジェストレスポンス */
+export interface SearchSuggestionsResponse {
+  suggestions: SearchSuggestion[];
+}
+
+/** 検索履歴 */
+export interface SearchHistory {
+  id: string;
+  query: string;
+  searchedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 検索履歴レスポンス */
+export interface SearchHistoryResponse {
+  history: SearchHistory[];
+}
+
+// ============================================================
 // クエリパラメータ型
 // ============================================================
 

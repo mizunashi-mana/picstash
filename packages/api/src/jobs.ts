@@ -7,6 +7,29 @@
 import { buildUrl } from './url.js';
 
 // ============================================================
+// レスポンス型
+// ============================================================
+
+/** ジョブステータス */
+export type JobStatusValue = 'waiting' | 'active' | 'completed' | 'failed';
+
+/** ジョブ詳細 */
+export interface Job {
+  id: string;
+  type: string;
+  status: JobStatusValue;
+  progress: number;
+  result?: Record<string, unknown>;
+  error?: string;
+  attempts: number;
+  maxAttempts: number;
+  createdAt: string;
+  updatedAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+}
+
+// ============================================================
 // クエリパラメータ型
 // ============================================================
 

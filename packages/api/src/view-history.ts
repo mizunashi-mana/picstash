@@ -7,6 +7,36 @@
 import { buildUrl } from './url.js';
 
 // ============================================================
+// レスポンス型
+// ============================================================
+
+/** 閲覧履歴 */
+export interface ViewHistory {
+  id: string;
+  imageId: string;
+  viewedAt: string;
+  duration: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 閲覧履歴（画像情報付き） */
+export interface ViewHistoryWithImage extends ViewHistory {
+  image: {
+    id: string;
+    title: string;
+    thumbnailPath: string | null;
+  };
+}
+
+/** 画像閲覧統計 */
+export interface ImageViewStats {
+  viewCount: number;
+  totalDuration: number;
+  lastViewedAt: string | null;
+}
+
+// ============================================================
 // クエリパラメータ型
 // ============================================================
 
