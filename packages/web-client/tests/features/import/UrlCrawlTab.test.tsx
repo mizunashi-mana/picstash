@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { UrlCrawlTab } from '@/features/import/components/UrlCrawlTab';
+import { UrlCrawlTab } from '@/features/import/ui/UrlCrawlTab';
 import {
   crawlUrl,
   getCrawlSession,

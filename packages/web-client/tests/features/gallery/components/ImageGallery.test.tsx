@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { fetchImages } from '@/entities/image';
-import { ImageGallery } from '@/features/gallery/components/ImageGallery';
+import { ImageGallery } from '@/features/gallery/ui/ImageGallery';
 
 vi.mock('@/entities/image', () => ({
   fetchImages: vi.fn(),

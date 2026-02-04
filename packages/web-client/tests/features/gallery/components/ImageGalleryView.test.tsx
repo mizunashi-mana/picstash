@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageGalleryView } from '@/features/gallery/components/ImageGalleryView';
+import { ImageGalleryView } from '@/features/gallery/ui/ImageGalleryView';
 import type { Image } from '@/entities/image';
 
 vi.mock('@/entities/image', () => ({

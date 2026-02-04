@@ -70,8 +70,10 @@ export default defineConfig({
         'src/features/import-archive/ui/ArchiveDropzone.tsx',
         'src/features/import-archive/ui/ArchivePreviewGallery.tsx',
 
-        // pages/collections - ページ全体テスト未対応
+        // pages/collections - View Props パターン適用済み（Storybook テストで対応）
         'src/pages/collections/ui/CollectionsPage.tsx',
+        'src/pages/collections/ui/CollectionsPageView.tsx',
+        'src/pages/collections/ui/useCollectionsPageViewProps.ts',
         'src/pages/collections/ui/CollectionDetailPage.tsx',
         'src/pages/collections/ui/CollectionDetailPageView.tsx',
         'src/pages/collections/ui/useCollectionDetailPageViewProps.ts',
@@ -79,7 +81,7 @@ export default defineConfig({
         'src/pages/collections/ui/CollectionViewerPageView.tsx',
         'src/pages/collections/ui/useCollectionViewerPageViewProps.ts',
 
-        // pages/duplicates - ページ全体テスト未対応
+        // pages/duplicates - View Props パターン適用済み（Storybook テストで対応）
         'src/pages/duplicates/ui/DuplicatesPage.tsx',
         'src/pages/duplicates/ui/DuplicatesPageView.tsx',
         'src/pages/duplicates/ui/useDuplicatesPageViewProps.ts',
@@ -88,52 +90,63 @@ export default defineConfig({
         'src/features/find-duplicates/ui/DuplicateGroupCard.tsx',
 
         // features/gallery
-        'src/features/gallery/components/ImageGallery.tsx',
+        'src/features/gallery/ui/ImageGallery.tsx',
 
-        // pages/gallery - ページ全体テスト未対応
+        // pages/gallery - View Props パターン適用済み（Storybook テストで対応）
         'src/pages/gallery/ui/GalleryPage.tsx',
         'src/pages/gallery/ui/GalleryPageView.tsx',
+        'src/pages/gallery/ui/useGalleryPageViewProps.ts',
 
-        // pages/image-detail - ページ全体テスト未対応
+        // pages/image-detail - View Props パターン適用済み（Storybook テストで対応）
         'src/pages/image-detail/ui/ImageDetailPage.tsx',
         'src/pages/image-detail/ui/ImageDetailPageView.tsx',
+        'src/pages/image-detail/ui/useImageDetailPageViewProps.ts',
 
-        // features/manage-image-attributes
-        // ImageAttributeSection.tsx - テスト未対応（container）
+        // features/manage-image-attributes（container は Storybook テストで対応）
         'src/features/manage-image-attributes/ui/ImageAttributeSection.tsx',
 
-        // features/manage-image-collections
-        // カバレッジ70%未達
+        // features/manage-image-collections - View Props パターン適用済み（Storybook テストで対応）
         'src/features/manage-image-collections/ui/ImageCollectionsSection.tsx',
+        'src/features/manage-image-collections/ui/ImageCollectionsSectionView.tsx',
+        'src/features/manage-image-collections/ui/useImageCollectionsSectionViewProps.ts',
 
-        // features/manage-image-description
-        // カバレッジ70%未達
+        // features/manage-image-description（container は Storybook テストで対応）
         'src/features/manage-image-description/ui/ImageDescriptionSection.tsx',
 
         // features/search-images
-        // カバレッジ70%未達
         'src/features/search-images/ui/SearchBar.tsx',
 
         // pages/home - ページ全体テスト未対応
         'src/pages/home/ui/HomePage.tsx',
 
-        // features/import（既存ページのロジック流用のため除外）
-        'src/features/import/components/ArchiveImportTab.tsx',
-        'src/features/import/components/UrlCrawlTab.tsx',
+        // features/import - View Props パターン適用済み（Storybook テストで対応）
+        'src/features/import/ui/ArchiveImportTab.tsx',
+        'src/features/import/ui/ArchiveImportTabView.tsx',
+        'src/features/import/ui/useArchiveImportTabViewProps.ts',
+        'src/features/import/ui/UrlCrawlTab.tsx',
+        'src/features/import/ui/UrlCrawlTabView.tsx',
+        'src/features/import/ui/useUrlCrawlTabViewProps.ts',
+        'src/features/import/ui/ImageUploadTab.tsx',
+        'src/features/import/ui/ImageUploadTabView.tsx',
+        'src/features/import/ui/useImageUploadTabViewProps.ts',
 
         // widgets/job-status（context.tsx, api, utils はテスト済み）
         'src/widgets/job-status/ui/JobStatusButton.tsx',
 
-        // pages/labels - ページ全体テスト未対応
+        // pages/labels - View Props パターン適用済み（Storybook テストで対応）
         'src/pages/labels/ui/LabelsPage.tsx',
+        'src/pages/labels/ui/LabelsPageView.tsx',
+        'src/pages/labels/ui/useLabelsPageViewProps.ts',
 
         // features/labels/ui（UI コンポーネントは Storybook テストで対応）
         'src/features/labels/ui/LabelBadge.tsx',
         'src/features/labels/ui/LabelForm.tsx',
         'src/features/labels/ui/LabelList.tsx',
 
-        // features/view-recommendations
+        // features/view-recommendations - View Props パターン適用済み（Storybook テストで対応）
         'src/features/view-recommendations/ui/RecommendationSection.tsx',
+        'src/features/view-recommendations/ui/RecommendationSectionView.tsx',
+        'src/features/view-recommendations/ui/useRecommendationSectionViewProps.ts',
 
         // features/view-stats
         'src/features/view-stats/ui/PopularImagesList.tsx',
@@ -141,17 +154,25 @@ export default defineConfig({
         'src/features/view-stats/ui/StatsOverviewCards.tsx',
         'src/features/view-stats/ui/ViewTrendsChart.tsx',
 
-        // pages/stats - ページ全体テスト未対応
+        // pages/stats - View Props パターン適用済み（Storybook テストで対応）
         'src/pages/stats/ui/StatsPage.tsx',
+        'src/pages/stats/ui/StatsPageView.tsx',
+        'src/pages/stats/ui/useStatsPageViewProps.ts',
 
         // features/upload-image
         'src/features/upload-image/ui/ImageDropzone.tsx',
         'src/features/upload-image/ui/ImageDropzoneView.tsx',
 
-        // features/import-url
+        // features/import-url - View Props パターン適用済み（Storybook テストで対応）
         'src/features/import-url/api/crawl.ts',
         'src/features/import-url/ui/CrawlPreviewGallery.tsx',
+        'src/features/import-url/ui/CrawlPreviewGalleryView.tsx',
+        'src/features/import-url/ui/useCrawlPreviewGalleryViewProps.ts',
         'src/features/import-url/ui/UrlInputForm.tsx',
+
+        // features/find-similar-images（Storybook テストで対応）
+        'src/features/find-similar-images/ui/SimilarImagesSection.tsx',
+        'src/features/find-similar-images/ui/SimilarImagesSectionView.tsx',
 
         // widgets/app-layout（AppLayout はテスト未実装）
         'src/widgets/app-layout/ui/AppLayout.tsx',

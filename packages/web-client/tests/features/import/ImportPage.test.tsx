@@ -8,15 +8,15 @@ import { describe, expect, it, vi } from 'vitest';
 import { ImportPage } from '@/pages/import';
 
 // Mock child components to isolate ImportPage testing
-vi.mock('@/features/import/components/ImageUploadTab', () => ({
+vi.mock('@/features/import/ui/ImageUploadTab', () => ({
   ImageUploadTab: () => <div data-testid="image-upload-tab">ImageUploadTab</div>,
 }));
 
-vi.mock('@/features/import/components/ArchiveImportTab', () => ({
+vi.mock('@/features/import/ui/ArchiveImportTab', () => ({
   ArchiveImportTab: () => <div data-testid="archive-import-tab">ArchiveImportTab</div>,
 }));
 
-vi.mock('@/features/import/components/UrlCrawlTab', () => ({
+vi.mock('@/features/import/ui/UrlCrawlTab', () => ({
   UrlCrawlTab: () => <div data-testid="url-crawl-tab">UrlCrawlTab</div>,
 }));
 

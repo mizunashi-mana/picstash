@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Anchor,
@@ -8,111 +7,52 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import {
   CrawlPreviewGallery,
-  crawlUrl,
-  deleteCrawlSession,
-  getCrawlSession,
-  importFromCrawl,
   UrlInputForm,
 } from '@/features/import-url';
-import type { ImportResult } from '@/features/import-url';
+import type { ImportResult, UrlCrawlSessionDetail } from '@/features/import-url';
 
-export function UrlCrawlTab() {
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
-  const sessionIdRef = useRef<string | null>(null);
+export interface UrlCrawlTabViewProps {
+  sessionId: string | null;
+  session: UrlCrawlSessionDetail | undefined;
+  isSessionLoading: boolean;
+  sessionError: Error | null;
+  isCrawling: boolean;
+  crawlError: Error | null;
+  selectedIndices: Set<number>;
+  isImporting: boolean;
+  importResult: ImportResult | null;
+  isClosing: boolean;
+  onSubmit: (url: string) => void;
+  onClose: () => void;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
+  onImport: () => void;
+  onSelectionChange: (indices: Set<number>) => void;
+  onClearImportResult: () => void;
+}
 
-  // Keep ref in sync with state for cleanup
-  useEffect(() => {
-    sessionIdRef.current = sessionId;
-  }, [sessionId]);
-
-  // Cleanup session on unmount
-  useEffect(() => {
-    return () => {
-      if (sessionIdRef.current !== null) {
-        deleteCrawlSession(sessionIdRef.current).catch(() => {
-          // Ignore errors during cleanup
-        });
-      }
-    };
-  }, []);
-
-  const crawlMutation = useMutation({
-    mutationFn: crawlUrl,
-    onSuccess: (data) => {
-      setSessionId(data.sessionId);
-      setSelectedIndices(new Set());
-      setImportResult(null);
-    },
-  });
-
-  const sessionQuery = useQuery({
-    queryKey: ['url-crawl-session', sessionId],
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- query is only enabled when sessionId !== null (see enabled option below)
-    queryFn: async () => await getCrawlSession(sessionId!),
-    enabled: sessionId !== null,
-  });
-
-  const session = sessionQuery.data;
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteCrawlSession,
-    onSuccess: () => {
-      setSessionId(null);
-      setSelectedIndices(new Set());
-      setImportResult(null);
-    },
-  });
-
-  const importMutation = useMutation({
-    mutationFn: async (indices: number[]) => {
-      if (sessionId === null) {
-        throw new Error('No session');
-      }
-      return await importFromCrawl(sessionId, indices);
-    },
-    onSuccess: (result) => {
-      setImportResult(result);
-      // Clear selection after successful import
-      if (result.successCount > 0) {
-        // Remove successfully imported indices from selection
-        const failedIndices = new Set(result.results.filter(r => !r.success).map(r => r.index));
-        setSelectedIndices(failedIndices);
-      }
-    },
-  });
-
-  const handleSubmit = (url: string) => {
-    crawlMutation.mutate(url);
-  };
-
-  const handleClose = () => {
-    if (sessionId !== null) {
-      deleteMutation.mutate(sessionId);
-    }
-  };
-
-  const handleSelectAll = () => {
-    if (session !== undefined) {
-      setSelectedIndices(new Set(session.images.map(img => img.index)));
-    }
-  };
-
-  const handleDeselectAll = () => {
-    setSelectedIndices(new Set());
-  };
-
-  const handleImport = () => {
-    if (selectedIndices.size > 0) {
-      importMutation.mutate(Array.from(selectedIndices));
-    }
-  };
-
+export function UrlCrawlTabView({
+  sessionId,
+  session,
+  isSessionLoading,
+  sessionError,
+  isCrawling,
+  crawlError,
+  selectedIndices,
+  isImporting,
+  importResult,
+  isClosing,
+  onSubmit,
+  onClose,
+  onSelectAll,
+  onDeselectAll,
+  onImport,
+  onSelectionChange,
+  onClearImportResult,
+}: UrlCrawlTabViewProps) {
   if (sessionId === null) {
     return (
       <Stack gap="md">
@@ -120,10 +60,10 @@ export function UrlCrawlTab() {
           ウェブページの URL を入力して画像をクロール
         </Text>
         <UrlInputForm
-          onSubmit={handleSubmit}
-          isPending={crawlMutation.isPending}
-          isError={crawlMutation.isError}
-          errorMessage={crawlMutation.error?.message}
+          onSubmit={onSubmit}
+          isPending={isCrawling}
+          isError={crawlError !== null}
+          errorMessage={crawlError?.message}
         />
       </Stack>
     );
@@ -131,17 +71,17 @@ export function UrlCrawlTab() {
 
   return (
     <Stack gap="md">
-      {sessionQuery.isLoading
+      {isSessionLoading
         ? (
             <Stack align="center" py="xl">
               <Loader size="lg" />
               <Text c="dimmed">ページを読み込み中...</Text>
             </Stack>
           )
-        : sessionQuery.error !== null
+        : sessionError !== null
           ? (
               <Alert color="red" title="エラー">
-                {sessionQuery.error.message}
+                {sessionError.message}
               </Alert>
             )
           : session !== undefined
@@ -171,8 +111,8 @@ export function UrlCrawlTab() {
                     <Button
                       variant="outline"
                       color="red"
-                      onClick={handleClose}
-                      loading={deleteMutation.isPending}
+                      onClick={onClose}
+                      loading={isClosing}
                     >
                       閉じる
                     </Button>
@@ -184,9 +124,7 @@ export function UrlCrawlTab() {
                       color={importResult.failedCount === 0 ? 'green' : 'yellow'}
                       title="インポート完了"
                       withCloseButton
-                      onClose={() => {
-                        setImportResult(null);
-                      }}
+                      onClose={onClearImportResult}
                     >
                       <Stack gap="xs">
                         <Text>
@@ -214,13 +152,13 @@ export function UrlCrawlTab() {
                   {/* Selection controls */}
                   <Group justify="space-between" align="center">
                     <Group gap="sm">
-                      <Button variant="light" size="sm" onClick={handleSelectAll}>
+                      <Button variant="light" size="sm" onClick={onSelectAll}>
                         全選択
                       </Button>
                       <Button
                         variant="light"
                         size="sm"
-                        onClick={handleDeselectAll}
+                        onClick={onDeselectAll}
                         disabled={selectedIndices.size === 0}
                       >
                         全解除
@@ -232,9 +170,9 @@ export function UrlCrawlTab() {
                       </Text>
                     </Group>
                     <Button
-                      onClick={handleImport}
+                      onClick={onImport}
                       disabled={selectedIndices.size === 0}
-                      loading={importMutation.isPending}
+                      loading={isImporting}
                     >
                       インポート (
                       {selectedIndices.size}
@@ -247,7 +185,7 @@ export function UrlCrawlTab() {
                     sessionId={session.sessionId}
                     images={session.images}
                     selectedIndices={selectedIndices}
-                    onSelectionChange={setSelectedIndices}
+                    onSelectionChange={onSelectionChange}
                   />
                 </>
               )

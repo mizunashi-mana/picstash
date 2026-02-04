@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { ImageUploadTab } from '@/features/import/components/ImageUploadTab';
+import { ImageUploadTab } from '@/features/import/ui/ImageUploadTab';
 import { uploadImage } from '@/features/upload-image';
 
 vi.mock('@/features/upload-image', () => ({
