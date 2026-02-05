@@ -43,22 +43,22 @@ describe('FetchRecommendationsApiClient', () => {
     const mockData = { conversions: [{ id: 'conv-1' }] };
     mockHttp.post.mockResolvedValueOnce(mockData);
 
-    const result = await client.recordImpressions([{ imageId: '1' }]);
+    const result = await client.recordImpressions([{ imageId: '1', score: 0.9 }]);
 
     expect(mockHttp.post).toHaveBeenCalledWith('/api/recommendation-conversions/impressions', {
-      recommendations: [{ imageId: '1' }],
+      recommendations: [{ imageId: '1', score: 0.9 }],
     });
     expect(result).toEqual(mockData);
   });
 
   it('should call http.patch for recordClick', async () => {
-    const mockData = { id: 'conv-1', clicked: true };
+    const mockData = { id: 'conv-1', viewHistoryId: 'vh-1' };
     mockHttp.patch.mockResolvedValueOnce(mockData);
 
-    const result = await client.recordClick('conv-1', { clicked: true });
+    const result = await client.recordClick('conv-1', { viewHistoryId: 'vh-1' });
 
     expect(mockHttp.patch).toHaveBeenCalledWith('/api/recommendation-conversions/conv-1/click', {
-      clicked: true,
+      viewHistoryId: 'vh-1',
     });
     expect(result).toEqual(mockData);
   });

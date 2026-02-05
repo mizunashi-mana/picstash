@@ -96,10 +96,18 @@ describe('FetchCollectionApiClient', () => {
   it('should call http.put for updateImageOrder', async () => {
     mockHttp.put.mockResolvedValueOnce(undefined);
 
-    await client.updateImageOrder('col-1', { imageIds: ['img-1', 'img-2'] });
+    await client.updateImageOrder('col-1', {
+      orders: [
+        { imageId: 'img-1', order: 0 },
+        { imageId: 'img-2', order: 1 },
+      ],
+    });
 
     expect(mockHttp.put).toHaveBeenCalledWith('/api/collections/col-1/images/order', {
-      imageIds: ['img-1', 'img-2'],
+      orders: [
+        { imageId: 'img-1', order: 0 },
+        { imageId: 'img-2', order: 1 },
+      ],
     });
   });
 

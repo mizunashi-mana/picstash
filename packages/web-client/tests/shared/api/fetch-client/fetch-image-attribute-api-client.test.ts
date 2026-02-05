@@ -32,26 +32,26 @@ describe('FetchImageAttributeApiClient', () => {
   });
 
   it('should call http.post for create', async () => {
-    const mockData = { id: '1', name: 'attr1', value: 'value1' };
+    const mockData = { id: '1', labelId: 'label-1', keywords: 'test' };
     mockHttp.post.mockResolvedValueOnce(mockData);
 
-    const result = await client.create('img-1', { name: 'attr1', value: 'value1' });
+    const result = await client.create('img-1', { labelId: 'label-1', keywords: 'test' });
 
     expect(mockHttp.post).toHaveBeenCalledWith('/api/images/img-1/attributes', {
-      name: 'attr1',
-      value: 'value1',
+      labelId: 'label-1',
+      keywords: 'test',
     });
     expect(result).toEqual(mockData);
   });
 
   it('should call http.put for update', async () => {
-    const mockData = { id: '1', name: 'attr1', value: 'updated' };
+    const mockData = { id: '1', labelId: 'label-1', keywords: 'updated' };
     mockHttp.put.mockResolvedValueOnce(mockData);
 
-    const result = await client.update('img-1', 'attr-1', { value: 'updated' });
+    const result = await client.update('img-1', 'attr-1', { keywords: 'updated' });
 
     expect(mockHttp.put).toHaveBeenCalledWith('/api/images/img-1/attributes/attr-1', {
-      value: 'updated',
+      keywords: 'updated',
     });
     expect(result).toEqual(mockData);
   });
