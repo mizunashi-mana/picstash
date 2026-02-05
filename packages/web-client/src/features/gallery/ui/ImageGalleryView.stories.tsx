@@ -117,7 +117,7 @@ export const ErrorState: Story = {
 
 export const SingleImage: Story = {
   args: {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test data is defined
+
     images: [mockImages[0]!],
     isLoading: false,
     error: null,

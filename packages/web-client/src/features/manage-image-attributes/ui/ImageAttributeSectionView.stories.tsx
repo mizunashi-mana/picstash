@@ -248,7 +248,7 @@ export const EditModalOpen: Story = {
     attributesError: null,
     labelsError: null,
     addModalOpen: false,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test data is defined
+
     editingAttribute: mockAttributes[0]!,
     selectedLabelId: null,
     keywords: ['キーワード1', 'キーワード2'],

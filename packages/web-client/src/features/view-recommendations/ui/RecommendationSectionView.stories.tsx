@@ -154,7 +154,7 @@ export const EmptyNoSimilar: Story = {
 
 export const SingleRecommendation: Story = {
   args: {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- mockRecommendations is defined with elements
+
     recommendations: [mockRecommendations[0]!],
     conversionMap: new Map<string, string>([['img-1', 'conv-1']]),
     isLoading: false,
