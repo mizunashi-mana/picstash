@@ -94,6 +94,12 @@ export class FetchHttpClient implements HttpClient {
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
+    // 204 No Content をハンドリング
+    if (response.status === 204) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- 204 returns no content
+      return undefined as T;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- response.json() returns unknown
     return (await response.json()) as T;
   }

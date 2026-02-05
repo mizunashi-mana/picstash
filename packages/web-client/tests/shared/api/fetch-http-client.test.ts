@@ -238,6 +238,18 @@ describe('FetchHttpClient', () => {
         signal: undefined,
       });
     });
+
+    it('should return undefined for 204 responses', async () => {
+      const formData = new FormData();
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+      });
+
+      const result = await client.postFormData('/api/upload', formData);
+
+      expect(result).toBeUndefined();
+    });
   });
 
   describe('204 No Content handling', () => {
