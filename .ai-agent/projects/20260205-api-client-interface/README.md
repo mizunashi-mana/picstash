@@ -1,32 +1,132 @@
-# API クライアントインターフェースを api パッケージで提供する
+# API クライアントを api パッケージで提供する
 
 GitHub Issue: https://github.com/mizunashi-mana/picstash/issues/159
 
 ## 目標
 
-`@picstash/api` パッケージに高レベルの API クライアントインターフェースを定義し、web-client の各 API アダプター（14 ファイル・54 関数）を inversify コンテナで管理される実装に置き換える。React Context + hooks で各コンポーネントから利用できるようにする。
+`@picstash/api` パッケージに HTTP Client interface と API Client 実装を提供し、web-client の各 API アダプター（14 ファイル・54 関数）を置き換える。クライアントパッケージでは URL 文字列を一切扱わず、HTTP Client interface の実装のみを提供する形にする。
 
 ### 完了条件
 
-- `@picstash/api` にリソース単位の API クライアントインターフェース（`ImageApiClient`, `LabelApiClient` 等）と統合 `ApiClient` インターフェースが定義されている
+- `@picstash/api` に `HttpClient` interface が定義されている
+- `@picstash/api` に `HttpClient` を受け取って API Client を生成する関数（`createApiClient`）が提供されている
 - `@picstash/api` に DI トークン（`API_TYPES`）が定義されている
-- web-client に inversify が導入され、`FetchApiClient` 実装がコンテナにバインドされている
+- web-client に inversify が導入され、`FetchHttpClient` 実装がコンテナにバインドされている
 - React Context（`ContainerProvider`）+ hooks（`useApiClient`）で API クライアントが利用可能
-- 既存の 14 API アダプターファイルが `ApiClient` インターフェース経由に移行されている
+- 既存の 14 API アダプターファイルが API Client 経由に移行されている
 - 全テスト・型チェック・lint が通る
 - Storybook が動作する
+
+## アーキテクチャ
+
+### 新しい設計
+
+```
+@picstash/api
+├── HttpClient interface   — HTTP リクエストの抽象化
+│   ├── get<T>(url, options?)
+│   ├── post<T>(url, body?, options?)
+│   ├── put<T>(url, body?, options?)
+│   ├── patch<T>(url, body?, options?)
+│   ├── delete(url, options?)
+│   └── postFormData<T>(url, formData, options?)
+│
+├── ApiClient 実装         — HttpClient を受け取り、URL ビルド + API 呼び出しを行う
+│   ├── images: ImageApiClient
+│   ├── collections: CollectionApiClient
+│   ├── labels: LabelApiClient
+│   ├── ... (その他のリソース)
+│   └── createApiClient(http: HttpClient): ApiClient
+│
+└── エンドポイント定義（内部で使用）
+    └── URL 生成は ApiClient 内部で行い、外部には公開しない
+
+web-client
+├── shared/api/FetchHttpClient   — HttpClient interface の fetch ベース実装
+├── shared/di/container.ts       — FetchHttpClient を HttpClient としてバインド
+│                                  createApiClient(http) で ApiClient を生成
+└── 各コンポーネント              — useApiClient() 経由で API Client を利用
+```
+
+### 利点
+
+1. **URL 文字列の局所化**: URL ビルドのロジックは全て api パッケージに集約。クライアントパッケージでは URL を扱わない
+2. **シンプルな責務分離**: web-client は HTTP Client の実装（fetch）のみ、api パッケージは API の抽象化を担当
+3. **テスト容易性**: HttpClient をモックすれば API Client 全体をモック可能
+4. **再利用性**: 他のクライアント（desktop-app 等）でも同じ ApiClient を使い、HttpClient のみ差し替え可能
+
+### 型定義イメージ
+
+```typescript
+// @picstash/api
+
+/** HTTP Client interface */
+export interface HttpClient {
+  get<T>(url: string, options?: RequestOptions): Promise<T>;
+  post<T>(url: string, body?: unknown, options?: RequestOptions): Promise<T>;
+  put<T>(url: string, body?: unknown, options?: RequestOptions): Promise<T>;
+  patch<T>(url: string, body?: unknown, options?: RequestOptions): Promise<T>;
+  delete(url: string, options?: RequestOptions): Promise<void>;
+  postFormData<T>(url: string, formData: FormData, options?: RequestOptions): Promise<T>;
+}
+
+/** API Client（HttpClient を受け取って生成） */
+export interface ApiClient {
+  readonly images: ImageApiClient;
+  readonly imageAttributes: ImageAttributeApiClient;
+  readonly collections: CollectionApiClient;
+  readonly labels: LabelApiClient;
+  readonly search: SearchApiClient;
+  readonly stats: StatsApiClient;
+  readonly viewHistory: ViewHistoryApiClient;
+  readonly recommendations: RecommendationsApiClient;
+  readonly archiveImport: ArchiveImportApiClient;
+  readonly urlCrawl: UrlCrawlApiClient;
+  readonly description: DescriptionApiClient;
+  readonly jobs: JobsApiClient;
+}
+
+/** API Client 生成関数 */
+export function createApiClient(http: HttpClient): ApiClient;
+
+/** DI トークン */
+export const API_TYPES = {
+  HttpClient: Symbol.for('HttpClient'),
+  ApiClient: Symbol.for('ApiClient'),
+};
+```
+
+```typescript
+// web-client
+
+// FetchHttpClient は HttpClient interface を実装
+export class FetchHttpClient implements HttpClient {
+  async get<T>(url: string): Promise<T> {
+    const res = await fetch(url, { method: 'GET' });
+    if (!res.ok) throw new Error(`API Error: ${res.status}`);
+    return await res.json();
+  }
+  // ... 他のメソッド
+}
+
+// コンテナ設定
+const container = new Container();
+const httpClient = new FetchHttpClient();
+container.bind<HttpClient>(API_TYPES.HttpClient).toConstantValue(httpClient);
+container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createApiClient(httpClient));
+```
 
 ## スコープ
 
 ### やること
 
-- `@picstash/api` に API クライアントインターフェース群を追加
+- `@picstash/api` に `HttpClient` interface を定義
+- `@picstash/api` に `createApiClient(http: HttpClient): ApiClient` 関数を実装
+- `@picstash/api` に各リソースの API Client 実装を追加
 - `@picstash/api` に DI トークン定義を追加
-- web-client に inversify を導入（`reflect-metadata` 含む）
-- `FetchApiClient` 実装（fetch ベース）を作成
-- inversify コンテナの React Context + hooks 連携
+- web-client に `FetchHttpClient` 実装を作成
+- web-client の inversify コンテナで HttpClient と ApiClient をバインド
 - 既存 14 API アダプターファイル（entities: 3, features: 11）を ApiClient 経由に移行
-- 各 feature/entity の API モジュールのエクスポート更新
 
 ### やらないこと
 
@@ -34,7 +134,6 @@ GitHub Issue: https://github.com/mizunashi-mana/picstash/issues/159
 - desktop-app への適用（web-client 完了後に別途対応）
 - OpenAPI スキーマ生成やコード生成ツールの導入
 - inversify の API クライアント以外への活用拡大（段階的に別タスクで対応）
-- `inversify-react` ライブラリの採用（自前の Context + hooks で十分）
 
 ## 現状分析
 
@@ -46,258 +145,139 @@ GitHub Issue: https://github.com/mizunashi-mana/picstash/issues/159
 │   ├── imageEndpoints      (12 メソッド)
 │   ├── collectionsEndpoints (7 メソッド)
 │   ├── labelsEndpoints      (5 メソッド)
-│   ├── statsEndpoints       (4 メソッド)
-│   ├── searchEndpoints      (4 メソッド)
-│   ├── jobsEndpoints        (2 メソッド)
-│   └── viewHistoryEndpoints (3 メソッド)
+│   └── ...
 └── 共有型定義（Label, ImageListQuery, StatsQueryOptions 等）
 
 web-client
 ├── shared/api/client.ts      — apiClient<T>(endpoint, options) ジェネリック fetch ラッパー
+├── shared/api/fetch-client/  — FetchApiClient 実装（現在の状態）
 ├── entities/*/api/*.ts        — 3 ファイル (image: 7関数, collection: 9関数, label: 5関数)
 └── features/*/api/*.ts        — 11 ファイル (合計 33関数)
 ```
 
-### 現在のパターン（各アダプターで繰り返されるボイラープレート）
-
-```typescript
-import { imageEndpoints } from '@picstash/api';
-import { apiClient } from '@/shared/api/client';
-
-export async function fetchImage(id: string): Promise<Image> {
-  return await apiClient<Image>(imageEndpoints.detail(id));
-}
-
-export async function deleteImage(id: string): Promise<void> {
-  await apiClient<undefined>(imageEndpoints.detail(id), { method: 'DELETE' });
-}
-```
-
 ### 問題点
 
-1. 各アダプターで `apiClient(endpoint.xxx(...), { method, body })` のボイラープレートが重複
-2. HTTP メソッド・ヘッダー・ボディのシリアライズ設定を各呼び出し箇所で手動指定
-3. テスト時のモック化が困難（各関数を個別にモックする必要がある）
-4. upload（FormData 直接 fetch）や duplicates（一部ハードコード URL）等の不整合
-
-### 移行対象の API アダプター一覧（14 ファイル・54 関数）
-
-| レイヤー | ファイル | 関数数 | 主な操作 |
-|---------|---------|--------|---------|
-| entities | image/api/image.ts | 7 | CRUD + URL生成 |
-| entities | collection/api/collection.ts | 9 | CRUD + 画像管理 |
-| entities | label/api/label.ts | 5 | CRUD |
-| features | find-duplicates/api/duplicates.ts | 2 | 重複検出 + 削除 |
-| features | find-similar-images/api/similar.ts | 1 | 類似画像取得 |
-| features | import-archive/api/archive.ts | 7 | アーカイブインポート |
-| features | import-url/api/crawl.ts | 6 | URL クロール |
-| features | manage-image-attributes/api/attributes.ts | 5 | 属性管理 |
-| features | manage-image-description/api/description.ts | 2 | 説明文生成 |
-| features | search-images/api/search.ts | 5 | 検索 + 履歴 |
-| features | track-view-history/api/view-history.ts | 4 | 閲覧履歴 |
-| features | upload-image/api/upload.ts | 1 | アップロード |
-| features | view-recommendations/api/recommendations.ts | 3 | レコメンド |
-| features | view-stats/api/stats.ts | 4 | 統計 |
+1. URL ビルドロジックが web-client の FetchApiClient に分散している
+2. エンドポイント定義（URL 生成関数）を web-client が直接使用しており、依存が強い
+3. クライアントパッケージごとに URL 文字列を扱うコードが必要になる
 
 ## タスク分解
 
 | ID | タスク | 依存 | 優先度 | 状態 |
 |----|--------|------|--------|------|
-| T1 | `@picstash/api` にインターフェース定義を追加 | - | 高 | 未着手 |
-| T2 | web-client に inversify を導入 | - | 高 | 完了 |
-| T3 | FetchApiClient 実装（entities 系） | T1, T2 | 高 | 未着手 |
-| T4 | FetchApiClient 実装（features 系） | T1, T2 | 高 | 未着手 |
-| T5 | React Context + hooks 連携 | T2 | 高 | 未着手 |
-| T6 | entities 層の API アダプター移行 | T3, T5 | 中 | 未着手 |
-| T7 | features 層の API アダプター移行 | T4, T5 | 中 | 未着手 |
-| T8 | テスト・Storybook 対応 | T6, T7 | 中 | 未着手 |
-| T9 | クリーンアップ・ドキュメント更新 | T8 | 低 | 未着手 |
+| T1 | `@picstash/api` に HttpClient interface を定義 | - | 高 | 未着手 |
+| T2 | `@picstash/api` に ApiClient 実装を追加 | T1 | 高 | 未着手 |
+| T3 | web-client に FetchHttpClient 実装を作成 | T1 | 高 | 未着手 |
+| T4 | web-client の既存 FetchApiClient を削除し、api パッケージの ApiClient に移行 | T2, T3 | 高 | 未着手 |
+| T5 | entities 層の API アダプター移行 | T4 | 中 | 未着手 |
+| T6 | features 層の API アダプター移行 | T4 | 中 | 未着手 |
+| T7 | テスト・Storybook 対応 | T5, T6 | 中 | 未着手 |
+| T8 | クリーンアップ・ドキュメント更新 | T7 | 低 | 未着手 |
 
 ### 依存関係図
 
 ```
-T1 (@picstash/api インターフェース)
-│
-├── T3 (FetchApiClient: entities)
-│   └── T6 (entities アダプター移行)
-│
-├── T4 (FetchApiClient: features)
-│   └── T7 (features アダプター移行)
-│
-T2 (inversify 導入)
-├── T3
-├── T4
-└── T5 (React Context + hooks)
-    ├── T6
-    └── T7
-        │
-        T8 (テスト・Storybook)
-        └── T9 (クリーンアップ)
+T1 (HttpClient interface)
+├── T2 (ApiClient 実装 in @picstash/api)
+│   └── T4 (web-client 移行)
+│       ├── T5 (entities アダプター移行)
+│       └── T6 (features アダプター移行)
+│           │
+│           T7 (テスト・Storybook)
+│           └── T8 (クリーンアップ)
+└── T3 (FetchHttpClient 実装)
+    └── T4
 ```
 
 ### 各タスクの詳細
 
-#### T1: `@picstash/api` にインターフェース定義を追加
+#### T1: `@picstash/api` に HttpClient interface を定義
 
-- **概要**: リソース単位の API クライアントインターフェースと統合 `ApiClient` インターフェース、DI トークンを `@picstash/api` に追加する
+- **概要**: HTTP リクエストを抽象化する `HttpClient` interface を定義
 - **作業内容**:
-  - `packages/api/src/client/` ディレクトリを作成
-  - リソース単位のインターフェース定義:
-    - `ImageApiClient` — list, listPaginated, detail, update, delete, getImageUrl, getThumbnailUrl, fetchSimilar, fetchDuplicates, fetchSuggestedAttributes, generateDescription, fetchCollections, upload
-    - `ImageAttributeApiClient` — list, create, update, delete
-    - `CollectionApiClient` — list, detail, create, update, delete, addImage, removeImage, updateImageOrder, fetchImageCollections
-    - `LabelApiClient` — list, detail, create, update, delete
-    - `SearchApiClient` — suggestions, saveHistory, fetchHistory, deleteHistory, deleteAllHistory
-    - `StatsApiClient` — overview, viewTrends, recommendationTrends, popularImages
-    - `ViewHistoryApiClient` — recordStart, recordEnd, list, imageStats
-    - `RecommendationsApiClient` — fetch, recordImpressions, recordClick
-    - `ArchiveImportApiClient` — upload, getSession, deleteSession, getThumbnailUrl, getImageUrl, import, getJobStatus
-    - `UrlCrawlApiClient` — crawl, getSession, deleteSession, getThumbnailUrl, getImageUrl, import
-    - `DescriptionApiClient` — generateJob, getJobStatus
-    - `JobsApiClient` — list, detail
-  - 統合インターフェース `ApiClient`:
-    ```typescript
-    export interface ApiClient {
-      images: ImageApiClient;
-      imageAttributes: ImageAttributeApiClient;
-      collections: CollectionApiClient;
-      labels: LabelApiClient;
-      search: SearchApiClient;
-      stats: StatsApiClient;
-      viewHistory: ViewHistoryApiClient;
-      recommendations: RecommendationsApiClient;
-      archiveImport: ArchiveImportApiClient;
-      urlCrawl: UrlCrawlApiClient;
-      description: DescriptionApiClient;
-      jobs: JobsApiClient;
-    }
-    ```
-  - DI トークン定義: `API_TYPES = { ApiClient: Symbol.for('ApiClient') }`
+  - `packages/api/src/client/http-client.ts` を作成
+  - `HttpClient` interface を定義（get, post, put, patch, delete, postFormData）
+  - `RequestOptions` 型を定義（必要に応じてヘッダー等を渡せるように）
   - `packages/api/src/index.ts` からエクスポート
-- **完了条件**: `@picstash/api` から `ApiClient` インターフェースと `API_TYPES` がインポート可能
+- **完了条件**: `@picstash/api` から `HttpClient` interface がインポート可能
 
-#### T2: web-client に inversify を導入
+#### T2: `@picstash/api` に ApiClient 実装を追加
 
-- **概要**: web-client パッケージに inversify と reflect-metadata を導入し、DI コンテナの基盤を構築する
+- **概要**: HttpClient を受け取り、URL ビルド + API 呼び出しを行う ApiClient を実装
 - **作業内容**:
-  - `npm install inversify reflect-metadata -w @picstash/web-client`
-  - `packages/web-client/src/shared/di/` ディレクトリを作成
-  - `container.ts` — inversify Container の作成・設定
-  - `index.ts` — Public API
-  - `main.tsx` のエントリポイントで `import 'reflect-metadata'` を追加
-  - tsconfig.json に `"experimentalDecorators": true`, `"emitDecoratorMetadata": true` を追加（必要な場合）
-- **完了条件**: inversify Container が web-client で利用可能、typecheck が通る
+  - `packages/api/src/client/api-client.ts` に `createApiClient(http: HttpClient): ApiClient` を実装
+  - 各リソースの ApiClient 実装:
+    - `ImageApiClientImpl` — imageEndpoints を使って URL をビルドし、http に委譲
+    - `CollectionApiClientImpl` — collectionsEndpoints を使用
+    - `LabelApiClientImpl` — labelsEndpoints を使用
+    - ... 他のリソースも同様
+  - 既存の interface 定義（`ImageApiClient` 等）はそのまま使用
+  - `API_TYPES` に `HttpClient` シンボルを追加
+- **完了条件**: `createApiClient(http)` が動作し、全リソースの API Client が利用可能
 
-#### T3: FetchApiClient 実装（entities 系）
+#### T3: web-client に FetchHttpClient 実装を作成
 
-- **概要**: `ApiClient` インターフェースの entities 関連部分（images, collections, labels）の fetch ベース実装を作成する
+- **概要**: `HttpClient` interface の fetch ベース実装を作成
 - **作業内容**:
-  - `packages/web-client/src/shared/api/fetch-client/` ディレクトリを作成
-  - `FetchImageApiClient` — 既存の `entities/image/api/image.ts` のロジックを移植
-  - `FetchCollectionApiClient` — 既存の `entities/collection/api/collection.ts` のロジックを移植
-  - `FetchLabelApiClient` — 既存の `entities/label/api/label.ts` のロジックを移植
-  - 各クラスに `@injectable()` デコレータ（または inversify 7.x の場合は関数ベース API）
-  - コンテナにバインド
-- **完了条件**: entities 系の FetchApiClient 実装がコンテナから取得可能、typecheck が通る
+  - `packages/web-client/src/shared/api/fetch-http-client.ts` を作成
+  - `FetchHttpClient` クラスを実装（既存の `BaseHttpClient` を参考に）
+  - エラーハンドリング、204 No Content 対応等を含める
+- **完了条件**: `FetchHttpClient` が `HttpClient` interface を満たす
 
-#### T4: FetchApiClient 実装（features 系）
+#### T4: web-client の既存 FetchApiClient を削除し、api パッケージの ApiClient に移行
 
-- **概要**: `ApiClient` インターフェースの features 関連部分の fetch ベース実装を作成する
+- **概要**: web-client の FetchApiClient を削除し、api パッケージの ApiClient を使用するように変更
 - **作業内容**:
-  - `FetchSearchApiClient` — search-images/api/search.ts のロジックを移植
-  - `FetchStatsApiClient` — view-stats/api/stats.ts のロジックを移植
-  - `FetchViewHistoryApiClient` — track-view-history/api/view-history.ts のロジックを移植
-  - `FetchRecommendationsApiClient` — view-recommendations/api/recommendations.ts のロジックを移植
-  - `FetchArchiveImportApiClient` — import-archive/api/archive.ts のロジックを移植
-  - `FetchUrlCrawlApiClient` — import-url/api/crawl.ts のロジックを移植
-  - `FetchImageAttributeApiClient` — manage-image-attributes/api/attributes.ts のロジックを移植
-  - `FetchDescriptionApiClient` — manage-image-description/api/description.ts のロジックを移植
-  - `FetchDuplicatesApiClient` — find-duplicates/api/duplicates.ts のロジックを移植（ハードコード URL を修正）
-  - `FetchSimilarImagesApiClient` — find-similar-images/api/similar.ts のロジックを移植
-  - `FetchJobsApiClient` — widgets/job-status のジョブ API のロジックを移植
-  - `FetchUploadApiClient` — upload-image/api/upload.ts のロジックを移植（FormData 対応）
-  - 統合 `FetchApiClient` クラスでまとめてコンテナにバインド
-- **完了条件**: 全 FetchApiClient 実装がコンテナから取得可能、typecheck が通る
+  - `packages/web-client/src/shared/api/fetch-client/` ディレクトリを削除
+  - `shared/di/container.ts` を更新:
+    - FetchHttpClient を HttpClient としてバインド
+    - `createApiClient(httpClient)` で ApiClient を生成してバインド
+  - `useApiClient()` hook は変更なし（ApiClient を返す）
+- **完了条件**: web-client が api パッケージの ApiClient を使用、既存のテストが通る
 
-#### T5: React Context + hooks 連携
+#### T5: entities 層の API アダプター移行
 
-- **概要**: inversify コンテナを React Context で提供し、hooks 経由で API クライアントを利用できるようにする
+- **概要**: entities の API アダプター（image, collection, label）を `ApiClient` 経由に移行
 - **作業内容**:
-  - `packages/web-client/src/shared/di/react.tsx` を作成:
-    - `ContainerContext` — React.createContext
-    - `ContainerProvider` — コンテナを提供するプロバイダーコンポーネント
-    - `useContainer()` — コンテナを取得する hook
-    - `useApiClient()` — `ApiClient` を取得する hook（ショートカット）
-  - `app/providers/index.tsx` に `ContainerProvider` を追加
-  - Storybook の decorator にも `ContainerProvider` を追加（モック or 実コンテナ）
-- **完了条件**: `useApiClient()` がコンポーネントから利用可能、Storybook でも動作
+  - 各 entity の `api/*.ts` ファイルを `useApiClient()` 経由に変更
+  - または: entities の API モジュールを廃止し、直接 `useApiClient()` を使用
+- **完了条件**: entities の API 呼び出しが全て ApiClient 経由
 
-#### T6: entities 層の API アダプター移行
+#### T6: features 層の API アダプター移行
 
-- **概要**: entities の API アダプター（image, collection, label）を `ApiClient` インターフェース経由に移行する
-- **作業内容**:
-  - `entities/image/api/image.ts` の各関数を `useApiClient().images.xxx()` 経由に変更
-    - 注意: 既存の関数エクスポートを維持しつつ、内部実装を ApiClient に委譲する方法を検討
-    - または: entities の API モジュールを廃止し、各呼び出し元で直接 `useApiClient()` を使用する
-  - `entities/collection/api/collection.ts` — 同様
-  - `entities/label/api/label.ts` — 同様
-  - `getImageUrl()`, `getThumbnailUrl()` 等の URL 生成関数も ApiClient 経由に統一
-  - 各 entity の `index.ts` エクスポートを更新
-- **完了条件**: entities の API 呼び出しが全て ApiClient 経由、既存の動作が維持される
-- **設計判断**: 移行方法は T3 実装時に決定（関数ラッパー維持 vs 直接 hook 使用）
-
-#### T7: features 層の API アダプター移行
-
-- **概要**: features の API アダプター（11 ファイル）を `ApiClient` インターフェース経由に移行する
+- **概要**: features の API アダプター（11 ファイル）を `ApiClient` 経由に移行
 - **作業内容**:
   - 各 feature の `api/*.ts` ファイルを ApiClient 経由に移行
-  - 特殊ケースの対応:
-    - `upload-image/api/upload.ts` — FormData を使う特殊パターン。FetchUploadApiClient 内で対応
-    - `find-duplicates/api/duplicates.ts` — ハードコード URL を imageEndpoints に修正しつつ移行
-    - `import-archive/api/archive.ts` — multipart upload + session 管理。FetchArchiveImportApiClient 内で対応
-  - 各 feature の `index.ts` エクスポートを更新
-  - useViewProps フックや各コンポーネントで `useApiClient()` を使用するように更新
-- **完了条件**: features の API 呼び出しが全て ApiClient 経由、既存の動作が維持される
+- **完了条件**: features の API 呼び出しが全て ApiClient 経由
 
-#### T8: テスト・Storybook 対応
+#### T7: テスト・Storybook 対応
 
-- **概要**: 移行後のテスト・Storybook の動作を確保する
+- **概要**: 移行後のテスト・Storybook の動作を確保
 - **作業内容**:
   - 既存ユニットテストの更新（API モック方法の変更）
-  - Storybook decorator の `ContainerProvider` 設定
-    - Stories では API を呼ばない View コンポーネントが主なので影響は限定的
-    - Container 子コンポーネントを含む Stories（ImageDetailPageView 等）への対応
-  - `npm run typecheck`
-  - `npm run lint`（ESLint + dependency-cruiser）
-  - `npm run test -w @picstash/web-client`
-  - `npm run test:storybook -w @picstash/web-client`
+  - HttpClient をモックしたテスト用コンテナの作成
+  - Storybook decorator の更新
 - **完了条件**: 全テスト・lint・Storybook テストが通る
 
-#### T9: クリーンアップ・ドキュメント更新
+#### T8: クリーンアップ・ドキュメント更新
 
 - **概要**: 不要になったコードの削除とドキュメント更新
 - **作業内容**:
-  - `shared/api/client.ts`（旧 `apiClient` 関数）の削除（FetchApiClient 内に吸収済み）
+  - `shared/api/client.ts`（旧 `apiClient` 関数）の削除
   - 不要になった直接インポート（`imageEndpoints` 等）の削除
-  - dependency-cruiser ルールの更新（必要な場合）
-  - vitest.config.ts のカバレッジパス更新（必要な場合）
+  - dependency-cruiser ルールの更新
 - **完了条件**: 不要コードが削除され、ドキュメントが最新状態
 
 ## 設計上のポイント
 
-1. **インターフェースの粒度**: リソース単位（`ImageApiClient`, `LabelApiClient` 等）で分割。既存のエンドポイント定義と 1:1 対応させる
-2. **URL 生成関数の扱い**: `getImageUrl()`, `getThumbnailUrl()` 等の同期 URL 生成関数も ApiClient に含める。これにより全ての API 関連ロジックが ApiClient に集約される
-3. **FormData アップロード**: `FetchUploadApiClient` と `FetchArchiveImportApiClient` 内で `Content-Type` を設定せず、ブラウザに `multipart/form-data` boundary を自動設定させる
-4. **inversify バージョン**: inversify 7.x では decorator ベースではなく関数ベース API（`injectable()` 関数）を使用する可能性がある。T2 で実際のバージョンに合わせて決定
-5. **移行戦略**: 既存の関数エクスポートを一時的にラッパーとして維持し、段階的に直接 `useApiClient()` 使用に移行する。これにより大量の呼び出し元を一度に変更する必要がない
-6. **Storybook**: View コンポーネントは props のみに依存するため、API クライアントの移行による影響は Container コンポーネントを含む Stories のみ
-7. **`@picstash/core` の TYPES との共存**: API クライアント用の `API_TYPES` は `@picstash/api` で定義し、サーバー側の `TYPES`（リポジトリ・サービス用）とは別の名前空間にする
+1. **HttpClient の責務**: HTTP リクエストの送信と基本的なエラーハンドリングのみ。URL ビルドは ApiClient の責務
+2. **URL 生成関数の扱い**: エンドポイント定義（imageEndpoints 等）は api パッケージ内部でのみ使用。外部からは ApiClient 経由でアクセス
+3. **FormData アップロード**: `postFormData` メソッドで対応。ApiClient 内で FormData を構築し、HttpClient に渡す
+4. **inversify の活用**: HttpClient と ApiClient の両方をコンテナで管理。テスト時は MockHttpClient を注入可能
+5. **段階的移行**: 既存の関数エクスポートを一時的にラッパーとして維持し、段階的に直接 `useApiClient()` 使用に移行
 
 ## 進捗
 
 - 2026-02-05: プロジェクト開始、計画策定
-- 2026-02-05: T2 完了 — web-client に inversify を導入
-  - inversify 7.11.0 + reflect-metadata 導入済み
-  - `shared/di/` モジュール作成（container.ts, react.tsx, index.ts）
-  - ContainerProvider と useContainer hook 提供
-  - app/providers に ContainerProvider 統合
+- 2026-02-05: web-client に inversify を導入（PR #164 でマージ済み）
+- 2026-02-05: 方針変更 — HttpClient interface を api パッケージで定義し、ApiClient 実装も api パッケージで提供する方向に変更
