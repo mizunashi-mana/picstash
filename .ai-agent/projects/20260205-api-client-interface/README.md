@@ -104,7 +104,7 @@ export async function deleteImage(id: string): Promise<void> {
 | ID | タスク | 依存 | 優先度 | 状態 |
 |----|--------|------|--------|------|
 | T1 | `@picstash/api` にインターフェース定義を追加 | - | 高 | 未着手 |
-| T2 | web-client に inversify を導入 | - | 高 | 未着手 |
+| T2 | web-client に inversify を導入 | - | 高 | 完了 |
 | T3 | FetchApiClient 実装（entities 系） | T1, T2 | 高 | 未着手 |
 | T4 | FetchApiClient 実装（features 系） | T1, T2 | 高 | 未着手 |
 | T5 | React Context + hooks 連携 | T2 | 高 | 未着手 |
@@ -296,3 +296,8 @@ T2 (inversify 導入)
 ## 進捗
 
 - 2026-02-05: プロジェクト開始、計画策定
+- 2026-02-05: T2 完了 — web-client に inversify を導入
+  - inversify 7.11.0 + reflect-metadata 導入済み
+  - `shared/di/` モジュール作成（container.ts, react.tsx, index.ts）
+  - ContainerProvider と useContainer hook 提供
+  - app/providers に ContainerProvider 統合
