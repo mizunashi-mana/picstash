@@ -6,7 +6,7 @@ import type {
   UrlCrawlImportResult,
   UrlCrawlSession,
   UrlCrawlSessionDetail,
-} from '../url-crawl.js';
+} from '@/url-crawl.js';
 
 export interface UrlCrawlApiClient {
   /** URL クロール開始 */

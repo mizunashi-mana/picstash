@@ -10,7 +10,7 @@ import type {
   CreateCollectionInput,
   UpdateCollectionInput,
   UpdateOrderInput,
-} from '../collections.js';
+} from '@/collections.js';
 
 export interface CollectionApiClient {
   /** コレクション一覧取得 */

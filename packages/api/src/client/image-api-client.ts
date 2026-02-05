@@ -2,7 +2,7 @@
  * Image API Client Interface
  */
 
-import type { Collection } from '../collections.js';
+import type { Collection } from '@/collections.js';
 import type {
   DuplicatesQuery,
   DuplicatesResponse,
@@ -16,7 +16,7 @@ import type {
   SuggestedAttributesQuery,
   SuggestedAttributesResponse,
   UpdateImageInput,
-} from '../images.js';
+} from '@/images.js';
 
 export interface ImageApiClient {
   /** 画像一覧取得 */

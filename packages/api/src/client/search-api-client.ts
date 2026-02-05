@@ -6,7 +6,7 @@ import type {
   SearchHistory,
   SearchHistoryResponse,
   SearchSuggestionsResponse,
-} from '../search.js';
+} from '@/search.js';
 
 export interface SearchApiClient {
   /** 検索サジェスト取得 */
