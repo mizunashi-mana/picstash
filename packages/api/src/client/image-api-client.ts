@@ -56,6 +56,5 @@ export interface ImageApiClient {
   fetchCollections: (imageId: string) => Promise<Collection[]>;
 
   /** 画像アップロード */
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in browser environment
   upload: (file: Blob) => Promise<Image>;
 }

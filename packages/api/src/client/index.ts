@@ -1,3 +1,6 @@
+// HTTP クライアントインターフェース
+export type { HttpClient, RequestOptions } from './http-client.js';
+
 // API クライアントインターフェース
 export type { ApiClient } from './api-client.js';
 export type { ImageApiClient } from './image-api-client.js';
