@@ -11,7 +11,6 @@ import type {
 
 export interface ArchiveImportApiClient {
   /** アーカイブアップロード */
-  // eslint-disable-next-line n/no-unsupported-features/node-builtins -- Blob is available in browser environment
   upload: (file: Blob) => Promise<ArchiveSession>;
 
   /** セッション詳細取得 */
