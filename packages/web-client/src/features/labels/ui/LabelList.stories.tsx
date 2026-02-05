@@ -70,7 +70,7 @@ export const Empty: Story = {
 
 export const SingleLabel: Story = {
   args: {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test data is defined
+
     labels: [mockLabels[0]!],
   },
   play: async ({ canvasElement }) => {

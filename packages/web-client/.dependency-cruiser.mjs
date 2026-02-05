@@ -139,6 +139,19 @@ export default {
       },
     },
 
+    // stories ファイルへの依存を禁止（stories は独立した Storybook 用ファイル）
+    {
+      name: 'no-deps-on-stories',
+      severity: 'error',
+      comment: 'stories ファイルは Storybook 専用であり、他のコードから依存してはいけない',
+      from: {
+        pathNot: '\\.stories\\.tsx$',
+      },
+      to: {
+        path: '\\.stories\\.tsx$',
+      },
+    },
+
     // main.tsx から到達できないモジュールを検出
     {
       name: 'not-reachable-from-main',

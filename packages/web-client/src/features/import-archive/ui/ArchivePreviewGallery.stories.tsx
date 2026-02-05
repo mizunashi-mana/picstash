@@ -133,7 +133,7 @@ export const ToggleSelection: Story = {
 export const SingleImage: Story = {
   args: {
     sessionId: 'test-session-id',
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- mockImages is defined with elements
+
     images: [mockImages[0]!],
     selectedIndices: new Set<number>(),
   },

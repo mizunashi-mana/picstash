@@ -90,7 +90,7 @@ export const PreviewOpen: Story = {
     sessionId: 'test-session-id',
     images: mockImages,
     selectedIndices: new Set([0]),
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- mockImages is defined with elements
+
     previewImage: mockImages[0]!,
     previewOpened: true,
   },
@@ -149,7 +149,7 @@ export const AllSelected: Story = {
 export const SingleImage: Story = {
   args: {
     sessionId: 'test-session-id',
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- mockImages is defined with elements
+
     images: [mockImages[0]!],
     selectedIndices: new Set<number>(),
     previewImage: null,
