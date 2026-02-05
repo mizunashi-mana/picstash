@@ -35,23 +35,26 @@ PR「$ARGUMENTS」のコードをレビューし、GitHub の Review 機能で�
      - エラーハンドリング
      - テストの妥当性
 
-5. **レビュー結果をユーザーに提示**:
-   - 問題点と改善提案を一覧化
-   - 深刻度（Critical/Warning/Info）を付与
-   - ユーザーの確認を得る
-
-6. **Pending Review の作成**:
+5. **Pending Review の作成**:
    - `mcp__github__pull_request_review_write` で pending review を作成（method: `create`）
    - event は指定せず、まず pending 状態で作成
 
-7. **行コメントの追加**:
+6. **行コメントの追加**:
    - `mcp__github__add_comment_to_pending_review` で各コメントを追加
    - 適切な行番号と side (LEFT/RIGHT) を指定
    - subjectType: LINE で行レベルのコメント
+   - Critical/Warning の指摘がある場合のみ行コメントを追加
 
-8. **ユーザー確認後に Submit**:
-   - レビュー結果（APPROVE / REQUEST_CHANGES / COMMENT）を選択
+7. **Submit**:
+   - レビュー結果に基づいてアクションを決定:
+     - Critical がある場合: REQUEST_CHANGES
+     - Critical がなく Warning のみ、または Info のみ: COMMENT
+     - 問題がない場合: APPROVE（自分の PR の場合は COMMENT にフォールバック）
    - `mcp__github__pull_request_review_write` で submit（method: `submit_pending`）
+   - body に総評を含める
+
+8. **レビュー結果の報告**:
+   - 投稿完了後、ユーザーにレビュー結果のサマリーを報告
 
 ## レビュー観点
 
