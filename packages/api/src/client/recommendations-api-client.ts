@@ -9,7 +9,7 @@ import type {
   RecommendationsQuery,
   RecommendationsResult,
   RecordClickInput,
-} from '../recommendations.js';
+} from '@/recommendations.js';
 
 export interface RecommendationsApiClient {
   /** レコメンド取得 */

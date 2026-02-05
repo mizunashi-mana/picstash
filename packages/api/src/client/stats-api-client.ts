@@ -9,7 +9,7 @@ import type {
   PopularImage,
   PopularImagesQueryOptions,
   StatsQueryOptions,
-} from '../stats.js';
+} from '@/stats.js';
 
 export interface StatsApiClient {
   /** 概要統計取得 */

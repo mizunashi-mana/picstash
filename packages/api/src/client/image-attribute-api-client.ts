@@ -6,7 +6,7 @@ import type {
   CreateImageAttributeInput,
   ImageAttribute,
   UpdateImageAttributeInput,
-} from '../image-attributes.js';
+} from '@/image-attributes.js';
 
 export interface ImageAttributeApiClient {
   /** 画像の属性一覧取得 */

@@ -6,7 +6,7 @@ import type {
   CreateLabelInput,
   Label,
   UpdateLabelInput,
-} from '../labels.js';
+} from '@/labels.js';
 
 export interface LabelApiClient {
   /** ラベル一覧取得 */

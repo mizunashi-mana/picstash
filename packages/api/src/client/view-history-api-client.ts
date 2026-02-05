@@ -5,7 +5,7 @@
 import type { ViewHistoryListQuery,
   ImageViewStats,
   ViewHistory,
-  ViewHistoryWithImage } from '../view-history.js';
+  ViewHistoryWithImage } from '@/view-history.js';
 
 export interface ViewHistoryApiClient {
   /** 閲覧開始記録 */

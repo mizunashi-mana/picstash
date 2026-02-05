@@ -7,7 +7,7 @@ import type {
   ArchiveSessionDetail,
   ImportJobStartResponse,
   ImportJobStatus,
-} from '../archives.js';
+} from '@/archives.js';
 
 export interface ArchiveImportApiClient {
   /** アーカイブアップロード */
