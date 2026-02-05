@@ -1,19 +1,23 @@
-import { API_TYPES, type ApiClient } from '@picstash/api';
+import { API_TYPES, createApiClient, type ApiClient, type HttpClient } from '@picstash/api';
 import { Container } from 'inversify';
-import { createFetchApiClient } from '@/shared/api/fetch-client';
+import { FetchHttpClient } from '@/shared/api/fetch-http-client';
 
 /**
  * Creates and configures the web-client DI container.
  *
  * Binds:
- * - API_TYPES.ApiClient -> FetchApiClient instance (singleton)
+ * - API_TYPES.HttpClient -> FetchHttpClient instance (singleton)
+ * - API_TYPES.ApiClient -> ApiClient instance created with HttpClient (singleton)
  */
 export function createContainer(): Container {
   const container = new Container();
 
-  // Bind ApiClient to FetchApiClient instance as a singleton
-  // Using toConstantValue avoids the need for @injectable() decorator
-  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createFetchApiClient());
+  // Bind HttpClient to FetchHttpClient instance as a singleton
+  const httpClient = new FetchHttpClient();
+  container.bind<HttpClient>(API_TYPES.HttpClient).toConstantValue(httpClient);
+
+  // Bind ApiClient using createApiClient from @picstash/api
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createApiClient(httpClient));
 
   return container;
 }

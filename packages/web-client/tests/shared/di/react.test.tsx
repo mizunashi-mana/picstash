@@ -2,7 +2,6 @@ import { API_TYPES, type ApiClient } from '@picstash/api';
 import { renderHook } from '@testing-library/react';
 import { Container } from 'inversify';
 import { describe, expect, it } from 'vitest';
-import { FetchApiClient } from '@/shared/api/fetch-client';
 import { ContainerProvider, useContainer, useApiClient } from '@/shared/di/react';
 
 describe('ContainerProvider', () => {
@@ -59,7 +58,10 @@ describe('useApiClient', () => {
       ),
     });
 
-    expect(result.current).toBeInstanceOf(FetchApiClient);
+    // ApiClient has expected properties from createApiClient
+    expect(result.current).toHaveProperty('images');
+    expect(result.current).toHaveProperty('collections');
+    expect(result.current).toHaveProperty('labels');
   });
 
   it('should return the same ApiClient instance across re-renders', () => {
