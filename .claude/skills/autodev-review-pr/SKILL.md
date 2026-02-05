@@ -9,40 +9,47 @@ PR「$ARGUMENTS」のコードをレビューし、GitHub の Review 機能で�
 
 ## 手順
 
-1. **PR 情報の取得**:
+1. **Steering ドキュメントの確認**:
+   - `.ai-agent/steering/tech.md` で技術スタック・コーディング規約を確認
+   - `.ai-agent/steering/plan.md` で実装計画・方針を確認
+   - `.ai-agent/structure.md` でディレクトリ構成・アーキテクチャを確認
+   - 変更内容が関連する場合は `.ai-agent/steering/product.md` も参照
+
+2. **PR 情報の取得**:
    - `mcp__github__pull_request_read` で PR の基本情報を取得（method: `get`）
    - タイトル、説明、ベースブランチを確認
 
-2. **変更ファイルの取得**:
+3. **変更ファイルの取得**:
    - `mcp__github__pull_request_read` で変更ファイル一覧を取得（method: `get_files`）
    - `mcp__github__pull_request_read` で差分を取得（method: `get_diff`）
 
-3. **コードレビュー実施**:
+4. **コードレビュー実施**:
    - 各変更ファイルを確認
    - 以下の観点でレビュー:
      - バグ・ロジックエラー
      - セキュリティ問題（インジェクション、認証、認可）
      - パフォーマンス問題
      - 可読性・保守性
-     - 命名規則・コーディング規約
+     - 命名規則・コーディング規約（tech.md 準拠）
+     - アーキテクチャ整合性（FSD レイヤー、DI パターン等）
      - エラーハンドリング
      - テストの妥当性
 
-4. **レビュー結果をユーザーに提示**:
+5. **レビュー結果をユーザーに提示**:
    - 問題点と改善提案を一覧化
    - 深刻度（Critical/Warning/Info）を付与
    - ユーザーの確認を得る
 
-5. **Pending Review の作成**:
+6. **Pending Review の作成**:
    - `mcp__github__pull_request_review_write` で pending review を作成（method: `create`）
    - event は指定せず、まず pending 状態で作成
 
-6. **行コメントの追加**:
+7. **行コメントの追加**:
    - `mcp__github__add_comment_to_pending_review` で各コメントを追加
    - 適切な行番号と side (LEFT/RIGHT) を指定
    - subjectType: LINE で行レベルのコメント
 
-7. **ユーザー確認後に Submit**:
+8. **ユーザー確認後に Submit**:
    - レビュー結果（APPROVE / REQUEST_CHANGES / COMMENT）を選択
    - `mcp__github__pull_request_review_write` で submit（method: `submit_pending`）
 
@@ -57,6 +64,8 @@ PR「$ARGUMENTS」のコードをレビューし、GitHub の Review 機能で�
 - パフォーマンス問題
 - エラーハンドリングの不足
 - 将来の保守性に影響する設計
+- プロジェクト方針・アーキテクチャとの不整合（FSD レイヤー違反、DI パターン逸脱等）
+- tech.md のコーディング規約違反
 
 ### Info（提案）
 - コードスタイル・可読性の改善
@@ -92,6 +101,7 @@ PR「$ARGUMENTS」のコードをレビューし、GitHub の Review 機能で�
 
 ## 注意事項
 
+- **Steering ドキュメントを必ず参照**: プロジェクト固有の方針・規約に基づいたレビューを行う
 - ローカルにチェックアウトされていないファイルは `mcp__github__get_file_contents` で取得
 - 大きな PR の場合はファイルごとに段階的にレビュー
 - 技術的に正確な指摘を心がける
