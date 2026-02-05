@@ -4,6 +4,71 @@
  * client と server で共有するコレクション関連の API 定義
  */
 
+// ============================================================
+// レスポンス型
+// ============================================================
+
+/** コレクション */
+export interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+  coverImageId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** コレクション（画像数付き） */
+export interface CollectionWithCount extends Collection {
+  imageCount: number;
+}
+
+/** コレクション画像 */
+export interface CollectionImage {
+  id: string;
+  imageId: string;
+  order: number;
+  title: string;
+  thumbnailPath: string | null;
+}
+
+/** コレクション（画像付き） */
+export interface CollectionWithImages extends Collection {
+  images: CollectionImage[];
+}
+
+/** コレクション作成入力 */
+export interface CreateCollectionInput {
+  name: string;
+  description?: string;
+  coverImageId?: string;
+}
+
+/** コレクション更新入力 */
+export interface UpdateCollectionInput {
+  name?: string;
+  description?: string | null;
+  coverImageId?: string | null;
+}
+
+/** コレクション画像追加入力 */
+export interface AddImageInput {
+  imageId: string;
+  order?: number;
+}
+
+/** コレクション画像順序更新入力 */
+export interface UpdateOrderInput {
+  orders: Array<{
+    imageId: string;
+    order: number;
+  }>;
+}
+
+// ============================================================
+// エンドポイント定義
+// ============================================================
+
 /**
  * コレクションエンドポイント定義
  */

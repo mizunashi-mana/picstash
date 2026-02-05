@@ -45,6 +45,9 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/setup-node
 
+      - name: Build api package
+        run: npm run build -w @picstash/api
+
       - name: Install Playwright browsers
         run: npx playwright install chromium
         working-directory: packages/web-client
@@ -104,6 +107,9 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: ./.github/actions/setup-node
+
+      - name: Build api package
+        run: npm run build -w @picstash/api
 
       - name: Run Desktop E2E tests
         run: xvfb-run --auto-servernum npm run test:e2e -w @picstash/desktop-app

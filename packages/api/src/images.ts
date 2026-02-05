@@ -41,6 +41,107 @@ export type DuplicatesQuery = {
 };
 
 // ============================================================
+// レスポンス型
+// ============================================================
+
+/** 画像 */
+export interface Image {
+  id: string;
+  path: string;
+  thumbnailPath: string | null;
+  mimeType: string;
+  size: number;
+  width: number | null;
+  height: number | null;
+  title: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** 画像更新入力 */
+export interface UpdateImageInput {
+  description?: string | null;
+}
+
+/** ページネーション結果 */
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+/** ページネーションオプション */
+export interface PaginationOptions {
+  limit?: number;
+  offset?: number;
+}
+
+/** 類似画像 */
+export interface SimilarImage {
+  id: string;
+  title: string;
+  thumbnailPath: string | null;
+  distance: number;
+}
+
+/** 類似画像レスポンス */
+export interface SimilarImagesResponse {
+  imageId: string;
+  similarImages: SimilarImage[];
+}
+
+/** 重複画像情報 */
+export interface DuplicateImageInfo {
+  id: string;
+  title: string;
+  thumbnailPath: string | null;
+  createdAt: string;
+  distance?: number;
+}
+
+/** 重複画像グループ */
+export interface DuplicateGroup {
+  original: DuplicateImageInfo;
+  duplicates: DuplicateImageInfo[];
+}
+
+/** 重複画像レスポンス */
+export interface DuplicatesResponse {
+  groups: DuplicateGroup[];
+  totalGroups: number;
+  totalDuplicates: number;
+}
+
+/** 属性提案キーワード */
+export interface SuggestedKeyword {
+  keyword: string;
+  count: number;
+}
+
+/** 属性提案 */
+export interface AttributeSuggestion {
+  labelId: string;
+  labelName: string;
+  score: number;
+  suggestedKeywords: SuggestedKeyword[];
+}
+
+/** 属性提案レスポンス */
+export interface SuggestedAttributesResponse {
+  imageId: string;
+  suggestions: AttributeSuggestion[];
+}
+
+/** 説明文生成ジョブレスポンス */
+export interface GenerateDescriptionJobResponse {
+  jobId: string;
+  status: 'queued';
+  message: string;
+}
+
+// ============================================================
 // エンドポイント定義
 // ============================================================
 

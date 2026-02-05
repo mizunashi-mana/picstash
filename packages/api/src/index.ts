@@ -11,7 +11,13 @@ export * from './search.js';
 export * from './jobs.js';
 export * from './collections.js';
 export * from './view-history.js';
+export * from './recommendations.js';
+export * from './archives.js';
+export * from './url-crawl.js';
 
 // 共有型定義
 export type * from './image-attributes.js';
 export * from './labels.js';
+
+// API クライアントインターフェース
+export * from './client/index.js';
