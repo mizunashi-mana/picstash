@@ -18,3 +18,6 @@ export type { JobsApiClient } from './jobs-api-client.js';
 
 // DI トークン
 export { API_TYPES } from './types.js';
+
+// API Client 生成関数
+export { createApiClient } from './create-api-client.js';
