@@ -41,6 +41,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     image: mockImage,
+    imageUrl: `/api/images/${mockImage.id}/file`,
     isLoading: false,
     error: null,
     deleteModalOpened: false,
@@ -67,6 +68,7 @@ export const Default: Story = {
 export const Loading: Story = {
   args: {
     image: undefined,
+    imageUrl: undefined,
     isLoading: true,
     error: null,
     deleteModalOpened: false,
@@ -83,6 +85,7 @@ export const Loading: Story = {
 export const Error: Story = {
   args: {
     image: undefined,
+    imageUrl: undefined,
     isLoading: false,
     error: new globalThis.Error('画像の取得に失敗しました'),
     deleteModalOpened: false,
@@ -100,6 +103,7 @@ export const Error: Story = {
 export const NotFound: Story = {
   args: {
     image: undefined,
+    imageUrl: undefined,
     isLoading: false,
     error: null,
     deleteModalOpened: false,
@@ -117,6 +121,7 @@ export const NotFound: Story = {
 export const DeleteModalOpen: Story = {
   args: {
     image: mockImage,
+    imageUrl: `/api/images/${mockImage.id}/file`,
     isLoading: false,
     error: null,
     deleteModalOpened: true,
@@ -141,6 +146,7 @@ export const DeleteModalOpen: Story = {
 export const DeleteModalDeleting: Story = {
   args: {
     image: mockImage,
+    imageUrl: `/api/images/${mockImage.id}/file`,
     isLoading: false,
     error: null,
     deleteModalOpened: true,

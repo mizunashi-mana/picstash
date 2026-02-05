@@ -1,19 +1,26 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
+import { Container } from 'inversify';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { SimilarImagesSection } from '@/features/find-similar-images';
 import { fetchSimilarImages } from '@/features/find-similar-images/api/similar';
-
-vi.mock('@/entities/image', () => ({
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-}));
+import { ContainerProvider } from '@/shared/di';
 
 vi.mock('@/features/find-similar-images/api/similar', () => ({
   fetchSimilarImages: vi.fn(),
 }));
+
+function createMockApiClient() {
+  return {
+    images: {
+      getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
+    },
+  } as unknown as ApiClient;
+}
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -23,11 +30,16 @@ function createWrapper() {
     },
   });
 
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient());
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
         <MantineProvider>
-          <MemoryRouter>{children}</MemoryRouter>
+          <ContainerProvider container={container}>
+            <MemoryRouter>{children}</MemoryRouter>
+          </ContainerProvider>
         </MantineProvider>
       </QueryClientProvider>
     );

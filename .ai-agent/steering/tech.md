@@ -94,31 +94,117 @@ app → pages → widgets → features → entities → shared
 ```
 
 - **app** — エントリポイント、プロバイダー、ルーティング
-- **pages** — ページコンポーネント（View Props パターン適用）
+- **pages** — ページコンポーネント（View / State 分離パターン適用）
 - **widgets** — 自己完結した UI ブロック（AppLayout, JobStatus）
 - **features** — 機能単位のモジュール（ユーザーアクション）
-- **entities** — ビジネスエンティティ（型定義 + API のみ、UI は持たない）
-- **shared** — 共通部品（API クライアント、ヘルパー、フック）
+- **entities** — ビジネスエンティティの型定義（`@picstash/api` から re-export のみ、UI・API 関数は持たない）
+- **shared** — 共通部品（DI コンテナ、API クライアント、ヘルパー、フック）
 
 dependency-cruiser（`.dependency-cruiser.mjs`）でレイヤー間の依存方向とスライス間の分離を自動検証。
 
-### View Props パターン
+### DI コンテナ（web-client）
 
-状態管理と描画を分離する View Props パターンを全 pages および主要 features に適用：
+web-client でも inversify を使用した DI コンテナで API クライアントを管理：
+
+```typescript
+// app/providers/ContainerProvider.tsx
+import { Container } from 'inversify';
+import { API_TYPES, type ApiClient } from '@picstash/api';
+import { ContainerProvider } from '@/shared/di';
+
+const container = new Container();
+container.bind<ApiClient>(API_TYPES.ApiClient).to(FetchApiClient).inSingletonScope();
+
+<ContainerProvider container={container}>
+  <App />
+</ContainerProvider>
+
+// コンポーネントからの利用
+import { useApiClient } from '@/shared';
+
+function ImageList() {
+  const apiClient = useApiClient();
+  const { data } = useQuery({
+    queryKey: ['images'],
+    queryFn: () => apiClient.images.list(),
+  });
+}
+```
+
+**ファイル構成:**
+```
+packages/web-client/src/shared/di/
+├── index.ts           # エクスポート（ContainerProvider, useApiClient 等）
+└── react.tsx          # ContainerContext, ContainerProvider, useContainer, useApiClient
+```
+
+### View / State 分離パターン
+
+状態管理と描画を分離するパターンを全 pages および主要 features に適用。単に ViewProps を明示するだけでなく、**View / Handler / State / Selector の4要素への分解**が核心。
+
+#### 4要素の役割
+
+| 要素 | 責務 | 例 |
+|------|------|-----|
+| **State** | コンポーネントの状態（React State, URL State, Server State） | `images`, `isLoading`, `error`, `query` |
+| **Selector** | State から派生する計算値 | `filteredImages`, `total`, `hasNextPage` |
+| **Handler** | ユーザーアクションに応じた状態変更 | `onSearch`, `onDelete`, `onToggleExpand` |
+| **View** | State/Selector/Handler を受け取り描画のみ行う純粋コンポーネント | `<GalleryPageView {...viewProps} />` |
+
+#### 目的
+
+1. **テスタビリティ**: View は props のみに依存するため、Storybook で全状態パターンを網羅できる
+2. **関心の分離**: 「何を表示するか」と「どう状態を管理するか」を明確に分離
+3. **再利用性**: 同じ View を異なる状態管理ロジックで再利用可能
+4. **型安全性**: ViewProps インターフェースで View と Hook 間の契約を明示
+
+#### ファイル構成
 
 ```
 Xxx.tsx               — useViewProps + View の統合（Container、7 LOC 程度）
 XxxView.tsx           — ViewProps のみを受け取る純粋な描画（View）
-useXxxViewProps.ts    — State / Queries / Mutations / Selectors / Handlers を提供（Hook）
+useXxxViewProps.ts    — State / Selector / Handler を提供（Hook）
 XxxView.stories.tsx   — Storybook ストーリー（View に対して作成）
 ```
 
-- 適用基準: 状態遷移が複数あり、ハンドラが3つ以上のコンポーネント
+#### ViewProps インターフェース例
+
+```typescript
+// useGalleryPageViewProps.ts
+export interface GalleryPageViewProps {
+  // State（現在の状態）
+  query: string;
+  viewMode: 'grid' | 'carousel';
+  isLoading: boolean;
+  error: Error | null;
+
+  // Selector（派生値）
+  allImages: Image[];
+  total: number;
+  isFetchingNextPage: boolean;
+
+  // Handler（アクション）
+  onSearchChange: (query: string) => void;
+  onViewModeChange: (mode: 'grid' | 'carousel') => void;
+  onDeleteAllHistory: () => void;
+
+  // 依存（外部から注入される関数）
+  getThumbnailUrl: (imageId: string) => string;
+}
+```
+
+#### 適用基準
+
+- 状態遷移が複数あるか、ハンドラが2つ以上のコンポーネント
 - 適用済み（Pages）: GalleryPage, ImageDetailPage, LabelsPage, CollectionsPage, StatsPage, DuplicatesPage, CollectionDetailPage, CollectionViewerPage
 - 適用済み（Features）: ArchiveImportTab, UrlCrawlTab, ImageUploadTab, ImageCollectionsSection, RecommendationSection, CrawlPreviewGallery, ImageAttributeSection, ImageDescriptionSection, SimilarImagesSection
+
+#### 実装ルール
+
 - Stories は View コンポーネントに対してのみ作成
 - Container は薄いグルーコード: `const viewProps = useXxxViewProps(); return <XxxView {...viewProps} />;`
 - インライン sub-components（CollectionCard, RecommendationCard 等）は View ファイル内に配置
+- View は `useApiClient()` 等の hooks を直接呼ばない（props 経由で受け取る）
 
 ### Storybook
 

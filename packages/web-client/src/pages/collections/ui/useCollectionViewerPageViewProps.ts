@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router';
-import { fetchCollection } from '@/entities/collection';
+import { useApiClient } from '@/shared';
 import type { CollectionViewerPageViewProps } from '@/pages/collections/ui/CollectionViewerPageView';
 
 export function useCollectionViewerPageViewProps(): CollectionViewerPageViewProps {
   const { id, imageId: initialImageId } = useParams<{ id: string; imageId?: string }>();
   const navigate = useNavigate();
+  const apiClient = useApiClient();
   const { data: collection, isLoading, error } = useQuery({
     queryKey: ['collection', id],
     queryFn: async () => {
       if (id === undefined) throw new Error('Collection ID is required');
-      return await fetchCollection(id);
+      return await apiClient.collections.detail(id);
     },
     enabled: id !== undefined,
   });

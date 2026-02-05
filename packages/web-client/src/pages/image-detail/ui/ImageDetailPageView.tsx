@@ -15,7 +15,6 @@ import {
 } from '@mantine/core';
 import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getImageUrl } from '@/entities/image';
 import { SimilarImagesSection } from '@/features/find-similar-images';
 import { ImageAttributeSection } from '@/features/manage-image-attributes';
 import { ImageCollectionsSection } from '@/features/manage-image-collections';
@@ -26,6 +25,8 @@ import type { Image as ImageType } from '@/entities/image';
 export interface ImageDetailPageViewProps {
   /** 画像データ */
   image: ImageType | undefined;
+  /** 画像ファイル URL */
+  imageUrl: string | undefined;
   /** ローディング中 */
   isLoading: boolean;
   /** エラー */
@@ -44,6 +45,7 @@ export interface ImageDetailPageViewProps {
 
 export function ImageDetailPageView({
   image,
+  imageUrl,
   isLoading,
   error,
   deleteModalOpened,
@@ -114,7 +116,7 @@ export function ImageDetailPageView({
 
         <Box>
           <Image
-            src={getImageUrl(image.id)}
+            src={imageUrl}
             alt={image.title}
             fit="contain"
             mah="70vh"

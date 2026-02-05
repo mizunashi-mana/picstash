@@ -1,16 +1,14 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Container } from 'inversify';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ImageCarousel } from '@/features/gallery/ui/ImageCarousel';
+import { ContainerProvider } from '@/shared/di';
 import type { Image } from '@/entities/image';
-
-vi.mock('@/entities/image', () => ({
-  getImageUrl: (id: string) => `/api/images/${id}/file`,
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-}));
 
 vi.mock('@mantine/hooks', async (importOriginal) => {
   const actual = await importOriginal<object>();
@@ -20,11 +18,25 @@ vi.mock('@mantine/hooks', async (importOriginal) => {
   };
 });
 
+function createMockApiClient() {
+  return {
+    images: {
+      getImageUrl: (id: string) => `/api/images/${id}/file`,
+      getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
+    },
+  } as unknown as ApiClient;
+}
+
 function createWrapper() {
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient());
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <MantineProvider>
-        <MemoryRouter>{children}</MemoryRouter>
+        <ContainerProvider container={container}>
+          <MemoryRouter>{children}</MemoryRouter>
+        </ContainerProvider>
       </MantineProvider>
     );
   };

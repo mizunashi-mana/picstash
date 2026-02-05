@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router';
-import { fetchImages } from '@/entities/image';
 import {
   deleteAllSearchHistory,
   saveSearchHistory,
 } from '@/features/search-images';
+import { useApiClient } from '@/shared';
 import { ImageGalleryView } from './ImageGalleryView';
 
 export function ImageGallery() {
@@ -13,10 +13,11 @@ export function ImageGallery() {
   const query = searchParams.get('q') ?? '';
   const [isExpanded, setIsExpanded] = useState(query !== '');
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   const { data: images, isLoading, error } = useQuery({
     queryKey: ['images', query],
-    queryFn: async () => await fetchImages(query),
+    queryFn: async () => await apiClient.images.list({ q: query !== '' ? query : undefined }),
     enabled: isExpanded,
   });
 

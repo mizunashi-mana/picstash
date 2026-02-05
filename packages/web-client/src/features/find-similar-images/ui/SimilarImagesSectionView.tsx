@@ -12,7 +12,7 @@ import {
 } from '@mantine/core';
 import { IconPhoto } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getThumbnailUrl } from '@/entities/image';
+import { useApiClient } from '@/shared';
 import type { SimilarImage } from '@/features/find-similar-images/api/similar';
 
 export interface SimilarImagesSectionViewProps {
@@ -38,6 +38,8 @@ export function SimilarImagesSectionView({
   isLoading,
   error,
 }: SimilarImagesSectionViewProps) {
+  const apiClient = useApiClient();
+
   return (
     <Card padding="md" withBorder>
       <Stack gap="md">
@@ -76,7 +78,7 @@ export function SimilarImagesSectionView({
                   {image.thumbnailPath !== null
                     ? (
                         <Image
-                          src={getThumbnailUrl(image.id)}
+                          src={apiClient.images.getThumbnailUrl(image.id)}
                           alt={image.title}
                           radius="sm"
                           h={80}

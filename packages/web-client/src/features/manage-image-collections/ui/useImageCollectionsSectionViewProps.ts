@@ -1,32 +1,28 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  addImageToCollection,
-  fetchCollections,
-  fetchImageCollections,
-  removeImageFromCollection,
-} from '@/entities/collection';
+import { useApiClient } from '@/shared';
 import type { ImageCollectionsSectionViewProps } from '@/features/manage-image-collections/ui/ImageCollectionsSectionView';
 
 export function useImageCollectionsSectionViewProps(imageId: string): ImageCollectionsSectionViewProps {
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   // === Queries ===
   const { data: imageCollections } = useQuery({
     queryKey: ['imageCollections', imageId],
-    queryFn: async () => await fetchImageCollections(imageId),
+    queryFn: async () => await apiClient.collections.fetchImageCollections(imageId),
   });
 
   const { data: allCollections } = useQuery({
     queryKey: ['collections'],
-    queryFn: fetchCollections,
+    queryFn: async () => await apiClient.collections.list(),
   });
 
   // === Mutations ===
   const addMutation = useMutation({
     mutationFn: async (collectionId: string) => {
-      await addImageToCollection(collectionId, { imageId });
+      await apiClient.collections.addImage(collectionId, { imageId });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['imageCollections', imageId] });
@@ -37,7 +33,7 @@ export function useImageCollectionsSectionViewProps(imageId: string): ImageColle
 
   const removeMutation = useMutation({
     mutationFn: async (collectionId: string) => {
-      await removeImageFromCollection(collectionId, imageId);
+      await apiClient.collections.removeImage(collectionId, imageId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['imageCollections', imageId] });

@@ -24,8 +24,9 @@ import {
   IconTrash,
 } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getThumbnailUrl, type Image as ImageType } from '@/entities/image';
 import { SearchBar } from '@/features/search-images';
+import { useApiClient } from '@/shared';
+import type { Image as ImageType } from '@/entities/image';
 
 export interface ImageGalleryViewProps {
   images: ImageType[] | undefined;
@@ -49,6 +50,7 @@ export function ImageGalleryView({
   onDeleteAllHistory,
 }: ImageGalleryViewProps) {
   const hasSearch = searchQuery !== '';
+  const apiClient = useApiClient();
 
   const renderContent = () => {
     if (isLoading) {
@@ -114,7 +116,7 @@ export function ImageGalleryView({
             <Card.Section>
               <AspectRatio ratio={1}>
                 <Image
-                  src={getThumbnailUrl(image.id)}
+                  src={apiClient.images.getThumbnailUrl(image.id)}
                   alt={image.title}
                   fit="cover"
                   fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23dee2e6' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23868e96' font-size='12'%3ENo image%3C/text%3E%3C/svg%3E"

@@ -1,20 +1,32 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { render, screen } from '@testing-library/react';
+import { Container } from 'inversify';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SimilarImagesSectionView } from '@/features/find-similar-images';
+import { ContainerProvider } from '@/shared/di';
 import type { SimilarImage } from '@/features/find-similar-images';
 
-vi.mock('@/entities/image', () => ({
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-}));
+function createMockApiClient() {
+  return {
+    images: {
+      getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
+    },
+  } as unknown as ApiClient;
+}
 
 function createWrapper() {
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient());
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <MantineProvider>
-        <MemoryRouter>{children}</MemoryRouter>
+        <ContainerProvider container={container}>
+          <MemoryRouter>{children}</MemoryRouter>
+        </ContainerProvider>
       </MantineProvider>
     );
   };

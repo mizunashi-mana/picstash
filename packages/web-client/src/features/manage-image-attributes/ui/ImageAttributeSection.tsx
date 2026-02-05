@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchLabels } from '@/entities/label';
 import {
   createImageAttribute,
   deleteImageAttribute,
@@ -9,6 +8,7 @@ import {
   updateImageAttribute,
   type AttributeSuggestion,
 } from '@/features/manage-image-attributes/api/attributes';
+import { useApiClient } from '@/shared';
 import { ImageAttributeSectionView } from './ImageAttributeSectionView';
 import type { ImageAttribute } from '@picstash/api';
 
@@ -18,6 +18,7 @@ interface ImageAttributeSectionProps {
 
 export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState<ImageAttribute | null>(null);
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
@@ -43,7 +44,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     error: labelsError,
   } = useQuery({
     queryKey: ['labels'],
-    queryFn: fetchLabels,
+    queryFn: async () => await apiClient.labels.list(),
   });
 
   // Fetch suggested attributes (only when panel is open)

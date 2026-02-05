@@ -51,13 +51,14 @@ picstash/
 │   │   │   │   ├── track-view-history/ # 閲覧履歴追跡
 │   │   │   │   └── view-stats/     # 統計表示
 │   │   │   │
-│   │   │   ├── entities/       # Entities レイヤー（型定義 + API のみ）
-│   │   │   │   ├── image/      # 画像エンティティ（api/, model/)
-│   │   │   │   ├── label/      # ラベルエンティティ（api/, model/)
-│   │   │   │   └── collection/ # コレクションエンティティ（api/, model/)
+│   │   │   ├── entities/       # Entities レイヤー（@picstash/api の re-export のみ）
+│   │   │   │   ├── image/      # 画像エンティティ型（index.ts のみ）
+│   │   │   │   ├── label/      # ラベルエンティティ型（index.ts のみ）
+│   │   │   │   └── collection/ # コレクションエンティティ型（index.ts のみ）
 │   │   │   │
 │   │   │   └── shared/         # Shared レイヤー
-│   │   │       ├── api/        # 共通 API クライアント
+│   │   │       ├── api/        # 共通 API クライアント（レガシー、非推奨）
+│   │   │       ├── di/         # DI コンテナ（ContainerProvider, useApiClient）
 │   │   │       ├── lib/        # ヘルパー関数
 │   │   │       └── hooks/      # 共通フック
 │   │   │
@@ -221,8 +222,8 @@ picstash/
 - **features/** - 機能ごとのモジュール（ユーザーアクション単位）
   - 各機能は ui/, api/ 等のセグメントを含む
   - 機能間は index.ts 経由でのみ依存可能（dependency-cruiser で検証）
-- **entities/** - ビジネスエンティティ（型定義 + API のみ、UI は持たない）
-- **shared/** - 共通部品（API クライアント、ヘルパー、フック）
+- **entities/** - ビジネスエンティティ（`@picstash/api` からの型 re-export のみ、API 関数・UI は持たない）
+- **shared/** - 共通部品（DI コンテナ、API クライアント、ヘルパー、フック）
 - レイヤー間の依存方向: shared ← entities ← features ← widgets ← pages ← app
 
 ### `packages/server/`
@@ -259,7 +260,8 @@ Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エ
 
 ### `packages/api/`
 フロントエンドとバックエンドで共有する API 型定義とエンドポイント定義 (`@picstash/api`)。
-- **images.ts** - 画像 API のエンドポイント URL ヘルパー
+- **client/** - `ApiClient` インターフェースと `FetchApiClient` 実装
+- **images.ts** - 画像 API のエンドポイント URL ヘルパーと型定義
 - **stats.ts** - 統計 API の Zod スキーマと型定義
 - **labels.ts** - ラベル API の Zod スキーマと型定義
 - **image-attributes.ts** - 画像属性 API の Zod スキーマと型定義

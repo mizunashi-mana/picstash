@@ -18,7 +18,8 @@ import {
   IconExternalLink,
 } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getImageUrl, getThumbnailUrl, type Image as ImageType } from '@/entities/image';
+import { useApiClient } from '@/shared';
+import type { Image as ImageType } from '@/entities/image';
 
 export interface ImageCarouselProps {
   images: ImageType[];
@@ -28,6 +29,7 @@ export interface ImageCarouselProps {
 
 export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const apiClient = useApiClient();
 
   const goToPrev = useCallback(() => {
     setCurrentIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
@@ -156,7 +158,7 @@ export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: Image
           }}
         >
           <Image
-            src={getImageUrl(currentImage.id)}
+            src={apiClient.images.getImageUrl(currentImage.id)}
             alt={currentImage.title}
             fit="contain"
             style={{
@@ -213,7 +215,7 @@ export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: Image
               >
                 <AspectRatio ratio={1} w={60}>
                   <Image
-                    src={getThumbnailUrl(image.id)}
+                    src={apiClient.images.getThumbnailUrl(image.id)}
                     alt={image.title}
                     fit="cover"
                     fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect fill='%23dee2e6' width='60' height='60'/%3E%3C/svg%3E"

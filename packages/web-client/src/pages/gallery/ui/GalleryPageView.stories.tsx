@@ -45,10 +45,13 @@ const mockImages: Image[] = [
   },
 ];
 
+const mockGetThumbnailUrl = (imageId: string) => `/api/images/${imageId}/thumbnail`;
+
 const meta = {
   title: 'Pages/Gallery/GalleryPageView',
   component: GalleryPageView,
   args: {
+    getThumbnailUrl: mockGetThumbnailUrl,
     onSearchChange: fn(),
     onDeleteAllHistory: fn(),
     onViewModeChange: fn(),

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateImage } from '@/entities/image';
 import {
   generateDescriptionJob,
   getJobStatus,
 } from '@/features/manage-image-description/api/description';
+import { useApiClient } from '@/shared';
 import { useJobs } from '@/widgets/job-status';
 import { ImageDescriptionSectionView } from './ImageDescriptionSectionView';
 
@@ -19,6 +19,7 @@ export function ImageDescriptionSection({
 }: ImageDescriptionSectionProps) {
   const queryClient = useQueryClient();
   const { trackJob } = useJobs();
+  const apiClient = useApiClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(description ?? '');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -92,7 +93,7 @@ export function ImageDescriptionSection({
   const updateMutation = useMutation({
     mutationFn: async (newDescription: string) => {
       const trimmed = newDescription.trim();
-      return await updateImage(imageId, {
+      return await apiClient.images.update(imageId, {
         description: trimmed === '' ? null : trimmed,
       });
     },
