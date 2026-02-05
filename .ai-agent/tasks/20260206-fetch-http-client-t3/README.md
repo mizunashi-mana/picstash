@@ -34,14 +34,23 @@
 
 ## 完了条件
 
-- [ ] `FetchHttpClient` が `HttpClient` interface を満たす
-- [ ] `RequestOptions`（headers, timeout, signal）をサポート
-- [ ] 204 No Content の適切なハンドリング
-- [ ] typecheck が通る
-- [ ] lint が通る
+- [x] `FetchHttpClient` が `HttpClient` interface を満たす
+- [x] `RequestOptions`（headers, timeout, signal）をサポート
+- [x] 204 No Content の適切なハンドリング
+- [x] typecheck が通る
+- [x] lint が通る
 
 ## 作業ログ
 
 ### 2026-02-06
 
 - タスク開始
+- `packages/web-client/src/shared/api/fetch-http-client.ts` を作成
+- `HttpClient` interface を実装:
+  - get, post, put, patch, delete, postFormData メソッド
+  - RequestOptions（headers, timeout, signal）をサポート
+  - タイムアウトは AbortSignal.timeout() で実装
+  - signal と timeout の両方が指定された場合は AbortSignal.any() で合成
+  - 204 No Content を適切にハンドリング
+- `shared/api/index.ts` からエクスポートを追加
+- typecheck / lint 通過確認
