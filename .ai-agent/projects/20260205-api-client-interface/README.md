@@ -165,8 +165,8 @@ web-client
 
 | ID | タスク | 依存 | 優先度 | 状態 |
 |----|--------|------|--------|------|
-| T1 | `@picstash/api` に HttpClient interface を定義 | - | 高 | 未着手 |
-| T2 | `@picstash/api` に ApiClient 実装を追加 | T1 | 高 | 未着手 |
+| T1 | `@picstash/api` に HttpClient interface を定義 | - | 高 | 完了 |
+| T2 | `@picstash/api` に ApiClient 実装を追加 | T1 | 高 | 完了 |
 | T3 | web-client に FetchHttpClient 実装を作成 | T1 | 高 | 未着手 |
 | T4 | web-client の既存 FetchApiClient を削除し、api パッケージの ApiClient に移行 | T2, T3 | 高 | 未着手 |
 | T5 | entities 層の API アダプター移行 | T4 | 中 | 未着手 |
@@ -281,3 +281,5 @@ T1 (HttpClient interface)
 - 2026-02-05: プロジェクト開始、計画策定
 - 2026-02-05: web-client に inversify を導入（PR #164 でマージ済み）
 - 2026-02-05: 方針変更 — HttpClient interface を api パッケージで定義し、ApiClient 実装も api パッケージで提供する方向に変更
+- 2026-02-05: T1 完了 — HttpClient interface を定義（PR #167 でマージ済み）
+- 2026-02-06: T2 完了 — createApiClient 関数と 12 リソースの API Client 実装を追加
