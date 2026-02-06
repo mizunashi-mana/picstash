@@ -2,6 +2,12 @@ import { expect, fn, within } from 'storybook/test';
 import { CrawlPreviewGalleryView } from './CrawlPreviewGalleryView';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+const mockGetThumbnailUrl = (sessionId: string, imageIndex: number) =>
+  `/api/url-crawl/${sessionId}/images/${imageIndex}/thumbnail`;
+
+const mockGetImageUrl = (sessionId: string, imageIndex: number) =>
+  `/api/url-crawl/${sessionId}/images/${imageIndex}/file`;
+
 const meta = {
   title: 'Features/ImportUrl/CrawlPreviewGalleryView',
   component: CrawlPreviewGalleryView,
@@ -9,6 +15,8 @@ const meta = {
     onSelectionToggle: fn(),
     onPreviewClick: fn(),
     onPreviewClose: fn(),
+    getThumbnailUrl: mockGetThumbnailUrl,
+    getImageUrl: mockGetImageUrl,
   },
 } satisfies Meta<typeof CrawlPreviewGalleryView>;
 

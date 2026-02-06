@@ -1,6 +1,6 @@
 import { expect, within } from 'storybook/test';
 import { SimilarImagesSectionView } from './SimilarImagesSectionView';
-import type { SimilarImage } from '@/features/find-similar-images/api/similar';
+import type { SimilarImage } from '@picstash/api';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const mockSimilarImages: SimilarImage[] = [

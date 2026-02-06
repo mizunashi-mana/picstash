@@ -1,14 +1,17 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
+import { Container } from 'inversify';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ImageUploadTab } from '@/features/import/ui/ImageUploadTab';
-import { uploadImage } from '@/features/upload-image';
+import { ContainerProvider } from '@/shared/di';
+
+const mockUpload = vi.fn();
 
 vi.mock('@/features/upload-image', () => ({
-  uploadImage: vi.fn(),
   ImageDropzoneView: ({ onDrop, isPending, isError, errorMessage }: {
     onDrop: (files: File[]) => void;
     isPending: boolean;
@@ -29,6 +32,14 @@ vi.mock('@/features/upload-image', () => ({
   ),
 }));
 
+function createMockApiClient() {
+  return {
+    images: {
+      upload: mockUpload,
+    },
+  } as unknown as ApiClient;
+}
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -37,12 +48,17 @@ function createWrapper() {
     },
   });
 
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient());
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>
-          <MemoryRouter>{children}</MemoryRouter>
-        </MantineProvider>
+        <ContainerProvider container={container}>
+          <MantineProvider>
+            <MemoryRouter>{children}</MemoryRouter>
+          </MantineProvider>
+        </ContainerProvider>
       </QueryClientProvider>
     );
   };
@@ -62,14 +78,16 @@ describe('ImageUploadTab', () => {
   });
 
   it('should show success alert after upload', async () => {
-    vi.mocked(uploadImage).mockResolvedValue({
+    mockUpload.mockResolvedValue({
       id: '1',
       path: '/test.png',
+      thumbnailPath: null,
       mimeType: 'image/png',
       size: 1000,
       width: 100,
       height: 100,
       title: 'test',
+      description: null,
       createdAt: '2024-01-01',
       updatedAt: '2024-01-01',
     });
@@ -84,14 +102,16 @@ describe('ImageUploadTab', () => {
   });
 
   it('should show gallery link after successful upload', async () => {
-    vi.mocked(uploadImage).mockResolvedValue({
+    mockUpload.mockResolvedValue({
       id: '1',
       path: '/test.png',
+      thumbnailPath: null,
       mimeType: 'image/png',
       size: 1000,
       width: 100,
       height: 100,
       title: 'test',
+      description: null,
       createdAt: '2024-01-01',
       updatedAt: '2024-01-01',
     });

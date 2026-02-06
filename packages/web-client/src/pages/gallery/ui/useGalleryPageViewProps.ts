@@ -3,10 +3,6 @@ import { useElementSize, useMergedRef } from '@mantine/hooks';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams } from 'react-router';
-import {
-  deleteAllSearchHistory,
-  saveSearchHistory,
-} from '@/features/search-images';
 import { useApiClient, useViewMode } from '@/shared';
 import type { GalleryPageViewProps } from '@/pages/gallery/ui/GalleryPageView';
 
@@ -110,12 +106,12 @@ export function useGalleryPageViewProps(): GalleryPageViewProps {
   // === Mutations ===
   // Save search history mutation
   const saveHistoryMutation = useMutation({
-    mutationFn: saveSearchHistory,
+    mutationFn: async (q: string) => await apiClient.search.saveHistory(q),
   });
 
   // Delete all history mutation
   const deleteAllHistoryMutation = useMutation({
-    mutationFn: deleteAllSearchHistory,
+    mutationFn: async () => { await apiClient.search.deleteAllHistory(); },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['search-suggestions'] });
     },

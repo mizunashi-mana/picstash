@@ -7,13 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { Container } from 'inversify';
 import { describe, expect, it, vi } from 'vitest';
 import { ImageDescriptionSection } from '@/features/manage-image-description';
-import { generateDescriptionJob, getJobStatus } from '@/features/manage-image-description/api/description';
 import { ContainerProvider } from '@/shared/di';
-
-vi.mock('@/features/manage-image-description/api/description', () => ({
-  generateDescriptionJob: vi.fn(),
-  getJobStatus: vi.fn(),
-}));
 
 vi.mock('@/widgets/job-status', () => ({
   useJobs: () => ({
@@ -21,19 +15,43 @@ vi.mock('@/widgets/job-status', () => ({
   }),
 }));
 
-interface MockImagesMethods {
-  update?: () => Promise<unknown>;
+interface MockMethods {
+  imagesUpdate?: () => Promise<unknown>;
+  descriptionGenerateJob?: () => Promise<unknown>;
+  jobsDetail?: () => Promise<unknown>;
 }
 
-function createMockApiClient(methods: MockImagesMethods = {}) {
+function createMockApiClient(methods: MockMethods = {}) {
   return {
     images: {
-      update: methods.update ?? vi.fn().mockResolvedValue(undefined),
+      update: methods.imagesUpdate ?? vi.fn().mockResolvedValue(undefined),
+    },
+    description: {
+      generateJob: methods.descriptionGenerateJob ?? vi.fn().mockResolvedValue({
+        jobId: 'job-1',
+        status: 'queued',
+        message: 'Job queued',
+      }),
+    },
+    jobs: {
+      detail: methods.jobsDetail ?? vi.fn().mockResolvedValue({
+        id: 'job-1',
+        type: 'caption-generation',
+        status: 'completed',
+        progress: 100,
+        result: { description: 'AI generated description', model: 'gpt-4' },
+        attempts: 1,
+        maxAttempts: 3,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+        startedAt: '2024-01-01T00:00:00Z',
+        completedAt: '2024-01-01T00:00:01Z',
+      }),
     },
   } as unknown as ApiClient;
 }
 
-function createWrapper(methods: MockImagesMethods = {}) {
+function createWrapper(methods: MockMethods = {}) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -129,7 +147,7 @@ describe('ImageDescriptionSection', () => {
 
     render(
       <ImageDescriptionSection imageId="img-1" description={null} />,
-      { wrapper: createWrapper({ update: mockUpdate }) },
+      { wrapper: createWrapper({ imagesUpdate: mockUpdate }) },
     );
 
     await user.click(screen.getByRole('button', { name: '説明を追加' }));
@@ -145,12 +163,12 @@ describe('ImageDescriptionSection', () => {
   });
 
   it('should generate description when AI button clicked', async () => {
-    vi.mocked(generateDescriptionJob).mockResolvedValue({
+    const mockGenerateJob = vi.fn().mockResolvedValue({
       jobId: 'job-1',
       status: 'queued',
       message: 'Job queued',
     });
-    vi.mocked(getJobStatus).mockResolvedValue({
+    const mockJobsDetail = vi.fn().mockResolvedValue({
       id: 'job-1',
       type: 'caption-generation',
       status: 'completed',
@@ -167,14 +185,17 @@ describe('ImageDescriptionSection', () => {
 
     render(
       <ImageDescriptionSection imageId="img-1" description={null} />,
-      { wrapper: createWrapper() },
+      { wrapper: createWrapper({
+        descriptionGenerateJob: mockGenerateJob,
+        jobsDetail: mockJobsDetail,
+      }) },
     );
 
     await user.click(screen.getByRole('button', { name: '説明を追加' }));
     await user.click(screen.getByRole('button', { name: 'AI で生成' }));
 
     await waitFor(() => {
-      expect(generateDescriptionJob).toHaveBeenCalledWith('img-1');
+      expect(mockGenerateJob).toHaveBeenCalledWith('img-1');
     });
   });
 });

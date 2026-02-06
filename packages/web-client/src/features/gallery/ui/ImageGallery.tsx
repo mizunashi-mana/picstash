@@ -1,10 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router';
-import {
-  deleteAllSearchHistory,
-  saveSearchHistory,
-} from '@/features/search-images';
 import { useApiClient } from '@/shared';
 import { ImageGalleryView } from './ImageGalleryView';
 
@@ -23,12 +19,12 @@ export function ImageGallery() {
 
   // Save search history mutation (fire and forget)
   const saveHistoryMutation = useMutation({
-    mutationFn: saveSearchHistory,
+    mutationFn: async (q: string) => await apiClient.search.saveHistory(q),
   });
 
   // Delete all history mutation
   const deleteAllHistoryMutation = useMutation({
-    mutationFn: deleteAllSearchHistory,
+    mutationFn: async () => { await apiClient.search.deleteAllHistory(); },
     onSuccess: () => {
       // Invalidate suggestions to refresh the list
       void queryClient.invalidateQueries({ queryKey: ['search-suggestions'] });

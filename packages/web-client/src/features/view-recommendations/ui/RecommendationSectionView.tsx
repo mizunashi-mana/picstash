@@ -15,7 +15,7 @@ import {
 import { IconSparkles } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import { buildUrl } from '@/shared/lib';
-import type { RecommendedImage } from '@/features/view-recommendations/api/recommendations';
+import type { RecommendedImage } from '@picstash/api';
 
 export interface RecommendationSectionViewProps {
   recommendations: RecommendedImage[];

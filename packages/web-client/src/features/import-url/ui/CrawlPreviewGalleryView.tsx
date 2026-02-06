@@ -9,8 +9,7 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { getCrawlImageUrl, getCrawlThumbnailUrl } from '@/features/import-url/api/crawl';
-import type { CrawledImage } from '@/features/import-url/api/crawl';
+import type { CrawledImage } from '@picstash/api';
 
 export interface CrawlPreviewGalleryViewProps {
   sessionId: string;
@@ -21,6 +20,8 @@ export interface CrawlPreviewGalleryViewProps {
   onSelectionToggle: (index: number) => void;
   onPreviewClick: (image: CrawledImage, event: React.MouseEvent) => void;
   onPreviewClose: () => void;
+  getThumbnailUrl: (sessionId: string, imageIndex: number) => string;
+  getImageUrl: (sessionId: string, imageIndex: number) => string;
 }
 
 export function CrawlPreviewGalleryView({
@@ -32,6 +33,8 @@ export function CrawlPreviewGalleryView({
   onSelectionToggle,
   onPreviewClick,
   onPreviewClose,
+  getThumbnailUrl,
+  getImageUrl,
 }: CrawlPreviewGalleryViewProps) {
   if (images.length === 0) {
     return (
@@ -65,7 +68,7 @@ export function CrawlPreviewGalleryView({
             <Card.Section pos="relative">
               <AspectRatio ratio={1}>
                 <Image
-                  src={getCrawlThumbnailUrl(sessionId, image.index)}
+                  src={getThumbnailUrl(sessionId, image.index)}
                   alt={image.alt ?? image.filename}
                   fit="cover"
                   fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23dee2e6' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23868e96' font-size='12'%3ELoading%3C/text%3E%3C/svg%3E"
@@ -109,7 +112,7 @@ export function CrawlPreviewGalleryView({
       <Modal opened={previewOpened} onClose={onPreviewClose} size="xl" title={previewImage?.filename} centered>
         {previewImage !== null && (
           <Image
-            src={getCrawlImageUrl(sessionId, previewImage.index)}
+            src={getImageUrl(sessionId, previewImage.index)}
             alt={previewImage.alt ?? previewImage.filename}
             fit="contain"
             mah="70vh"

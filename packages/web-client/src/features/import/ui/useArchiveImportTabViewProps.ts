@@ -1,15 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-  deleteArchiveSession,
-  getArchiveSession,
-  getImportJobStatus,
-  importFromArchive,
-  uploadArchive,
-} from '@/features/import-archive';
+import { useApiClient } from '@/shared/di';
 import type { ArchiveImportTabViewProps } from '@/features/import/ui/ArchiveImportTabView';
-import type { ImportJobStatus, ImportResult } from '@/features/import-archive';
 import type { FileWithPath } from '@mantine/dropzone';
+import type { ArchiveImportResult, ImportJobStatus } from '@picstash/api';
 
 /** ジョブが完了したかどうかを判定 */
 function isJobFinished(status: string | undefined): boolean {
@@ -17,7 +11,7 @@ function isJobFinished(status: string | undefined): boolean {
 }
 
 /** ジョブステータスから完了結果を抽出 */
-function extractCompletedResult(data: ImportJobStatus): ImportResult | null {
+function extractCompletedResult(data: ImportJobStatus): ArchiveImportResult | null {
   if (data.status !== 'completed') {
     return null;
   }
@@ -40,10 +34,11 @@ export function useArchiveImportTabViewProps(): ArchiveImportTabViewProps {
   // === State ===
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importResult, setImportResult] = useState<ArchiveImportResult | null>(null);
   const [importJobId, setImportJobId] = useState<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
   const importJobIdRef = useRef<string | null>(null);
+  const apiClient = useApiClient();
 
   // Keep refs in sync with state for cleanup
   useEffect(() => {
@@ -64,16 +59,16 @@ export function useArchiveImportTabViewProps(): ArchiveImportTabViewProps {
         return;
       }
       if (sessionIdRef.current !== null) {
-        deleteArchiveSession(sessionIdRef.current).catch(() => {
+        apiClient.archiveImport.deleteSession(sessionIdRef.current).catch(() => {
           // Ignore errors during cleanup
         });
       }
     };
-  }, []);
+  }, [apiClient]);
 
   // === Mutations ===
   const uploadMutation = useMutation({
-    mutationFn: uploadArchive,
+    mutationFn: apiClient.archiveImport.upload,
     onSuccess: (data) => {
       setSessionId(data.sessionId);
       setSelectedIndices(new Set());
@@ -86,14 +81,14 @@ export function useArchiveImportTabViewProps(): ArchiveImportTabViewProps {
   const sessionQuery = useQuery({
     queryKey: ['archive-session', sessionId],
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures sessionId is not null
-    queryFn: async () => await getArchiveSession(sessionId!),
+    queryFn: async () => await apiClient.archiveImport.getSession(sessionId!),
     enabled: sessionId !== null,
   });
 
   const session = sessionQuery.data;
 
   const deleteMutation = useMutation({
-    mutationFn: deleteArchiveSession,
+    mutationFn: apiClient.archiveImport.deleteSession,
     onSuccess: () => {
       setSessionId(null);
       setSelectedIndices(new Set());
@@ -106,7 +101,7 @@ export function useArchiveImportTabViewProps(): ArchiveImportTabViewProps {
   const jobStatusQuery = useQuery({
     queryKey: ['import-job-status', importJobId],
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures importJobId is not null
-    queryFn: async () => await getImportJobStatus(importJobId!),
+    queryFn: async () => await apiClient.archiveImport.getImportJobStatus(importJobId!),
     enabled: importJobId !== null,
     refetchInterval: (query) => {
       const data = query.state.data;
@@ -149,7 +144,7 @@ export function useArchiveImportTabViewProps(): ArchiveImportTabViewProps {
       if (sessionId === null) {
         throw new Error('No session');
       }
-      return await importFromArchive(sessionId, indices);
+      return await apiClient.archiveImport.importImages(sessionId, indices);
     },
     onSuccess: (result) => {
       // ジョブIDを設定してポーリング開始
@@ -219,6 +214,10 @@ export function useArchiveImportTabViewProps(): ArchiveImportTabViewProps {
 
     // Delete state
     isClosing: deleteMutation.isPending,
+
+    // URL functions
+    getArchiveThumbnailUrl: apiClient.archiveImport.getThumbnailUrl,
+    getArchiveImageUrl: apiClient.archiveImport.getImageUrl,
 
     // Handlers
     onDrop: handleDrop,

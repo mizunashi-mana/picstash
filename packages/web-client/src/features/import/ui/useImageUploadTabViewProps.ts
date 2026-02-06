@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { uploadImage } from '@/features/upload-image';
+import { useApiClient } from '@/shared';
 import type { ImageUploadTabViewProps, UploadResult } from '@/features/import/ui/ImageUploadTabView';
 import type { FileWithPath } from '@mantine/dropzone';
 
 export function useImageUploadTabViewProps(): ImageUploadTabViewProps {
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
+  const apiClient = useApiClient();
 
   const mutation = useMutation({
     mutationFn: async (files: Blob[]) => {
@@ -14,7 +15,7 @@ export function useImageUploadTabViewProps(): ImageUploadTabViewProps {
 
       for (const file of files) {
         try {
-          await uploadImage(file);
+          await apiClient.images.upload(file);
           successCount++;
         }
         catch {

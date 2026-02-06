@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
-import type { CrawledImage } from '@/features/import-url/api/crawl';
+import { useApiClient } from '@/shared';
 import type { CrawlPreviewGalleryViewProps } from '@/features/import-url/ui/CrawlPreviewGalleryView';
+import type { CrawledImage } from '@picstash/api';
 
 interface CrawlPreviewGalleryInputProps {
   sessionId: string;
@@ -13,6 +14,7 @@ interface CrawlPreviewGalleryInputProps {
 export function useCrawlPreviewGalleryViewProps(
   props: CrawlPreviewGalleryInputProps,
 ): CrawlPreviewGalleryViewProps {
+  const apiClient = useApiClient();
   const [previewImage, setPreviewImage] = useState<CrawledImage | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
 
@@ -42,5 +44,7 @@ export function useCrawlPreviewGalleryViewProps(
     onSelectionToggle: handleSelectionToggle,
     onPreviewClick: handlePreviewClick,
     onPreviewClose: close,
+    getThumbnailUrl: apiClient.urlCrawl.getThumbnailUrl,
+    getImageUrl: apiClient.urlCrawl.getImageUrl,
   };
 }

@@ -1,37 +1,33 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchOverviewStats,
-  fetchPopularImages,
-  fetchRecommendationTrends,
-  fetchViewTrends,
-} from '@/features/view-stats/api/stats';
+import { useApiClient } from '@/shared';
 import type { StatsPageViewProps } from '@/pages/stats/ui/StatsPageView';
 
 export function useStatsPageViewProps(): StatsPageViewProps {
   // === State ===
   const [days, setDays] = useState('30');
   const daysNumber = parseInt(days, 10);
+  const apiClient = useApiClient();
 
   // === Queries ===
   const overviewQuery = useQuery({
     queryKey: ['stats', 'overview', daysNumber],
-    queryFn: async () => await fetchOverviewStats({ days: daysNumber }),
+    queryFn: async () => await apiClient.stats.overview({ days: daysNumber }),
   });
 
   const viewTrendsQuery = useQuery({
     queryKey: ['stats', 'view-trends', daysNumber],
-    queryFn: async () => await fetchViewTrends({ days: daysNumber }),
+    queryFn: async () => await apiClient.stats.viewTrends({ days: daysNumber }),
   });
 
   const recommendationTrendsQuery = useQuery({
     queryKey: ['stats', 'recommendation-trends', daysNumber],
-    queryFn: async () => await fetchRecommendationTrends({ days: daysNumber }),
+    queryFn: async () => await apiClient.stats.recommendationTrends({ days: daysNumber }),
   });
 
   const popularImagesQuery = useQuery({
     queryKey: ['stats', 'popular-images', daysNumber],
-    queryFn: async () => await fetchPopularImages({ days: daysNumber, limit: 10 }),
+    queryFn: async () => await apiClient.stats.popularImages({ days: daysNumber, limit: 10 }),
   });
 
   // === Derived state ===
@@ -49,5 +45,6 @@ export function useStatsPageViewProps(): StatsPageViewProps {
     isLoading,
     hasError,
     onDaysChange: setDays,
+    getThumbnailUrl: apiClient.images.getThumbnailUrl,
   };
 }

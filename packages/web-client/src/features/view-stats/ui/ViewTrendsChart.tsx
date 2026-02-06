@@ -1,6 +1,6 @@
 import { AreaChart } from '@mantine/charts';
 import { Card, Text } from '@mantine/core';
-import type { DailyViewStats } from '@/features/view-stats/api/stats';
+import type { DailyViewStats } from '@picstash/api';
 
 interface ViewTrendsChartProps {
   data: DailyViewStats[];

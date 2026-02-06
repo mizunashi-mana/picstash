@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { SimilarImagesSectionView } from '@/features/find-similar-images';
-import type { SimilarImage } from '@/features/find-similar-images';
+import type { SimilarImage } from '@picstash/api';
 
 const mockGetThumbnailUrl = (id: string) => `/api/images/${id}/thumbnail`;
 

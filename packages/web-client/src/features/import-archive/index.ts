@@ -1,14 +1,13 @@
 export { ArchiveDropzone } from './ui/ArchiveDropzone';
 export { ArchivePreviewGallery } from './ui/ArchivePreviewGallery';
-export {
-  uploadArchive,
-  getArchiveSession,
-  deleteArchiveSession,
-  importFromArchive,
-  getImportJobStatus,
-} from './api/archive';
+export type { ArchivePreviewGalleryProps } from './ui/ArchivePreviewGallery';
 export type {
-  ImportResult,
+  ArchiveSession,
+  ArchiveSessionDetail,
+  ArchiveImage,
+  ArchiveImportResult,
+  ArchiveImportResultItem,
   ImportJobStartResponse,
   ImportJobStatus,
-} from './api/archive';
+  ImportJobStatusValue,
+} from '@picstash/api';

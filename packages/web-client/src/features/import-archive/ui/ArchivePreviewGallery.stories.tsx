@@ -2,11 +2,18 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { ArchivePreviewGallery } from './ArchivePreviewGallery';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+const mockGetThumbnailUrl = (sessionId: string, fileIndex: number) =>
+  `/api/archives/${sessionId}/files/${fileIndex}/thumbnail`;
+const mockGetImageUrl = (sessionId: string, fileIndex: number) =>
+  `/api/archives/${sessionId}/files/${fileIndex}/file`;
+
 const meta = {
   title: 'Features/ImportArchive/ArchivePreviewGallery',
   component: ArchivePreviewGallery,
   args: {
     onSelectionChange: fn(),
+    getThumbnailUrl: mockGetThumbnailUrl,
+    getImageUrl: mockGetImageUrl,
   },
 } satisfies Meta<typeof ArchivePreviewGallery>;
 

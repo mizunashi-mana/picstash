@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchRecommendations,
-  recordImpressions,
-} from '@/features/view-recommendations/api/recommendations';
 import { useApiClient } from '@/shared';
 import type { RecommendationSectionViewProps } from '@/features/view-recommendations/ui/RecommendationSectionView';
 
@@ -12,11 +8,17 @@ type ConversionMap = Map<string, string>;
 
 export function useRecommendationSectionViewProps(): RecommendationSectionViewProps {
   const apiClient = useApiClient();
+  const apiClientRef = useRef(apiClient);
+
+  // Keep ref in sync
+  useEffect(() => {
+    apiClientRef.current = apiClient;
+  }, [apiClient]);
 
   // === Queries ===
   const { data, isLoading, error } = useQuery({
     queryKey: ['recommendations'],
-    queryFn: async () => await fetchRecommendations({ limit: 12 }),
+    queryFn: async () => await apiClient.recommendations.fetch({ limit: 12 }),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -47,7 +49,7 @@ export function useRecommendationSectionViewProps(): RecommendationSectionViewPr
       score: rec.score,
     }));
 
-    recordImpressions(inputs)
+    apiClientRef.current.recommendations.recordImpressions(inputs)
       .then((result) => {
         // Build mapping from imageId to conversionId
         const map = new Map<string, string>();

@@ -1,10 +1,3 @@
-export {
-  fetchImageAttributes,
-  createImageAttribute,
-  updateImageAttribute,
-  deleteImageAttribute,
-  fetchSuggestedAttributes,
-} from './api/attributes';
 export type {
   ImageAttribute,
   CreateImageAttributeInput,
@@ -12,7 +5,7 @@ export type {
   SuggestedKeyword,
   AttributeSuggestion,
   SuggestedAttributesResponse,
-} from './api/attributes';
+} from '@picstash/api';
 export { ImageAttributeSection } from './ui/ImageAttributeSection';
 export { ImageAttributeSectionView } from './ui/ImageAttributeSectionView';
 export type { ImageAttributeSectionViewProps } from './ui/ImageAttributeSectionView';
