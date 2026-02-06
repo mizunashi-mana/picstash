@@ -1,14 +1,11 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
-import { API_TYPES, type ApiClient } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Container } from 'inversify';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { ImageGalleryView } from '@/features/gallery/ui/ImageGalleryView';
-import { ContainerProvider } from '@/shared/di';
 import type { Image } from '@/entities/image';
 
 vi.mock('@/features/search-images', () => ({
@@ -23,13 +20,7 @@ vi.mock('@/features/search-images', () => ({
   ),
 }));
 
-function createMockApiClient() {
-  return {
-    images: {
-      getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-    },
-  } as unknown as ApiClient;
-}
+const mockGetThumbnailUrl = (id: string) => `/api/images/${id}/thumbnail`;
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -39,16 +30,11 @@ function createWrapper() {
     },
   });
 
-  const container = new Container();
-  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient());
-
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
         <MantineProvider>
-          <ContainerProvider container={container}>
-            <MemoryRouter>{children}</MemoryRouter>
-          </ContainerProvider>
+          <MemoryRouter>{children}</MemoryRouter>
         </MantineProvider>
       </QueryClientProvider>
     );
@@ -147,6 +133,7 @@ describe('ImageGalleryView', () => {
         images={mockImages}
         isLoading={false}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -168,6 +155,7 @@ describe('ImageGalleryView', () => {
         error={null}
         searchQuery=""
         onSearchChange={onSearchChange}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -186,6 +174,7 @@ describe('ImageGalleryView', () => {
         error={null}
         isExpanded={true}
         onToggleExpand={onToggleExpand}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -204,6 +193,7 @@ describe('ImageGalleryView', () => {
         error={null}
         isExpanded={false}
         onToggleExpand={vi.fn()}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -219,6 +209,7 @@ describe('ImageGalleryView', () => {
         error={null}
         onSearchChange={vi.fn()}
         onDeleteAllHistory={vi.fn()}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );

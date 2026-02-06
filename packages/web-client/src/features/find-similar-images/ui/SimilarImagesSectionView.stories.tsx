@@ -10,6 +10,8 @@ const mockSimilarImages: SimilarImage[] = [
   { id: 'img-4', title: '夕焼け', thumbnailPath: '/thumbs/img-4.jpg', distance: 1.0 },
 ];
 
+const mockGetThumbnailUrl = (imageId: string) => `/api/images/${imageId}/thumbnail`;
+
 const meta = {
   title: 'Features/FindSimilarImages/SimilarImagesSectionView',
   component: SimilarImagesSectionView,
@@ -17,6 +19,7 @@ const meta = {
     similarImages: [],
     isLoading: false,
     error: null,
+    getThumbnailUrl: mockGetThumbnailUrl,
   },
 } satisfies Meta<typeof SimilarImagesSectionView>;
 

@@ -160,6 +160,7 @@ export function useGalleryPageViewProps(): GalleryPageViewProps {
     virtualRows,
     virtualTotalSize: virtualizer.getTotalSize(),
     parentRef,
+    getImageUrl: apiClient.images.getImageUrl,
     getThumbnailUrl: apiClient.images.getThumbnailUrl,
     onSearchChange: handleSearchChange,
     onDeleteAllHistory: handleDeleteAllHistory,

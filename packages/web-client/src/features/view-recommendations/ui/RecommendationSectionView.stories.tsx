@@ -2,9 +2,14 @@ import { expect, within } from 'storybook/test';
 import { RecommendationSectionView } from './RecommendationSectionView';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+const mockGetThumbnailUrl = (imageId: string) => `/api/images/${imageId}/thumbnail`;
+
 const meta = {
   title: 'Features/ViewRecommendations/RecommendationSectionView',
   component: RecommendationSectionView,
+  args: {
+    getThumbnailUrl: mockGetThumbnailUrl,
+  },
 } satisfies Meta<typeof RecommendationSectionView>;
 
 export default meta;

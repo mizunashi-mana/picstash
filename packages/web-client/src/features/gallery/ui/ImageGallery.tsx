@@ -69,6 +69,7 @@ export function ImageGallery() {
       isExpanded={isExpanded}
       onToggleExpand={handleToggleExpand}
       onDeleteAllHistory={handleDeleteAllHistory}
+      getThumbnailUrl={apiClient.images.getThumbnailUrl}
     />
   );
 }
