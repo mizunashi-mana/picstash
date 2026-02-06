@@ -1,16 +1,12 @@
 import type { ReactNode } from 'react';
 import { notifications } from '@mantine/notifications';
+import { API_TYPES, type ApiClient, type Job } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { listJobs } from '@/widgets/job-status/api/jobs';
+import { Container } from 'inversify';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ContainerProvider } from '@/shared/di';
 import { JobsProvider, useJobs } from '@/widgets/job-status/model/context';
-import type { Job } from '@/widgets/job-status/api/jobs';
-
-// Mock API
-vi.mock('@/widgets/job-status/api/jobs', () => ({
-  listJobs: vi.fn(),
-}));
 
 // Mock notifications
 vi.mock('@mantine/notifications', () => ({
@@ -33,7 +29,16 @@ const createJob = (overrides: Partial<Job> = {}): Job => ({
   ...overrides,
 });
 
-function createWrapper() {
+function createMockApiClient(listJobsResult: { jobs: Job[]; total: number }) {
+  return {
+    jobs: {
+      list: vi.fn().mockResolvedValue(listJobsResult),
+      detail: vi.fn(),
+    },
+  } as unknown as ApiClient;
+}
+
+function createWrapper(mockApiClient: ApiClient) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -42,20 +47,21 @@ function createWrapper() {
     },
   });
 
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(mockApiClient);
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <JobsProvider>{children}</JobsProvider>
-      </QueryClientProvider>
+      <ContainerProvider container={container}>
+        <QueryClientProvider client={queryClient}>
+          <JobsProvider>{children}</JobsProvider>
+        </QueryClientProvider>
+      </ContainerProvider>
     );
   };
 }
 
 describe('JobsProvider', () => {
-  beforeEach(() => {
-    vi.mocked(listJobs).mockResolvedValue({ jobs: [], total: 0 });
-  });
-
   afterEach(() => {
     vi.resetAllMocks();
   });
@@ -73,7 +79,8 @@ describe('JobsProvider', () => {
 
   describe('useJobs hook', () => {
     it('should return initial state', () => {
-      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper() });
+      const mockApiClient = createMockApiClient({ jobs: [], total: 0 });
+      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper(mockApiClient) });
 
       expect(result.current.jobs).toEqual([]);
       expect(result.current.activeJobs).toEqual([]);
@@ -83,9 +90,9 @@ describe('JobsProvider', () => {
 
     it('should track a job', async () => {
       const job = createJob({ id: 'job-1', status: 'active' });
-      vi.mocked(listJobs).mockResolvedValue({ jobs: [job], total: 1 });
+      const mockApiClient = createMockApiClient({ jobs: [job], total: 1 });
 
-      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper() });
+      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper(mockApiClient) });
 
       act(() => {
         result.current.trackJob('job-1');
@@ -100,9 +107,9 @@ describe('JobsProvider', () => {
 
     it('should untrack a job', async () => {
       const job = createJob({ id: 'job-1', status: 'active' });
-      vi.mocked(listJobs).mockResolvedValue({ jobs: [job], total: 1 });
+      const mockApiClient = createMockApiClient({ jobs: [job], total: 1 });
 
-      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper() });
+      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper(mockApiClient) });
 
       act(() => {
         result.current.trackJob('job-1');
@@ -121,9 +128,9 @@ describe('JobsProvider', () => {
 
     it('should mark completed job as read', async () => {
       const job = createJob({ id: 'job-1', status: 'completed' });
-      vi.mocked(listJobs).mockResolvedValue({ jobs: [job], total: 1 });
+      const mockApiClient = createMockApiClient({ jobs: [job], total: 1 });
 
-      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper() });
+      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper(mockApiClient) });
 
       act(() => {
         result.current.trackJob('job-1');
@@ -145,12 +152,12 @@ describe('JobsProvider', () => {
       const waitingJob = createJob({ id: 'job-2', status: 'waiting' });
       const completedJob = createJob({ id: 'job-3', status: 'completed' });
 
-      vi.mocked(listJobs).mockResolvedValue({
+      const mockApiClient = createMockApiClient({
         jobs: [activeJob, waitingJob, completedJob],
         total: 3,
       });
 
-      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper() });
+      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper(mockApiClient) });
 
       act(() => {
         result.current.trackJob('job-1');
@@ -169,9 +176,15 @@ describe('JobsProvider', () => {
   describe('notifications', () => {
     it('should show notification when job completes', async () => {
       const activeJob = createJob({ id: 'job-1', status: 'active' });
-      vi.mocked(listJobs).mockResolvedValue({ jobs: [activeJob], total: 1 });
+      const mockListJobs = vi.fn().mockResolvedValue({ jobs: [activeJob], total: 1 });
+      const mockApiClient = {
+        jobs: {
+          list: mockListJobs,
+          detail: vi.fn(),
+        },
+      } as unknown as ApiClient;
 
-      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper() });
+      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper(mockApiClient) });
 
       act(() => {
         result.current.trackJob('job-1');
@@ -183,7 +196,7 @@ describe('JobsProvider', () => {
 
       // Simulate job completion by updating mock
       const completedJob = createJob({ id: 'job-1', status: 'completed' });
-      vi.mocked(listJobs).mockResolvedValue({ jobs: [completedJob], total: 1 });
+      mockListJobs.mockResolvedValue({ jobs: [completedJob], total: 1 });
 
       // Trigger refetch
       act(() => {
@@ -202,9 +215,15 @@ describe('JobsProvider', () => {
 
     it('should show notification when job fails', async () => {
       const activeJob = createJob({ id: 'job-1', status: 'active' });
-      vi.mocked(listJobs).mockResolvedValue({ jobs: [activeJob], total: 1 });
+      const mockListJobs = vi.fn().mockResolvedValue({ jobs: [activeJob], total: 1 });
+      const mockApiClient = {
+        jobs: {
+          list: mockListJobs,
+          detail: vi.fn(),
+        },
+      } as unknown as ApiClient;
 
-      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper() });
+      const { result } = renderHook(() => useJobs(), { wrapper: createWrapper(mockApiClient) });
 
       act(() => {
         result.current.trackJob('job-1');
@@ -216,7 +235,7 @@ describe('JobsProvider', () => {
 
       // Simulate job failure
       const failedJob = createJob({ id: 'job-1', status: 'failed', error: 'Something went wrong' });
-      vi.mocked(listJobs).mockResolvedValue({ jobs: [failedJob], total: 1 });
+      mockListJobs.mockResolvedValue({ jobs: [failedJob], total: 1 });
 
       act(() => {
         result.current.refetch();

@@ -21,12 +21,19 @@ export interface Job {
   progress: number;
   result?: Record<string, unknown>;
   error?: string;
+  payload?: Record<string, unknown>;
   attempts: number;
   maxAttempts: number;
   createdAt: string;
   updatedAt: string;
   startedAt: string | null;
   completedAt: string | null;
+}
+
+/** ジョブ一覧レスポンス */
+export interface ListJobsResponse {
+  jobs: Job[];
+  total: number;
 }
 
 // ============================================================

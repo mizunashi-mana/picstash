@@ -48,6 +48,10 @@ function createMockApiClient(): ApiClient {
         `/api/url-crawl/${sessionId}/images/${imageIndex}/file`,
       importImages: async () => ({ totalRequested: 0, successCount: 0, failedCount: 0, results: [] }),
     },
+    jobs: {
+      list: async () => ({ jobs: [], total: 0 }),
+      detail: async () => undefined,
+    },
   } as unknown as ApiClient;
 }
 
