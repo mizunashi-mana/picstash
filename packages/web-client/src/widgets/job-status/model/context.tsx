@@ -9,8 +9,9 @@ import {
 } from 'react';
 import { notifications } from '@mantine/notifications';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { listJobs, type Job, type JobStatus } from '@/widgets/job-status/api/jobs';
+import { useApiClient } from '@/shared';
 import { getJobTypeName, getJobTargetDescription } from '@/widgets/job-status/lib/utils';
+import type { Job, JobStatusValue } from '@picstash/api';
 
 interface JobsContextValue {
   /** 監視中のジョブ一覧 */
@@ -44,6 +45,7 @@ interface JobsProviderProps {
 
 export function JobsProvider({ children }: JobsProviderProps) {
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   // 監視対象のジョブID
   const [trackedJobIds, setTrackedJobIds] = useState<Set<string>>(new Set());
@@ -55,7 +57,7 @@ export function JobsProvider({ children }: JobsProviderProps) {
   const notifiedJobIds = useRef<Set<string>>(new Set());
 
   // 前回のジョブ状態（完了検知用）
-  const previousJobsRef = useRef<Map<string, JobStatus>>(new Map());
+  const previousJobsRef = useRef<Map<string, JobStatusValue>>(new Map());
 
   // アクティブなジョブがあるときだけポーリング
   const hasActiveJobs = trackedJobIds.size > 0;
@@ -63,8 +65,8 @@ export function JobsProvider({ children }: JobsProviderProps) {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['jobs', 'list', { status: ['waiting', 'active', 'completed', 'failed'] }],
     queryFn: async () =>
-      await listJobs({
-        status: ['waiting', 'active', 'completed', 'failed'],
+      await apiClient.jobs.list({
+        status: 'waiting,active,completed,failed',
         limit: RECENT_JOBS_LIMIT,
       }),
     refetchInterval: hasActiveJobs ? POLLING_INTERVAL : false,

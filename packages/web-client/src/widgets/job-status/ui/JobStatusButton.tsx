@@ -15,7 +15,7 @@ import { Link } from 'react-router';
 import { getJobTypeName, getImageId } from '@/widgets/job-status/lib/utils';
 import { useJobs } from '@/widgets/job-status/model/context';
 import styles from './JobStatusButton.module.css';
-import type { Job } from '@/widgets/job-status/api/jobs';
+import type { Job } from '@picstash/api';
 
 function JobProgressItem({ job }: { job: Job }) {
   const { markAsRead } = useJobs();

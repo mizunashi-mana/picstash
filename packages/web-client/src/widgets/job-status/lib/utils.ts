@@ -1,4 +1,4 @@
-import type { Job } from '@/widgets/job-status/api/jobs';
+import type { Job } from '@picstash/api';
 
 /** ジョブタイプの日本語表示名を取得 */
 export function getJobTypeName(type: string): string {
@@ -12,7 +12,6 @@ export function getJobTypeName(type: string): string {
 
 /** ペイロードから対象の画像IDを取得 */
 export function getImageId(job: Job): string | undefined {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- job.payload is unknown type
   const payload = job.payload as { imageId?: string } | undefined;
   return payload?.imageId;
 }

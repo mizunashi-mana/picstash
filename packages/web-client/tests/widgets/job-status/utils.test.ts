@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getImageId, getJobTargetDescription, getJobTypeName } from '@/widgets/job-status/lib/utils';
-import type { Job } from '@/widgets/job-status/api/jobs';
+import type { Job } from '@picstash/api';
 
 describe('getJobTypeName', () => {
   it('should return Japanese name for caption-generation type', () => {
@@ -17,7 +17,7 @@ describe('getJobTypeName', () => {
 });
 
 describe('getImageId', () => {
-  const createJob = (payload?: unknown): Job => ({
+  const createJob = (payload?: Record<string, unknown>): Job => ({
     id: 'job-1',
     type: 'caption-generation',
     status: 'active',
@@ -45,15 +45,10 @@ describe('getImageId', () => {
     const job = createJob({ otherField: 'value' });
     expect(getImageId(job)).toBeUndefined();
   });
-
-  it('should return undefined when payload is null', () => {
-    const job = createJob(null);
-    expect(getImageId(job)).toBeUndefined();
-  });
 });
 
 describe('getJobTargetDescription', () => {
-  const createJob = (payload?: unknown): Job => ({
+  const createJob = (payload?: Record<string, unknown>): Job => ({
     id: 'job-1',
     type: 'caption-generation',
     status: 'active',
