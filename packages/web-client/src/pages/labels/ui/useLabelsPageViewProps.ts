@@ -1,26 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createLabel,
-  deleteLabel,
-  fetchLabels,
-  updateLabel,
-  type CreateLabelInput,
-  type UpdateLabelInput,
-} from '@/entities/label';
+import { useApiClient } from '@/shared';
 import type { LabelsPageViewProps } from '@/pages/labels/ui/LabelsPageView';
+import type { CreateLabelInput, UpdateLabelInput } from '@picstash/api';
 
 export function useLabelsPageViewProps(): LabelsPageViewProps {
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   // === Queries ===
   const { data: labels, isLoading, error } = useQuery({
     queryKey: ['labels'],
-    queryFn: fetchLabels,
+    queryFn: async () => await apiClient.labels.list(),
   });
 
   // === Mutations ===
   const createMutation = useMutation({
-    mutationFn: async (input: CreateLabelInput) => await createLabel(input),
+    mutationFn: async (input: CreateLabelInput) => await apiClient.labels.create(input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },
@@ -28,14 +23,14 @@ export function useLabelsPageViewProps(): LabelsPageViewProps {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, input }: { id: string; input: UpdateLabelInput }) =>
-      await updateLabel(id, input),
+      await apiClient.labels.update(id, input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await deleteLabel(id); },
+    mutationFn: async (id: string) => { await apiClient.labels.delete(id); },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { deleteImage, fetchImage } from '@/entities/image';
 import { useViewHistory } from '@/features/track-view-history';
+import { useApiClient } from '@/shared';
 import type { ImageDetailPageViewProps } from '@/pages/image-detail/ui/ImageDetailPageView';
 
 export function useImageDetailPageViewProps(): ImageDetailPageViewProps {
@@ -15,19 +15,20 @@ export function useImageDetailPageViewProps(): ImageDetailPageViewProps {
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const apiClient = useApiClient();
 
   // === Queries ===
   const { data: image, isLoading, error } = useQuery({
     queryKey: ['image', id],
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures id is defined
-    queryFn: async () => await fetchImage(id!),
+    queryFn: async () => await apiClient.images.detail(id!),
     enabled: id !== undefined && id !== '',
   });
 
   // === Mutations ===
   const deleteMutation = useMutation({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- button is disabled when id is undefined
-    mutationFn: async () => { await deleteImage(id!); },
+    mutationFn: async () => { await apiClient.images.delete(id!); },
     onSuccess: async () => {
       setIsDeleted(true);
       close();
@@ -50,6 +51,7 @@ export function useImageDetailPageViewProps(): ImageDetailPageViewProps {
 
   return {
     image,
+    imageUrl: image ? apiClient.images.getImageUrl(image.id) : undefined,
     isLoading,
     error,
     deleteModalOpened: opened,

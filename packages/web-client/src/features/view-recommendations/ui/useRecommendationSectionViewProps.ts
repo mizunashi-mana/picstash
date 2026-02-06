@@ -4,12 +4,15 @@ import {
   fetchRecommendations,
   recordImpressions,
 } from '@/features/view-recommendations/api/recommendations';
+import { useApiClient } from '@/shared';
 import type { RecommendationSectionViewProps } from '@/features/view-recommendations/ui/RecommendationSectionView';
 
 /** Maps imageId to conversionId */
 type ConversionMap = Map<string, string>;
 
 export function useRecommendationSectionViewProps(): RecommendationSectionViewProps {
+  const apiClient = useApiClient();
+
   // === Queries ===
   const { data, isLoading, error } = useQuery({
     queryKey: ['recommendations'],
@@ -71,5 +74,6 @@ export function useRecommendationSectionViewProps(): RecommendationSectionViewPr
     isLoading,
     error,
     emptyReason,
+    getThumbnailUrl: apiClient.images.getThumbnailUrl,
   };
 }

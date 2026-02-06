@@ -18,15 +18,23 @@ import {
   IconExternalLink,
 } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getImageUrl, getThumbnailUrl, type Image as ImageType } from '@/entities/image';
+import type { Image as ImageType } from '@/entities/image';
 
 export interface ImageCarouselProps {
   images: ImageType[];
   initialIndex?: number;
   onIndexChange?: (index: number) => void;
+  getImageUrl: (imageId: string) => string;
+  getThumbnailUrl: (imageId: string) => string;
 }
 
-export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: ImageCarouselProps) {
+export function ImageCarousel({
+  images,
+  initialIndex = 0,
+  onIndexChange,
+  getImageUrl,
+  getThumbnailUrl,
+}: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const goToPrev = useCallback(() => {

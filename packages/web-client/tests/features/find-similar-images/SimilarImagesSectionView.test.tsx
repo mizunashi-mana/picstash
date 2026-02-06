@@ -2,13 +2,11 @@ import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SimilarImagesSectionView } from '@/features/find-similar-images';
 import type { SimilarImage } from '@/features/find-similar-images';
 
-vi.mock('@/entities/image', () => ({
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-}));
+const mockGetThumbnailUrl = (id: string) => `/api/images/${id}/thumbnail`;
 
 function createWrapper() {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -42,6 +40,7 @@ describe('SimilarImagesSectionView', () => {
         similarImages={[]}
         isLoading={false}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -55,6 +54,7 @@ describe('SimilarImagesSectionView', () => {
         similarImages={[]}
         isLoading={true}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -68,6 +68,7 @@ describe('SimilarImagesSectionView', () => {
         similarImages={[]}
         isLoading={false}
         error={new Error('Failed to fetch')}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -81,6 +82,7 @@ describe('SimilarImagesSectionView', () => {
         similarImages={[]}
         isLoading={false}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -94,6 +96,7 @@ describe('SimilarImagesSectionView', () => {
         similarImages={mockSimilarImages}
         isLoading={false}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -111,6 +114,7 @@ describe('SimilarImagesSectionView', () => {
         similarImages={mockSimilarImages}
         isLoading={false}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -136,6 +140,7 @@ describe('SimilarImagesSectionView', () => {
         similarImages={imagesWithoutThumbnail}
         isLoading={false}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );

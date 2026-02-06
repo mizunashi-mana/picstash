@@ -24,7 +24,6 @@ import {
   IconTrash,
 } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getThumbnailUrl } from '@/entities/image';
 import { ImageCarousel } from '@/features/gallery';
 import { SearchBar } from '@/features/search-images';
 import type { Image as ImageType } from '@/entities/image';
@@ -53,6 +52,10 @@ export interface GalleryPageViewProps {
   virtualTotalSize: number;
   /** スクロールコンテナ ref（size 計測 + scroll 参照を統合済み） */
   parentRef: Ref<HTMLDivElement>;
+  /** 画像 URL 取得関数 */
+  getImageUrl: (imageId: string) => string;
+  /** サムネイル URL 取得関数 */
+  getThumbnailUrl: (imageId: string) => string;
   /** 検索変更ハンドラ */
   onSearchChange: (value: string) => void;
   /** 検索履歴全削除ハンドラ */
@@ -78,6 +81,8 @@ export function GalleryPageView({
   virtualRows,
   virtualTotalSize,
   parentRef,
+  getImageUrl,
+  getThumbnailUrl,
   onSearchChange,
   onDeleteAllHistory,
   onViewModeChange,
@@ -215,7 +220,14 @@ export function GalleryPageView({
     }
 
     if (viewMode === 'carousel') {
-      return <ImageCarousel images={allImages} onIndexChange={onCarouselIndexChange} />;
+      return (
+        <ImageCarousel
+          images={allImages}
+          onIndexChange={onCarouselIndexChange}
+          getImageUrl={getImageUrl}
+          getThumbnailUrl={getThumbnailUrl}
+        />
+      );
     }
 
     return renderGridView();

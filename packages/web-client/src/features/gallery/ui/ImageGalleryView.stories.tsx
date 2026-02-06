@@ -2,12 +2,15 @@ import { expect, fn, within } from 'storybook/test';
 import { ImageGalleryView } from './ImageGalleryView';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+const mockGetThumbnailUrl = (imageId: string) => `/api/images/${imageId}/thumbnail`;
+
 const meta = {
   title: 'Features/Gallery/ImageGalleryView',
   component: ImageGalleryView,
   args: {
     isExpanded: true,
     onToggleExpand: fn(),
+    getThumbnailUrl: mockGetThumbnailUrl,
   },
 } satisfies Meta<typeof ImageGalleryView>;
 

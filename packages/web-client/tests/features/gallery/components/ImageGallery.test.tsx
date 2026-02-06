@@ -1,17 +1,14 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Container } from 'inversify';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
-import { fetchImages } from '@/entities/image';
 import { ImageGallery } from '@/features/gallery/ui/ImageGallery';
-
-vi.mock('@/entities/image', () => ({
-  fetchImages: vi.fn(),
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-}));
+import { ContainerProvider } from '@/shared/di';
 
 vi.mock('@/features/search-images', () => ({
   saveSearchHistory: vi.fn(),
@@ -27,7 +24,16 @@ vi.mock('@/features/search-images', () => ({
   ),
 }));
 
-function createWrapper(initialEntries: string[] = ['/']) {
+function createMockApiClient(listFn: () => Promise<unknown>) {
+  return {
+    images: {
+      list: listFn,
+      getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
+    },
+  } as unknown as ApiClient;
+}
+
+function createWrapper(initialEntries: string[] = ['/'], listFn: () => Promise<unknown> = async () => []) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -35,11 +41,16 @@ function createWrapper(initialEntries: string[] = ['/']) {
     },
   });
 
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient(listFn));
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
         <MantineProvider>
-          <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+          <ContainerProvider container={container}>
+            <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+          </ContainerProvider>
         </MantineProvider>
       </QueryClientProvider>
     );
@@ -54,9 +65,7 @@ describe('ImageGallery', () => {
   });
 
   it('should render expanded when query exists in URL', async () => {
-    vi.mocked(fetchImages).mockResolvedValue([]);
-
-    render(<ImageGallery />, { wrapper: createWrapper(['/?q=test']) });
+    render(<ImageGallery />, { wrapper: createWrapper(['/?q=test'], async () => []) });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: '折りたたむ' })).toBeInTheDocument();
@@ -64,20 +73,19 @@ describe('ImageGallery', () => {
   });
 
   it('should fetch images when expanded', async () => {
-    vi.mocked(fetchImages).mockResolvedValue([]);
+    const mockList = vi.fn().mockResolvedValue([]);
     const user = userEvent.setup();
 
-    render(<ImageGallery />, { wrapper: createWrapper() });
+    render(<ImageGallery />, { wrapper: createWrapper(['/'], mockList) });
 
     await user.click(screen.getByRole('button', { name: '展開する' }));
 
     await waitFor(() => {
-      expect(fetchImages).toHaveBeenCalled();
+      expect(mockList).toHaveBeenCalled();
     });
   });
 
   it('should render search bar when expanded', async () => {
-    vi.mocked(fetchImages).mockResolvedValue([]);
     const user = userEvent.setup();
 
     render(<ImageGallery />, { wrapper: createWrapper() });
@@ -89,10 +97,10 @@ describe('ImageGallery', () => {
   });
 
   it('should render loading state', async () => {
-    vi.mocked(fetchImages).mockImplementation(async () => await new Promise(() => {})); // Never resolves
+    const mockList = vi.fn().mockImplementation(async () => await new Promise(() => {})); // Never resolves
     const user = userEvent.setup();
 
-    render(<ImageGallery />, { wrapper: createWrapper() });
+    render(<ImageGallery />, { wrapper: createWrapper(['/'], mockList) });
 
     await user.click(screen.getByRole('button', { name: '展開する' }));
 
@@ -100,7 +108,7 @@ describe('ImageGallery', () => {
   });
 
   it('should display images when loaded', async () => {
-    vi.mocked(fetchImages).mockResolvedValue([
+    const mockList = vi.fn().mockResolvedValue([
       {
         id: 'img-1',
         title: 'Image 1',
@@ -117,7 +125,7 @@ describe('ImageGallery', () => {
     ]);
     const user = userEvent.setup();
 
-    render(<ImageGallery />, { wrapper: createWrapper() });
+    render(<ImageGallery />, { wrapper: createWrapper(['/'], mockList) });
 
     await user.click(screen.getByRole('button', { name: '展開する' }));
 

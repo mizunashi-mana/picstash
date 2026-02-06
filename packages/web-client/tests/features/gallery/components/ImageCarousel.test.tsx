@@ -7,11 +7,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { ImageCarousel } from '@/features/gallery/ui/ImageCarousel';
 import type { Image } from '@/entities/image';
 
-vi.mock('@/entities/image', () => ({
-  getImageUrl: (id: string) => `/api/images/${id}/file`,
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-}));
-
 vi.mock('@mantine/hooks', async (importOriginal) => {
   const actual = await importOriginal<object>();
   return {
@@ -19,6 +14,9 @@ vi.mock('@mantine/hooks', async (importOriginal) => {
     useHotkeys: vi.fn(),
   };
 });
+
+const mockGetImageUrl = (id: string) => `/api/images/${id}/file`;
+const mockGetThumbnailUrl = (id: string) => `/api/images/${id}/thumbnail`;
 
 function createWrapper() {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -74,26 +72,54 @@ const mockImages: Image[] = [
 
 describe('ImageCarousel', () => {
   it('should render empty state when no images', () => {
-    render(<ImageCarousel images={[]} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={[]}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     expect(screen.getByText('画像がありません')).toBeInTheDocument();
   });
 
   it('should render image counter', () => {
-    render(<ImageCarousel images={mockImages} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     expect(screen.getByText('1 / 3')).toBeInTheDocument();
   });
 
   it('should render navigation buttons', () => {
-    render(<ImageCarousel images={mockImages} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     expect(screen.getByRole('button', { name: '前の画像' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '次の画像' })).toBeInTheDocument();
   });
 
   it('should render detail link button', () => {
-    render(<ImageCarousel images={mockImages} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     expect(screen.getByRole('link', { name: '詳細を表示' })).toHaveAttribute('href', '/images/img-1');
   });
@@ -103,7 +129,12 @@ describe('ImageCarousel', () => {
     const onIndexChange = vi.fn();
 
     render(
-      <ImageCarousel images={mockImages} onIndexChange={onIndexChange} />,
+      <ImageCarousel
+        images={mockImages}
+        onIndexChange={onIndexChange}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
       { wrapper: createWrapper() },
     );
 
@@ -116,7 +147,12 @@ describe('ImageCarousel', () => {
     const user = userEvent.setup();
 
     render(
-      <ImageCarousel images={mockImages} initialIndex={1} />,
+      <ImageCarousel
+        images={mockImages}
+        initialIndex={1}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
       { wrapper: createWrapper() },
     );
 
@@ -130,7 +166,15 @@ describe('ImageCarousel', () => {
   it('should wrap around to last image when clicking prev on first', async () => {
     const user = userEvent.setup();
 
-    render(<ImageCarousel images={mockImages} initialIndex={0} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        initialIndex={0}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     await user.click(screen.getByRole('button', { name: '前の画像' }));
 
@@ -140,7 +184,15 @@ describe('ImageCarousel', () => {
   it('should wrap around to first image when clicking next on last', async () => {
     const user = userEvent.setup();
 
-    render(<ImageCarousel images={mockImages} initialIndex={2} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        initialIndex={2}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     await user.click(screen.getByRole('button', { name: '次の画像' }));
 
@@ -148,7 +200,14 @@ describe('ImageCarousel', () => {
   });
 
   it('should render thumbnail strip', () => {
-    render(<ImageCarousel images={mockImages} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     // Check for thumbnail buttons
     const thumbnailButtons = screen.getAllByRole('button', { name: /Image \d \(\d\/3\)/ });
@@ -158,7 +217,14 @@ describe('ImageCarousel', () => {
   it('should change image when thumbnail clicked', async () => {
     const user = userEvent.setup();
 
-    render(<ImageCarousel images={mockImages} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     expect(screen.getByText('1 / 3')).toBeInTheDocument();
 
@@ -173,7 +239,12 @@ describe('ImageCarousel', () => {
     const onIndexChange = vi.fn();
 
     render(
-      <ImageCarousel images={mockImages} onIndexChange={onIndexChange} />,
+      <ImageCarousel
+        images={mockImages}
+        onIndexChange={onIndexChange}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
       { wrapper: createWrapper() },
     );
 
@@ -186,7 +257,15 @@ describe('ImageCarousel', () => {
   });
 
   it('should start at initialIndex', () => {
-    render(<ImageCarousel images={mockImages} initialIndex={2} />, { wrapper: createWrapper() });
+    render(
+      <ImageCarousel
+        images={mockImages}
+        initialIndex={2}
+        getImageUrl={mockGetImageUrl}
+        getThumbnailUrl={mockGetThumbnailUrl}
+      />,
+      { wrapper: createWrapper() },
+    );
 
     expect(screen.getByText('3 / 3')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '詳細を表示' })).toHaveAttribute('href', '/images/img-3');

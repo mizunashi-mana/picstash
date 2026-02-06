@@ -1,16 +1,14 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Container } from 'inversify';
 import { describe, expect, it, vi } from 'vitest';
-import { updateImage } from '@/entities/image';
 import { ImageDescriptionSection } from '@/features/manage-image-description';
 import { generateDescriptionJob, getJobStatus } from '@/features/manage-image-description/api/description';
-
-vi.mock('@/entities/image', () => ({
-  updateImage: vi.fn(),
-}));
+import { ContainerProvider } from '@/shared/di';
 
 vi.mock('@/features/manage-image-description/api/description', () => ({
   generateDescriptionJob: vi.fn(),
@@ -23,7 +21,19 @@ vi.mock('@/widgets/job-status', () => ({
   }),
 }));
 
-function createWrapper() {
+interface MockImagesMethods {
+  update?: () => Promise<unknown>;
+}
+
+function createMockApiClient(methods: MockImagesMethods = {}) {
+  return {
+    images: {
+      update: methods.update ?? vi.fn().mockResolvedValue(undefined),
+    },
+  } as unknown as ApiClient;
+}
+
+function createWrapper(methods: MockImagesMethods = {}) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -31,10 +41,15 @@ function createWrapper() {
     },
   });
 
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient(methods));
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider>
+          <ContainerProvider container={container}>{children}</ContainerProvider>
+        </MantineProvider>
       </QueryClientProvider>
     );
   };
@@ -97,7 +112,7 @@ describe('ImageDescriptionSection', () => {
   });
 
   it('should save description when save button clicked', async () => {
-    vi.mocked(updateImage).mockResolvedValue({
+    const mockUpdate = vi.fn().mockResolvedValue({
       id: 'img-1',
       title: 'Test',
       path: '/test.png',
@@ -114,7 +129,7 @@ describe('ImageDescriptionSection', () => {
 
     render(
       <ImageDescriptionSection imageId="img-1" description={null} />,
-      { wrapper: createWrapper() },
+      { wrapper: createWrapper({ update: mockUpdate }) },
     );
 
     await user.click(screen.getByRole('button', { name: '説明を追加' }));
@@ -125,7 +140,7 @@ describe('ImageDescriptionSection', () => {
     await user.click(screen.getByRole('button', { name: '保存' }));
 
     await waitFor(() => {
-      expect(updateImage).toHaveBeenCalledWith('img-1', { description: 'New description' });
+      expect(mockUpdate).toHaveBeenCalledWith('img-1', { description: 'New description' });
     });
   });
 

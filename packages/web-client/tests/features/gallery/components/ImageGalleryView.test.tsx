@@ -8,10 +8,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { ImageGalleryView } from '@/features/gallery/ui/ImageGalleryView';
 import type { Image } from '@/entities/image';
 
-vi.mock('@/entities/image', () => ({
-  getThumbnailUrl: (id: string) => `/api/images/${id}/thumbnail`,
-}));
-
 vi.mock('@/features/search-images', () => ({
   SearchBar: ({ value, onChange }: { value: string; onChange: (v: string) => void }) => (
     <input
@@ -23,6 +19,8 @@ vi.mock('@/features/search-images', () => ({
     />
   ),
 }));
+
+const mockGetThumbnailUrl = (id: string) => `/api/images/${id}/thumbnail`;
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -135,6 +133,7 @@ describe('ImageGalleryView', () => {
         images={mockImages}
         isLoading={false}
         error={null}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -156,6 +155,7 @@ describe('ImageGalleryView', () => {
         error={null}
         searchQuery=""
         onSearchChange={onSearchChange}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -174,6 +174,7 @@ describe('ImageGalleryView', () => {
         error={null}
         isExpanded={true}
         onToggleExpand={onToggleExpand}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -192,6 +193,7 @@ describe('ImageGalleryView', () => {
         error={null}
         isExpanded={false}
         onToggleExpand={vi.fn()}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );
@@ -207,6 +209,7 @@ describe('ImageGalleryView', () => {
         error={null}
         onSearchChange={vi.fn()}
         onDeleteAllHistory={vi.fn()}
+        getThumbnailUrl={mockGetThumbnailUrl}
       />,
       { wrapper: createWrapper() },
     );

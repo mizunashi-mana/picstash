@@ -1,12 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createCollection,
-  deleteCollection,
-  fetchCollections,
-  type CreateCollectionInput,
-} from '@/entities/collection';
+import { useApiClient } from '@/shared';
 import type { CollectionsPageViewProps } from '@/pages/collections/ui/CollectionsPageView';
+import type { CreateCollectionInput } from '@picstash/api';
 
 export function useCollectionsPageViewProps(): CollectionsPageViewProps {
   // === State ===
@@ -14,16 +10,17 @@ export function useCollectionsPageViewProps(): CollectionsPageViewProps {
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   // === Queries ===
   const { data: collections, isLoading, error } = useQuery({
     queryKey: ['collections'],
-    queryFn: fetchCollections,
+    queryFn: async () => await apiClient.collections.list(),
   });
 
   // === Mutations ===
   const createMutation = useMutation({
-    mutationFn: async (input: CreateCollectionInput) => await createCollection(input),
+    mutationFn: async (input: CreateCollectionInput) => await apiClient.collections.create(input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
       setCreateModalOpen(false);
@@ -33,7 +30,7 @@ export function useCollectionsPageViewProps(): CollectionsPageViewProps {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await deleteCollection(id); },
+    mutationFn: async (id: string) => { await apiClient.collections.delete(id); },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
     },

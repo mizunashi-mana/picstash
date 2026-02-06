@@ -3,12 +3,11 @@ import { useElementSize, useMergedRef } from '@mantine/hooks';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams } from 'react-router';
-import { fetchImagesPaginated } from '@/entities/image';
 import {
   deleteAllSearchHistory,
   saveSearchHistory,
 } from '@/features/search-images';
-import { useViewMode } from '@/shared';
+import { useApiClient, useViewMode } from '@/shared';
 import type { GalleryPageViewProps } from '@/pages/gallery/ui/GalleryPageView';
 
 const PAGE_SIZE = 50;
@@ -36,6 +35,7 @@ export function useGalleryPageViewProps(): GalleryPageViewProps {
   const query = searchParams.get('q') ?? '';
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useViewMode('grid');
+  const apiClient = useApiClient();
 
   // Container size for responsive grid (merged with scroll container ref)
   const { ref: sizeRef, width: containerWidth } = useElementSize();
@@ -53,7 +53,7 @@ export function useGalleryPageViewProps(): GalleryPageViewProps {
   } = useInfiniteQuery({
     queryKey: ['images-paginated', query],
     queryFn: async ({ pageParam = 0 }) => {
-      return await fetchImagesPaginated(query, {
+      return await apiClient.images.listPaginated(query, {
         limit: PAGE_SIZE,
         offset: pageParam,
       });
@@ -160,6 +160,8 @@ export function useGalleryPageViewProps(): GalleryPageViewProps {
     virtualRows,
     virtualTotalSize: virtualizer.getTotalSize(),
     parentRef,
+    getImageUrl: apiClient.images.getImageUrl,
+    getThumbnailUrl: apiClient.images.getThumbnailUrl,
     onSearchChange: handleSearchChange,
     onDeleteAllHistory: handleDeleteAllHistory,
     onViewModeChange: setViewMode,

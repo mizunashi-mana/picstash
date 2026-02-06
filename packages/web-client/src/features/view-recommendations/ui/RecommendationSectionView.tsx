@@ -14,7 +14,6 @@ import {
 } from '@mantine/core';
 import { IconSparkles } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import { getThumbnailUrl } from '@/entities/image';
 import { buildUrl } from '@/shared/lib';
 import type { RecommendedImage } from '@/features/view-recommendations/api/recommendations';
 
@@ -24,6 +23,7 @@ export interface RecommendationSectionViewProps {
   isLoading: boolean;
   error: Error | null;
   emptyReason: 'no_history' | 'no_embeddings' | 'no_similar' | undefined;
+  getThumbnailUrl: (imageId: string) => string;
 }
 
 export function RecommendationSectionView({
@@ -32,6 +32,7 @@ export function RecommendationSectionView({
   isLoading,
   error,
   emptyReason,
+  getThumbnailUrl,
 }: RecommendationSectionViewProps) {
   if (isLoading) {
     return (
@@ -99,6 +100,7 @@ export function RecommendationSectionView({
                 key={image.id}
                 image={image}
                 conversionId={conversionMap.get(image.id)}
+                getThumbnailUrl={getThumbnailUrl}
               />
             ))}
           </Group>
@@ -111,9 +113,10 @@ export function RecommendationSectionView({
 interface RecommendationCardProps {
   image: RecommendedImage;
   conversionId: string | undefined;
+  getThumbnailUrl: (imageId: string) => string;
 }
 
-function RecommendationCard({ image, conversionId }: RecommendationCardProps) {
+function RecommendationCard({ image, conversionId, getThumbnailUrl }: RecommendationCardProps) {
   // Build URL with optional conversionId
   const url = buildUrl(`/images/${image.id}`, { conversionId });
 
