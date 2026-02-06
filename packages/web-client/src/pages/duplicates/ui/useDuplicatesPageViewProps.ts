@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteDuplicateImage, fetchDuplicates } from '@/features/find-duplicates/api/duplicates';
-import type { DuplicateGroup } from '@/features/find-duplicates/api/duplicates';
+import { useApiClient } from '@/shared/di';
 import type { DuplicatesPageViewProps } from '@/pages/duplicates/ui/DuplicatesPageView';
+import type { DuplicateGroup } from '@picstash/api';
 
 interface DeleteResult {
   successIds: string[];
@@ -15,16 +15,17 @@ export function useDuplicatesPageViewProps(): DuplicatesPageViewProps {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['duplicates', threshold],
-    queryFn: async () => await fetchDuplicates({ threshold }),
+    queryFn: async () => await apiClient.images.fetchDuplicates({ threshold }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (imageIds: string[]): Promise<DeleteResult> => {
       const results = await Promise.allSettled(
-        imageIds.map(async id => await deleteDuplicateImage(id).then(() => id)),
+        imageIds.map(async id => await apiClient.images.delete(id).then(() => id)),
       );
 
       const successIds: string[] = [];
@@ -122,6 +123,7 @@ export function useDuplicatesPageViewProps(): DuplicatesPageViewProps {
     isLoading,
     error,
     isDeleting: deleteMutation.isPending,
+    getThumbnailUrl: apiClient.images.getThumbnailUrl,
     onThresholdChange: setThreshold,
     onSelectToggle: handleSelectToggle,
     onSelectAllDuplicates: handleSelectAllDuplicates,

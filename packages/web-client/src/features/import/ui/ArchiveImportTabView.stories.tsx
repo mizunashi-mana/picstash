@@ -16,10 +16,17 @@ const mockSession = {
   ],
 };
 
+const mockGetArchiveThumbnailUrl = (sessionId: string, fileIndex: number) =>
+  `/api/archives/${sessionId}/files/${fileIndex}/thumbnail`;
+const mockGetArchiveImageUrl = (sessionId: string, fileIndex: number) =>
+  `/api/archives/${sessionId}/files/${fileIndex}/file`;
+
 const meta = {
   title: 'Features/Import/ArchiveImportTabView',
   component: ArchiveImportTabView,
   args: {
+    getArchiveThumbnailUrl: mockGetArchiveThumbnailUrl,
+    getArchiveImageUrl: mockGetArchiveImageUrl,
     onDrop: fn(),
     onClose: fn(),
     onSelectAll: fn(),

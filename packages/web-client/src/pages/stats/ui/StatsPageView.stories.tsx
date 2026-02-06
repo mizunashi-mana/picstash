@@ -2,12 +2,15 @@ import { expect, fn, userEvent, within } from 'storybook/test';
 import { StatsPageView } from './StatsPageView';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+const mockGetThumbnailUrl = (imageId: string) => `/api/images/${imageId}/thumbnail`;
+
 const meta = {
   title: 'Pages/Stats/StatsPageView',
   component: StatsPageView,
   args: {
     days: '7',
     onDaysChange: fn(),
+    getThumbnailUrl: mockGetThumbnailUrl,
   },
 } satisfies Meta<typeof StatsPageView>;
 

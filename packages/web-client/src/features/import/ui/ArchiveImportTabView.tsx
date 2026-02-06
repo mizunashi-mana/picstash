@@ -13,8 +13,8 @@ import {
   ArchiveDropzone,
   ArchivePreviewGallery,
 } from '@/features/import-archive';
-import type { ImportResult } from '@/features/import-archive';
 import type { FileWithPath } from '@mantine/dropzone';
+import type { ArchiveImportResult } from '@picstash/api';
 
 export interface ArchiveImportTabViewProps {
   // Session state
@@ -33,7 +33,7 @@ export interface ArchiveImportTabViewProps {
   // Import state
   isImporting: boolean;
   importError: Error | null;
-  importResult: ImportResult | null;
+  importResult: ArchiveImportResult | null;
 
   // Job state
   jobStatus: string | undefined;
@@ -44,6 +44,10 @@ export interface ArchiveImportTabViewProps {
 
   // Delete state
   isClosing: boolean;
+
+  // URL functions
+  getArchiveThumbnailUrl: (sessionId: string, fileIndex: number) => string;
+  getArchiveImageUrl: (sessionId: string, fileIndex: number) => string;
 
   // Handlers
   onDrop: (files: FileWithPath[]) => void;
@@ -119,7 +123,7 @@ function ImportResultAlert({
   result,
   onClose,
 }: {
-  result: ImportResult;
+  result: ArchiveImportResult;
   onClose: () => void;
 }) {
   return (
@@ -254,6 +258,8 @@ export function ArchiveImportTabView({
   jobFailedError,
   jobStatusError,
   isClosing,
+  getArchiveThumbnailUrl,
+  getArchiveImageUrl,
   onDrop,
   onClose,
   onSelectAll,
@@ -358,6 +364,8 @@ export function ArchiveImportTabView({
                     images={session.images}
                     selectedIndices={selectedIndices}
                     onSelectionChange={onSelectionChange}
+                    getThumbnailUrl={getArchiveThumbnailUrl}
+                    getImageUrl={getArchiveImageUrl}
                   />
                 </>
               )

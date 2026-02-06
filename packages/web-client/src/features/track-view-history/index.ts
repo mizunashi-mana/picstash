@@ -1,12 +1,6 @@
-export {
-  fetchImageViewStats,
-  fetchViewHistory,
-  recordViewEnd,
-  recordViewStart,
-} from './api/view-history';
 export type {
-  ImageViewStats,
   ViewHistory,
   ViewHistoryWithImage,
-} from './api/view-history';
+  ImageViewStats,
+} from '@picstash/api';
 export { useViewHistory } from './model/useViewHistory';

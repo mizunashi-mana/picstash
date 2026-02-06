@@ -12,7 +12,7 @@ import {
   CrawlPreviewGallery,
   UrlInputForm,
 } from '@/features/import-url';
-import type { ImportResult, UrlCrawlSessionDetail } from '@/features/import-url';
+import type { UrlCrawlImportResult, UrlCrawlSessionDetail } from '@picstash/api';
 
 export interface UrlCrawlTabViewProps {
   sessionId: string | null;
@@ -23,7 +23,7 @@ export interface UrlCrawlTabViewProps {
   crawlError: Error | null;
   selectedIndices: Set<number>;
   isImporting: boolean;
-  importResult: ImportResult | null;
+  importResult: UrlCrawlImportResult | null;
   isClosing: boolean;
   onSubmit: (url: string) => void;
   onClose: () => void;

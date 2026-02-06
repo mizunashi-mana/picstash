@@ -17,8 +17,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { IconEdit, IconPlus, IconSparkles, IconTrash } from '@tabler/icons-react';
-import type { AttributeSuggestion } from '@/features/manage-image-attributes/api/attributes';
-import type { ImageAttribute } from '@picstash/api';
+import type { AttributeSuggestion, ImageAttribute } from '@picstash/api';
 
 export interface ImageAttributeSectionViewProps {
   attributes: ImageAttribute[] | undefined;

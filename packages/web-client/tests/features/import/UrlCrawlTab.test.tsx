@@ -1,20 +1,28 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
+import { Container } from 'inversify';
 import { MemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 import { UrlCrawlTab } from '@/features/import/ui/UrlCrawlTab';
-import {
-  crawlUrl,
-  getCrawlSession,
-} from '@/features/import-url';
+import { ContainerProvider } from '@/shared/di/react';
+
+const mockUrlCrawlApi = {
+  crawl: vi.fn(),
+  getSession: vi.fn(),
+  deleteSession: vi.fn().mockResolvedValue(undefined),
+  importImages: vi.fn(),
+  getThumbnailUrl: vi.fn((sessionId: string, imageIndex: number) =>
+    `/api/url-crawl/${sessionId}/images/${imageIndex}/thumbnail`,
+  ),
+  getImageUrl: vi.fn((sessionId: string, imageIndex: number) =>
+    `/api/url-crawl/${sessionId}/images/${imageIndex}/file`,
+  ),
+};
 
 vi.mock('@/features/import-url', () => ({
-  crawlUrl: vi.fn(),
-  getCrawlSession: vi.fn(),
-  deleteCrawlSession: vi.fn().mockResolvedValue(undefined),
-  importFromCrawl: vi.fn(),
   UrlInputForm: ({ onSubmit, isPending }: {
     onSubmit: (url: string) => void;
     isPending: boolean;
@@ -47,12 +55,21 @@ function createWrapper() {
     },
   });
 
+  const mockContainer = new Container();
+
+  const mockApiClient = {
+    urlCrawl: mockUrlCrawlApi,
+  } as unknown as ApiClient;
+  mockContainer.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(mockApiClient);
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>
-          <MemoryRouter>{children}</MemoryRouter>
-        </MantineProvider>
+        <ContainerProvider container={mockContainer}>
+          <MantineProvider>
+            <MemoryRouter>{children}</MemoryRouter>
+          </MantineProvider>
+        </ContainerProvider>
       </QueryClientProvider>
     );
   };
@@ -72,12 +89,12 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show session info after crawl', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({
+    mockUrlCrawlApi.crawl.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       imageCount: 5,
     });
-    vi.mocked(getCrawlSession).mockResolvedValue({
+    mockUrlCrawlApi.getSession.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       pageTitle: 'Example Page',
@@ -102,12 +119,12 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show source URL link when session is active', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({
+    mockUrlCrawlApi.crawl.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com/gallery',
       imageCount: 1,
     });
-    vi.mocked(getCrawlSession).mockResolvedValue({
+    mockUrlCrawlApi.getSession.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com/gallery',
       pageTitle: 'Gallery',
@@ -127,12 +144,12 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show close button when session is active', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({
+    mockUrlCrawlApi.crawl.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       imageCount: 1,
     });
-    vi.mocked(getCrawlSession).mockResolvedValue({
+    mockUrlCrawlApi.getSession.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       pageTitle: 'Test',
@@ -150,12 +167,12 @@ describe('UrlCrawlTab', () => {
   });
 
   it('should show selection controls when session is active', async () => {
-    vi.mocked(crawlUrl).mockResolvedValue({
+    mockUrlCrawlApi.crawl.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       imageCount: 2,
     });
-    vi.mocked(getCrawlSession).mockResolvedValue({
+    mockUrlCrawlApi.getSession.mockResolvedValue({
       sessionId: 'session-1',
       sourceUrl: 'https://example.com',
       pageTitle: 'Test',

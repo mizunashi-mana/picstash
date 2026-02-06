@@ -1,8 +1,9 @@
 import { Card, Group, Image, Stack, Text } from '@mantine/core';
-import { imageEndpoints, type PopularImage } from '@picstash/api';
+import type { PopularImage } from '@picstash/api';
 
 interface PopularImagesListProps {
   images: PopularImage[];
+  getThumbnailUrl: (imageId: string) => string;
 }
 
 function formatDuration(ms: number): string {
@@ -23,7 +24,7 @@ function formatDate(dateStr: string | null): string {
   return date.toLocaleDateString('ja-JP');
 }
 
-export function PopularImagesList({ images }: PopularImagesListProps) {
+export function PopularImagesList({ images, getThumbnailUrl }: PopularImagesListProps) {
   return (
     <Card shadow="sm" padding="lg" radius="md" withBorder>
       <Text fw={500} mb="md">
@@ -49,7 +50,7 @@ export function PopularImagesList({ images }: PopularImagesListProps) {
                     {index + 1}
                   </Text>
                   <Image
-                    src={imageEndpoints.thumbnail(image.id)}
+                    src={getThumbnailUrl(image.id)}
                     alt={image.title}
                     w={60}
                     h={60}

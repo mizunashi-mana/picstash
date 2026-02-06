@@ -1,8 +1,10 @@
-export { fetchRecommendations, recordRecommendationClick } from './api/recommendations';
 export type {
-  FetchRecommendationsOptions,
+  CreateImpressionsInput,
+  CreateImpressionsResult,
+  RecommendationConversion,
+  RecommendationsQuery,
   RecommendationsResult,
   RecommendedImage,
   RecordClickInput,
-} from './api/recommendations';
+} from '@picstash/api';
 export { RecommendationSection } from './ui/RecommendationSection';

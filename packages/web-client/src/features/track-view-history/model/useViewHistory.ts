@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { recordViewEnd, recordViewStart } from '@/features/track-view-history/api/view-history';
-import { recordRecommendationClick } from '@/features/view-recommendations';
+import { useApiClient } from '@/shared';
 
 interface UseViewHistoryOptions {
   enabled?: boolean;
@@ -20,16 +19,22 @@ export function useViewHistory(
   options: UseViewHistoryOptions = {},
 ): void {
   const { enabled = true, conversionId, isDeleted = false } = options;
+  const apiClient = useApiClient();
   const viewHistoryIdRef = useRef<string | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const conversionRecordedRef = useRef<boolean>(false);
   const lastConversionIdRef = useRef<string | null | undefined>(undefined);
   const isDeletedRef = useRef<boolean>(false);
+  const apiClientRef = useRef(apiClient);
 
-  // Keep isDeletedRef in sync with isDeleted prop
+  // Keep refs in sync with values
   useEffect(() => {
     isDeletedRef.current = isDeleted;
   }, [isDeleted]);
+
+  useEffect(() => {
+    apiClientRef.current = apiClient;
+  }, [apiClient]);
 
   // Reset conversionRecordedRef when conversionId changes
   useEffect(() => {
@@ -59,7 +64,7 @@ export function useViewHistory(
     startTimeRef.current = null;
 
     try {
-      await recordViewEnd(viewHistoryId, duration);
+      await apiClientRef.current.viewHistory.recordEnd(viewHistoryId, duration);
     }
     catch {
       // Silently fail - view history is not critical
@@ -74,7 +79,7 @@ export function useViewHistory(
     // Record view start
     const startView = async () => {
       try {
-        const viewHistory = await recordViewStart(imageId);
+        const viewHistory = await apiClientRef.current.viewHistory.recordStart(imageId);
         viewHistoryIdRef.current = viewHistory.id;
         startTimeRef.current = Date.now();
 
@@ -86,7 +91,7 @@ export function useViewHistory(
         ) {
           conversionRecordedRef.current = true;
           try {
-            await recordRecommendationClick(conversionId, {
+            await apiClientRef.current.recommendations.recordClick(conversionId, {
               viewHistoryId: viewHistory.id,
             });
           }

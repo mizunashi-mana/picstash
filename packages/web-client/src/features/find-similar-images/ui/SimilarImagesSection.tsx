@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchSimilarImages } from '@/features/find-similar-images/api/similar';
 import { useApiClient } from '@/shared';
 import { SimilarImagesSectionView } from './SimilarImagesSectionView';
 
@@ -11,7 +10,7 @@ export function SimilarImagesSection({ imageId }: SimilarImagesSectionProps) {
   const apiClient = useApiClient();
   const { data, isLoading, error } = useQuery({
     queryKey: ['similarImages', imageId],
-    queryFn: async () => await fetchSimilarImages(imageId, { limit: 10 }),
+    queryFn: async () => await apiClient.images.fetchSimilar(imageId, { limit: 10 }),
   });
 
   return (

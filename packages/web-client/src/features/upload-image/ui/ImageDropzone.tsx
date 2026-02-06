@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { uploadImage } from '@/features/upload-image/api/upload';
+import { useApiClient } from '@/shared';
 import { ImageDropzoneView } from './ImageDropzoneView';
 import type { FileWithPath } from '@mantine/dropzone';
 
@@ -8,8 +8,10 @@ interface ImageDropzoneProps {
 }
 
 export function ImageDropzone({ onUploadSuccess }: ImageDropzoneProps) {
+  const apiClient = useApiClient();
+
   const mutation = useMutation({
-    mutationFn: uploadImage,
+    mutationFn: async (file: Blob) => await apiClient.images.upload(file),
     onSuccess: () => {
       onUploadSuccess?.();
     },

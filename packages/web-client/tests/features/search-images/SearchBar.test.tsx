@@ -1,16 +1,25 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
+import { API_TYPES, type ApiClient } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Container } from 'inversify';
 import { describe, expect, it, vi } from 'vitest';
 import { SearchBar } from '@/features/search-images';
-import { fetchSearchSuggestions } from '@/features/search-images/api/search';
+import { ContainerProvider } from '@/shared/di';
 
-vi.mock('@/features/search-images/api/search', () => ({
-  fetchSearchSuggestions: vi.fn().mockResolvedValue({ suggestions: [] }),
-  deleteSearchHistory: vi.fn(),
-}));
+const mockSuggestions = vi.fn().mockResolvedValue({ suggestions: [] });
+const mockDeleteHistory = vi.fn();
+
+function createMockApiClient() {
+  return {
+    search: {
+      suggestions: mockSuggestions,
+      deleteHistory: mockDeleteHistory,
+    },
+  } as unknown as ApiClient;
+}
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -20,10 +29,15 @@ function createWrapper() {
     },
   });
 
+  const container = new Container();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient());
+
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <MantineProvider>{children}</MantineProvider>
+        <ContainerProvider container={container}>
+          <MantineProvider>{children}</MantineProvider>
+        </ContainerProvider>
       </QueryClientProvider>
     );
   };
@@ -101,7 +115,7 @@ describe('SearchBar', () => {
   });
 
   it('should fetch suggestions when typing', async () => {
-    vi.mocked(fetchSearchSuggestions).mockResolvedValue({
+    mockSuggestions.mockResolvedValue({
       suggestions: [
         { type: 'keyword', value: 'test suggestion' },
       ],
@@ -115,11 +129,14 @@ describe('SearchBar', () => {
     await user.type(input, 'test');
 
     await waitFor(() => {
-      expect(fetchSearchSuggestions).toHaveBeenCalledWith('test');
+      expect(mockSuggestions).toHaveBeenCalledWith('test');
     });
   });
 
   it('should update value when parent prop changes', () => {
+    const container = new Container();
+    container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createMockApiClient());
+
     const { rerender } = render(
       <SearchBar value="initial" onChange={vi.fn()} />,
       { wrapper: createWrapper() },
@@ -130,7 +147,9 @@ describe('SearchBar', () => {
     rerender(
       <MantineProvider>
         <QueryClientProvider client={new QueryClient()}>
-          <SearchBar value="updated" onChange={vi.fn()} />
+          <ContainerProvider container={container}>
+            <SearchBar value="updated" onChange={vi.fn()} />
+          </ContainerProvider>
         </QueryClientProvider>
       </MantineProvider>,
     );

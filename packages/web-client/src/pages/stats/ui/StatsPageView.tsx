@@ -8,7 +8,7 @@ import type {
   DailyViewStats,
   OverviewStats,
   PopularImage,
-} from '@/features/view-stats/api/stats';
+} from '@picstash/api';
 
 export interface StatsPageViewProps {
   /** 期間（日数） */
@@ -27,6 +27,8 @@ export interface StatsPageViewProps {
   hasError: boolean;
   /** 期間変更ハンドラ */
   onDaysChange: (value: string) => void;
+  /** サムネイル URL 取得関数 */
+  getThumbnailUrl: (imageId: string) => string;
 }
 
 const PERIOD_OPTIONS = [
@@ -44,6 +46,7 @@ export function StatsPageView({
   isLoading,
   hasError,
   onDaysChange,
+  getThumbnailUrl,
 }: StatsPageViewProps) {
   return (
     <Container size="xl" py="md">
@@ -66,7 +69,7 @@ export function StatsPageView({
                     {recommendationTrends !== undefined && (<RecommendationTrendsChart data={recommendationTrends} />)}
                   </Grid.Col>
                 </Grid>
-                {popularImages !== undefined && (<PopularImagesList images={popularImages} />)}
+                {popularImages !== undefined && (<PopularImagesList images={popularImages} getThumbnailUrl={getThumbnailUrl} />)}
               </>
             )}
       </Stack>

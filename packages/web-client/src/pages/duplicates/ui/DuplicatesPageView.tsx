@@ -12,7 +12,7 @@ import {
   Title,
 } from '@mantine/core';
 import { DuplicateGroupCard } from '@/features/find-duplicates/ui/DuplicateGroupCard';
-import type { DuplicateGroup, DuplicatesResponse } from '@/features/find-duplicates/api/duplicates';
+import type { DuplicateGroup, DuplicatesResponse } from '@picstash/api';
 
 export interface DuplicatesPageViewProps {
   threshold: number;
@@ -23,6 +23,7 @@ export interface DuplicatesPageViewProps {
   isLoading: boolean;
   error: Error | null;
   isDeleting: boolean;
+  getThumbnailUrl: (imageId: string) => string;
   onThresholdChange: (value: number) => void;
   onSelectToggle: (imageId: string) => void;
   onSelectAllDuplicates: (group: DuplicateGroup) => void;
@@ -41,6 +42,7 @@ export function DuplicatesPageView({
   isLoading,
   error,
   isDeleting,
+  getThumbnailUrl,
   onThresholdChange,
   onSelectToggle,
   onSelectAllDuplicates,
@@ -142,6 +144,7 @@ export function DuplicatesPageView({
                     selectedIds={selectedIds}
                     onSelectToggle={onSelectToggle}
                     onSelectAllDuplicates={onSelectAllDuplicates}
+                    getThumbnailUrl={getThumbnailUrl}
                   />
                 ))}
               </Stack>

@@ -1,6 +1,6 @@
 import { CrawlPreviewGalleryView } from '@/features/import-url/ui/CrawlPreviewGalleryView';
 import { useCrawlPreviewGalleryViewProps } from '@/features/import-url/ui/useCrawlPreviewGalleryViewProps';
-import type { CrawledImage } from '@/features/import-url/api/crawl';
+import type { CrawledImage } from '@picstash/api';
 
 export interface CrawlPreviewGalleryProps {
   sessionId: string;

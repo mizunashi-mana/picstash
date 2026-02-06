@@ -1,7 +1,9 @@
 import { expect, fn, within } from 'storybook/test';
 import { DuplicatesPageView } from './DuplicatesPageView';
-import type { DuplicateGroup, DuplicatesResponse } from '@/features/find-duplicates/api/duplicates';
+import type { DuplicateGroup, DuplicatesResponse } from '@picstash/api';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
+const mockGetThumbnailUrl = (imageId: string) => `/api/images/${imageId}/thumbnail`;
 
 const mockGroup: DuplicateGroup = {
   original: {
@@ -44,6 +46,7 @@ const meta = {
   title: 'Pages/Duplicates/DuplicatesPageView',
   component: DuplicatesPageView,
   args: {
+    getThumbnailUrl: mockGetThumbnailUrl,
     onThresholdChange: fn(),
     onSelectToggle: fn(),
     onSelectAllDuplicates: fn(),

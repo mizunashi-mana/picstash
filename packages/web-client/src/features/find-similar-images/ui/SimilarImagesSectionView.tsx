@@ -12,7 +12,7 @@ import {
 } from '@mantine/core';
 import { IconPhoto } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import type { SimilarImage } from '@/features/find-similar-images/api/similar';
+import type { SimilarImage } from '@picstash/api';
 
 export interface SimilarImagesSectionViewProps {
   similarImages: SimilarImage[];

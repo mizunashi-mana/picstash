@@ -1,14 +1,7 @@
-export {
-  fetchSearchSuggestions,
-  saveSearchHistory,
-  fetchSearchHistory,
-  deleteSearchHistory,
-  deleteAllSearchHistory,
-} from './api/search';
 export type {
   SearchSuggestion,
   SearchSuggestionsResponse,
   SearchHistory,
   SearchHistoryResponse,
-} from './api/search';
+} from '@picstash/api';
 export { SearchBar } from './ui/SearchBar';

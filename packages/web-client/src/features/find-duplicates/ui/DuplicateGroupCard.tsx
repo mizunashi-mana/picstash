@@ -9,15 +9,15 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { imageEndpoints } from '@picstash/api';
 import { Link } from 'react-router';
-import type { DuplicateGroup } from '@/features/find-duplicates/api/duplicates';
+import type { DuplicateGroup } from '@picstash/api';
 
-interface DuplicateGroupCardProps {
+export interface DuplicateGroupCardProps {
   group: DuplicateGroup;
   selectedIds: Set<string>;
   onSelectToggle: (id: string) => void;
   onSelectAllDuplicates: (group: DuplicateGroup) => void;
+  getThumbnailUrl: (imageId: string) => string;
 }
 
 function formatDistance(distance: number): string {
@@ -31,6 +31,7 @@ export function DuplicateGroupCard({
   selectedIds,
   onSelectToggle,
   onSelectAllDuplicates,
+  getThumbnailUrl,
 }: DuplicateGroupCardProps): React.JSX.Element {
   const allDuplicatesSelected = group.duplicates.every(dup =>
     selectedIds.has(dup.id),
@@ -59,7 +60,7 @@ export function DuplicateGroupCard({
             <Card.Section>
               <Link to={`/images/${group.original.id}`}>
                 <Image
-                  src={imageEndpoints.thumbnail(group.original.id)}
+                  src={getThumbnailUrl(group.original.id)}
                   alt={group.original.title}
                   height={120}
                   fit="cover"
@@ -87,7 +88,7 @@ export function DuplicateGroupCard({
                 />
                 <Link to={`/images/${dup.id}`}>
                   <Image
-                    src={imageEndpoints.thumbnail(dup.id)}
+                    src={getThumbnailUrl(dup.id)}
                     alt={dup.title}
                     height={120}
                     fit="cover"

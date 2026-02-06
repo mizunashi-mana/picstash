@@ -38,6 +38,16 @@ function createMockApiClient(): ApiClient {
       update: async () => ({}),
       delete: async () => undefined,
     },
+    urlCrawl: {
+      crawl: async () => ({ sessionId: '' }),
+      getSession: async () => undefined,
+      deleteSession: async () => undefined,
+      getThumbnailUrl: (sessionId: string, imageIndex: number) =>
+        `/api/url-crawl/${sessionId}/images/${imageIndex}/thumbnail`,
+      getImageUrl: (sessionId: string, imageIndex: number) =>
+        `/api/url-crawl/${sessionId}/images/${imageIndex}/file`,
+      importImages: async () => ({ totalRequested: 0, successCount: 0, failedCount: 0, results: [] }),
+    },
   } as unknown as ApiClient;
 }
 
