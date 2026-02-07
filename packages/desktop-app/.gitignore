@@ -1,4 +1,15 @@
-dist/
-release/
-playwright-report/
+# TS build
+/dist/
+
+# vitest
+/coverage/
 test-results/
+
+# Prisma generated client
+/generated/
+
+# Playwright
+playwright-report/
+
+# Electron
+release/

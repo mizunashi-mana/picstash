@@ -37,8 +37,6 @@
     "build:storybook": "storybook build"
   },
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "^7.2.0",
-    "@prisma/client": "^7.2.0",
     "@mantine/charts": "^8.3.13",
     "@mantine/core": "^8.3.13",
     "@mantine/dropzone": "^8.3.13",
@@ -46,6 +44,8 @@
     "@mantine/notifications": "^8.3.13",
     "@picstash/api": "*",
     "@picstash/core": "*",
+    "@prisma/adapter-better-sqlite3": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "@tabler/icons-react": "^3.36.1",
     "@tanstack/react-query": "^5.80.7",
     "@tanstack/react-virtual": "^3.13.18",
@@ -62,7 +62,6 @@
   },
   "devDependencies": {
     "@picstash/eslint-config": "*",
-    "prisma": "^7.2.0",
     "@playwright/test": "^1.57.0",
     "@storybook/addon-vitest": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
@@ -82,6 +81,8 @@
     "electron-builder": "^26.7.0",
     "esbuild": "^0.27.2",
     "playwright": "^1.57.0",
+    "prisma": "^7.2.0",
+    "prisma-lint": "^0.13.1",
     "storybook": "^10.1.11",
     "tsx": "^4.19.4",
     "typescript": "^5.8.0",
