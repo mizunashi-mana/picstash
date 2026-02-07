@@ -20,6 +20,12 @@ vi.mock('../../../src/main/infra/database/index.js', () => ({
   PrismaService: MockPrismaService,
 }));
 
+// モック: infra/di (bindRepositories)
+const mockBindRepositories = vi.fn();
+vi.mock('../../../src/main/infra/di/index.js', () => ({
+  bindRepositories: (...args: unknown[]) => mockBindRepositories(...args),
+}));
+
 // モック: @picstash/core
 const mockEmbeddingRepository = {
   close: mockClose,

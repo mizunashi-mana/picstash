@@ -10,7 +10,7 @@ const mockMigrationsDir = join(tmpdir(), `picstash-migrations-test-${Date.now()}
 vi.mock('node:module', () => ({
   createRequire: () => ({
     resolve: (id: string) => {
-      if (id === '@picstash/core/package.json') {
+      if (id === '@picstash/desktop-app/package.json') {
         // モック用のルートディレクトリを返す（prisma/migrations/ をそこに作る）
         return join(mockMigrationsDir, 'package.json');
       }
