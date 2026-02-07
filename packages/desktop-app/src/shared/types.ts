@@ -38,7 +38,33 @@ export const IPC_CHANNELS = {
   // 画像操作
   IMAGE_UPLOAD: 'image:upload',
   IMAGE_GET_DATA_URL: 'image:getDataUrl',
+  // 汎用 API リクエスト（IPC 経由で API を呼び出す）
+  API_REQUEST: 'api:request',
 } as const;
+
+/**
+ * IPC 経由の API リクエスト
+ */
+export interface IpcApiRequest {
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  url: string;
+  body?: unknown;
+  formData?: {
+    fieldName: string;
+    data: ArrayBuffer;
+    filename: string;
+    contentType: string;
+  };
+}
+
+/**
+ * IPC 経由の API レスポンス
+ */
+export interface IpcApiResponse {
+  status: number;
+  data?: unknown;
+  error?: string;
+}
 
 /**
  * 画像アップロード入力
@@ -160,6 +186,18 @@ export interface StorageAPI {
 }
 
 /**
+ * レンダラープロセスに公開する汎用 API の型定義
+ */
+export interface GenericAPI {
+  /**
+   * IPC 経由で API リクエストを送信
+   * @param request API リクエスト
+   * @returns API レスポンス
+   */
+  request: (request: IpcApiRequest) => Promise<IpcApiResponse>;
+}
+
+/**
  * window.picstash の型定義
  */
 export interface PicstashAPI {
@@ -170,4 +208,5 @@ export interface PicstashAPI {
   };
   storage: StorageAPI;
   image: ImageAPI;
+  api: GenericAPI;
 }

@@ -1,9 +1,10 @@
 import { ipcMain } from 'electron';
 import { IPC_CHANNELS } from '@desktop-app/shared/types.js';
 import { coreManager } from './core-manager.js';
+import { handleApiRequest } from './ipc/api-router.js';
 import { uploadService } from './services/index.js';
 import { storageManager } from './storage-manager.js';
-import type { FileCategory, ImageUploadInput, SaveFileOptions } from '@desktop-app/shared/types.js';
+import type { FileCategory, ImageUploadInput, IpcApiRequest, SaveFileOptions } from '@desktop-app/shared/types.js';
 
 /**
  * 許可されたファイルカテゴリ
@@ -182,5 +183,28 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.IMAGE_GET_DATA_URL, async (_event, relativePath: unknown) => {
     validateRelativePath(relativePath);
     return await uploadService.getDataUrl(relativePath);
+  });
+
+  // 汎用 API リクエスト
+  ipcMain.handle(IPC_CHANNELS.API_REQUEST, async (_event, request: unknown) => {
+    // リクエストの検証
+    if (typeof request !== 'object' || request === null) {
+      return { status: 400, error: 'Invalid request' };
+    }
+    if (!('method' in request) || typeof request.method !== 'string') {
+      return { status: 400, error: 'Invalid request method' };
+    }
+    if (!('url' in request) || typeof request.url !== 'string') {
+      return { status: 400, error: 'Invalid request url' };
+    }
+
+    // CoreManager が初期化されているか確認
+    if (!coreManager.isInitialized()) {
+      return { status: 503, error: 'Core is not initialized' };
+    }
+
+    const container = coreManager.getContainer();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Validated above
+    return await handleApiRequest(container, request as IpcApiRequest);
   });
 }

@@ -1,8 +1,11 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC_CHANNELS } from '@desktop-app/shared/types.js';
 import type {
+  GenericAPI,
   ImageAPI,
   ImageUploadInput,
+  IpcApiRequest,
+  IpcApiResponse,
   PicstashAPI,
   SaveFileOptions,
   SaveFileResult,
@@ -60,6 +63,13 @@ const imageAPI: ImageAPI = {
   },
 };
 
+// Generic API の実装（IPC 経由の汎用 API リクエスト）
+const genericAPI: GenericAPI = {
+  request: async (request: IpcApiRequest): Promise<IpcApiResponse> => {
+    return await ipcRenderer.invoke(IPC_CHANNELS.API_REQUEST, request);
+  },
+};
+
 // レンダラープロセスに公開する API
 const api: PicstashAPI = {
   versions: {
@@ -69,6 +79,7 @@ const api: PicstashAPI = {
   },
   storage: storageAPI,
   image: imageAPI,
+  api: genericAPI,
 };
 
 contextBridge.exposeInMainWorld('picstash', api);
