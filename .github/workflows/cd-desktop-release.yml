@@ -1,0 +1,45 @@
+name: CD Desktop Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build desktop app (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact-name: desktop-app-macos
+            artifact-path: packages/desktop-app/release/*.dmg
+          - os: windows-latest
+            artifact-name: desktop-app-windows
+            artifact-path: packages/desktop-app/release/*.exe
+          - os: ubuntu-latest
+            artifact-name: desktop-app-linux
+            artifact-path: |
+              packages/desktop-app/release/*.AppImage
+              packages/desktop-app/release/*.deb
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-node
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Package desktop app
+        run: npm run package -w @picstash/desktop-app
+
+      - name: Upload installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          retention-days: 30
