@@ -102,18 +102,17 @@ app → pages → widgets → features → entities → shared
 
 dependency-cruiser（`.dependency-cruiser.mjs`）でレイヤー間の依存方向とスライス間の分離を自動検証。
 
-### DI コンテナ（web-client）
+### DI コンテナ（web-client / desktop-app）
 
-web-client でも inversify を使用した DI コンテナで API クライアントを管理：
+web-client および desktop-app で inversify を使用した DI コンテナで API クライアントを管理：
 
 ```typescript
-// app/providers/ContainerProvider.tsx
+// shared/di/react.tsx
 import { Container } from 'inversify';
 import { API_TYPES, type ApiClient } from '@picstash/api';
-import { ContainerProvider } from '@/shared/di';
 
 const container = new Container();
-container.bind<ApiClient>(API_TYPES.ApiClient).to(FetchApiClient).inSingletonScope();
+container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createApiClient(httpClient));
 
 <ContainerProvider container={container}>
   <App />
@@ -131,11 +130,16 @@ function ImageList() {
 }
 ```
 
-**ファイル構成:**
+**ファイル構成（web-client / desktop-app 共通パターン）:**
 ```
-packages/web-client/src/shared/di/
-├── index.ts           # エクスポート（ContainerProvider, useApiClient 等）
-└── react.tsx          # ContainerContext, ContainerProvider, useContainer, useApiClient
+packages/{web-client,desktop-app}/src/{,renderer/}shared/
+├── di/
+│   ├── index.ts           # エクスポート（ContainerProvider, useApiClient 等）
+│   ├── container.ts       # createContainer() - inversify Container 設定
+│   └── react.tsx          # ContainerContext, ContainerProvider, useContainer, useApiClient
+└── api/
+    ├── index.ts           # エクスポート
+    └── fetch-http-client.ts # HttpClient 実装
 ```
 
 ### View / State 分離パターン

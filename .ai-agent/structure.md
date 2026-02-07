@@ -177,12 +177,20 @@ picstash/
 │   │   │   │   └── index.ts    # エントリポイント（BrowserWindow 作成）
 │   │   │   ├── preload/        # プリロードスクリプト
 │   │   │   │   └── index.ts    # contextBridge による API 公開
-│   │   │   └── renderer/       # レンダラープロセス
-│   │   │       ├── index.html
-│   │   │       ├── styles.css
-│   │   │       └── renderer.js
-│   │   ├── tests/              # Playwright E2E テスト
-│   │   │   └── app.spec.ts
+│   │   │   ├── renderer/       # レンダラープロセス（React アプリ）
+│   │   │   │   ├── index.html
+│   │   │   │   ├── main.tsx    # エントリポイント
+│   │   │   │   ├── App.tsx     # ルートコンポーネント
+│   │   │   │   ├── routes/     # React Router 設定
+│   │   │   │   ├── features/   # 機能モジュール（gallery, upload, labels 等）
+│   │   │   │   └── shared/     # 共通部品
+│   │   │   │       ├── di/     # DI コンテナ（ContainerProvider, useApiClient）
+│   │   │   │       ├── api/    # FetchHttpClient 実装
+│   │   │   │       ├── components/
+│   │   │   │       ├── helpers/
+│   │   │   │       └── hooks/
+│   │   │   └── shared/         # main/preload/renderer 共有
+│   │   ├── tests/              # テスト
 │   │   ├── dist/               # ビルド出力
 │   │   ├── electron-builder.json  # Electron Builder 設定
 │   │   ├── playwright.config.ts
