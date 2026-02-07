@@ -1,0 +1,120 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.1.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version-update:
+    name: Update version and create tag
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    outputs:
+      tag: v${{ inputs.version }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update version in package.json
+        run: |
+          npm version ${{ inputs.version }} --no-git-tag-version --workspaces --include-workspace-root
+
+      - name: Commit version update
+        run: |
+          git add -A
+          git commit -m "chore: bump version to ${{ inputs.version }}"
+
+      - name: Create and push tag
+        run: |
+          git tag v${{ inputs.version }}
+          git push origin HEAD:${{ github.ref_name }}
+          git push origin v${{ inputs.version }}
+
+  build:
+    name: Build desktop app (${{ matrix.os }})
+    needs: version-update
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            artifact-name: desktop-app-macos
+            artifact-path: packages/desktop-app/release/*.pkg
+          - os: windows-latest
+            artifact-name: desktop-app-windows
+            artifact-path: packages/desktop-app/release/*.exe
+          - os: ubuntu-latest
+            artifact-name: desktop-app-linux
+            artifact-path: |
+              packages/desktop-app/release/*.AppImage
+              packages/desktop-app/release/*.deb
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.version-update.outputs.tag }}
+      - uses: ./.github/actions/setup-node
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Package desktop app
+        run: npm run package -w @picstash/desktop-app
+
+      - name: Upload installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    needs: [version-update, build]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ needs.version-update.outputs.tag }}
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${{ needs.version-update.outputs.tag }} \
+            --title "Picstash ${{ needs.version-update.outputs.tag }}" \
+            --generate-notes \
+            artifacts/**/*
