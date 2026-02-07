@@ -3,7 +3,11 @@ import { fileURLToPath } from 'node:url';
 import { app, BrowserWindow } from 'electron';
 import { coreManager } from './core-manager.js';
 import { registerIpcHandlers } from './ipc-handlers.js';
+import { registerCustomProtocol, registerProtocolPrivileges } from './protocol-handler.js';
 import { storageManager } from './storage-manager.js';
+
+// カスタムプロトコルを特権スキームとして登録（app.whenReady の前に呼ぶ必要あり）
+registerProtocolPrivileges();
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,6 +48,9 @@ function createWindow(): void {
 }
 
 void app.whenReady().then(async () => {
+  // カスタムプロトコルを登録
+  registerCustomProtocol();
+
   // 設定を読み込み
   await storageManager.loadConfig();
 
