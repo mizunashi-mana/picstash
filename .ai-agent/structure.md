@@ -70,6 +70,12 @@ picstash/
 │   │   │
 │   │   ├── public/             # 静的ファイル
 │   │   ├── tests/              # web-client のテスト
+│   │   │   ├── setup.ts        # テストセットアップ
+│   │   │   ├── unit/           # ユニットテスト（Vitest）
+│   │   │   ├── fixtures/       # テスト用フィクスチャ
+│   │   │   └── e2e/            # E2E テスト（Playwright）
+│   │   │       └── config.yaml # E2E テスト用サーバー設定
+│   │   ├── playwright.config.ts # Playwright 設定
 │   │   ├── eslint.config.mjs   # ESLint 設定（browser 環境）
 │   │   ├── package.json
 │   │   └── tsconfig.json
@@ -223,14 +229,6 @@ picstash/
 │   │   ├── tsconfig.main.json     # メインプロセス用
 │   │   ├── tsconfig.preload.json  # プリロード用
 │   │   └── tsconfig.test.json     # テスト用
-│   │
-│   └── e2e-test/               # E2E テスト
-│       ├── tests/              # Playwright テストファイル
-│       ├── fixtures/           # テスト用フィクスチャ
-│       ├── playwright.config.ts
-│       ├── eslint.config.mjs
-│       ├── package.json
-│       └── tsconfig.json
 │
 ├── storage/                    # 画像ストレージ（ローカル）
 │   ├── originals/              # オリジナル画像
@@ -304,12 +302,20 @@ Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エ
 - **labels.ts** - ラベル API の Zod スキーマと型定義
 - **image-attributes.ts** - 画像属性 API の Zod スキーマと型定義
 
-### `packages/e2e-test/`
-Playwright を使用した E2E テストパッケージ。アプリケーション全体の統合テストを実行。
-
 ### `storage/`
 アップロードされた画像の保存先。オリジナル画像とサムネイルを分離して管理。
 
 ## テスト構成
 
-各パッケージ内に `tests/` ディレクトリを配置し、ユニットテストと統合テストをパッケージ毎に管理。
+各パッケージ内に `tests/` ディレクトリを配置し、テストをパッケージ毎に管理。
+
+### web-client のテスト
+
+- **tests/unit/** - ユニットテスト（Vitest + jsdom）
+- **tests/e2e/** - E2E テスト（Playwright）
+- **Storybook テスト** - `@storybook/addon-vitest` によるコンポーネントテスト
+
+### desktop-app のテスト
+
+- **tests/unit/** - ユニットテスト（Vitest）
+- **tests/e2e/** - E2E テスト（Playwright + Electron）

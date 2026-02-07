@@ -11,6 +11,7 @@
     "test:watch": "vitest --project unit",
     "test:coverage": "vitest run --project unit --coverage",
     "test:storybook": "vitest run --project storybook",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "lint:eslint": "eslint --cache --fix src",
     "lint:deps": "depcruise src --config .dependency-cruiser.mjs",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@picstash/eslint-config": "*",
+    "@playwright/test": "^1.57.0",
     "@storybook/addon-vitest": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
     "@testing-library/dom": "^10.4.1",

@@ -112,7 +112,6 @@ packages/core/src/domain/image/
 | `packages/core` | コアロジック（domain, application, infra）(`@picstash/core`) | セットアップ済み |
 | `packages/api` | 共有 API 型定義・エンドポイント (`@picstash/api`) | セットアップ済み |
 | `packages/desktop-app` | Electron デスクトップアプリ (`@picstash/desktop-app`) | セットアップ済み |
-| `packages/e2e-test` | Playwright E2E テスト | セットアップ済み |
 | `packages/eslint-config` | 共有 ESLint 設定 | セットアップ済み |
 
 詳細は [structure.md](../structure.md) を参照。
