@@ -7,7 +7,7 @@ import type {
   FileStorage,
   ImageAttributeRepository,
   ImageRepository,
-  Image,
+  ImageDetail,
   ImageWithEmbedding,
   JobQueue,
   Job,
@@ -125,7 +125,7 @@ function createMockJobQueue(): JobQueue {
   };
 }
 
-function createImage(id: string): Image {
+function createImage(id: string): ImageDetail {
   return {
     id,
     path: `originals/${id}.png`,
