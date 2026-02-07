@@ -2,6 +2,11 @@
   "name": "@picstash/desktop-app",
   "version": "0.0.1",
   "description": "Picstash Desktop Application",
+  "author": {
+    "name": "mizunashi-mana",
+    "email": "mizunashi-mana@users.noreply.github.com"
+  },
+  "homepage": "https://github.com/mizunashi-mana/picstash",
   "private": true,
   "main": "dist/main/index.js",
   "exports": {
