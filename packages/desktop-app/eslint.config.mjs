@@ -18,6 +18,14 @@ export default [
     },
   },
   {
+    // .storybook はブラウザ環境で動作するため、node-builtins チェックと import 解決を無効化
+    files: ['.storybook/**/*.{ts,tsx}'],
+    rules: {
+      'import-x/no-unresolved': 'off',
+      'n/no-unsupported-features/node-builtins': 'off',
+    },
+  },
+  {
     // main/preload は @desktop-app/shared エイリアスで shared ディレクトリを参照
     // esbuild が解決するため import-x/no-unresolved を無効化
     files: ['src/main/**/*.ts', 'src/preload/**/*.ts'],
