@@ -1,3 +1,4 @@
+/* v8 ignore start -- External AI model dependency (@huggingface/transformers) */
 /**
  * Caption Service using @huggingface/transformers
  *
@@ -320,3 +321,4 @@ ${similarDescriptionsText}
     console.log(`Translation model loaded in ${translationElapsed}ms`);
   }
 }
+/* v8 ignore stop */

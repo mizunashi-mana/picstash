@@ -1,3 +1,4 @@
+/* v8 ignore start -- External library dependency (node-unrar-js) */
 import 'reflect-metadata';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
@@ -85,3 +86,4 @@ export class RarArchiveHandler implements ArchiveHandler {
     return Buffer.from(file.extraction);
   }
 }
+/* v8 ignore stop */

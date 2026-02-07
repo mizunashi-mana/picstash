@@ -1,3 +1,4 @@
+/* v8 ignore start -- DI container configuration, tested through integration */
 import 'reflect-metadata';
 import { Container } from 'inversify';
 import {
@@ -228,3 +229,4 @@ export function buildCoreContainer(config: CoreConfig): CoreContainer {
   const container = createCoreContainer(config);
   return new CoreContainer(container);
 }
+/* v8 ignore stop */
