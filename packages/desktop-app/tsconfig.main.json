@@ -4,7 +4,6 @@
     "moduleResolution": "node",
     "noEmit": false,
     "outDir": "dist",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@desktop-app/main/*": ["src/main/*"],
@@ -12,5 +11,5 @@
       "@~generated/*": ["generated/*"]
     }
   },
-  "include": ["src/main/**/*", "src/shared/**/*"]
+  "include": ["src/main/**/*", "src/shared/**/*", "generated/**/*"]
 }
