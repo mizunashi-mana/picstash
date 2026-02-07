@@ -8,6 +8,11 @@ test-results/
 # Prisma generated client
 /generated/
 
+# SQLite database files
+/prisma/data/*.db
+/prisma/data/*.db-wal
+/prisma/data/*.db-shm
+
 # Playwright
 playwright-report/
 
