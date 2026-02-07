@@ -18,7 +18,7 @@
     "build:main": "npx tsx esbuild.config.ts main",
     "build:preload": "npx tsx esbuild.config.ts preload",
     "package": "npm run build && electron-builder",
-    "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.preload.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
+    "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.preload.json --noEmit && tsc -p tsconfig.renderer.json --noEmit && tsc -p tsconfig.tools.json --noEmit",
     "lint": "eslint src tests *.mjs playwright.config.ts esbuild.config.ts",
     "lint:deps": "depcruise src --config .dependency-cruiser.mjs",
     "test": "vitest run",
