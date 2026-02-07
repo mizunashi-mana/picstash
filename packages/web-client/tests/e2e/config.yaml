@@ -5,7 +5,7 @@ server:
   host: "0.0.0.0"
 
 database:
-  url: "file:./data/picstash.db"
+  path: "./packages/server/prisma/data/picstash.db"
 
 storage:
   path: "./data/storage"

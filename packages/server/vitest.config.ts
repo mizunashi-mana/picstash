@@ -5,7 +5,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
-      '@~generated': resolve(__dirname, '../core/generated'),
+      '@~generated': resolve(__dirname, 'generated'),
     },
   },
   test: {
@@ -24,6 +24,8 @@ export default defineConfig({
         // CLI コマンド
         'src/cli/generate-embeddings.ts',
         'src/cli/generate-label-embeddings.ts',
+        // インフラ層: データベース
+        'src/infra/database/prisma-service.ts',
         // インフラ層: DI
         'src/infra/di/app-container.ts',
         'src/infra/di/container.ts',
