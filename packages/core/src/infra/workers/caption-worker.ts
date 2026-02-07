@@ -63,14 +63,14 @@ export function createCaptionJobHandler(deps: {
     // 30% - ファイル確認完了
     await updateProgress(30);
 
+    // ファイルをバッファとして読み込み
+    const imageBuffer = await fileStorage.readFile(image.path);
+
     // OCR でテキストを抽出（オプション）
-    // NOTE: ocrService/captionService はパスベースのため getAbsolutePath を引き続き使用
-    // eslint-disable-next-line @typescript-eslint/no-deprecated -- OCR/Caption サービスのインターフェースがパスベースのため
-    const absolutePath = fileStorage.getAbsolutePath(image.path);
     let ocrText: string | undefined;
     if (ocrService !== undefined) {
       try {
-        const ocrResult = await ocrService.extractText(absolutePath);
+        const ocrResult = await ocrService.extractTextFromBuffer(imageBuffer);
         if (ocrResult.text.trim() !== '') {
           ocrText = ocrResult.text;
         }
@@ -96,7 +96,7 @@ export function createCaptionJobHandler(deps: {
     await updateProgress(50);
 
     // キャプション生成（重い処理）
-    const result = await captionService.generateWithContext(absolutePath, {
+    const result = await captionService.generateWithContextFromBuffer(imageBuffer, {
       similarDescriptions,
       ocrText,
     });

@@ -122,14 +122,6 @@ export class LocalFileStorage implements FileStorage {
     };
   }
 
-  /** @deprecated saveFile を使用してください */
-  async saveOriginalFromStream(
-    stream: Readable,
-    extension: string,
-  ): Promise<SaveFileResult> {
-    return await this.saveFile(stream, { category: 'originals', extension });
-  }
-
   async readFile(relativePath: string): Promise<Buffer> {
     const filePath = this.resolveAndValidatePath(relativePath);
     return await readFile(filePath);
@@ -160,10 +152,5 @@ export class LocalFileStorage implements FileStorage {
   async deleteFile(relativePath: string): Promise<void> {
     const filePath = this.resolveAndValidatePath(relativePath);
     await unlink(filePath);
-  }
-
-  /** @deprecated readFile/readFileAsStream を使用してください */
-  getAbsolutePath(relativePath: string): string {
-    return this.resolveAndValidatePath(relativePath);
   }
 }

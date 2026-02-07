@@ -37,59 +37,6 @@ describe('LocalFileStorage', () => {
     await rm(tempDir, { recursive: true });
   });
 
-  describe('saveOriginalFromStream', () => {
-    it('should save file from stream', async () => {
-      const content = 'test file content';
-      const stream = Readable.from(Buffer.from(content));
-
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- deprecated メソッドのテスト
-      const result = await storage.saveOriginalFromStream(stream, '.txt');
-
-      expect(result.filename).toMatch(/^[a-f0-9-]+\.txt$/);
-      expect(result.path).toBe(`originals/${result.filename}`);
-
-      // Verify file was saved
-      const savedPath = join(tempDir, result.path);
-      const savedContent = await readFile(savedPath, 'utf-8');
-      expect(savedContent).toBe(content);
-    });
-
-    it('should save image file with correct extension', async () => {
-      const stream = Readable.from(Buffer.from('fake image data'));
-
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- deprecated メソッドのテスト
-      const result = await storage.saveOriginalFromStream(stream, '.png');
-
-      expect(result.filename).toMatch(/^[a-f0-9-]+\.png$/);
-    });
-
-    it('should create originals directory if not exists', async () => {
-      const stream = Readable.from(Buffer.from('test'));
-
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- deprecated メソッドのテスト
-      const result = await storage.saveOriginalFromStream(stream, '.txt');
-
-      expect(result.path).toMatch(/^originals\//);
-    });
-
-    it('should clean up partial file on stream error', async () => {
-      // Create a stream that emits an error
-      const errorStream = new Readable({
-        read() {
-          this.push(Buffer.from('partial data'));
-          process.nextTick(() => {
-            this.destroy(new Error('Stream error'));
-          });
-        },
-      });
-
-      await expect(
-        // eslint-disable-next-line @typescript-eslint/no-deprecated -- deprecated メソッドのテスト
-        storage.saveOriginalFromStream(errorStream, '.txt'),
-      ).rejects.toThrow('Stream error');
-    });
-  });
-
   describe('deleteFile', () => {
     it('should delete existing file', async () => {
       // Create a file first
@@ -259,26 +206,6 @@ describe('LocalFileStorage', () => {
       const exists = await storage.fileExists('originals/non-existent.txt');
 
       expect(exists).toBe(false);
-    });
-  });
-
-  describe('getAbsolutePath', () => {
-    it('should return absolute path for relative path', () => {
-      const relativePath = 'originals/test.png';
-
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- deprecated メソッドのテスト
-      const result = storage.getAbsolutePath(relativePath);
-
-      expect(result).toBe(join(tempDir, relativePath));
-    });
-
-    it('should handle nested paths', () => {
-      const relativePath = 'thumbnails/2024/01/test.jpg';
-
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- deprecated メソッドのテスト
-      const result = storage.getAbsolutePath(relativePath);
-
-      expect(result).toBe(join(tempDir, relativePath));
     });
   });
 });

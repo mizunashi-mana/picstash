@@ -185,6 +185,11 @@ export class TransformersCaptionService implements CaptionService {
   }
 
   async generateWithContext(imagePath: string, context: CaptionContext): Promise<CaptionResult> {
+    const imageData = await readFile(imagePath);
+    return await this.generateWithContextFromBuffer(imageData, context);
+  }
+
+  async generateWithContextFromBuffer(imageData: Buffer, context: CaptionContext): Promise<CaptionResult> {
     // Determine whether LLM is available (short-circuit if service is undefined)
     const llmAvailable
       = this.llmService !== undefined && await this.llmService.isAvailable();
@@ -195,11 +200,11 @@ export class TransformersCaptionService implements CaptionService {
 
     // If no context or LLM not available, fall back to basic generation
     if (!hasContext || !llmAvailable) {
-      return await this.generateFromFile(imagePath);
+      return await this.generateFromBuffer(imageData);
     }
 
     // First, generate a base caption using Florence-2
-    const baseResult = await this.generateFromFile(imagePath);
+    const baseResult = await this.generateFromBuffer(imageData);
 
     // Build the prompt for LLM refinement with similarity scores
     const similarDescriptionsText = context.similarDescriptions.length > 0

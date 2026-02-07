@@ -19,9 +19,6 @@ export interface FileStorage {
   saveFile: (stream: Readable, options: SaveFileOptions) => Promise<SaveFileResult>;
   saveFileFromBuffer: (buffer: Buffer, options: SaveFileOptions) => Promise<SaveFileResult>;
 
-  /** @deprecated saveFile を使用してください */
-  saveOriginalFromStream: (stream: Readable, extension: string) => Promise<SaveFileResult>;
-
   // --- 読み取り ---
   readFile: (relativePath: string) => Promise<Buffer>;
   readFileAsStream: (relativePath: string) => Promise<Readable>;
@@ -30,8 +27,4 @@ export interface FileStorage {
 
   // --- 削除 ---
   deleteFile: (relativePath: string) => Promise<void>;
-
-  // --- レガシー ---
-  /** @deprecated readFile/readFileAsStream を使用してください */
-  getAbsolutePath: (relativePath: string) => string;
 }
