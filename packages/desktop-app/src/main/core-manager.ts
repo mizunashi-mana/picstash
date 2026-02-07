@@ -8,6 +8,7 @@
 
 import { join } from 'node:path';
 import { PrismaService } from './infra/database/index.js';
+import { bindRepositories } from './infra/di/index.js';
 import { runMigrations } from './migration-runner.js';
 import type { CoreContainer } from '@picstash/core';
 
@@ -72,6 +73,9 @@ class CoreManager {
 
     // DI コンテナを構築
     const container = buildCoreContainer(config);
+
+    // Repository 実装をバインド
+    bindRepositories(container, databaseService);
 
     this.container = container;
     this.databaseService = databaseService;

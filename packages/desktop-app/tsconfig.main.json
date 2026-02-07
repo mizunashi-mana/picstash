@@ -7,6 +7,7 @@
     "rootDir": "src",
     "baseUrl": ".",
     "paths": {
+      "@desktop-app/main/*": ["src/main/*"],
       "@desktop-app/shared/*": ["src/shared/*"],
       "@~generated/*": ["generated/*"]
     }
