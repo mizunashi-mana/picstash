@@ -1,6 +1,6 @@
 import { BarChart } from '@mantine/charts';
 import { Card, Text } from '@mantine/core';
-import type { DailyRecommendationStats } from '@/features/stats/api';
+import type { DailyRecommendationStats } from '@picstash/api';
 
 interface RecommendationTrendsChartProps {
   data: DailyRecommendationStats[];

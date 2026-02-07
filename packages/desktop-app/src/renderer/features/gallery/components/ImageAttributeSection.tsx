@@ -1,16 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ImageAttributeSectionView } from './ImageAttributeSectionView';
-import type { ImageAttribute } from '@picstash/api';
-import {
-  createImageAttribute,
-  deleteImageAttribute,
-  fetchImageAttributes,
-  fetchSuggestedAttributes,
-  updateImageAttribute,
-  type AttributeSuggestion,
-} from '@/features/gallery/api';
-import { fetchLabels } from '@/features/labels';
+import type { AttributeSuggestion, ImageAttribute } from '@picstash/api';
+import { useApiClient } from '@/shared';
 
 interface ImageAttributeSectionProps {
   imageId: string;
@@ -18,6 +10,7 @@ interface ImageAttributeSectionProps {
 
 export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState<ImageAttribute | null>(null);
   const [selectedLabelId, setSelectedLabelId] = useState<string | null>(null);
@@ -33,7 +26,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     error: attributesError,
   } = useQuery({
     queryKey: ['imageAttributes', imageId],
-    queryFn: async () => await fetchImageAttributes(imageId),
+    queryFn: async () => await apiClient.imageAttributes.list(imageId),
   });
 
   // Fetch all labels for the dropdown
@@ -43,7 +36,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     error: labelsError,
   } = useQuery({
     queryKey: ['labels'],
-    queryFn: fetchLabels,
+    queryFn: async () => await apiClient.labels.list(),
   });
 
   // Fetch suggested attributes (only when panel is open)
@@ -54,7 +47,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
     refetch: refetchSuggestions,
   } = useQuery({
     queryKey: ['suggestedAttributes', imageId],
-    queryFn: async () => await fetchSuggestedAttributes(imageId, { limit: 10 }),
+    queryFn: async () => await apiClient.images.fetchSuggestedAttributes(imageId, { limit: 10 }),
     enabled: showSuggestions,
   });
 
@@ -65,7 +58,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       const trimmedKeywords = keywords
         .map(k => k.trim())
         .filter(k => k !== '');
-      return await createImageAttribute(imageId, {
+      return await apiClient.imageAttributes.create(imageId, {
         labelId: selectedLabelId,
         keywords: trimmedKeywords.length > 0 ? trimmedKeywords.join(',') : undefined,
       });
@@ -85,7 +78,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
       const trimmedKeywords = keywords
         .map(k => k.trim())
         .filter(k => k !== '');
-      return await updateImageAttribute(imageId, editingAttribute.id, {
+      return await apiClient.imageAttributes.update(imageId, editingAttribute.id, {
         keywords: trimmedKeywords.length > 0 ? trimmedKeywords.join(',') : undefined,
       });
     },
@@ -100,7 +93,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const deleteMutation = useMutation({
     mutationFn: async (attributeId: string) => {
       setDeletingId(attributeId);
-      await deleteImageAttribute(imageId, attributeId);
+      await apiClient.imageAttributes.delete(imageId, attributeId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['imageAttributes', imageId] });
@@ -115,7 +108,7 @@ export function ImageAttributeSection({ imageId }: ImageAttributeSectionProps) {
   const addSuggestionMutation = useMutation({
     mutationFn: async (suggestion: AttributeSuggestion) => {
       setAddingSuggestionId(suggestion.labelId);
-      return await createImageAttribute(imageId, {
+      return await apiClient.imageAttributes.create(imageId, {
         labelId: suggestion.labelId,
       });
     },

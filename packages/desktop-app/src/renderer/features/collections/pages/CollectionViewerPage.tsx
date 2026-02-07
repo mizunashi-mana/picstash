@@ -11,7 +11,6 @@ import {
   Text,
   Title,
 } from '@mantine/core';
-import { imageEndpoints } from '@picstash/api';
 import {
   IconAlertCircle,
   IconArrowLeft,
@@ -21,16 +20,17 @@ import {
 } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
-import { fetchCollection } from '@/features/collections/api';
+import { useApiClient } from '@/shared';
 
 export function CollectionViewerPage() {
   const { id, imageId: initialImageId } = useParams<{ id: string; imageId?: string }>();
   const navigate = useNavigate();
+  const apiClient = useApiClient();
   const { data: collection, isLoading, error } = useQuery({
     queryKey: ['collection', id],
     queryFn: async () => {
       if (id === undefined) throw new Error('Collection ID is required');
-      return await fetchCollection(id);
+      return await apiClient.collections.detail(id);
     },
     enabled: id !== undefined,
   });
@@ -214,7 +214,7 @@ export function CollectionViewerPage() {
         <Center h="100%">
           {currentImage !== null && (
             <Image
-              src={imageEndpoints.file(currentImage.imageId)}
+              src={apiClient.images.getImageUrl(currentImage.imageId)}
               alt={`${collection.images.length}枚中${currentIndex + 1}枚目`}
               fit="contain"
               style={{ maxHeight: '100%', maxWidth: '100%' }}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { recordViewEnd, recordViewStart } from './api';
-import { recordRecommendationClick } from '@/features/recommendations';
+import { viewHistoryEndpoints, type ApiClient } from '@picstash/api';
+import { useApiClient } from '@/shared';
 
 interface UseViewHistoryOptions {
   enabled?: boolean;
@@ -20,6 +20,7 @@ export function useViewHistory(
   options: UseViewHistoryOptions = {},
 ): void {
   const { enabled = true, conversionId, isDeleted = false } = options;
+  const apiClient = useApiClient();
   const viewHistoryIdRef = useRef<string | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const conversionRecordedRef = useRef<boolean>(false);
@@ -39,7 +40,7 @@ export function useViewHistory(
     }
   }, [conversionId]);
 
-  const sendViewEnd = useCallback(async () => {
+  const sendViewEnd = useCallback(async (client: ApiClient) => {
     // Skip if image was deleted (view history is cascade deleted)
     if (isDeletedRef.current) {
       viewHistoryIdRef.current = null;
@@ -59,7 +60,7 @@ export function useViewHistory(
     startTimeRef.current = null;
 
     try {
-      await recordViewEnd(viewHistoryId, duration);
+      await client.viewHistory.recordEnd(viewHistoryId, duration);
     }
     catch {
       // Silently fail - view history is not critical
@@ -74,7 +75,7 @@ export function useViewHistory(
     // Record view start
     const startView = async () => {
       try {
-        const viewHistory = await recordViewStart(imageId);
+        const viewHistory = await apiClient.viewHistory.recordStart(imageId);
         viewHistoryIdRef.current = viewHistory.id;
         startTimeRef.current = Date.now();
 
@@ -86,7 +87,7 @@ export function useViewHistory(
         ) {
           conversionRecordedRef.current = true;
           try {
-            await recordRecommendationClick(conversionId, {
+            await apiClient.recommendations.recordClick(conversionId, {
               viewHistoryId: viewHistory.id,
             });
           }
@@ -105,7 +106,7 @@ export function useViewHistory(
     // Handle visibility change (user switches tab or minimizes window)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        void sendViewEnd();
+        void sendViewEnd(apiClient);
       }
     };
 
@@ -119,7 +120,7 @@ export function useViewHistory(
       if (viewHistoryIdRef.current !== null && startTimeRef.current !== null) {
         const duration = Date.now() - startTimeRef.current;
         // Use fetch with keepalive for reliable delivery during page unload
-        void fetch(`/api/view-history/${viewHistoryIdRef.current}`, {
+        void fetch(viewHistoryEndpoints.detail(viewHistoryIdRef.current), {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ duration }),
@@ -135,7 +136,7 @@ export function useViewHistory(
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      void sendViewEnd();
+      void sendViewEnd(apiClient);
     };
-  }, [imageId, enabled, conversionId, sendViewEnd]);
+  }, [imageId, enabled, conversionId, sendViewEnd, apiClient]);
 }

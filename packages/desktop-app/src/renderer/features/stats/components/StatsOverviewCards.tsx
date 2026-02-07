@@ -1,5 +1,5 @@
 import { Card, Group, SimpleGrid, Text } from '@mantine/core';
-import type { OverviewStats } from '@/features/stats/api';
+import type { OverviewStats } from '@picstash/api';
 
 interface StatsOverviewCardsProps {
   stats: OverviewStats;

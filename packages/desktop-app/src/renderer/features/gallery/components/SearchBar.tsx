@@ -9,11 +9,8 @@ import {
 import { useDebouncedValue } from '@mantine/hooks';
 import { IconClock, IconSearch, IconTag, IconX } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  deleteSearchHistory,
-  fetchSearchSuggestions,
-  type SearchSuggestion,
-} from '@/features/gallery/api';
+import type { SearchSuggestion } from '@picstash/api';
+import { useApiClient } from '@/shared';
 
 interface SearchBarProps {
   value: string;
@@ -26,6 +23,7 @@ const DEBOUNCE_MS = 300;
 export function SearchBar({ value, onChange }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(value);
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   // Debounced value for suggestions query only
   const [debouncedInputForSuggestions] = useDebouncedValue(inputValue, DEBOUNCE_MS);
@@ -69,14 +67,14 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
   // Fetch suggestions when input changes (using debounced value)
   const suggestionsQuery = useQuery({
     queryKey: ['search-suggestions', debouncedInputForSuggestions],
-    queryFn: async () => await fetchSearchSuggestions(debouncedInputForSuggestions),
+    queryFn: async () => await apiClient.search.suggestions(debouncedInputForSuggestions),
     enabled: debouncedInputForSuggestions.length >= MIN_QUERY_LENGTH,
     staleTime: 30000, // Cache for 30 seconds
   });
 
   // Delete history mutation
   const deleteHistoryMutation = useMutation({
-    mutationFn: deleteSearchHistory,
+    mutationFn: async (id: string) => { await apiClient.search.deleteHistory(id); },
     onSuccess: () => {
       // Invalidate suggestions to refresh the list
       void queryClient.invalidateQueries({ queryKey: ['search-suggestions'] });

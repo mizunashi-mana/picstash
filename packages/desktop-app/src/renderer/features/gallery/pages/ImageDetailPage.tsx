@@ -18,12 +18,12 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconArrowLeft, IconTrash } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
-import { deleteImage, fetchImage, getImageUrl } from '@/features/gallery/api';
 import { ImageAttributeSection } from '@/features/gallery/components/ImageAttributeSection';
 import { ImageCollectionsSection } from '@/features/gallery/components/ImageCollectionsSection';
 import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
 import { SimilarImagesSection } from '@/features/gallery/components/SimilarImagesSection';
 import { useViewHistory } from '@/features/view-history';
+import { useApiClient } from '@/shared';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -55,19 +55,20 @@ export function ImageDetailPage() {
   const conversionId = searchParams.get('conversionId');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
   const [opened, { open, close }] = useDisclosure(false);
   const [isDeleted, setIsDeleted] = useState(false);
 
   const { data: image, isLoading, error } = useQuery({
     queryKey: ['image', id],
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures id is defined
-    queryFn: async () => await fetchImage(id!),
+    queryFn: async () => await apiClient.images.detail(id!),
     enabled: id !== undefined && id !== '',
   });
 
   const deleteMutation = useMutation({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- button is disabled when id is undefined
-    mutationFn: async () => { await deleteImage(id!); },
+    mutationFn: async () => { await apiClient.images.delete(id!); },
     onSuccess: async () => {
       // Mark as deleted before navigation to prevent view history update
       setIsDeleted(true);
@@ -147,7 +148,7 @@ export function ImageDetailPage() {
 
         <Box>
           <Image
-            src={getImageUrl(image.id)}
+            src={apiClient.images.getImageUrl(image.id)}
             alt={image.title}
             fit="contain"
             mah="70vh"

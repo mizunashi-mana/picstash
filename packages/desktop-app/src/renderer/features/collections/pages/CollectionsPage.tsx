@@ -16,24 +16,20 @@ import {
   Textarea,
   Title,
 } from '@mantine/core';
-import { imageEndpoints } from '@picstash/api';
 import { IconAlertCircle, IconFolder, IconPlus } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import type { CollectionWithCount, CreateCollectionInput } from '@/features/collections/api';
-import {
-  createCollection,
-  deleteCollection,
-  fetchCollections,
-} from '@/features/collections/api';
+import type { CollectionWithCount, CreateCollectionInput } from '@picstash/api';
+import { useApiClient } from '@/shared';
 
 interface CollectionCardProps {
   collection: CollectionWithCount;
   onDelete: (id: string) => void;
   isDeleting: boolean;
+  getThumbnailUrl: (imageId: string) => string;
 }
 
-function CollectionCard({ collection, onDelete, isDeleting }: CollectionCardProps) {
+function CollectionCard({ collection, onDelete, isDeleting, getThumbnailUrl }: CollectionCardProps) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const handleDelete = () => {
@@ -49,7 +45,7 @@ function CollectionCard({ collection, onDelete, isDeleting }: CollectionCardProp
             {collection.coverImageId !== null
               ? (
                   <Image
-                    src={imageEndpoints.thumbnail(collection.coverImageId)}
+                    src={getThumbnailUrl(collection.coverImageId)}
                     height={160}
                     alt={collection.name}
                     fit="cover"
@@ -117,14 +113,15 @@ export function CollectionsPage() {
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   const { data: collections, isLoading, error } = useQuery({
     queryKey: ['collections'],
-    queryFn: fetchCollections,
+    queryFn: async () => await apiClient.collections.list(),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (input: CreateCollectionInput) => await createCollection(input),
+    mutationFn: async (input: CreateCollectionInput) => await apiClient.collections.create(input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
       setCreateModalOpen(false);
@@ -134,7 +131,7 @@ export function CollectionsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await deleteCollection(id); },
+    mutationFn: async (id: string) => { await apiClient.collections.delete(id); },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
     },
@@ -210,6 +207,7 @@ export function CollectionsPage() {
                     collection={collection}
                     onDelete={handleDelete}
                     isDeleting={deleteMutation.isPending}
+                    getThumbnailUrl={apiClient.images.getThumbnailUrl}
                   />
                 ))}
               </SimpleGrid>

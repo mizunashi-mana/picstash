@@ -1,8 +1,8 @@
-export { fetchRecommendations, recordRecommendationClick } from './api';
+// Types are re-exported from @picstash/api for convenience
 export type {
-  FetchRecommendationsOptions,
+  RecommendationsQuery as FetchRecommendationsOptions,
   RecommendationsResult,
   RecommendedImage,
   RecordClickInput,
-} from './api';
+} from '@picstash/api';
 export { RecommendationSection } from './components/RecommendationSection';

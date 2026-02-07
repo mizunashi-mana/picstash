@@ -1,16 +1,11 @@
 import { useState } from 'react';
 import { Container, Grid, Group, SegmentedControl, Stack, Text, Title } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchOverviewStats,
-  fetchPopularImages,
-  fetchRecommendationTrends,
-  fetchViewTrends,
-} from '@/features/stats/api';
 import { PopularImagesList } from '@/features/stats/components/PopularImagesList';
 import { RecommendationTrendsChart } from '@/features/stats/components/RecommendationTrendsChart';
 import { StatsOverviewCards } from '@/features/stats/components/StatsOverviewCards';
 import { ViewTrendsChart } from '@/features/stats/components/ViewTrendsChart';
+import { useApiClient } from '@/shared';
 
 const PERIOD_OPTIONS = [
   { label: '7日間', value: '7' },
@@ -21,25 +16,26 @@ const PERIOD_OPTIONS = [
 export function StatsPage() {
   const [days, setDays] = useState('30');
   const daysNumber = parseInt(days, 10);
+  const apiClient = useApiClient();
 
   const overviewQuery = useQuery({
     queryKey: ['stats', 'overview', daysNumber],
-    queryFn: async () => await fetchOverviewStats({ days: daysNumber }),
+    queryFn: async () => await apiClient.stats.overview({ days: daysNumber }),
   });
 
   const viewTrendsQuery = useQuery({
     queryKey: ['stats', 'view-trends', daysNumber],
-    queryFn: async () => await fetchViewTrends({ days: daysNumber }),
+    queryFn: async () => await apiClient.stats.viewTrends({ days: daysNumber }),
   });
 
   const recommendationTrendsQuery = useQuery({
     queryKey: ['stats', 'recommendation-trends', daysNumber],
-    queryFn: async () => await fetchRecommendationTrends({ days: daysNumber }),
+    queryFn: async () => await apiClient.stats.recommendationTrends({ days: daysNumber }),
   });
 
   const popularImagesQuery = useQuery({
     queryKey: ['stats', 'popular-images', daysNumber],
-    queryFn: async () => await fetchPopularImages({ days: daysNumber, limit: 10 }),
+    queryFn: async () => await apiClient.stats.popularImages({ days: daysNumber, limit: 10 }),
   });
 
   const isLoading

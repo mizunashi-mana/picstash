@@ -17,7 +17,6 @@ import {
   Textarea,
   Title,
 } from '@mantine/core';
-import { imageEndpoints } from '@picstash/api';
 import {
   IconAlertCircle,
   IconArrowLeft,
@@ -28,18 +27,14 @@ import {
 } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
-import type { UpdateCollectionInput } from '@/features/collections/api';
-import {
-  deleteCollection,
-  fetchCollection,
-  removeImageFromCollection,
-  updateCollection,
-} from '@/features/collections/api';
+import type { UpdateCollectionInput } from '@picstash/api';
+import { useApiClient } from '@/shared';
 
 export function CollectionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -50,7 +45,7 @@ export function CollectionDetailPage() {
     queryKey: ['collection', id],
     queryFn: async () => {
       if (id === undefined) throw new Error('Collection ID is required');
-      return await fetchCollection(id);
+      return await apiClient.collections.detail(id);
     },
     enabled: id !== undefined,
   });
@@ -58,7 +53,7 @@ export function CollectionDetailPage() {
   const updateMutation = useMutation({
     mutationFn: async (input: UpdateCollectionInput) => {
       if (id === undefined) throw new Error('Collection ID is required');
-      return await updateCollection(id, input);
+      return await apiClient.collections.update(id, input);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['collection', id] });
@@ -70,7 +65,7 @@ export function CollectionDetailPage() {
   const deleteMutation = useMutation({
     mutationFn: async () => {
       if (id === undefined) throw new Error('Collection ID is required');
-      await deleteCollection(id);
+      await apiClient.collections.delete(id);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['collections'] });
@@ -81,7 +76,7 @@ export function CollectionDetailPage() {
   const removeImageMutation = useMutation({
     mutationFn: async (imageId: string) => {
       if (id === undefined) throw new Error('Collection ID is required');
-      await removeImageFromCollection(id, imageId);
+      await apiClient.collections.removeImage(id, imageId);
     },
     onSuccess: async (_data, imageId) => {
       await queryClient.invalidateQueries({ queryKey: ['collection', id] });
@@ -206,7 +201,7 @@ export function CollectionDetailPage() {
                     <Card.Section pos="relative">
                       <Link to={`/collections/${id}/view/${img.imageId}`}>
                         <Image
-                          src={imageEndpoints.thumbnail(img.imageId)}
+                          src={apiClient.images.getThumbnailUrl(img.imageId)}
                           alt={img.title}
                           height={140}
                           fit="cover"
