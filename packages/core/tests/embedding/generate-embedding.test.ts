@@ -11,9 +11,9 @@ import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository';
 import type { EmbeddingService, EmbeddingResult } from '@/application/ports/embedding-service';
 import type { FileStorage } from '@/application/ports/file-storage';
-import type { Image, ImageRepository } from '@/application/ports/image-repository';
+import type { ImageDetail, ImageRepository } from '@/application/ports/image-repository';
 
-function createMockImage(overrides: Partial<Image> = {}): Image {
+function createMockImage(overrides: Partial<ImageDetail> = {}): ImageDetail {
   return {
     id: 'test-image-id',
     path: 'originals/test-image.png',

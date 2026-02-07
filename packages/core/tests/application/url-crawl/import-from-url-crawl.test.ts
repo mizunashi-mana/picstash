@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { importFromUrlCrawl } from '@/application/url-crawl/import-from-url-crawl';
 import type { FileStorage } from '@/application/ports/file-storage';
 import type { ImageProcessor } from '@/application/ports/image-processor';
-import type { Image, ImageRepository } from '@/application/ports/image-repository';
+import type { ImageEntity, ImageRepository } from '@/application/ports/image-repository';
 import type { UrlCrawlSessionManager, UrlCrawlSession } from '@/application/ports/url-crawl-session-manager';
 
 function createMockSession(overrides: Partial<UrlCrawlSession> = {}): UrlCrawlSession {
@@ -20,7 +20,7 @@ function createMockSession(overrides: Partial<UrlCrawlSession> = {}): UrlCrawlSe
   };
 }
 
-function createMockImage(overrides: Partial<Image> = {}): Image {
+function createMockImage(overrides: Partial<ImageEntity> = {}): ImageEntity {
   return {
     id: 'test-image-id',
     path: 'originals/saved-image.png',

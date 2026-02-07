@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createLabel } from '@/application/label/create-label.js';
 import type {
   CreateLabelInput,
-  Label,
+  LabelEntity,
   LabelRepository,
 } from '@/application/ports/label-repository.js';
 
@@ -107,7 +107,7 @@ describe('createLabel', () => {
   });
 
   it('should return DUPLICATE_NAME error if name already exists', async () => {
-    const existingLabel: Label = {
+    const existingLabel: LabelEntity = {
       id: 'existing-id',
       name: 'Existing Label',
       color: null,

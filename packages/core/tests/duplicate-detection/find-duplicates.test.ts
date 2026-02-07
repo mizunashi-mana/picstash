@@ -6,7 +6,7 @@ import {
   type FindDuplicatesDeps,
 } from '@/application/duplicate-detection/find-duplicates';
 import type { EmbeddingRepository } from '@/application/ports/embedding-repository';
-import type { ImageRepository, Image } from '@/application/ports/image-repository';
+import type { ImageRepository, ImageDetail } from '@/application/ports/image-repository';
 
 function createMockImageRepository(): ImageRepository {
   return {
@@ -53,7 +53,7 @@ function createNormalizedEmbedding(values: number[]): Uint8Array {
   return new Uint8Array(float32.buffer);
 }
 
-function createImage(id: string, createdAt: Date): Image {
+function createImage(id: string, createdAt: Date): ImageDetail {
   return {
     id,
     path: `originals/${id}.png`,

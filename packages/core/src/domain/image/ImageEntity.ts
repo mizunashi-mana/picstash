@@ -1,7 +1,7 @@
 /**
- * Image entity
+ * Image entity for command operations (create, update, delete)
  */
-export interface Image {
+export interface ImageEntity {
   id: string;
   path: string;
   thumbnailPath: string | null;

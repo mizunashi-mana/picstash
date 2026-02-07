@@ -7,9 +7,9 @@ import {
   type GenerateLabelEmbeddingDeps,
 } from '@/application/attribute-suggestion/generate-label-embeddings';
 import type { EmbeddingService, EmbeddingResult } from '@/application/ports/embedding-service';
-import type { Label, LabelRepository } from '@/application/ports/label-repository';
+import type { LabelEntity, LabelRepository } from '@/application/ports/label-repository';
 
-function createMockLabel(overrides: Partial<Label> = {}): Label {
+function createMockLabel(overrides: Partial<LabelEntity> = {}): LabelEntity {
   return {
     id: 'test-label-id',
     name: 'Test Label',

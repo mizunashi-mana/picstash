@@ -3,11 +3,11 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
 import type {
   AddImageToCollectionInput,
-  Collection,
+  CollectionEntity,
   CollectionImage,
   CollectionRepository,
-  CollectionWithCount,
-  CollectionWithImages,
+  CollectionListItem,
+  CollectionDetail,
   CreateCollectionInput,
   UpdateCollectionInput,
   UpdateImageOrderInput,
@@ -23,19 +23,19 @@ export class PrismaCollectionRepository implements CollectionRepository {
     this.prisma = prismaService.getClient();
   }
 
-  async create(input: CreateCollectionInput): Promise<Collection> {
+  async create(input: CreateCollectionInput): Promise<CollectionEntity> {
     return await this.prisma.collection.create({
       data: input,
     });
   }
 
-  async findById(id: string): Promise<Collection | null> {
+  async findById(id: string): Promise<CollectionEntity | null> {
     return await this.prisma.collection.findUnique({
       where: { id },
     });
   }
 
-  async findByIdWithImages(id: string): Promise<CollectionWithImages | null> {
+  async findByIdWithImages(id: string): Promise<CollectionDetail | null> {
     const collection = await this.prisma.collection.findUnique({
       where: { id },
       include: {
@@ -71,7 +71,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
     };
   }
 
-  async findAll(): Promise<CollectionWithCount[]> {
+  async findAll(): Promise<CollectionListItem[]> {
     const collections = await this.prisma.collection.findMany({
       orderBy: { updatedAt: 'desc' },
       include: {
@@ -92,14 +92,14 @@ export class PrismaCollectionRepository implements CollectionRepository {
     }));
   }
 
-  async updateById(id: string, input: UpdateCollectionInput): Promise<Collection> {
+  async updateById(id: string, input: UpdateCollectionInput): Promise<CollectionEntity> {
     return await this.prisma.collection.update({
       where: { id },
       data: input,
     });
   }
 
-  async deleteById(id: string): Promise<Collection> {
+  async deleteById(id: string): Promise<CollectionEntity> {
     return await this.prisma.collection.delete({
       where: { id },
     });
@@ -157,7 +157,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
   }
 
   // Query helpers
-  async findCollectionsByImageId(imageId: string): Promise<Collection[]> {
+  async findCollectionsByImageId(imageId: string): Promise<CollectionEntity[]> {
     const collectionImages = await this.prisma.collectionImage.findMany({
       where: { imageId },
       include: { collection: true },

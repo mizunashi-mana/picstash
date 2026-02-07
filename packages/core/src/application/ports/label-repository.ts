@@ -1,11 +1,11 @@
 import type {
-  Label,
+  LabelEntity,
   CreateLabelInput,
   UpdateLabelInput,
 } from '@/domain/label/index.js';
 
-// Re-export domain types for backward compatibility
-export type { Label, CreateLabelInput, UpdateLabelInput };
+// Re-export domain types for convenience
+export type { LabelEntity, CreateLabelInput, UpdateLabelInput };
 
 /** Label with embedding data for similarity calculation */
 export interface LabelWithEmbedding {
@@ -21,12 +21,15 @@ export interface UpdateLabelEmbeddingInput {
 }
 
 export interface LabelRepository {
-  create: (input: CreateLabelInput) => Promise<Label>;
-  findById: (id: string) => Promise<Label | null>;
-  findByName: (name: string) => Promise<Label | null>;
-  findAll: () => Promise<Label[]>;
-  updateById: (id: string, input: UpdateLabelInput) => Promise<Label>;
-  deleteById: (id: string) => Promise<Label>;
+  // Command operations → return LabelEntity
+  create: (input: CreateLabelInput) => Promise<LabelEntity>;
+  updateById: (id: string, input: UpdateLabelInput) => Promise<LabelEntity>;
+  deleteById: (id: string) => Promise<LabelEntity>;
+
+  // Query operations → return LabelEntity (simple value object)
+  findById: (id: string) => Promise<LabelEntity | null>;
+  findByName: (name: string) => Promise<LabelEntity | null>;
+  findAll: () => Promise<LabelEntity[]>;
 
   // Embedding-related methods
   /** Find labels with embeddings for similarity calculation */

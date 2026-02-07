@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
 import type {
   CreateLabelInput,
-  Label,
+  LabelEntity,
   LabelRepository,
   LabelWithEmbedding,
   UpdateLabelEmbeddingInput,
@@ -20,38 +20,38 @@ export class PrismaLabelRepository implements LabelRepository {
     this.prisma = prismaService.getClient();
   }
 
-  async create(input: CreateLabelInput): Promise<Label> {
+  async create(input: CreateLabelInput): Promise<LabelEntity> {
     return await this.prisma.attributeLabel.create({
       data: input,
     });
   }
 
-  async findById(id: string): Promise<Label | null> {
+  async findById(id: string): Promise<LabelEntity | null> {
     return await this.prisma.attributeLabel.findUnique({
       where: { id },
     });
   }
 
-  async findByName(name: string): Promise<Label | null> {
+  async findByName(name: string): Promise<LabelEntity | null> {
     return await this.prisma.attributeLabel.findUnique({
       where: { name },
     });
   }
 
-  async findAll(): Promise<Label[]> {
+  async findAll(): Promise<LabelEntity[]> {
     return await this.prisma.attributeLabel.findMany({
       orderBy: { name: 'asc' },
     });
   }
 
-  async updateById(id: string, input: UpdateLabelInput): Promise<Label> {
+  async updateById(id: string, input: UpdateLabelInput): Promise<LabelEntity> {
     return await this.prisma.attributeLabel.update({
       where: { id },
       data: input,
     });
   }
 
-  async deleteById(id: string): Promise<Label> {
+  async deleteById(id: string): Promise<LabelEntity> {
     return await this.prisma.attributeLabel.delete({
       where: { id },
     });

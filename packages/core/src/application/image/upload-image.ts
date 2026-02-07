@@ -4,7 +4,7 @@ import type { EmbeddingRepository } from '@/application/ports/embedding-reposito
 import type { EmbeddingService } from '@/application/ports/embedding-service.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
+import type { ImageEntity, ImageRepository } from '@/application/ports/image-repository.js';
 import type { Readable } from 'node:stream';
 
 export interface UploadImageInput {
@@ -14,7 +14,7 @@ export interface UploadImageInput {
 }
 
 export type UploadImageResult
-  = | { success: true; image: Image }
+  = | { success: true; image: ImageEntity }
     | { success: false; error: 'INVALID_MIME_TYPE'; message: string };
 
 export interface UploadImageDeps {
