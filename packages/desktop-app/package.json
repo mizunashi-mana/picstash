@@ -19,7 +19,7 @@
     "dev:renderer": "vite -c vite.renderer.config.ts",
     "dev:main": "wait-on http://localhost:5174 && npm run build:main && npm run build:preload && cross-env NODE_ENV=development electron . --remote-debugging-port=9222",
     "db:generate": "prisma generate",
-    "build": "npm run build:renderer && npm run build:main && npm run build:preload",
+    "build": "npm run db:generate && npm run build:renderer && npm run build:main && npm run build:preload",
     "build:renderer": "vite build -c vite.renderer.config.ts",
     "build:main": "npx tsx esbuild.config.ts main",
     "build:preload": "npx tsx esbuild.config.ts preload",
