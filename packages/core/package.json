@@ -22,7 +22,7 @@
     "lint:deps": "depcruise src --config .dependency-cruiser.mjs"
   },
   "engines": {
-    "node": ">=21.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
