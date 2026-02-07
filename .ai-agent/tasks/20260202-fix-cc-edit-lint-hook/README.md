@@ -35,14 +35,14 @@
 ## 完了条件
 
 - [ ] `cc-edit-lint-hook.mjs` の環境変数名が ESLint 設定と一致している
-- [ ] `DISABLED_FIXED_RULES=true` が pre-commit 経由で ESLint に正しく伝播する
+- [ ] `DISABLED_FIXED_RULES=true` が prek 経由で ESLint に正しく伝播する
 - [ ] `SKIP_LINT_HOOK=true` で hook 全体をスキップできる
 - [ ] 通常のファイル編集時は従来通り ESLint --fix が動作する
 
 ## 完了条件チェック
 
 - [x] `cc-edit-lint-hook.mjs` の環境変数名が ESLint 設定と一致している
-- [x] `DISABLED_FIXED_RULES=true` が pre-commit 経由で ESLint に正しく伝播する
+- [x] `DISABLED_FIXED_RULES=true` が prek 経由で ESLint に正しく伝播する
 - [x] `SKIP_LINT_HOOK=true` で hook 全体をスキップできる
 - [x] 通常のファイル編集時は従来通り ESLint --fix が動作する
 

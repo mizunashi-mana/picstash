@@ -27,8 +27,8 @@ jobs:
       - name: Build
         run: devenv shell npm run build
 
-      - name: pre-commit run
-        run: devenv shell pre-commit run --all-files --verbose
+      - name: Lint
+        run: devenv shell prek run --all-files --verbose
 
       - name: Show modified files
         if: failure()
