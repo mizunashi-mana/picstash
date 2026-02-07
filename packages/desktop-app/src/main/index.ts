@@ -6,6 +6,14 @@ import { registerIpcHandlers } from './ipc-handlers.js';
 import { registerCustomProtocol, registerProtocolPrivileges } from './protocol-handler.js';
 import { storageManager } from './storage-manager.js';
 
+// E2E テスト時はテスト専用のデータディレクトリを使用する
+// app.whenReady() の前に app.setPath() を呼ぶ必要がある
+// eslint-disable-next-line @typescript-eslint/dot-notation -- 環境変数アクセスにはブラケット記法が必要
+const e2eDataDir = process.env['PICSTASH_E2E_DATA_DIR'];
+if (e2eDataDir !== undefined) {
+  app.setPath('userData', e2eDataDir);
+}
+
 // カスタムプロトコルを特権スキームとして登録（app.whenReady の前に呼ぶ必要あり）
 registerProtocolPrivileges();
 

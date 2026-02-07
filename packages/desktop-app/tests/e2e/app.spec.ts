@@ -1,3 +1,4 @@
+import { rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -5,6 +6,9 @@ import { test, expect, _electron as electron, type ElectronApplication, type Pag
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const appPath = path.join(currentDir, '..', '..');
+
+// E2E テスト用のデータディレクトリ（本番データを汚染しないようテスト専用パスを使用）
+const e2eDataDir = path.join(appPath, 'tmp', 'e2e-data');
 
 // npm ワークスペースの node_modules 配置により、Playwright が electron バイナリを自動検出できないため
 // テストファイルのコンテキストから明示的にパスを解決する
@@ -15,6 +19,9 @@ let electronApp: ElectronApplication;
 let window: Page;
 
 test.beforeAll(async () => {
+  // 前回のテストデータをクリーンアップ（存在しない場合も無視）
+  await rm(e2eDataDir, { recursive: true, force: true });
+
   // Electron アプリをビルドしてから起動
   // CI 環境では --no-sandbox フラグが必要（Linux の SUID サンドボックス権限問題を回避）
   const args = [appPath];
@@ -24,6 +31,11 @@ test.beforeAll(async () => {
   electronApp = await electron.launch({
     args,
     executablePath: electronBinaryPath,
+    env: {
+      ...process.env,
+      // E2E テスト用のデータディレクトリを設定（本番データを汚染しない）
+      PICSTASH_E2E_DATA_DIR: e2eDataDir,
+    },
   });
 
   // 最初のウィンドウを取得
@@ -35,6 +47,9 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   await electronApp.close();
+
+  // テストデータをクリーンアップ
+  await rm(e2eDataDir, { recursive: true, force: true });
 });
 
 test.describe('Electron アプリの起動', () => {
