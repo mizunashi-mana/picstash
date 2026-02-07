@@ -1,8 +1,25 @@
 import { randomUUID } from 'node:crypto';
 import { access, mkdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
-import { basename, join, resolve, sep } from 'node:path';
+import { basename, extname, join, resolve, sep } from 'node:path';
 import { app, dialog } from 'electron';
 import type { FileCategory, SaveFileOptions, SaveFileResult } from '@desktop-app/shared/types.js';
+
+/**
+ * ライブラリディレクトリの拡張子
+ */
+const LIBRARY_EXTENSION = '.pstlib';
+
+/**
+ * 新規作成時のデフォルトライブラリ名
+ */
+const DEFAULT_LIBRARY_NAME = `library${LIBRARY_EXTENSION}`;
+
+/**
+ * パスがライブラリディレクトリかどうかを判定
+ */
+function isLibraryDirectory(path: string): boolean {
+  return extname(path).toLowerCase() === LIBRARY_EXTENSION;
+}
 
 /**
  * 設定ファイルの構造
@@ -93,13 +110,26 @@ export class StorageManager {
   }
 
   /**
+   * ライブラリディレクトリを初期化（必要なサブディレクトリを作成）
+   */
+  private async initializeLibraryDirectory(libraryPath: string): Promise<void> {
+    await mkdir(libraryPath, { recursive: true });
+    await mkdir(join(libraryPath, 'storage', 'originals'), { recursive: true });
+    await mkdir(join(libraryPath, 'storage', 'thumbnails'), { recursive: true });
+  }
+
+  /**
    * フォルダ選択ダイアログを表示
+   *
+   * - .pstlib ディレクトリが選択された場合: 既存ライブラリとして開く
+   * - それ以外のディレクトリが選択された場合: library.pstlib を作成して新規ライブラリとして開く
    */
   async selectPath(): Promise<string | null> {
     const result = await dialog.showOpenDialog({
-      title: 'ストレージフォルダを選択',
+      title: 'ライブラリフォルダを選択',
       properties: ['openDirectory', 'createDirectory'],
       buttonLabel: '選択',
+      message: '既存の .pstlib フォルダを選択するか、新規ライブラリを作成するフォルダを選択してください',
     });
 
     if (result.canceled || result.filePaths.length === 0) {
@@ -107,10 +137,26 @@ export class StorageManager {
     }
 
     const selectedPath = result.filePaths[0];
-    if (selectedPath !== undefined) {
-      await this.setPath(selectedPath);
+    if (selectedPath === undefined) {
+      return null;
     }
-    return selectedPath ?? null;
+
+    let libraryPath: string;
+
+    if (isLibraryDirectory(selectedPath)) {
+      // .pstlib ディレクトリが選択された場合: そのまま使用
+      libraryPath = selectedPath;
+    }
+    else {
+      // 通常ディレクトリが選択された場合: library.pstlib を作成
+      libraryPath = join(selectedPath, DEFAULT_LIBRARY_NAME);
+    }
+
+    // ライブラリディレクトリを初期化（既存の場合は何もしない）
+    await this.initializeLibraryDirectory(libraryPath);
+    await this.setPath(libraryPath);
+
+    return libraryPath;
   }
 
   /**
@@ -126,10 +172,11 @@ export class StorageManager {
 
   /**
    * カテゴリのパスを取得
+   * .pstlib ディレクトリ内の storage/ サブディレクトリを経由
    */
   private getCategoryPath(category: FileCategory): string {
     const basePath = this.ensureInitialized();
-    return join(basePath, category);
+    return join(basePath, 'storage', category);
   }
 
   /**
@@ -216,7 +263,7 @@ export class StorageManager {
 
     return {
       filename,
-      path: `${options.category}/${filename}`,
+      path: `storage/${options.category}/${filename}`,
     };
   }
 
