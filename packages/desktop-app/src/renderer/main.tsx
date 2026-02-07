@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router';
 import { App } from '@/App';
 import { JobsProvider } from '@/features/jobs';
+import { ContainerProvider } from '@/shared/di';
 
 import '@mantine/core/styles.css';
 import '@mantine/dropzone/styles.css';
@@ -28,15 +29,17 @@ if (!rootElement) {
 // Electron では HashRouter を使用（file:// プロトコルでは BrowserRouter が動作しない）
 createRoot(rootElement).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <MantineProvider>
-        <Notifications position="top-right" />
-        <HashRouter>
-          <JobsProvider>
-            <App />
-          </JobsProvider>
-        </HashRouter>
-      </MantineProvider>
-    </QueryClientProvider>
+    <ContainerProvider>
+      <QueryClientProvider client={queryClient}>
+        <MantineProvider>
+          <Notifications position="top-right" />
+          <HashRouter>
+            <JobsProvider>
+              <App />
+            </JobsProvider>
+          </HashRouter>
+        </MantineProvider>
+      </QueryClientProvider>
+    </ContainerProvider>
   </StrictMode>,
 );
