@@ -1,13 +1,13 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type {
   CreateImageAttributeInput,
   ImageAttribute,
   ImageAttributeRepository,
   UpdateImageAttributeInput,
-} from '@/application/ports/image-attribute-repository.js';
-import type { PrismaService } from '@/infra/database/prisma-service.js';
+} from '@picstash/core';
 import type { PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()

@@ -13,10 +13,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@~generated/*": ["./generated/*"],
       "@~tests/*": ["./tests/*"]
     }
   },
-  "include": ["src/**/*", "generated/**/*", "*.config.ts", "tests/**/*"],
+  "include": ["src/**/*", "*.config.ts", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }

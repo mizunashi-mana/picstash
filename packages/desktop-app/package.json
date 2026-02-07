@@ -11,14 +11,16 @@
   "main": "dist/main/index.js",
   "exports": {
     ".": "./dist/main/index.js",
-    "./shared/*": "./dist/shared/*"
+    "./shared/*": "./dist/shared/*",
+    "./package.json": "./package.json"
   },
   "type": "module",
   "scripts": {
     "dev": "concurrently -k \"npm run dev:renderer\" \"npm run dev:main\"",
     "dev:renderer": "vite -c vite.renderer.config.ts",
-    "dev:main": "wait-on http://localhost:5174 && npm run build:main && npm run build:preload && cross-env NODE_ENV=development electron .",
-    "build": "npm run build:renderer && npm run build:main && npm run build:preload",
+    "dev:main": "wait-on http://localhost:5174 && npm run build:main && npm run build:preload && cross-env NODE_ENV=development electron . --remote-debugging-port=9222",
+    "db:generate": "prisma generate",
+    "build": "npm run db:generate && npm run build:renderer && npm run build:main && npm run build:preload",
     "build:renderer": "vite build -c vite.renderer.config.ts",
     "build:main": "npx tsx esbuild.config.ts main",
     "build:preload": "npx tsx esbuild.config.ts preload",
@@ -43,6 +45,8 @@
     "@mantine/notifications": "^8.3.13",
     "@picstash/api": "*",
     "@picstash/core": "*",
+    "@prisma/adapter-better-sqlite3": "^7.2.0",
+    "@prisma/client": "^7.2.0",
     "@tabler/icons-react": "^3.36.1",
     "@tanstack/react-query": "^5.80.7",
     "@tanstack/react-virtual": "^3.13.18",
@@ -55,6 +59,7 @@
     "recharts": "^3.6.0",
     "reflect-metadata": "^0.2.2",
     "sharp": "^0.34.5",
+    "sqlite-vec": "^0.1.7-alpha.2",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -62,6 +67,7 @@
     "@playwright/test": "^1.57.0",
     "@storybook/addon-vitest": "^10.1.11",
     "@storybook/react-vite": "^10.1.11",
+    "@swc/core": "^1.15.11",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.21",
     "@types/qs": "^6.14.0",
@@ -78,6 +84,8 @@
     "electron-builder": "^26.7.0",
     "esbuild": "^0.27.2",
     "playwright": "^1.57.0",
+    "prisma": "^7.2.0",
+    "prisma-lint": "^0.13.1",
     "storybook": "^10.1.11",
     "tsx": "^4.19.4",
     "typescript": "^5.8.0",

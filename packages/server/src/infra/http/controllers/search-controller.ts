@@ -1,8 +1,8 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
+import type { PrismaService } from '@/infra/database/index.js';
 import type {
   LabelRepository,
-  PrismaService,
   SearchHistoryRepository,
 } from '@picstash/core';
 import type { FastifyInstance } from 'fastify';

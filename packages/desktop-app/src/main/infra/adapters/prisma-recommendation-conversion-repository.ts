@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '@/infra/di/types.js';
+import { TYPES } from '@desktop-app/main/infra/di/types.js';
 import { Prisma } from '@~generated/prisma/client.js';
+import type { PrismaService } from '@desktop-app/main/infra/database/prisma-service.js';
 import type {
   RecommendationConversion,
   CreateImpressionInput,
@@ -9,8 +10,7 @@ import type {
   ConversionStats,
   RecommendationConversionRepository,
   ConversionStatsOptions,
-} from '@/application/ports/recommendation-conversion-repository.js';
-import type { PrismaService } from '@/infra/database/prisma-service.js';
+} from '@picstash/core';
 import type { PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()
@@ -40,7 +40,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
         });
         results.push(record);
       }
-      catch (error) {
+      catch (error: unknown) {
         // Skip if image doesn't exist (foreign key constraint violation)
         if (
           error instanceof Prisma.PrismaClientKnownRequestError

@@ -1,11 +1,12 @@
-import type { PrismaService } from '@picstash/core';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type { FastifyInstance } from 'fastify';
 
-export function healthRoutes(app: FastifyInstance, prismaService: PrismaService): void {
+export function healthRoutes(app: FastifyInstance, databaseService: PrismaService): void {
   app.get('/health', async (_request, reply) => {
     try {
       // Check database connection
-      await prismaService.getClient().$queryRaw`SELECT 1`;
+      const client = databaseService.getClient();
+      await client.$queryRaw`SELECT 1`;
 
       return await reply.send({
         status: 'ok',

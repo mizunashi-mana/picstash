@@ -1,4 +1,37 @@
+import { readFile } from 'node:fs/promises';
+import * as swc from '@swc/core';
 import * as esbuild from 'esbuild';
+
+/**
+ * SWC プラグイン
+ * デコレータとメタデータの emit をサポートするために使用
+ */
+const swcPlugin: esbuild.Plugin = {
+  name: 'swc',
+  setup(build) {
+    build.onLoad({ filter: /\.ts$/ }, async (args) => {
+      const source = await readFile(args.path, 'utf-8');
+      const result = await swc.transform(source, {
+        filename: args.path,
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            decorators: true,
+          },
+          transform: {
+            legacyDecorator: true,
+            decoratorMetadata: true,
+          },
+          target: 'es2022',
+        },
+      });
+      return {
+        contents: result.code,
+        loader: 'js',
+      };
+    });
+  },
+};
 
 /**
  * Native modules や ESM 互換性のないパッケージを external 化
@@ -18,6 +51,9 @@ const externalPackages = [
 
   // Prisma (CommonJS runtime が ESM バンドルと互換性がない)
   '@prisma/client',
+  '@prisma/adapter-better-sqlite3',
+
+  // Generated Prisma client (ローカル生成) - エイリアスで解決されるので external 指定不要
 
   // Heavy ML libraries (サイズが大きく、動的インポートを使用)
   '@huggingface/transformers',
@@ -40,8 +76,11 @@ export const mainConfig: esbuild.BuildOptions = {
   outfile: 'dist/main/index.js',
   external: externalPackages,
   alias: {
+    '@desktop-app/main': './src/main',
     '@desktop-app/shared': './src/shared',
+    '@~generated': './generated',
   },
+  plugins: [swcPlugin],
 };
 
 /**

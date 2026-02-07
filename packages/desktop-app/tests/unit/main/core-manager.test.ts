@@ -6,22 +6,26 @@ vi.mock('../../../src/main/migration-runner.js', () => ({
   runMigrations: async (dbPath: string) => await mockRunMigrations(dbPath),
 }));
 
-// モック: @picstash/core
+// モック: PrismaService (ローカルデータベースサービス)
 const mockConnect = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
 const mockDisconnect = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
 const mockClose = vi.fn();
 
-const mockPrismaService = {
-  connect: mockConnect,
-  disconnect: mockDisconnect,
-};
+class MockPrismaService {
+  connect = mockConnect;
+  disconnect = mockDisconnect;
+}
 
+vi.mock('../../../src/main/infra/database/index.js', () => ({
+  PrismaService: MockPrismaService,
+}));
+
+// モック: @picstash/core
 const mockEmbeddingRepository = {
   close: mockClose,
 };
 
 const mockContainer = {
-  getPrismaService: () => mockPrismaService,
   getEmbeddingRepository: () => mockEmbeddingRepository,
 };
 
@@ -29,7 +33,6 @@ const mockBuildCoreContainer = vi.fn().mockReturnValue(mockContainer);
 
 vi.mock('reflect-metadata', () => ({}));
 vi.mock('@picstash/core', () => ({
-
   buildCoreContainer: (...args: unknown[]) => mockBuildCoreContainer(...args),
 }));
 
@@ -80,6 +83,9 @@ describe('CoreManager', () => {
         callOrder.push('runMigrations');
         return 0;
       });
+      mockConnect.mockImplementation(async () => {
+        callOrder.push('PrismaService.connect');
+      });
       mockBuildCoreContainer.mockImplementation((..._args: unknown[]) => {
         callOrder.push('buildCoreContainer');
         return mockContainer;
@@ -87,7 +93,8 @@ describe('CoreManager', () => {
 
       await coreManager.initialize('/test/storage');
 
-      expect(callOrder).toEqual(['runMigrations', 'buildCoreContainer']);
+      // migrations → PrismaService.connect → container の順で実行される
+      expect(callOrder).toEqual(['runMigrations', 'PrismaService.connect', 'buildCoreContainer']);
     });
   });
 

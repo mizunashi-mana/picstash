@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type {
   OverviewStats,
   DailyViewStats,
@@ -9,8 +10,7 @@ import type {
   StatsRepository,
   TrendOptions,
   PopularImagesOptions,
-} from '@/application/ports/stats-repository.js';
-import type { PrismaService } from '@/infra/database/prisma-service.js';
+} from '@picstash/core';
 import type { PrismaClient } from '@~generated/prisma/client.js';
 
 /** Format a date as YYYY-MM-DD in local timezone */

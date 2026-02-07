@@ -1,15 +1,18 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'prisma/config';
-import { initConfig } from './src/config.js';
 
-const config = initConfig();
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Prisma configuration for @picstash/server package.
+ *
+ * datasource.url is required for CLI commands like db:push, db:migrate.
+ * At runtime, the connection is handled by Driver Adapter pattern.
+ */
 export default defineConfig({
-  // Use schema and migrations from core package
-  schema: '../core/prisma/schema.prisma',
-  migrations: {
-    path: '../core/prisma/migrations',
-  },
+  schema: 'prisma/schema.prisma',
   datasource: {
-    url: `file:${config.database.path}`,
+    url: `file:${path.join(currentDir, 'prisma', 'data', 'picstash.db')}`,
   },
 });

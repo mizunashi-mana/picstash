@@ -16,13 +16,13 @@ import {
   generateMissingEmbeddings,
   syncEmbeddingsToVectorDb,
   type GenerateEmbeddingDeps,
-  type PrismaService,
 } from '@picstash/core';
 import { initConfig, parseCliArgs } from '@/config.js';
 import { type AppContainer, buildAppContainer } from '@/infra/di/index.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 
 interface CliDeps extends GenerateEmbeddingDeps {
-  prismaService: PrismaService;
+  databaseService: PrismaService;
 }
 
 function getDeps(container: AppContainer): CliDeps {
@@ -31,7 +31,7 @@ function getDeps(container: AppContainer): CliDeps {
     fileStorage: container.getFileStorage(),
     embeddingService: container.getEmbeddingService(),
     embeddingRepository: container.getEmbeddingRepository(),
-    prismaService: container.getPrismaService(),
+    databaseService: container.getDatabaseService(),
   };
 }
 
@@ -44,7 +44,7 @@ async function main(): Promise<void> {
   const deps = getDeps(container);
 
   console.log('Connecting to database...');
-  await deps.prismaService.connect();
+  await deps.databaseService.connect();
 
   try {
     switch (command) {
@@ -68,7 +68,7 @@ async function main(): Promise<void> {
   }
   finally {
     deps.embeddingRepository.close();
-    await deps.prismaService.disconnect();
+    await deps.databaseService.disconnect();
   }
 }
 

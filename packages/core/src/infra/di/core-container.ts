@@ -4,22 +4,11 @@ import {
   InMemoryArchiveSessionManager,
   InMemoryUrlCrawlSessionManager,
   LocalFileStorage,
-  PrismaCollectionRepository,
-  PrismaImageAttributeRepository,
-  PrismaImageRepository,
-  PrismaJobQueue,
-  PrismaLabelRepository,
-  PrismaRecommendationConversionRepository,
-  PrismaSearchHistoryRepository,
-  PrismaStatsRepository,
-  PrismaViewHistoryRepository,
   RarArchiveHandler,
   SharpImageProcessor,
-  SqliteVecEmbeddingRepository,
   ZipArchiveHandler,
 } from '@/infra/adapters/index.js';
 import { TransformersCaptionService } from '@/infra/caption/index.js';
-import { PrismaService } from '@/infra/database/prisma-service.js';
 import { TYPES } from '@/infra/di/types.js';
 import { ClipEmbeddingService } from '@/infra/embedding/clip-embedding-service.js';
 import { OllamaLlmService } from '@/infra/llm/index.js';
@@ -47,6 +36,7 @@ import type { CoreConfig } from '@/config.js';
 
 /**
  * Creates and configures a new inversify Container with core dependencies.
+ * Does not include database/repository implementations - those are added by consuming packages.
  * Does not include HTTP controllers - those are added by the server package.
  * @param config - Core configuration
  */
@@ -56,54 +46,19 @@ export function createCoreContainer(config: CoreConfig): Container {
   // Bind config
   container.bind<CoreConfig>(TYPES.Config).toConstantValue(config);
 
-  // Bind database service
-  container
-    .bind<PrismaService>(TYPES.PrismaService)
-    .to(PrismaService)
-    .inSingletonScope();
-
-  // Bind repositories as singletons
-  container
-    .bind<ImageRepository>(TYPES.ImageRepository)
-    .to(PrismaImageRepository)
-    .inSingletonScope();
-
-  container
-    .bind<LabelRepository>(TYPES.LabelRepository)
-    .to(PrismaLabelRepository)
-    .inSingletonScope();
-
-  container
-    .bind<ImageAttributeRepository>(TYPES.ImageAttributeRepository)
-    .to(PrismaImageAttributeRepository)
-    .inSingletonScope();
-
-  container
-    .bind<CollectionRepository>(TYPES.CollectionRepository)
-    .to(PrismaCollectionRepository)
-    .inSingletonScope();
-
-  container
-    .bind<ViewHistoryRepository>(TYPES.ViewHistoryRepository)
-    .to(PrismaViewHistoryRepository)
-    .inSingletonScope();
-
-  container
-    .bind<RecommendationConversionRepository>(
-      TYPES.RecommendationConversionRepository,
-    )
-    .to(PrismaRecommendationConversionRepository)
-    .inSingletonScope();
-
-  container
-    .bind<StatsRepository>(TYPES.StatsRepository)
-    .to(PrismaStatsRepository)
-    .inSingletonScope();
-
-  container
-    .bind<SearchHistoryRepository>(TYPES.SearchHistoryRepository)
-    .to(PrismaSearchHistoryRepository)
-    .inSingletonScope();
+  // NOTE: Database and repository bindings are NOT included here.
+  // Each consuming package (server, desktop-app) must bind their own
+  // database service and repository implementations:
+  // - TYPES.ImageRepository
+  // - TYPES.LabelRepository
+  // - TYPES.ImageAttributeRepository
+  // - TYPES.CollectionRepository
+  // - TYPES.ViewHistoryRepository
+  // - TYPES.RecommendationConversionRepository
+  // - TYPES.StatsRepository
+  // - TYPES.SearchHistoryRepository
+  // - TYPES.EmbeddingRepository
+  // - TYPES.JobQueue
 
   // Bind storage & processing as singletons
   container
@@ -138,11 +93,6 @@ export function createCoreContainer(config: CoreConfig): Container {
     .inSingletonScope();
 
   container
-    .bind<EmbeddingRepository>(TYPES.EmbeddingRepository)
-    .to(SqliteVecEmbeddingRepository)
-    .inSingletonScope();
-
-  container
     .bind<CaptionService>(TYPES.CaptionService)
     .to(TransformersCaptionService)
     .inSingletonScope();
@@ -150,12 +100,6 @@ export function createCoreContainer(config: CoreConfig): Container {
   container
     .bind<OcrService>(TYPES.OcrService)
     .to(TesseractOcrService)
-    .inSingletonScope();
-
-  // Bind Job Queue
-  container
-    .bind<JobQueue>(TYPES.JobQueue)
-    .to(PrismaJobQueue)
     .inSingletonScope();
 
   // Bind LLM service only if ollama is configured
@@ -273,12 +217,6 @@ export class CoreContainer {
 
   getJobQueue(): JobQueue {
     return this.container.get<JobQueue>(TYPES.JobQueue);
-  }
-
-  // Database
-
-  getPrismaService(): PrismaService {
-    return this.container.get<PrismaService>(TYPES.PrismaService);
   }
 }
 

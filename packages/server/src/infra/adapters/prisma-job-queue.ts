@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type {
   AddJobOptions,
   Job,
@@ -8,8 +9,7 @@ import type {
   JobStatus,
   ListJobsOptions,
   ListJobsResult,
-} from '@/application/ports/job-queue.js';
-import type { PrismaService } from '@/infra/database/prisma-service.js';
+} from '@picstash/core';
 import type { PrismaClient } from '@~generated/prisma/client.js';
 
 /**

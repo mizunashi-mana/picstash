@@ -5,5 +5,5 @@
     "moduleResolution": "bundler",
     "noEmit": true
   },
-  "include": ["esbuild.config.ts", "*.mjs", "playwright.config.ts"]
+  "include": ["esbuild.config.ts", "*.mjs", "playwright.config.ts", "prisma.config.ts"]
 }

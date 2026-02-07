@@ -3,6 +3,3 @@
 
 # vitest coverage
 /coverage/
-
-# Prisma generated client
-/generated/

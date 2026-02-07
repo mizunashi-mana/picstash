@@ -7,7 +7,7 @@ import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
 import { Prisma, PrismaClient } from '@~generated/prisma/client.js';
-import type { CoreConfig } from '@/config.js';
+import type { CoreConfig } from '@picstash/core';
 
 // Re-export Prisma namespace for error handling (e.g., PrismaClientKnownRequestError)
 export { Prisma };

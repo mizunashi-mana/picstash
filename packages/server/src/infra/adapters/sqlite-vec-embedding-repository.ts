@@ -3,13 +3,11 @@
  */
 
 import 'reflect-metadata';
+import { EMBEDDING_DIMENSION, TYPES } from '@picstash/core';
 import Database from 'better-sqlite3';
 import { inject, injectable } from 'inversify';
 import * as sqliteVec from 'sqlite-vec';
-import { EMBEDDING_DIMENSION } from '@/application/ports/embedding-repository.js';
-import { TYPES } from '@/infra/di/types.js';
-import type { EmbeddingRepository, SimilarityResult } from '@/application/ports/embedding-repository.js';
-import type { CoreConfig } from '@/config.js';
+import type { EmbeddingRepository, SimilarityResult, CoreConfig } from '@picstash/core';
 
 @injectable()
 export class SqliteVecEmbeddingRepository implements EmbeddingRepository {

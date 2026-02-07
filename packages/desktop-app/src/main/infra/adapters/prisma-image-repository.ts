@@ -1,8 +1,12 @@
 import 'reflect-metadata';
+import {
+  buildSearchWhere,
+  isEmptyQuery,
+  parseSearchQuery,
+} from '@picstash/core';
 import { inject, injectable } from 'inversify';
-import { buildSearchWhere } from '@/application/search/build-search-where.js';
-import { isEmptyQuery, parseSearchQuery } from '@/application/search/query-parser.js';
-import { TYPES } from '@/infra/di/types.js';
+import { TYPES } from '@desktop-app/main/infra/di/types.js';
+import type { PrismaService } from '@desktop-app/main/infra/database/prisma-service.js';
 import type {
   CreateImageInput,
   ImageEntity,
@@ -14,8 +18,7 @@ import type {
   PaginationOptions,
   UpdateEmbeddingInput,
   UpdateImageInput,
-} from '@/application/ports/image-repository.js';
-import type { PrismaService } from '@/infra/database/prisma-service.js';
+} from '@picstash/core';
 import type { Prisma, PrismaClient } from '@~generated/prisma/client.js';
 
 @injectable()

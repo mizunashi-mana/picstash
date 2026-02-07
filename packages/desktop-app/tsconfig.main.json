@@ -4,11 +4,12 @@
     "moduleResolution": "node",
     "noEmit": false,
     "outDir": "dist",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
-      "@desktop-app/shared/*": ["src/shared/*"]
+      "@desktop-app/main/*": ["src/main/*"],
+      "@desktop-app/shared/*": ["src/shared/*"],
+      "@~generated/*": ["generated/*"]
     }
   },
-  "include": ["src/main/**/*", "src/shared/**/*"]
+  "include": ["src/main/**/*", "src/shared/**/*", "generated/**/*"]
 }

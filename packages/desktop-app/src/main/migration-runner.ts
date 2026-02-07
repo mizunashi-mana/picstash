@@ -24,13 +24,13 @@ interface PrismaMigrationRow {
 
 /**
  * マイグレーションディレクトリのパスを解決する。
- * createRequire で @picstash/core/package.json を解決し、prisma/migrations/ を導出する。
+ * desktop-app パッケージの prisma/migrations/ ディレクトリを返す。
  */
 function resolveMigrationsDir(): string {
   const require = createRequire(import.meta.url);
-  const corePackageJsonPath = require.resolve('@picstash/core/package.json');
-  const coreRoot = dirname(corePackageJsonPath);
-  return join(coreRoot, 'prisma', 'migrations');
+  const packageJsonPath = require.resolve('@picstash/desktop-app/package.json');
+  const packageRoot = dirname(packageJsonPath);
+  return join(packageRoot, 'prisma', 'migrations');
 }
 
 /**

@@ -7,6 +7,8 @@
  */
 
 import { join } from 'node:path';
+import { PrismaService } from './infra/database/index.js';
+import { bindRepositories } from './infra/di/index.js';
 import { runMigrations } from './migration-runner.js';
 import type { CoreContainer } from '@picstash/core';
 
@@ -15,6 +17,7 @@ import type { CoreContainer } from '@picstash/core';
  */
 class CoreManager {
   private container: CoreContainer | null = null;
+  private databaseService: PrismaService | null = null;
 
   /** initialize/teardown の直列化用 Promise チェーン */
   private pending: Promise<void> = Promise.resolve();
@@ -64,13 +67,18 @@ class CoreManager {
     // マイグレーションを実行（コンテナ構築前に DB スキーマを確定させる）
     await runMigrations(dbPath);
 
+    // データベースサービスを作成・接続
+    const databaseService = new PrismaService(dbPath);
+    await databaseService.connect();
+
     // DI コンテナを構築
     const container = buildCoreContainer(config);
 
-    // データベースに接続
-    await container.getPrismaService().connect();
+    // Repository 実装をバインド
+    bindRepositories(container, databaseService);
 
     this.container = container;
+    this.databaseService = databaseService;
   }
 
   /**
@@ -89,10 +97,12 @@ class CoreManager {
     }
 
     const container = this.container;
+    const databaseService = this.databaseService;
     this.container = null;
+    this.databaseService = null;
 
     try {
-      await container.getPrismaService().disconnect();
+      await databaseService?.disconnect();
     }
     catch {
       // 切断エラーは無視（アプリ終了時に発生しうる）

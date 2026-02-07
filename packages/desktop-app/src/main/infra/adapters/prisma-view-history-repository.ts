@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '@/infra/di/types.js';
+import { TYPES } from '@desktop-app/main/infra/di/types.js';
+import type { PrismaService } from '@desktop-app/main/infra/database/prisma-service.js';
 import type {
   ViewHistory,
   ViewHistoryWithImage,
@@ -9,9 +10,12 @@ import type {
   ImageViewStats,
   ViewHistoryRepository,
   ViewHistoryListOptions,
-} from '@/application/ports/view-history-repository.js';
-import type { PrismaService } from '@/infra/database/prisma-service.js';
-import type { PrismaClient } from '@~generated/prisma/client.js';
+} from '@picstash/core';
+import type { Prisma, PrismaClient } from '@~generated/prisma/client.js';
+
+type ViewHistoryWithImageRecord = Prisma.ViewHistoryGetPayload<{
+  include: { image: { select: { id: true; title: true; thumbnailPath: true } } };
+}>;
 
 @injectable()
 export class PrismaViewHistoryRepository implements ViewHistoryRepository {
@@ -68,7 +72,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
       },
     });
 
-    return records.map(record => ({
+    return records.map((record: ViewHistoryWithImageRecord) => ({
       id: record.id,
       imageId: record.imageId,
       viewedAt: record.viewedAt,

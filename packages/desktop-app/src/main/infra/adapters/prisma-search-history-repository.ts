@@ -1,14 +1,14 @@
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '@/infra/di/types.js';
+import { TYPES } from '@desktop-app/main/infra/di/types.js';
+import type { PrismaService } from '@desktop-app/main/infra/database/prisma-service.js';
 import type {
   SearchHistory,
   SearchHistoryRepository,
   SearchHistoryListOptions,
   SaveSearchHistoryInput,
-} from '@/application/ports/search-history-repository.js';
-import type { PrismaService } from '@/infra/database/prisma-service.js';
-import type { PrismaClient } from '@~generated/prisma/client.js';
+} from '@picstash/core';
+import type { PrismaClient, SearchHistory as PrismaSearchHistory } from '@~generated/prisma/client.js';
 
 const DEFAULT_LIMIT = 20;
 const MAX_FETCH_LIMIT = 1000;
@@ -63,7 +63,7 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
     });
 
     return all
-      .filter(h => h.query.toLowerCase().startsWith(normalizedPrefix))
+      .filter((h: PrismaSearchHistory) => h.query.toLowerCase().startsWith(normalizedPrefix))
       .slice(0, limit);
   }
 
