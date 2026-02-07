@@ -94,25 +94,84 @@ export type { CrawledImageEntry, UrlCrawlSession } from './domain/url-crawl/inde
 export type { ArchiveHandler } from './application/ports/archive-handler.js';
 export type { ArchiveSessionManager } from './application/ports/archive-session-manager.js';
 export type { CaptionService } from './application/ports/caption-service.js';
-export type { CollectionRepository } from './application/ports/collection-repository.js';
+export type {
+  CollectionRepository,
+  CollectionEntity,
+  CollectionImage,
+  CollectionListItem,
+  CollectionDetail,
+  CreateCollectionInput,
+  UpdateCollectionInput,
+  AddImageToCollectionInput,
+  UpdateImageOrderInput,
+  CollectionImageInfo,
+} from './application/ports/collection-repository.js';
 export type { EmbeddingRepository } from './application/ports/embedding-repository.js';
 export type { EmbeddingService } from './application/ports/embedding-service.js';
 export type { FileStorage, FileCategory, SaveFileOptions, SaveFileResult } from './application/ports/file-storage.js';
-export type { ImageAttributeRepository } from './application/ports/image-attribute-repository.js';
+export type {
+  ImageAttributeRepository,
+  ImageAttribute,
+  CreateImageAttributeInput,
+  UpdateImageAttributeInput,
+} from './application/ports/image-attribute-repository.js';
 export type { ImageProcessor, ImageMetadata } from './application/ports/image-processor.js';
-export type { ImageRepository, ImageWithEmbedding } from './application/ports/image-repository.js';
-export type { Job, JobQueue, JobStatus } from './application/ports/job-queue.js';
-export type { LabelRepository } from './application/ports/label-repository.js';
+export type {
+  ImageRepository,
+  ImageWithEmbedding,
+  UpdateEmbeddingInput,
+  PaginationOptions,
+  PaginatedResult,
+} from './application/ports/image-repository.js';
+export type {
+  Job,
+  JobQueue,
+  JobStatus,
+  AddJobOptions,
+  ListJobsOptions,
+  ListJobsResult,
+} from './application/ports/job-queue.js';
+export type {
+  LabelRepository,
+  LabelEntity,
+  LabelWithEmbedding,
+  UpdateLabelEmbeddingInput,
+} from './application/ports/label-repository.js';
 export type { LlmService } from './application/ports/llm-service.js';
 export type { OcrService } from './application/ports/ocr-service.js';
 export type {
   RecommendationConversionRepository,
+  RecommendationConversion,
   CreateImpressionInput,
+  RecordClickInput,
+  ConversionStats,
+  ConversionStatsOptions,
 } from './application/ports/recommendation-conversion-repository.js';
-export type { SearchHistoryRepository } from './application/ports/search-history-repository.js';
-export type { StatsRepository } from './application/ports/stats-repository.js';
+export type {
+  SearchHistoryRepository,
+  SearchHistory,
+  SaveSearchHistoryInput,
+  SearchHistoryListOptions,
+} from './application/ports/search-history-repository.js';
+export type {
+  StatsRepository,
+  OverviewStats,
+  DailyViewStats,
+  DailyRecommendationStats,
+  PopularImage,
+  TrendOptions,
+  PopularImagesOptions,
+} from './application/ports/stats-repository.js';
 export type { UrlCrawlSessionManager } from './application/ports/url-crawl-session-manager.js';
-export type { ViewHistoryRepository } from './application/ports/view-history-repository.js';
+export type {
+  ViewHistoryRepository,
+  ViewHistory,
+  ViewHistoryWithImage,
+  CreateViewHistoryInput,
+  UpdateViewHistoryDurationInput,
+  ImageViewStats,
+  ViewHistoryListOptions,
+} from './application/ports/view-history-repository.js';
 
 // Adapters (concrete implementations)
 export * from './infra/adapters/index.js';

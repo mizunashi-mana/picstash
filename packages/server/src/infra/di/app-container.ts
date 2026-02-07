@@ -87,7 +87,7 @@ export class AppContainer extends CoreContainer {
  * Creates a new AppContainer instance with all dependencies configured.
  * @param config - Application configuration
  */
-export function buildAppContainer(config: Config): AppContainer {
-  const container = createContainer(config);
+export async function buildAppContainer(config: Config): Promise<AppContainer> {
+  const container = await createContainer(config);
   return new AppContainer(container);
 }

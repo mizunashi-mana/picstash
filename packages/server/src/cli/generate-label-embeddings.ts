@@ -37,7 +37,7 @@ async function main(): Promise<void> {
 
   // Initialize configuration
   const config = initConfig(configPath);
-  const container = buildAppContainer(config);
+  const container = await buildAppContainer(config);
   const deps = getDeps(container);
 
   console.log('Connecting to database...');
