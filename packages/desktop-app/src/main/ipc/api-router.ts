@@ -9,6 +9,7 @@ import {
   generateRecommendations,
   type CoreContainer,
 } from '@picstash/core';
+import { z } from 'zod';
 import type { IpcApiRequest, IpcApiResponse } from '@desktop-app/shared/types.js';
 
 type RouteHandler = (
@@ -487,4 +488,35 @@ route('GET', '/api/jobs/:jobId', async (container, params) => {
     return { status: 404, error: 'Job not found' };
   }
   return { status: 200, data: job };
+});
+
+// --- Images (from local) ---
+
+const createImageFromLocalSchema = z.object({
+  path: z.string().min(1),
+  thumbnailPath: z.string().min(1),
+  mimeType: z.string().min(1),
+  size: z.number().int().positive(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+
+route('POST', '/api/images/from-local', async (container, _params, body) => {
+  const parseResult = createImageFromLocalSchema.safeParse(body);
+  if (!parseResult.success) {
+    return { status: 400, error: 'Invalid request body' };
+  }
+  const input = parseResult.data;
+
+  const repo = container.getImageRepository();
+  const image = await repo.create({
+    path: input.path,
+    thumbnailPath: input.thumbnailPath,
+    mimeType: input.mimeType,
+    size: input.size,
+    width: input.width,
+    height: input.height,
+  });
+
+  return { status: 201, data: image };
 });
