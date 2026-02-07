@@ -2,6 +2,10 @@ import { buildConfig } from '@picstash/eslint-config';
 
 // NOTE: renderer は web-client のソースを参照しているが、desktop-app 固有のエントリもあるため lint 対象に含める
 export default [
+  // Prisma generated files should be ignored
+  {
+    ignores: ['generated/**'],
+  },
   ...buildConfig({
     // playwright は e2e テストのみに適用するため、ここでは含めない
     ruleSets: ['common', 'node', 'react'],

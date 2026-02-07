@@ -15,13 +15,13 @@ import {
   generateMissingLabelEmbeddings,
   regenerateAllLabelEmbeddings,
   type GenerateLabelEmbeddingDeps,
-  type PrismaService,
+  type DatabaseService,
 } from '@picstash/core';
 import { initConfig, parseCliArgs } from '@/config.js';
 import { type AppContainer, buildAppContainer } from '@/infra/di/index.js';
 
 interface CliDeps extends GenerateLabelEmbeddingDeps {
-  prismaService: PrismaService;
+  prismaService: DatabaseService;
 }
 
 function getDeps(container: AppContainer): CliDeps {

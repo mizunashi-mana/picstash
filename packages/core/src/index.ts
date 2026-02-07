@@ -11,6 +11,7 @@ export type {
 
 // DI Container
 export { TYPES, CoreContainer, buildCoreContainer, createCoreContainer } from './infra/di/index.js';
+export type { DatabaseService } from './infra/di/index.js';
 
 // Shared utilities
 export { normalizeKeywords } from './shared/normalizers/index.js';
@@ -182,13 +183,7 @@ export { ClipEmbeddingService } from './infra/embedding/clip-embedding-service.j
 export { OllamaLlmService } from './infra/llm/index.js';
 export { TesseractOcrService } from './infra/ocr/index.js';
 
-// Database
-export { PrismaService, Prisma } from './infra/database/prisma-service.js';
-export {
-  initializeDatabase,
-  connectDatabase,
-  disconnectDatabase,
-} from './infra/database/prisma.js';
+// Embedding
 export { EMBEDDING_DIMENSION } from './application/ports/embedding-repository.js';
 export type { SimilarityResult } from './application/ports/embedding-repository.js';
 
