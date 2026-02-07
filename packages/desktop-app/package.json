@@ -69,7 +69,7 @@
     "@storybook/react-vite": "^10.1.11",
     "@swc/core": "^1.15.11",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^22.15.21",
+    "@types/node": "^24.10.11",
     "@types/qs": "^6.14.0",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.6",
