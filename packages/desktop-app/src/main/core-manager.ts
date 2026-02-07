@@ -50,6 +50,8 @@ class CoreManager {
 
     const dbPath = join(storagePath, 'picstash.db');
 
+    // storage.path は .pstlib ディレクトリを指す
+    // ファイルパスは storage/originals/xxx.jpg のように storage/ サブディレクトリを含む形式
     const config = {
       database: { path: dbPath },
       storage: { path: storagePath },
