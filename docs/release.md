@@ -47,7 +47,7 @@ MAJOR.MINOR.PATCH[-PRERELEASE]
 
 ### 1. GitHub Actions ページを開く
 
-[Actions タブ](../../actions) → 左サイドバーの「Release」を選択
+[Actions タブ](https://github.com/mizunashi-mana/picstash/actions) → 左サイドバーの「Release」を選択
 
 ### 2. ワークフローを実行
 

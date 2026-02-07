@@ -208,6 +208,12 @@ picstash/
 │   │   │   ├── main/           # メインプロセス
 │   │   │   │   ├── index.ts    # エントリポイント（BrowserWindow 作成）
 │   │   │   │   ├── core-manager.ts # CoreContainer 管理
+│   │   │   │   ├── ipc-handlers.ts # IPC ハンドラー
+│   │   │   │   ├── storage-manager.ts # ストレージ管理
+│   │   │   │   ├── migration-runner.ts # マイグレーション実行
+│   │   │   │   ├── protocol-handler.ts # カスタムプロトコル
+│   │   │   │   ├── ipc/        # IPC チャンネル定義
+│   │   │   │   ├── services/   # メインプロセスサービス
 │   │   │   │   └── infra/      # メインプロセス固有インフラ層
 │   │   │   │       ├── adapters/   # Repository 実装（PrismaImageRepository 等）
 │   │   │   │       ├── database/   # PrismaService、sqlite-vec
