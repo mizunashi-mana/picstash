@@ -20,6 +20,9 @@
       }
     ]
   },
+  "pkg": {
+    "isRelocatable": false
+  },
   "win": {
     "target": [
       {
