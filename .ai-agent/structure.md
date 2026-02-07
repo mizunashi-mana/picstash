@@ -80,7 +80,7 @@ picstash/
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
-│   ├── server/                 # バックエンド（HTTP 層）
+│   ├── server/                 # バックエンド（HTTP 層 + Prisma 実装）
 │   │   ├── src/
 │   │   │   ├── index.ts        # サーバーエントリポイント
 │   │   │   ├── app.ts          # Fastify アプリ構成
@@ -91,14 +91,24 @@ picstash/
 │   │   │   │   └── generate-label-embeddings.ts # ラベル埋め込み生成コマンド
 │   │   │   │
 │   │   │   └── infra/          # サーバー固有インフラ層
-│   │   │       ├── di/         # サーバー用 DI 設定
+│   │   │       ├── adapters/   # Repository 実装（PrismaImageRepository 等）
+│   │   │       ├── database/   # PrismaService、sqlite-vec
+│   │   │       ├── di/         # サーバー用 DI 設定（createContainer）
 │   │   │       ├── http/       # Fastify ルート、プラグイン
 │   │   │       │   ├── routes/ # API ルート（images, labels, image-attributes, archives 等）
+│   │   │       │   ├── controllers/ # コントローラー（inversify @injectable）
 │   │   │       │   └── plugins/
 │   │   │       └── logging/    # ロギングサービス
 │   │   │
+│   │   ├── prisma/             # Prisma スキーマ・マイグレーション
+│   │   │   ├── schema.prisma
+│   │   │   ├── data/           # SQLite データベースファイル
+│   │   │   └── migrations/
+│   │   ├── generated/          # Prisma 生成ファイル（.gitignore）
+│   │   │   └── prisma/         # Prisma Client
 │   │   ├── tests/              # server のテスト
 │   │   ├── eslint.config.mjs   # ESLint 設定（node 環境）
+│   │   ├── prisma.config.ts    # Prisma 設定
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
@@ -126,16 +136,15 @@ picstash/
 │   │   │   │   ├── image/      # 画像ユースケース
 │   │   │   │   ├── image-attribute/ # 画像属性ユースケース
 │   │   │   │   ├── label/      # ラベルユースケース
-│   │   │   │   ├── ports/      # ポート定義（インターフェース）
+│   │   │   │   ├── ports/      # ポート定義（Repository インターフェース等）
 │   │   │   │   ├── recommendation/ # 画像推薦
 │   │   │   │   ├── search/     # 検索ユースケース
 │   │   │   │   └── url-crawl/  # URLクロールユースケース
 │   │   │   │
-│   │   │   ├── infra/          # インフラ層
-│   │   │   │   ├── adapters/   # 外部アダプター実装
+│   │   │   ├── infra/          # インフラ層（Prisma は含まない）
+│   │   │   │   ├── adapters/   # 外部アダプター実装（ファイルストレージ、アーカイブ等）
 │   │   │   │   ├── caption/    # キャプション生成サービス
-│   │   │   │   ├── database/   # Prisma Client、sqlite-vec
-│   │   │   │   ├── di/         # 依存性注入コンテナ
+│   │   │   │   ├── di/         # 依存性注入コンテナ（createCoreContainer, CoreContainer）
 │   │   │   │   ├── embedding/  # CLIP 埋め込みサービス
 │   │   │   │   ├── llm/        # LLM サービス（Ollama 連携）
 │   │   │   │   ├── ocr/        # OCR サービス（Tesseract.js）
@@ -144,15 +153,8 @@ picstash/
 │   │   │   │
 │   │   │   └── shared/         # コア内共通
 │   │   │
-│   │   ├── generated/          # Prisma 生成ファイル
-│   │   │   └── prisma/         # Prisma Client
-│   │   ├── prisma/             # Prisma スキーマ・マイグレーション
-│   │   │   ├── schema.prisma
-│   │   │   ├── data/           # SQLite データベースファイル
-│   │   │   └── migrations/
 │   │   ├── tests/              # core のテスト
 │   │   ├── eslint.config.mjs   # ESLint 設定（node 環境）
-│   │   ├── prisma.config.ts    # Prisma 設定
 │   │   ├── package.json
 │   │   └── tsconfig.json
 │   │
@@ -204,7 +206,12 @@ picstash/
 │   ├── desktop-app/            # Electron デスクトップアプリ (@picstash/desktop-app)
 │   │   ├── src/
 │   │   │   ├── main/           # メインプロセス
-│   │   │   │   └── index.ts    # エントリポイント（BrowserWindow 作成）
+│   │   │   │   ├── index.ts    # エントリポイント（BrowserWindow 作成）
+│   │   │   │   ├── core-manager.ts # CoreContainer 管理
+│   │   │   │   └── infra/      # メインプロセス固有インフラ層
+│   │   │   │       ├── adapters/   # Repository 実装（PrismaImageRepository 等）
+│   │   │   │       ├── database/   # PrismaService、sqlite-vec
+│   │   │   │       └── di/         # DI 設定（createDesktopContainer）
 │   │   │   ├── preload/        # プリロードスクリプト
 │   │   │   │   └── index.ts    # contextBridge による API 公開
 │   │   │   ├── renderer/       # レンダラープロセス（React アプリ）
@@ -220,9 +227,14 @@ picstash/
 │   │   │   │       ├── helpers/
 │   │   │   │       └── hooks/
 │   │   │   └── shared/         # main/preload/renderer 共有
+│   │   ├── prisma/             # Prisma スキーマ
+│   │   │   └── schema.prisma
+│   │   ├── generated/          # Prisma 生成ファイル（.gitignore）
+│   │   │   └── prisma/         # Prisma Client
 │   │   ├── tests/              # テスト
 │   │   ├── dist/               # ビルド出力
 │   │   ├── electron-builder.json  # Electron Builder 設定
+│   │   ├── esbuild.config.ts   # esbuild 設定（パスエイリアス、デコレータ）
 │   │   ├── playwright.config.ts
 │   │   ├── eslint.config.mjs
 │   │   ├── package.json
@@ -268,10 +280,10 @@ picstash/
 コアロジックパッケージ (`@picstash/core`)。クリーンアーキテクチャを採用：
 - **domain/** - ドメイン層（ビジネスルール、エンティティ、バリューオブジェクト）
 - **application/** - アプリケーション層（ユースケース、ポート定義）
-- **infra/** - インフラ層（外部システム連携）
-  - **adapters/** - 外部アダプター実装
-  - **database/** - Prisma Client、sqlite-vec
-  - **di/** - 依存性注入コンテナ
+  - **ports/** - Repository インターフェース等（実装は各消費パッケージで提供）
+- **infra/** - インフラ層（外部システム連携、Prisma は含まない）
+  - **adapters/** - 外部アダプター実装（ファイルストレージ、アーカイブ等）
+  - **di/** - 依存性注入コンテナ（`createCoreContainer`, `CoreContainer`, `DatabaseService` インターフェース）
   - **caption/** - キャプション生成サービス（ViT-GPT2 + NLLB翻訳）
   - **embedding/** - CLIP 埋め込みサービス
   - **llm/** - LLM サービス（Ollama 連携）
@@ -279,7 +291,7 @@ picstash/
   - **queue/** - ジョブキュー
   - **workers/** - バックグラウンドワーカー
 
-Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エイリアスでインポート。
+**注意**: core パッケージは Prisma 依存を持たない。各消費パッケージ（server, desktop-app）が独自の Prisma スキーマと Repository 実装を管理。
 
 ### `packages/eslint-config/`
 共有 ESLint 設定パッケージ。`buildConfig()` 関数で環境に応じた設定を生成：

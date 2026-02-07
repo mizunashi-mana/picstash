@@ -44,30 +44,40 @@
 
 ### DI コンテナ
 
-inversify を使用した DI コンテナで依存性を管理。`AppContainer` クラスで型安全なラッパーを提供：
+inversify を使用した DI コンテナで依存性を管理。core パッケージは Repository インターフェースと共通サービスのみを提供し、各消費パッケージ（server, desktop-app）が Prisma 実装をバインド：
 
 ```typescript
-// main (index.ts)
-import { buildAppContainer } from '@picstash/core';
+// server/src/infra/di/container.ts
+import { createCoreContainer, type CoreConfig } from '@picstash/core';
 
-const container = buildAppContainer();
-const app = await buildApp(container);
+export function createContainer(config: Config): Container {
+  const container = createCoreContainer(config);
+  bindRepositories(container);  // Prisma 実装をバインド
+  bindControllers(container);
+  return container;
+}
 
 // routes
-export function imageRoutes(app: FastifyInstance, container: AppContainer): void {
+export function imageRoutes(app: FastifyInstance, container: CoreContainer): void {
   const imageRepository = container.getImageRepository();
   const fileStorage = container.getFileStorage();
   // ...
 }
 ```
 
-**ファイル構成:**
+**core パッケージ:**
 ```
 packages/core/src/infra/di/
-├── index.ts           # エクスポート（buildAppContainer, AppContainer）
-├── container.ts       # createContainer() - inversify Container 設定
-├── types.ts           # TYPES 定義（内部使用）
-└── app-container.ts   # AppContainer クラス + buildAppContainer()
+├── index.ts           # エクスポート（createCoreContainer, CoreContainer, TYPES）
+├── core-container.ts  # createCoreContainer() + CoreContainer クラス + DatabaseService インターフェース
+└── types.ts           # TYPES 定義（内部使用）
+```
+
+**server/desktop-app パッケージ:**
+```
+packages/{server,desktop-app}/src/*/infra/di/
+├── container.ts       # createContainer() - Prisma 実装のバインド
+└── types.ts           # 追加の TYPES 定義（必要に応じて）
 ```
 
 ### CQRS (Command Query Responsibility Segregation)
@@ -387,8 +397,11 @@ npm run test:e2e
 ### データベース
 
 ```bash
-# Prisma Client 生成
-npm run db:generate -w @picstash/core
+# Prisma Client 生成（server）
+npm run db:generate -w @picstash/server
+
+# Prisma Client 生成（desktop-app）
+npm run db:generate -w @picstash/desktop-app
 
 # マイグレーション作成・適用（開発）
 npm run db:migrate -w @picstash/server
@@ -434,16 +447,22 @@ npm run label:embedding:status -w @picstash/server
 
 #### Prisma 7.x Driver Adapter
 
-Prisma 7.x では Driver Adapter パターンを使用：
+Prisma 7.x では Driver Adapter パターンを使用。各パッケージ（server, desktop-app）が独自の Prisma スキーマと実装を管理：
 
 ```typescript
-// packages/core/src/infra/database/prisma.ts
+// packages/server/src/infra/database/prisma-service.ts
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaClient } from '@~generated/prisma/client.js';
 
 const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
 export const prisma = new PrismaClient({ adapter });
 ```
+
+**パッケージ構成:**
+- `packages/server/prisma/` - サーバー用 Prisma スキーマ・マイグレーション
+- `packages/server/generated/prisma/` - 生成された Prisma Client
+- `packages/desktop-app/prisma/` - デスクトップアプリ用 Prisma スキーマ
+- `packages/desktop-app/generated/prisma/` - 生成された Prisma Client
 
 ## コーディング規約
 
