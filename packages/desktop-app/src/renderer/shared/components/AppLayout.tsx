@@ -17,6 +17,7 @@ import {
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
   IconPhoto,
+  IconSettings,
   IconTags,
 } from '@tabler/icons-react';
 import { Link, useLocation } from 'react-router';
@@ -35,6 +36,7 @@ const navItems = [
   { label: '重複検出', path: '/duplicates', icon: IconCopy },
   { label: 'インポート', path: '/import', icon: IconDownload },
   { label: '統計', path: '/stats', icon: IconChartBar },
+  { label: '設定', path: '/settings', icon: IconSettings },
 ];
 
 export function AppLayout({ children, headerActions }: AppLayoutProps) {

@@ -80,7 +80,7 @@ describe('StorageManager', () => {
       });
 
       expect(result.filename).toMatch(/^[a-f0-9-]+\.jpg$/);
-      expect(result.path).toMatch(/^originals\/[a-f0-9-]+\.jpg$/);
+      expect(result.path).toMatch(/^storage\/originals\/[a-f0-9-]+\.jpg$/);
     });
 
     it('無効な拡張子（ドットなし）を拒否する', async () => {
@@ -121,7 +121,7 @@ describe('StorageManager', () => {
 
       // basename により ../ が除去され、malicious.jpg のみになる
       expect(result.filename).toBe('malicious.jpg');
-      expect(result.path).toBe('originals/malicious.jpg');
+      expect(result.path).toBe('storage/originals/malicious.jpg');
     });
   });
 

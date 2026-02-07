@@ -9,6 +9,7 @@ import { GalleryPage, ImageDetailPage } from '@/features/gallery';
 import { HomePage } from '@/features/home';
 import { ImportPage } from '@/features/import';
 import { LabelsPage } from '@/features/labels';
+import { SettingsPage } from '@/features/settings';
 import { StatsPage } from '@/features/stats';
 
 export function AppRoutes() {
@@ -25,6 +26,7 @@ export function AppRoutes() {
       <Route path="/duplicates" element={<DuplicatesPage />} />
       <Route path="/import" element={<ImportPage />} />
       <Route path="/stats" element={<StatsPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   );
 }
