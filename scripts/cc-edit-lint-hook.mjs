@@ -49,7 +49,7 @@ function gitRmCached(files, cwd) {
 
 function runPreCommit(cwd) {
   return new Promise((resolve) => {
-    const child = spawn("pre-commit", ["run"], {
+    const child = spawn("prek", ["run"], {
       stdio: "inherit",
       shell: process.platform === "win32",
       cwd,
@@ -60,7 +60,7 @@ function runPreCommit(cwd) {
     });
 
     child.on("error", (err) => {
-      console.error(`Error: Failed to execute pre-commit: ${err.message}`);
+      console.error(`Error: Failed to execute prek: ${err.message}`);
       resolve(1);
     });
 
