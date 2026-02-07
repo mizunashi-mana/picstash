@@ -70,6 +70,39 @@ packages/core/src/infra/di/
 └── app-container.ts   # AppContainer クラス + buildAppContainer()
 ```
 
+### CQRS (Command Query Responsibility Segregation)
+
+core パッケージの domain 層で CQRS パターンを採用。Entity（Command Model）と Read Model を分離：
+
+| モデル種別 | 用途 | 命名規則 | 例 |
+|-----------|------|---------|-----|
+| Entity | 書き込み・更新操作 | `XxxEntity` | `ImageEntity`, `CollectionEntity`, `LabelEntity` |
+| Read Model (List) | 一覧表示用 | `XxxListItem` | `ImageListItem`, `CollectionListItem` |
+| Read Model (Detail) | 詳細表示用 | `XxxDetail` | `ImageDetail`, `CollectionDetail` |
+
+#### 目的
+
+1. **関心の分離**: 書き込み操作と読み取り操作で異なるデータ構造を使用
+2. **パフォーマンス**: 一覧表示では必要最小限のフィールドのみ取得
+3. **型安全性**: 操作の種類に応じた適切な型を強制
+
+#### Repository の戻り値
+
+| 操作 | 戻り値 |
+|------|--------|
+| Command（create, update, delete） | Entity |
+| Query（findById, findAll, list） | Read Model |
+
+#### ファイル構成例
+
+```
+packages/core/src/domain/image/
+├── ImageEntity.ts      # Entity (Command Model)
+├── ImageListItem.ts    # Read Model (一覧用)
+├── ImageDetail.ts      # Read Model (詳細用)
+└── index.ts            # エクスポート
+```
+
 ### パッケージ構成
 
 | パッケージ | 説明 | 状態 |
