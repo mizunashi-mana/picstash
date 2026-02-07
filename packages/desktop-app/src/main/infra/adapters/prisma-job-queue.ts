@@ -10,7 +10,9 @@ import type {
   ListJobsOptions,
   ListJobsResult,
 } from '@picstash/core';
-import type { PrismaClient } from '@~generated/prisma/client.js';
+import type { Job as PrismaJob, PrismaClient } from '@~generated/prisma/client.js';
+
+type TransactionClient = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
 
 /**
  * SQLite/Prisma ベースのジョブキュー実装
@@ -82,7 +84,7 @@ export class PrismaJobQueue implements JobQueue {
     ]);
 
     return {
-      jobs: jobs.map(job => this.mapToJob<TPayload, TResult>(job)),
+      jobs: jobs.map((job: PrismaJob) => this.mapToJob<TPayload, TResult>(job)),
       total,
     };
   }
@@ -92,7 +94,7 @@ export class PrismaJobQueue implements JobQueue {
   ): Promise<Job<TPayload> | null> {
     // SQLite では SKIP LOCKED がないため、トランザクションで処理
     // 同時実行性は低いが、単一プロセスでの使用を想定
-    return await this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx: TransactionClient) => {
       const job = await tx.job.findFirst({
         where: {
           type,

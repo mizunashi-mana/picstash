@@ -11,7 +11,11 @@ import type {
   ViewHistoryRepository,
   ViewHistoryListOptions,
 } from '@picstash/core';
-import type { PrismaClient } from '@~generated/prisma/client.js';
+import type { Prisma, PrismaClient } from '@~generated/prisma/client.js';
+
+type ViewHistoryWithImageRecord = Prisma.ViewHistoryGetPayload<{
+  include: { image: { select: { id: true; title: true; thumbnailPath: true } } };
+}>;
 
 @injectable()
 export class PrismaViewHistoryRepository implements ViewHistoryRepository {
@@ -68,7 +72,7 @@ export class PrismaViewHistoryRepository implements ViewHistoryRepository {
       },
     });
 
-    return records.map(record => ({
+    return records.map((record: ViewHistoryWithImageRecord) => ({
       id: record.id,
       imageId: record.imageId,
       viewedAt: record.viewedAt,

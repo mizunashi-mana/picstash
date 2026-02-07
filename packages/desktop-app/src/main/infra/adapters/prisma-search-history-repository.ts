@@ -8,7 +8,7 @@ import type {
   SearchHistoryListOptions,
   SaveSearchHistoryInput,
 } from '@picstash/core';
-import type { PrismaClient } from '@~generated/prisma/client.js';
+import type { PrismaClient, SearchHistory as PrismaSearchHistory } from '@~generated/prisma/client.js';
 
 const DEFAULT_LIMIT = 20;
 const MAX_FETCH_LIMIT = 1000;
@@ -63,7 +63,7 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
     });
 
     return all
-      .filter(h => h.query.toLowerCase().startsWith(normalizedPrefix))
+      .filter((h: PrismaSearchHistory) => h.query.toLowerCase().startsWith(normalizedPrefix))
       .slice(0, limit);
   }
 

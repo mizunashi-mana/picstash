@@ -13,7 +13,12 @@ import type {
   UpdateCollectionInput,
   UpdateImageOrderInput,
 } from '@picstash/core';
-import type { PrismaClient } from '@~generated/prisma/client.js';
+import type { Prisma, PrismaClient } from '@~generated/prisma/client.js';
+
+type TransactionClient = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
+type CollectionWithCount = Prisma.CollectionGetPayload<{ include: { _count: { select: { images: true } } } }>;
+type CollectionImageWithImage = Prisma.CollectionImageGetPayload<{ include: { image: { select: { title: true; thumbnailPath: true } } } }>;
+type CollectionImageWithCollection = Prisma.CollectionImageGetPayload<{ include: { collection: true } }>;
 
 @injectable()
 export class PrismaCollectionRepository implements CollectionRepository {
@@ -61,7 +66,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
       coverImageId: collection.coverImageId,
       createdAt: collection.createdAt,
       updatedAt: collection.updatedAt,
-      images: collection.images.map(ci => ({
+      images: collection.images.map((ci: CollectionImageWithImage) => ({
         id: ci.id,
         imageId: ci.imageId,
         order: ci.order,
@@ -81,7 +86,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
       },
     });
 
-    return collections.map(c => ({
+    return collections.map((c: CollectionWithCount) => ({
       id: c.id,
       name: c.name,
       description: c.description,
@@ -107,7 +112,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
 
   // Collection image management
   async addImage(collectionId: string, input: AddImageToCollectionInput): Promise<CollectionImage> {
-    return await this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async (tx: TransactionClient) => {
       // If order is not specified, add at the end
       let order = input.order;
       if (order === undefined) {
@@ -141,7 +146,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
   }
 
   async updateImageOrder(collectionId: string, orders: UpdateImageOrderInput[]): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: TransactionClient) => {
       for (const { imageId, order } of orders) {
         await tx.collectionImage.update({
           where: {
@@ -163,6 +168,6 @@ export class PrismaCollectionRepository implements CollectionRepository {
       include: { collection: true },
     });
 
-    return collectionImages.map(ci => ci.collection);
+    return collectionImages.map((ci: CollectionImageWithCollection) => ci.collection);
   }
 }

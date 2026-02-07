@@ -40,7 +40,7 @@ export class PrismaRecommendationConversionRepository implements RecommendationC
         });
         results.push(record);
       }
-      catch (error) {
+      catch (error: unknown) {
         // Skip if image doesn't exist (foreign key constraint violation)
         if (
           error instanceof Prisma.PrismaClientKnownRequestError

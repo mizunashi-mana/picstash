@@ -114,7 +114,7 @@ export class PrismaStatsRepository implements StatsRepository {
     `;
 
     // Create a map of existing data
-    const dataMap = new Map(
+    const dataMap = new Map<string, { viewCount: number; totalDuration: number }>(
       results.map(row => [
         row.date,
         {
@@ -161,8 +161,8 @@ export class PrismaStatsRepository implements StatsRepository {
     `;
 
     // Create a map of existing data
-    const dataMap = new Map(
-      results.map((row) => {
+    const dataMap = new Map<string, { impressions: number; clicks: number; conversionRate: number }>(
+      results.map((row): [string, { impressions: number; clicks: number; conversionRate: number }] => {
         const impressions = Number(row.impressions);
         const clicks = Number(row.clicks);
         return [
