@@ -43,6 +43,7 @@
         "arch": ["x64"]
       }
     ],
-    "category": "Graphics"
+    "category": "Graphics",
+    "artifactName": "${productName}-${version}-${arch}.${ext}"
   }
 }
