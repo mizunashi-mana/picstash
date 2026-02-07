@@ -8,7 +8,7 @@ import type {
   FileStorage,
   ImageProcessor,
   ImageRepository,
-  Image,
+  ImageDetail,
 } from '@picstash/core';
 
 interface ErrorResponse {
@@ -96,7 +96,7 @@ function createMockEmbeddingRepository(): EmbeddingRepository {
   };
 }
 
-function createImage(id: string, overrides: Partial<Image> = {}): Image {
+function createImage(id: string, overrides: Partial<ImageDetail> = {}): ImageDetail {
   return {
     id,
     path: `originals/${id}.png`,

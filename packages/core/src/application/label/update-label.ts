@@ -1,5 +1,5 @@
 import { LabelName, LABEL_NAME_MAX_LENGTH } from '@/domain/label/index.js';
-import type { Label, LabelRepository } from '@/application/ports/label-repository.js';
+import type { LabelEntity, LabelRepository } from '@/application/ports/label-repository.js';
 
 export interface UpdateLabelInput {
   name?: string;
@@ -7,7 +7,7 @@ export interface UpdateLabelInput {
 }
 
 export type UpdateLabelResult
-  = | { success: true; label: Label }
+  = | { success: true; label: LabelEntity }
     | { success: false; error: 'NOT_FOUND' }
     | { success: false; error: 'EMPTY_NAME' }
     | { success: false; error: 'NAME_TOO_LONG'; maxLength: number }

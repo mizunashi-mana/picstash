@@ -1,11 +1,19 @@
 import type {
-  Image,
+  ImageEntity,
+  ImageListItem,
+  ImageDetail,
   CreateImageInput,
   UpdateImageInput,
 } from '@/domain/image/index.js';
 
-// Re-export domain types for backward compatibility
-export type { Image, CreateImageInput, UpdateImageInput };
+// Re-export domain types for convenience
+export type {
+  ImageEntity,
+  ImageListItem,
+  ImageDetail,
+  CreateImageInput,
+  UpdateImageInput,
+};
 
 /** Image with embedding data */
 export interface ImageWithEmbedding {
@@ -35,18 +43,20 @@ export interface PaginatedResult<T> {
 }
 
 export interface ImageRepository {
-  create: (input: CreateImageInput) => Promise<Image>;
-  findById: (id: string) => Promise<Image | null>;
-  /** Find multiple images by IDs */
-  findByIds: (ids: string[]) => Promise<Image[]>;
-  findAll: () => Promise<Image[]>;
-  /** Find all images with pagination */
-  findAllPaginated: (options: PaginationOptions) => Promise<PaginatedResult<Image>>;
-  search: (query: string) => Promise<Image[]>;
-  /** Search images with pagination */
-  searchPaginated: (query: string, options: PaginationOptions) => Promise<PaginatedResult<Image>>;
-  updateById: (id: string, input: UpdateImageInput) => Promise<Image>;
-  deleteById: (id: string) => Promise<Image>;
+  // Command operations → return ImageEntity
+  create: (input: CreateImageInput) => Promise<ImageEntity>;
+  updateById: (id: string, input: UpdateImageInput) => Promise<ImageEntity>;
+  deleteById: (id: string) => Promise<ImageEntity>;
+
+  // Query operations for detail → return ImageDetail
+  findById: (id: string) => Promise<ImageDetail | null>;
+
+  // Query operations for list → return ImageListItem
+  findByIds: (ids: string[]) => Promise<ImageListItem[]>;
+  findAll: () => Promise<ImageListItem[]>;
+  findAllPaginated: (options: PaginationOptions) => Promise<PaginatedResult<ImageListItem>>;
+  search: (query: string) => Promise<ImageListItem[]>;
+  searchPaginated: (query: string, options: PaginationOptions) => Promise<PaginatedResult<ImageListItem>>;
 
   // Embedding-related methods
   /** Find IDs of images without embedding */

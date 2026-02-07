@@ -2,7 +2,7 @@ import { Readable } from 'node:stream';
 import { generateTitle } from '@/domain/image/index.js';
 import type { FileStorage } from '@/application/ports/file-storage.js';
 import type { ImageProcessor } from '@/application/ports/image-processor.js';
-import type { Image, ImageRepository } from '@/application/ports/image-repository.js';
+import type { ImageEntity, ImageRepository } from '@/application/ports/image-repository.js';
 import type { UrlCrawlSessionManager } from '@/application/ports/url-crawl-session-manager.js';
 
 export interface ImportFromUrlCrawlInput {
@@ -13,7 +13,7 @@ export interface ImportFromUrlCrawlInput {
 export interface ImportResult {
   index: number;
   success: boolean;
-  image?: Image;
+  image?: ImageEntity;
   error?: string;
 }
 

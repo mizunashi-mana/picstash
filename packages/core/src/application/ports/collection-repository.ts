@@ -1,7 +1,8 @@
 import type {
-  Collection,
-  CollectionWithCount,
+  CollectionEntity,
   CollectionImage,
+  CollectionListItem,
+  CollectionDetail,
   CreateCollectionInput,
   UpdateCollectionInput,
   AddImageToCollectionInput,
@@ -10,43 +11,35 @@ import type {
 
 // Re-export domain types for convenience
 export type {
-  Collection,
-  CollectionWithCount,
+  CollectionEntity,
   CollectionImage,
+  CollectionListItem,
+  CollectionDetail,
   CreateCollectionInput,
   UpdateCollectionInput,
   AddImageToCollectionInput,
   UpdateImageOrderInput,
 };
-
-/** Image info for collection display */
-export interface CollectionImageInfo {
-  id: string;
-  imageId: string;
-  order: number;
-  title: string;
-  thumbnailPath: string | null;
-}
-
-/** Collection with its images */
-export interface CollectionWithImages extends Collection {
-  images: CollectionImageInfo[];
-}
+export type { CollectionImageInfo } from '@/domain/collection/index.js';
 
 export interface CollectionRepository {
-  // Collection CRUD
-  create: (input: CreateCollectionInput) => Promise<Collection>;
-  findById: (id: string) => Promise<Collection | null>;
-  findByIdWithImages: (id: string) => Promise<CollectionWithImages | null>;
-  findAll: () => Promise<CollectionWithCount[]>;
-  updateById: (id: string, input: UpdateCollectionInput) => Promise<Collection>;
-  deleteById: (id: string) => Promise<Collection>;
+  // Command operations → return CollectionEntity
+  create: (input: CreateCollectionInput) => Promise<CollectionEntity>;
+  updateById: (id: string, input: UpdateCollectionInput) => Promise<CollectionEntity>;
+  deleteById: (id: string) => Promise<CollectionEntity>;
 
-  // Collection image management
+  // Query operations for detail → return CollectionDetail
+  findById: (id: string) => Promise<CollectionEntity | null>;
+  findByIdWithImages: (id: string) => Promise<CollectionDetail | null>;
+
+  // Query operations for list → return CollectionListItem
+  findAll: () => Promise<CollectionListItem[]>;
+
+  // Collection image management → return CollectionImage (junction entity)
   addImage: (collectionId: string, input: AddImageToCollectionInput) => Promise<CollectionImage>;
   removeImage: (collectionId: string, imageId: string) => Promise<void>;
   updateImageOrder: (collectionId: string, orders: UpdateImageOrderInput[]) => Promise<void>;
 
-  // Query helpers
-  findCollectionsByImageId: (imageId: string) => Promise<Collection[]>;
+  // Query helpers → return CollectionEntity (for command operations context)
+  findCollectionsByImageId: (imageId: string) => Promise<CollectionEntity[]>;
 }

@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { updateLabel } from '@/application/label/update-label.js';
 import type {
-  Label,
+  LabelEntity,
   LabelRepository,
   UpdateLabelInput,
 } from '@/application/ports/label-repository.js';
 
-const existingLabel: Label = {
+const existingLabel: LabelEntity = {
   id: 'label-1',
   name: 'Original Name',
   color: '#000000',
@@ -166,7 +166,7 @@ describe('updateLabel', () => {
   });
 
   it('should return DUPLICATE_NAME error if name is taken by another label', async () => {
-    const anotherLabel: Label = {
+    const anotherLabel: LabelEntity = {
       id: 'label-2',
       name: 'Taken Name',
       color: null,

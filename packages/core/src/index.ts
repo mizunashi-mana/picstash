@@ -19,7 +19,7 @@ export { fileExists } from './shared/file-utils.js';
 
 // Domain types
 export { generateTitle } from './domain/image/index.js';
-export type { Image, CreateImageInput, UpdateImageInput } from './domain/image/index.js';
+export type { ImageEntity, ImageListItem, ImageDetail, CreateImageInput, UpdateImageInput } from './domain/image/index.js';
 export {
   ImageMimeType,
   ALLOWED_IMAGE_MIME_TYPES,

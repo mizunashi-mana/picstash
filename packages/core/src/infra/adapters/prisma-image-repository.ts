@@ -5,7 +5,9 @@ import { isEmptyQuery, parseSearchQuery } from '@/application/search/query-parse
 import { TYPES } from '@/infra/di/types.js';
 import type {
   CreateImageInput,
-  Image,
+  ImageEntity,
+  ImageListItem,
+  ImageDetail,
   ImageRepository,
   ImageWithEmbedding,
   PaginatedResult,
@@ -24,19 +26,19 @@ export class PrismaImageRepository implements ImageRepository {
     this.prisma = prismaService.getClient();
   }
 
-  async create(input: CreateImageInput): Promise<Image> {
+  async create(input: CreateImageInput): Promise<ImageEntity> {
     return await this.prisma.image.create({
       data: input,
     });
   }
 
-  async findById(id: string): Promise<Image | null> {
+  async findById(id: string): Promise<ImageDetail | null> {
     return await this.prisma.image.findUnique({
       where: { id },
     });
   }
 
-  async findByIds(ids: string[]): Promise<Image[]> {
+  async findByIds(ids: string[]): Promise<ImageListItem[]> {
     if (ids.length === 0) {
       return [];
     }
@@ -45,13 +47,13 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 
-  async findAll(): Promise<Image[]> {
+  async findAll(): Promise<ImageListItem[]> {
     return await this.prisma.image.findMany({
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findAllPaginated(options: PaginationOptions): Promise<PaginatedResult<Image>> {
+  async findAllPaginated(options: PaginationOptions): Promise<PaginatedResult<ImageListItem>> {
     const [items, total] = await Promise.all([
       this.prisma.image.findMany({
         orderBy: { createdAt: 'desc' },
@@ -69,7 +71,7 @@ export class PrismaImageRepository implements ImageRepository {
     };
   }
 
-  async search(query: string): Promise<Image[]> {
+  async search(query: string): Promise<ImageListItem[]> {
     const parsedQuery = parseSearchQuery(query);
 
     // If query is empty, return all images
@@ -87,7 +89,7 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 
-  async searchPaginated(query: string, options: PaginationOptions): Promise<PaginatedResult<Image>> {
+  async searchPaginated(query: string, options: PaginationOptions): Promise<PaginatedResult<ImageListItem>> {
     const parsedQuery = parseSearchQuery(query);
 
     // If query is empty, return all images paginated
@@ -117,14 +119,14 @@ export class PrismaImageRepository implements ImageRepository {
     };
   }
 
-  async updateById(id: string, input: UpdateImageInput): Promise<Image> {
+  async updateById(id: string, input: UpdateImageInput): Promise<ImageEntity> {
     return await this.prisma.image.update({
       where: { id },
       data: input,
     });
   }
 
-  async deleteById(id: string): Promise<Image> {
+  async deleteById(id: string): Promise<ImageEntity> {
     return await this.prisma.image.delete({
       where: { id },
     });

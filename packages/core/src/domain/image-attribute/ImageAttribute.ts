@@ -1,4 +1,4 @@
-import type { Label } from '@/domain/label/Label.js';
+import type { LabelEntity } from '@/domain/label/index.js';
 
 /**
  * ImageAttribute entity - represents a label with keywords assigned to an image
@@ -10,7 +10,7 @@ export interface ImageAttribute {
   keywords: string | null;
   createdAt: Date;
   updatedAt: Date;
-  label: Label;
+  label: LabelEntity;
 }
 
 /**

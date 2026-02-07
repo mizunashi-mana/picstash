@@ -1,7 +1,10 @@
 /**
- * Label entity
+ * Label entity for command operations (create, update, delete)
+ *
+ * Labels are simple value objects, so the same type is used
+ * for both command and query operations.
  */
-export interface Label {
+export interface LabelEntity {
   id: string;
   name: string;
   color: string | null;

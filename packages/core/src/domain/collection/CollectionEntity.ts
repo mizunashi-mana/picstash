@@ -1,20 +1,13 @@
 /**
- * Collection entity
+ * Collection entity for command operations (create, update, delete)
  */
-export interface Collection {
+export interface CollectionEntity {
   id: string;
   name: string;
   description: string | null;
   coverImageId: string | null;
   createdAt: Date;
   updatedAt: Date;
-}
-
-/**
- * Collection with image count for list display
- */
-export interface CollectionWithCount extends Collection {
-  imageCount: number;
 }
 
 /**

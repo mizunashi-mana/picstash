@@ -11,7 +11,7 @@ import type { EmbeddingRepository } from '@/application/ports/embedding-reposito
 import type { EmbeddingService } from '@/application/ports/embedding-service';
 import type { FileStorage } from '@/application/ports/file-storage';
 import type { ImageProcessor } from '@/application/ports/image-processor';
-import type { Image, ImageRepository } from '@/application/ports/image-repository';
+import type { ImageEntity, ImageRepository } from '@/application/ports/image-repository';
 
 vi.mock('@/application/embedding/generate-embedding', () => ({
   generateEmbedding: vi.fn().mockResolvedValue({ imageId: 'test-id', success: true }),
@@ -93,7 +93,7 @@ function createMockDeps(): UploadImageDeps {
   };
 }
 
-function createMockImage(overrides: Partial<Image> = {}): Image {
+function createMockImage(overrides: Partial<ImageEntity> = {}): ImageEntity {
   return {
     id: 'test-image-id',
     path: 'originals/test-image.png',
@@ -119,7 +119,7 @@ function createMockInput(overrides: Partial<UploadImageInput> = {}): UploadImage
   };
 }
 
-function setupSuccessMocks(deps: UploadImageDeps, mockImage: Image): void {
+function setupSuccessMocks(deps: UploadImageDeps, mockImage: ImageEntity): void {
   vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
     path: 'originals/test-image.png',
     filename: 'test-image.png',
