@@ -104,19 +104,20 @@ dependency-cruiser（`.dependency-cruiser.mjs`）でレイヤー間の依存方�
 
 ### DI コンテナ（web-client / desktop-app）
 
-web-client および desktop-app で inversify を使用した DI コンテナで API クライアントを管理：
+web-client および desktop-app で inversify を使用した DI コンテナで API クライアントを管理。
+`@picstash/api` パッケージで定義された `ApiClient` インターフェースと `API_TYPES.ApiClient` シンボルを使用：
 
 ```typescript
-// shared/di/react.tsx
+// shared/di/container.ts
 import { Container } from 'inversify';
-import { API_TYPES, type ApiClient } from '@picstash/api';
+import { API_TYPES, createApiClient, type ApiClient } from '@picstash/api';
 
-const container = new Container();
-container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createApiClient(httpClient));
-
-<ContainerProvider container={container}>
-  <App />
-</ContainerProvider>
+export function createContainer(): Container {
+  const container = new Container();
+  const httpClient = new FetchHttpClient();
+  container.bind<ApiClient>(API_TYPES.ApiClient).toConstantValue(createApiClient(httpClient));
+  return container;
+}
 
 // コンポーネントからの利用
 import { useApiClient } from '@/shared';
@@ -129,6 +130,20 @@ function ImageList() {
   });
 }
 ```
+
+**ApiClient のリソース:**
+- `images` - 画像 CRUD、サムネイル/ファイル URL 取得
+- `collections` - コレクション CRUD、画像追加/削除
+- `labels` - ラベル CRUD
+- `jobs` - ジョブ一覧・詳細取得
+- `urlCrawl` - URL クロール、セッション管理、画像インポート
+- `stats` - 統計情報取得
+- `search` - 画像検索
+- `recommendations` - おすすめ画像取得
+- `archiveImport` - アーカイブインポート
+- `descriptions` - 画像説明文管理
+- `imageAttributes` - 画像属性管理
+- `viewHistory` - 閲覧履歴管理
 
 **ファイル構成（web-client / desktop-app 共通パターン）:**
 ```

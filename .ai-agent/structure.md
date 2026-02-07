@@ -26,9 +26,15 @@ picstash/
 │   │   │   │   ├── providers/  # プロバイダー設定
 │   │   │   │   └── routes/     # React Router 設定
 │   │   │   │
-│   │   │   ├── pages/          # Pages レイヤー
-│   │   │   │   ├── gallery/    # ギャラリーページ（View Props パターン）
-│   │   │   │   └── image-detail/ # 画像詳細ページ（View Props パターン）
+│   │   │   ├── pages/          # Pages レイヤー（View Props パターン適用）
+│   │   │   │   ├── gallery/      # ギャラリーページ
+│   │   │   │   ├── image-detail/ # 画像詳細ページ
+│   │   │   │   ├── collections/  # コレクション一覧・詳細ページ
+│   │   │   │   ├── duplicates/   # 重複画像ページ
+│   │   │   │   ├── home/         # ホームページ（おすすめ）
+│   │   │   │   ├── import/       # インポートページ
+│   │   │   │   ├── labels/       # ラベル管理ページ
+│   │   │   │   └── stats/        # 統計ページ
 │   │   │   │
 │   │   │   ├── widgets/        # Widgets レイヤー
 │   │   │   │   ├── app-layout/ # AppLayout
@@ -36,11 +42,11 @@ picstash/
 │   │   │   │
 │   │   │   ├── features/       # Features レイヤー（ユーザーアクション単位）
 │   │   │   │   ├── gallery/        # ギャラリー表示
-│   │   │   │   ├── labels/         # ラベル管理（UI + ページ）
-│   │   │   │   ├── collections/    # コレクション管理
-│   │   │   │   ├── upload-image/   # 画像アップロード
+│   │   │   │   ├── labels/         # ラベル管理
+│   │   │   │   ├── import/         # インポート共通
 │   │   │   │   ├── import-archive/ # アーカイブインポート
 │   │   │   │   ├── import-url/     # URLクロール
+│   │   │   │   ├── upload-image/   # 画像アップロード
 │   │   │   │   ├── search-images/  # 画像検索
 │   │   │   │   ├── find-duplicates/ # 重複画像検出
 │   │   │   │   ├── find-similar-images/ # 類似画像検索
@@ -57,7 +63,7 @@ picstash/
 │   │   │   │   └── collection/ # コレクションエンティティ型（index.ts のみ）
 │   │   │   │
 │   │   │   └── shared/         # Shared レイヤー
-│   │   │       ├── api/        # 共通 API クライアント（レガシー、非推奨）
+│   │   │       ├── api/        # HttpClient 実装（FetchHttpClient）
 │   │   │       ├── di/         # DI コンテナ（ContainerProvider, useApiClient）
 │   │   │       ├── lib/        # ヘルパー関数
 │   │   │       └── hooks/      # 共通フック
@@ -159,6 +165,24 @@ picstash/
 │   ├── api/                    # 共有 API 型定義 (@picstash/api)
 │   │   ├── src/
 │   │   │   ├── index.ts        # メインエクスポート
+│   │   │   ├── client/         # ApiClient インターフェースと実装
+│   │   │   │   ├── api-client.ts           # ApiClient 統合インターフェース
+│   │   │   │   ├── create-api-client.ts    # ファクトリ関数
+│   │   │   │   ├── http-client.ts          # HttpClient インターフェース
+│   │   │   │   ├── types.ts                # DI 用 Symbol 定義（API_TYPES）
+│   │   │   │   ├── image-api-client.ts     # 画像 API クライアント
+│   │   │   │   ├── collection-api-client.ts # コレクション API クライアント
+│   │   │   │   ├── label-api-client.ts     # ラベル API クライアント
+│   │   │   │   ├── jobs-api-client.ts      # ジョブ API クライアント
+│   │   │   │   ├── url-crawl-api-client.ts # URL クロール API クライアント
+│   │   │   │   ├── stats-api-client.ts     # 統計 API クライアント
+│   │   │   │   ├── search-api-client.ts    # 検索 API クライアント
+│   │   │   │   ├── recommendations-api-client.ts # 推薦 API クライアント
+│   │   │   │   ├── archive-import-api-client.ts  # アーカイブ API クライアント
+│   │   │   │   ├── description-api-client.ts     # 説明文 API クライアント
+│   │   │   │   ├── image-attribute-api-client.ts # 画像属性 API クライアント
+│   │   │   │   ├── view-history-api-client.ts    # 閲覧履歴 API クライアント
+│   │   │   │   └── impl/       # 各 API クライアントの実装
 │   │   │   ├── collections.ts  # コレクション API エンドポイント・型定義
 │   │   │   ├── image-attributes.ts # 画像属性 API エンドポイント・型定義
 │   │   │   ├── images.ts       # 画像 API エンドポイント定義
@@ -268,7 +292,13 @@ Prisma Client は `generated/prisma/` に出力され、`@~generated/prisma` エ
 
 ### `packages/api/`
 フロントエンドとバックエンドで共有する API 型定義とエンドポイント定義 (`@picstash/api`)。
-- **client/** - `ApiClient` インターフェースと `FetchApiClient` 実装
+- **client/** - `ApiClient` インターフェースとリソース別クライアント実装
+  - `api-client.ts` - 統合 ApiClient インターフェース（images, collections, labels, jobs 等のリソースを集約）
+  - `create-api-client.ts` - HttpClient を受け取り ApiClient を生成するファクトリ
+  - `http-client.ts` - HttpClient インターフェース（fetch のラッパー）
+  - `types.ts` - DI 用 Symbol 定義（`API_TYPES.ApiClient`）
+  - 各リソース別クライアント（image-api-client.ts, collection-api-client.ts 等）
+  - `impl/` - 各クライアントの実装
 - **images.ts** - 画像 API のエンドポイント URL ヘルパーと型定義
 - **stats.ts** - 統計 API の Zod スキーマと型定義
 - **labels.ts** - ラベル API の Zod スキーマと型定義
