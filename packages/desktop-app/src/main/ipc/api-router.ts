@@ -9,6 +9,7 @@ import {
   generateRecommendations,
   type CoreContainer,
 } from '@picstash/core';
+import { z } from 'zod';
 import type { IpcApiRequest, IpcApiResponse } from '@desktop-app/shared/types.js';
 
 type RouteHandler = (
@@ -491,18 +492,23 @@ route('GET', '/api/jobs/:jobId', async (container, params) => {
 
 // --- Images (from local) ---
 
-route('POST', '/api/images/from-local', async (container, _params, body) => {
-  const repo = container.getImageRepository();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Request body type
-  const input = body as {
-    path: string;
-    thumbnailPath: string;
-    mimeType: string;
-    size: number;
-    width: number;
-    height: number;
-  };
+const createImageFromLocalSchema = z.object({
+  path: z.string().min(1),
+  thumbnailPath: z.string().min(1),
+  mimeType: z.string().min(1),
+  size: z.number().int().positive(),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
 
+route('POST', '/api/images/from-local', async (container, _params, body) => {
+  const parseResult = createImageFromLocalSchema.safeParse(body);
+  if (!parseResult.success) {
+    return { status: 400, error: 'Invalid request body' };
+  }
+  const input = parseResult.data;
+
+  const repo = container.getImageRepository();
   const image = await repo.create({
     path: input.path,
     thumbnailPath: input.thumbnailPath,
