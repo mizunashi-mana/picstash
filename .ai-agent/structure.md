@@ -72,8 +72,8 @@ picstash/
 │   │   ├── tests/              # web-client のテスト
 │   │   │   ├── setup.ts        # テストセットアップ
 │   │   │   ├── unit/           # ユニットテスト（Vitest）
+│   │   │   ├── fixtures/       # テスト用フィクスチャ
 │   │   │   └── e2e/            # E2E テスト（Playwright）
-│   │   │       ├── fixtures/   # テスト用フィクスチャ
 │   │   │       └── config.yaml # E2E テスト用サーバー設定
 │   │   ├── playwright.config.ts # Playwright 設定
 │   │   ├── eslint.config.mjs   # ESLint 設定（browser 環境）
