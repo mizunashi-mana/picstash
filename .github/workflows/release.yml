@@ -45,19 +45,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Update version in package.json
-        run: |
-          npm version ${{ inputs.version }} --no-git-tag-version --workspaces --include-workspace-root
-
-      - name: Commit version update
-        run: |
-          git add -A
-          git commit -m "chore: bump version to ${{ inputs.version }}"
-
       - name: Create and push tag
         run: |
           git tag v${{ inputs.version }}
-          git push origin HEAD:${{ github.ref_name }}
           git push origin v${{ inputs.version }}
 
   build:
