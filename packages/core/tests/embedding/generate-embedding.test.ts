@@ -61,13 +61,11 @@ function createMockDeps(): GenerateEmbeddingDeps {
   const mockFileStorage: FileStorage = {
     saveFile: vi.fn(),
     saveFileFromBuffer: vi.fn(),
-    saveOriginalFromStream: vi.fn(),
     readFile: vi.fn(),
     readFileAsStream: vi.fn(),
     getFileSize: vi.fn(),
     fileExists: vi.fn(),
     deleteFile: vi.fn(),
-    getAbsolutePath: vi.fn(),
   };
 
   const mockEmbeddingService: EmbeddingService = {

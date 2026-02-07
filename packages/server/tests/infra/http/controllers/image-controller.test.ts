@@ -62,13 +62,11 @@ function createMockFileStorage(): FileStorage {
   return {
     saveFile: vi.fn(),
     saveFileFromBuffer: vi.fn(),
-    saveOriginalFromStream: vi.fn(),
     readFile: vi.fn(),
     readFileAsStream: vi.fn(),
     getFileSize: vi.fn(),
     fileExists: vi.fn().mockResolvedValue(true),
     deleteFile: vi.fn(),
-    getAbsolutePath: vi.fn().mockReturnValue('/tmp/test.png'),
   };
 }
 

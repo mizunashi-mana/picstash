@@ -57,6 +57,16 @@ export interface CaptionService {
   generateWithContext: (imagePath: string, context: CaptionContext) => Promise<CaptionResult>;
 
   /**
+   * Generate a caption from image data with context from similar images.
+   * Uses an LLM to refine the caption based on similar images' descriptions.
+   * Falls back to generateFromBuffer if LLM is unavailable or context is empty.
+   * @param imageData - Raw image data as Buffer
+   * @param context - Context from similar images
+   * @returns The caption result
+   */
+  generateWithContextFromBuffer: (imageData: Buffer, context: CaptionContext) => Promise<CaptionResult>;
+
+  /**
    * Get the model identifier used by this service.
    */
   getModel: () => string;
