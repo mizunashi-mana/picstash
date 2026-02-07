@@ -3,9 +3,9 @@
  */
 
 import 'reflect-metadata';
-import { TYPES } from '@picstash/core';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import { Prisma, PrismaClient } from '@~generated/prisma/client.js';
 import type { CoreConfig } from '@picstash/core';
 

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { createCoreContainer, TYPES } from '@picstash/core';
+import { createCoreContainer } from '@picstash/core';
 import {
   PrismaCollectionRepository,
   PrismaImageAttributeRepository,
@@ -29,7 +29,7 @@ import {
   UrlCrawlController,
   ViewHistoryController,
 } from '@/infra/http/controllers/index.js';
-import { CONTROLLER_TYPES } from './types.js';
+import { CONTROLLER_TYPES, TYPES } from './types.js';
 import type { Config } from '@/config.js';
 import type {
   CollectionRepository,
@@ -51,7 +51,7 @@ import type { Container } from 'inversify';
  */
 function bindRepositories(container: Container): void {
   container
-    .bind<PrismaService>(TYPES.DatabaseService)
+    .bind<PrismaService>(TYPES.PrismaService)
     .to(PrismaService)
     .inSingletonScope();
 

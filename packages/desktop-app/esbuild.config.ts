@@ -18,6 +18,9 @@ const externalPackages = [
 
   // Prisma (CommonJS runtime が ESM バンドルと互換性がない)
   '@prisma/client',
+  '@prisma/adapter-better-sqlite3',
+
+  // Generated Prisma client (ローカル生成) - エイリアスで解決されるので external 指定不要
 
   // Heavy ML libraries (サイズが大きく、動的インポートを使用)
   '@huggingface/transformers',
@@ -41,6 +44,7 @@ export const mainConfig: esbuild.BuildOptions = {
   external: externalPackages,
   alias: {
     '@desktop-app/shared': './src/shared',
+    '@~generated': './generated',
   },
 };
 

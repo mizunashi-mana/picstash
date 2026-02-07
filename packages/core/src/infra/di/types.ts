@@ -2,9 +2,6 @@ export const TYPES = {
   // Config
   Config: Symbol.for('Config'),
 
-  // Database
-  DatabaseService: Symbol.for('DatabaseService'),
-
   // Repositories
   ImageRepository: Symbol.for('ImageRepository'),
   LabelRepository: Symbol.for('LabelRepository'),

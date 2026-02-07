@@ -36,7 +36,7 @@ export class SearchController {
     private readonly searchHistoryRepository: SearchHistoryRepository,
     @inject(TYPES.LabelRepository)
     private readonly labelRepository: LabelRepository,
-    @inject(TYPES.DatabaseService)
+    @inject(TYPES.PrismaService)
     private readonly prismaService: PrismaService,
   ) {}
 

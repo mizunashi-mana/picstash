@@ -35,16 +35,6 @@ import type { ViewHistoryRepository } from '@/application/ports/view-history-rep
 import type { CoreConfig } from '@/config.js';
 
 /**
- * Database service interface.
- * Each package (server, desktop-app) provides its own implementation.
- */
-export interface DatabaseService {
-  getClient: () => unknown;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
-}
-
-/**
  * Creates and configures a new inversify Container with core dependencies.
  * Does not include database/repository implementations - those are added by consuming packages.
  * Does not include HTTP controllers - those are added by the server package.
@@ -57,8 +47,8 @@ export function createCoreContainer(config: CoreConfig): Container {
   container.bind<CoreConfig>(TYPES.Config).toConstantValue(config);
 
   // NOTE: Database and repository bindings are NOT included here.
-  // Each consuming package (server, desktop-app) must bind:
-  // - TYPES.DatabaseService (DatabaseService implementation)
+  // Each consuming package (server, desktop-app) must bind their own
+  // database service and repository implementations:
   // - TYPES.ImageRepository
   // - TYPES.LabelRepository
   // - TYPES.ImageAttributeRepository
@@ -227,12 +217,6 @@ export class CoreContainer {
 
   getJobQueue(): JobQueue {
     return this.container.get<JobQueue>(TYPES.JobQueue);
-  }
-
-  // Database
-
-  getDatabaseService(): DatabaseService {
-    return this.container.get<DatabaseService>(TYPES.DatabaseService);
   }
 }
 

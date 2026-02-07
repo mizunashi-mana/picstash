@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { TYPES } from '@picstash/core';
 import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import { Prisma } from '@~generated/prisma/client.js';
 import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type {
@@ -17,7 +17,7 @@ import type { PrismaClient } from '@~generated/prisma/client.js';
 export class PrismaRecommendationConversionRepository implements RecommendationConversionRepository {
   private readonly prisma: PrismaClient;
 
-  constructor(@inject(TYPES.DatabaseService) prismaService: PrismaService) {
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
     this.prisma = prismaService.getClient();
   }
 

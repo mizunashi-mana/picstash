@@ -11,7 +11,6 @@ export type {
 
 // DI Container
 export { TYPES, CoreContainer, buildCoreContainer, createCoreContainer } from './infra/di/index.js';
-export type { DatabaseService } from './infra/di/index.js';
 
 // Shared utilities
 export { normalizeKeywords } from './shared/normalizers/index.js';

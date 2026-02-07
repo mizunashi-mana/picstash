@@ -17,7 +17,7 @@ async function main(): Promise<void> {
   const configPath = parseConfigArg(process.argv);
   const config = initConfig(configPath);
 
-  const container = await buildAppContainer(config);
+  const container = buildAppContainer(config);
   const app = await buildApp(container, config);
 
   // Connect to database (run `npm run db:migrate:deploy` before starting server)

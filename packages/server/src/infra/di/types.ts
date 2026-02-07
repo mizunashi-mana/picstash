@@ -3,6 +3,11 @@ import { TYPES as CORE_TYPES } from '@picstash/core';
 // Re-export core types
 export { TYPES as CORE_TYPES } from '@picstash/core';
 
+// Server-specific database service type (not part of core)
+export const DB_TYPES = {
+  PrismaService: Symbol.for('PrismaService'),
+} as const;
+
 // Controller-specific types (HTTP layer only)
 export const CONTROLLER_TYPES = {
   ImageController: Symbol.for('ImageController'),
@@ -21,8 +26,9 @@ export const CONTROLLER_TYPES = {
   JobController: Symbol.for('JobController'),
 } as const;
 
-// Combined types for backward compatibility
+// Combined types for convenience
 export const TYPES = {
   ...CORE_TYPES,
+  ...DB_TYPES,
   ...CONTROLLER_TYPES,
 } as const;

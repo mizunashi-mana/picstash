@@ -1,7 +1,8 @@
 import { CoreContainer } from '@picstash/core';
 import { createContainer } from './container.js';
-import { CONTROLLER_TYPES } from './types.js';
+import { CONTROLLER_TYPES, TYPES } from './types.js';
 import type { Config } from '@/config.js';
+import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type {
   ArchiveController,
   CollectionController,
@@ -24,6 +25,12 @@ import type {
  * Extends CoreContainer with HTTP controller accessor methods.
  */
 export class AppContainer extends CoreContainer {
+  // Database Service
+
+  getDatabaseService(): PrismaService {
+    return this.container.get<PrismaService>(TYPES.PrismaService);
+  }
+
   // Controllers
 
   getImageController(): ImageController {
@@ -87,7 +94,7 @@ export class AppContainer extends CoreContainer {
  * Creates a new AppContainer instance with all dependencies configured.
  * @param config - Application configuration
  */
-export async function buildAppContainer(config: Config): Promise<AppContainer> {
-  const container = await createContainer(config);
+export function buildAppContainer(config: Config): AppContainer {
+  const container = createContainer(config);
   return new AppContainer(container);
 }

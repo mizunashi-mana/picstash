@@ -3,9 +3,9 @@ import {
   buildSearchWhere,
   isEmptyQuery,
   parseSearchQuery,
-  TYPES,
 } from '@picstash/core';
 import { inject, injectable } from 'inversify';
+import { TYPES } from '@/infra/di/types.js';
 import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type {
   CreateImageInput,
@@ -25,7 +25,7 @@ import type { Prisma, PrismaClient } from '@~generated/prisma/client.js';
 export class PrismaImageRepository implements ImageRepository {
   private readonly prisma: PrismaClient;
 
-  constructor(@inject(TYPES.DatabaseService) prismaService: PrismaService) {
+  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
     this.prisma = prismaService.getClient();
   }
 
