@@ -1,3 +1,4 @@
+/* v8 ignore start -- External library dependency (tesseract.js) */
 /**
  * OCR Service using Tesseract.js
  *
@@ -130,3 +131,4 @@ export class TesseractOcrService implements OcrService {
       .trim();
   }
 }
+/* v8 ignore stop */

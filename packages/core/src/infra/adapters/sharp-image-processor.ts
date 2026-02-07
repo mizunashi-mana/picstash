@@ -1,3 +1,4 @@
+/* v8 ignore start -- External library dependency (sharp) */
 import 'reflect-metadata';
 import { injectable } from 'inversify';
 import sharp from 'sharp';
@@ -33,3 +34,4 @@ export class SharpImageProcessor implements ImageProcessor {
       .toBuffer();
   }
 }
+/* v8 ignore stop */

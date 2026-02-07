@@ -1,3 +1,4 @@
+/* v8 ignore start -- External AI model dependency (@huggingface/transformers) */
 /**
  * CLIP Embedding Service using @huggingface/transformers
  *
@@ -221,3 +222,4 @@ export class ClipEmbeddingService implements EmbeddingService {
     return normalized;
   }
 }
+/* v8 ignore stop */

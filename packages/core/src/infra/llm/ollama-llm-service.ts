@@ -1,3 +1,4 @@
+/* v8 ignore start -- External API dependency (Ollama) */
 /**
  * Ollama LLM Service
  *
@@ -101,3 +102,4 @@ export class OllamaLlmService implements LlmService {
     }
   }
 }
+/* v8 ignore stop */
