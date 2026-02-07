@@ -10,5 +10,5 @@
       "@desktop-app/shared/*": ["src/shared/*"]
     }
   },
-  "include": ["src/main/**/*", "src/shared/**/*"]
+  "include": ["src/main/**/*", "src/shared/**/*", "esbuild.config.ts"]
 }
