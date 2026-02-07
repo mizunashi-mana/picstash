@@ -83,8 +83,8 @@ packages/core/src/application/ports/
 |----|--------|------|--------|------|
 | T1 | core から Prisma 実装を分離する設計ドキュメント作成 | - | 高 | 完了 |
 | T2 | server パッケージに Prisma 設定を追加 | T1 | 高 | 完了 |
-| T3 | server パッケージに Repository 実装を移動 | T2 | 高 | 未着手 |
-| T4 | desktop-app パッケージに Prisma 設定を追加 | T1 | 高 | 未着手 |
+| T3 | server パッケージに Repository 実装を移動 | T2 | 高 | 完了 |
+| T4 | desktop-app パッケージに Prisma 設定を追加 | T1 | 高 | 完了 |
 | T5 | desktop-app パッケージに Repository 実装を移動 | T4 | 高 | 未着手 |
 | T6 | core パッケージから Prisma 関連を削除 | T3, T5 | 中 | 未着手 |
 | T7 | 全パッケージのテスト実行・修正 | T6 | 中 | 未着手 |
@@ -144,6 +144,8 @@ T1 ─┬→ T2 → T3 ─┬→ T6 → T7
 - 2026-02-07: プロジェクト開始、現状分析完了
 - 2026-02-07: T1 完了 - 設計ドキュメント作成 ([design.md](./design.md))
 - 2026-02-07: T2 完了 - server に Prisma 設定追加（schema, migrations, prisma.config.ts）
+- 2026-02-07: T3 完了 - server に Repository 実装を移動、DI container 更新
+- 2026-02-07: T4 完了 - desktop-app に Prisma 設定追加（schema, prisma.config.ts）
 
 ## メモ
 
