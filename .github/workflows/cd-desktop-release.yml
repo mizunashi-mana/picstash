@@ -17,7 +17,7 @@ jobs:
         include:
           - os: macos-latest
             artifact-name: desktop-app-macos
-            artifact-path: packages/desktop-app/release/*.dmg
+            artifact-path: packages/desktop-app/release/*.pkg
           - os: windows-latest
             artifact-name: desktop-app-windows
             artifact-path: packages/desktop-app/release/*.exe
