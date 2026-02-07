@@ -488,3 +488,29 @@ route('GET', '/api/jobs/:jobId', async (container, params) => {
   }
   return { status: 200, data: job };
 });
+
+// --- Images (from local) ---
+
+route('POST', '/api/images/from-local', async (container, _params, body) => {
+  const repo = container.getImageRepository();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Request body type
+  const input = body as {
+    path: string;
+    thumbnailPath: string;
+    mimeType: string;
+    size: number;
+    width: number;
+    height: number;
+  };
+
+  const image = await repo.create({
+    path: input.path,
+    thumbnailPath: input.thumbnailPath,
+    mimeType: input.mimeType,
+    size: input.size,
+    width: input.width,
+    height: input.height,
+  });
+
+  return { status: 201, data: image };
+});

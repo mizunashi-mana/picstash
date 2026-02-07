@@ -15,7 +15,7 @@ interface CreateImageFromLocalInput {
 /**
  * ローカルストレージを使用して画像をアップロード
  * 1. IPC 経由でローカルにファイル保存
- * 2. リモート API でデータベースレコード作成
+ * 2. IPC 経由で API を呼び出してデータベースレコード作成
  * @param file アップロードするファイル
  * @returns 作成された画像レコード
  * @throws picstash API が利用できない場合
@@ -25,7 +25,7 @@ export async function uploadImageLocal(file: Blob): Promise<Image> {
   if (window.picstash === undefined) {
     throw new Error('Picstash API is not available');
   }
-  const { image, storage } = window.picstash;
+  const { image, api, storage } = window.picstash;
 
   // 1. Blob → ArrayBuffer
   const data = await file.arrayBuffer();
@@ -41,7 +41,7 @@ export async function uploadImageLocal(file: Blob): Promise<Image> {
     throw new Error(result.message);
   }
 
-  // 3. DB レコード作成 (リモート API)
+  // 3. DB レコード作成 (IPC 経由で API を呼び出し)
   const body: CreateImageFromLocalInput = {
     path: result.path,
     thumbnailPath: result.thumbnailPath,
@@ -51,13 +51,13 @@ export async function uploadImageLocal(file: Blob): Promise<Image> {
     height: result.height,
   };
 
-  const response = await fetch(imageEndpoints.fromLocal, {
+  const response = await api.request({
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    url: imageEndpoints.fromLocal,
+    body,
   });
 
-  if (!response.ok) {
+  if (response.error !== undefined) {
     // ロールバック: ローカルファイル削除
     await storage.deleteFile(result.path).catch(() => {
       // クリーンアップエラーは無視
@@ -66,21 +66,9 @@ export async function uploadImageLocal(file: Blob): Promise<Image> {
       // クリーンアップエラーは無視
     });
 
-    // レスポンスからエラーメッセージを取得
-    let errorMessage = `Failed to create database record (status ${String(response.status)})`;
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API error response
-      const errorBody = (await response.json()) as { message?: string };
-      if (typeof errorBody.message === 'string' && errorBody.message !== '') {
-        errorMessage = errorBody.message;
-      }
-    }
-    catch {
-      // JSON パース失敗時はデフォルトメッセージを使用
-    }
-    throw new Error(errorMessage);
+    throw new Error(response.error);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- API response
-  return (await response.json()) as Image;
+  return response.data as Image;
 }

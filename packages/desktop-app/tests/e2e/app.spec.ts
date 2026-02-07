@@ -162,4 +162,16 @@ test.describe('UI 表示', () => {
     // root の子要素が存在する（React がマウントされている）まで待つ
     await expect.poll(async () => await window.locator('#root > *').count()).toBeGreaterThan(0);
   });
+
+  test('ストレージ未設定時に選択画面が表示される', async () => {
+    // ストレージが未設定の場合、選択画面が表示される
+    // 「フォルダを選択」ボタンが表示されることを確認
+    const selectButton = window.getByRole('button', { name: 'フォルダを選択' });
+    await expect(selectButton).toBeVisible();
+  });
+
+  test('ストレージ選択画面にタイトルが表示される', async () => {
+    // タイトルが表示されることを確認
+    await expect(window.getByRole('heading', { name: 'Picstash へようこそ' })).toBeVisible();
+  });
 });
