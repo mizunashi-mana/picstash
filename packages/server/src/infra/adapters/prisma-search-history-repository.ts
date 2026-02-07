@@ -17,7 +17,7 @@ const MAX_FETCH_LIMIT = 1000;
 export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
   private readonly prisma: PrismaClient;
 
-  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+  constructor(@inject(TYPES.DatabaseService) prismaService: PrismaService) {
     this.prisma = prismaService.getClient();
   }
 

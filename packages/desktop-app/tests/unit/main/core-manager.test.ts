@@ -11,7 +11,7 @@ const mockConnect = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
 const mockDisconnect = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
 const mockClose = vi.fn();
 
-const mockPrismaService = {
+const mockDatabaseService = {
   connect: mockConnect,
   disconnect: mockDisconnect,
 };
@@ -21,7 +21,7 @@ const mockEmbeddingRepository = {
 };
 
 const mockContainer = {
-  getPrismaService: () => mockPrismaService,
+  getDatabaseService: () => mockDatabaseService,
   getEmbeddingRepository: () => mockEmbeddingRepository,
 };
 

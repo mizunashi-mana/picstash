@@ -46,28 +46,12 @@ import type {
 import type { Container } from 'inversify';
 
 /**
- * Rebind database and repository implementations with server-local implementations.
+ * Bind database and repository implementations with server-local implementations.
  * This allows the server package to use its own Prisma schema and generated client.
  */
-async function rebindRepositories(container: Container): Promise<void> {
-  // Unbind core's repository bindings
-  await Promise.all([
-    container.unbind(TYPES.PrismaService),
-    container.unbind(TYPES.ImageRepository),
-    container.unbind(TYPES.LabelRepository),
-    container.unbind(TYPES.ImageAttributeRepository),
-    container.unbind(TYPES.CollectionRepository),
-    container.unbind(TYPES.ViewHistoryRepository),
-    container.unbind(TYPES.RecommendationConversionRepository),
-    container.unbind(TYPES.StatsRepository),
-    container.unbind(TYPES.SearchHistoryRepository),
-    container.unbind(TYPES.EmbeddingRepository),
-    container.unbind(TYPES.JobQueue),
-  ]);
-
-  // Rebind with server-local implementations
+function bindRepositories(container: Container): void {
   container
-    .bind<PrismaService>(TYPES.PrismaService)
+    .bind<PrismaService>(TYPES.DatabaseService)
     .to(PrismaService)
     .inSingletonScope();
 
@@ -127,13 +111,13 @@ async function rebindRepositories(container: Container): Promise<void> {
  * Extends core container with HTTP controllers.
  * @param config - Application configuration
  */
-export async function createContainer(config: Config): Promise<Container> {
+export function createContainer(config: Config): Container {
   // Create core container with all core services
   const container = createCoreContainer(config);
 
-  // Rebind database and repository implementations with local implementations
+  // Bind database and repository implementations with local implementations
   // This allows server to use its own Prisma schema and generated client
-  await rebindRepositories(container);
+  bindRepositories(container);
 
   // Bind Controllers (HTTP layer specific)
   container.bind(CONTROLLER_TYPES.ImageController).to(ImageController);

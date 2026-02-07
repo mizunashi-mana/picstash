@@ -19,7 +19,7 @@ import type { PrismaClient } from '@~generated/prisma/client.js';
 export class PrismaCollectionRepository implements CollectionRepository {
   private readonly prisma: PrismaClient;
 
-  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+  constructor(@inject(TYPES.DatabaseService) prismaService: PrismaService) {
     this.prisma = prismaService.getClient();
   }
 

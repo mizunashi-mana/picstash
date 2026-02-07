@@ -21,8 +21,8 @@ async function main(): Promise<void> {
   const app = await buildApp(container, config);
 
   // Connect to database (run `npm run db:migrate:deploy` before starting server)
-  const prismaService = container.getPrismaService();
-  await prismaService.connect();
+  const databaseService = container.getDatabaseService();
+  await databaseService.connect();
   app.log.info('Database connected');
 
   // Start job worker
@@ -98,7 +98,7 @@ async function main(): Promise<void> {
 
     // データベース接続を閉じる
     try {
-      await prismaService.disconnect();
+      await databaseService.disconnect();
       container.getEmbeddingRepository().close();
       app.log.info('Database disconnected');
     }

@@ -58,7 +58,7 @@ export function createCoreContainer(config: CoreConfig): Container {
 
   // NOTE: Database and repository bindings are NOT included here.
   // Each consuming package (server, desktop-app) must bind:
-  // - TYPES.PrismaService (DatabaseService implementation)
+  // - TYPES.DatabaseService (DatabaseService implementation)
   // - TYPES.ImageRepository
   // - TYPES.LabelRepository
   // - TYPES.ImageAttributeRepository
@@ -231,8 +231,8 @@ export class CoreContainer {
 
   // Database
 
-  getPrismaService(): DatabaseService {
-    return this.container.get<DatabaseService>(TYPES.PrismaService);
+  getDatabaseService(): DatabaseService {
+    return this.container.get<DatabaseService>(TYPES.DatabaseService);
   }
 }
 

@@ -68,7 +68,7 @@ class CoreManager {
     const container = buildCoreContainer(config);
 
     // データベースに接続
-    await container.getPrismaService().connect();
+    await container.getDatabaseService().connect();
 
     this.container = container;
   }
@@ -92,7 +92,7 @@ class CoreManager {
     this.container = null;
 
     try {
-      await container.getPrismaService().disconnect();
+      await container.getDatabaseService().disconnect();
     }
     catch {
       // 切断エラーは無視（アプリ終了時に発生しうる）

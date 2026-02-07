@@ -17,7 +17,7 @@ import type { PrismaClient } from '@~generated/prisma/client.js';
 export class PrismaViewHistoryRepository implements ViewHistoryRepository {
   private readonly prisma: PrismaClient;
 
-  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+  constructor(@inject(TYPES.DatabaseService) prismaService: PrismaService) {
     this.prisma = prismaService.getClient();
   }
 

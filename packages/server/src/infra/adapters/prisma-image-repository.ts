@@ -25,7 +25,7 @@ import type { Prisma, PrismaClient } from '@~generated/prisma/client.js';
 export class PrismaImageRepository implements ImageRepository {
   private readonly prisma: PrismaClient;
 
-  constructor(@inject(TYPES.PrismaService) prismaService: PrismaService) {
+  constructor(@inject(TYPES.DatabaseService) prismaService: PrismaService) {
     this.prisma = prismaService.getClient();
   }
 
