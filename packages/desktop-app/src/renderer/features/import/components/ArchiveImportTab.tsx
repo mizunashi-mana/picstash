@@ -11,17 +11,10 @@ import {
 } from '@mantine/core';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import type { ImportJobStatus, ImportResult } from '@/features/archive-import';
 import type { FileWithPath } from '@mantine/dropzone';
-import {
-  ArchiveDropzone,
-  ArchivePreviewGallery,
-  deleteArchiveSession,
-  getArchiveSession,
-  getImportJobStatus,
-  importFromArchive,
-  uploadArchive,
-} from '@/features/archive-import';
+import type { ArchiveImportResult, ImportJobStatus } from '@picstash/api';
+import { ArchiveDropzone, ArchivePreviewGallery } from '@/features/archive-import';
+import { useApiClient } from '@/shared';
 
 /** ジョブが完了したかどうかを判定 */
 function isJobFinished(status: string | undefined): boolean {
@@ -90,7 +83,7 @@ function ImportResultAlert({
   result,
   onClose,
 }: {
-  result: ImportResult;
+  result: ArchiveImportResult;
   onClose: () => void;
 }) {
   return (
@@ -209,7 +202,7 @@ function JobStatusErrorAlert({
 }
 
 /** ジョブステータスから完了結果を抽出 */
-function extractCompletedResult(data: ImportJobStatus): ImportResult | null {
+function extractCompletedResult(data: ImportJobStatus): ArchiveImportResult | null {
   if (data.status !== 'completed') {
     return null;
   }
@@ -229,9 +222,10 @@ function extractCompletedResult(data: ImportJobStatus): ImportResult | null {
 }
 
 export function ArchiveImportTab() {
+  const apiClient = useApiClient();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importResult, setImportResult] = useState<ArchiveImportResult | null>(null);
   const [importJobId, setImportJobId] = useState<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
   const importJobIdRef = useRef<string | null>(null);
@@ -255,15 +249,15 @@ export function ArchiveImportTab() {
         return;
       }
       if (sessionIdRef.current !== null) {
-        deleteArchiveSession(sessionIdRef.current).catch(() => {
+        apiClient.archiveImport.deleteSession(sessionIdRef.current).catch(() => {
           // Ignore errors during cleanup
         });
       }
     };
-  }, []);
+  }, [apiClient.archiveImport]);
 
   const uploadMutation = useMutation({
-    mutationFn: uploadArchive,
+    mutationFn: async (file: Blob) => await apiClient.archiveImport.upload(file),
     onSuccess: (data) => {
       setSessionId(data.sessionId);
       setSelectedIndices(new Set());
@@ -275,14 +269,14 @@ export function ArchiveImportTab() {
   const sessionQuery = useQuery({
     queryKey: ['archive-session', sessionId],
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures sessionId is not null
-    queryFn: async () => await getArchiveSession(sessionId!),
+    queryFn: async () => await apiClient.archiveImport.getSession(sessionId!),
     enabled: sessionId !== null,
   });
 
   const session = sessionQuery.data;
 
   const deleteMutation = useMutation({
-    mutationFn: deleteArchiveSession,
+    mutationFn: async (id: string) => { await apiClient.archiveImport.deleteSession(id); },
     onSuccess: () => {
       setSessionId(null);
       setSelectedIndices(new Set());
@@ -295,7 +289,7 @@ export function ArchiveImportTab() {
   const jobStatusQuery = useQuery({
     queryKey: ['import-job-status', importJobId],
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- enabled ensures importJobId is not null
-    queryFn: async () => await getImportJobStatus(importJobId!),
+    queryFn: async () => await apiClient.archiveImport.getImportJobStatus(importJobId!),
     enabled: importJobId !== null,
     refetchInterval: (query) => {
       const data = query.state.data;
@@ -338,7 +332,7 @@ export function ArchiveImportTab() {
       if (sessionId === null) {
         throw new Error('No session');
       }
-      return await importFromArchive(sessionId, indices);
+      return await apiClient.archiveImport.importImages(sessionId, indices);
     },
     onSuccess: (result) => {
       // ジョブIDを設定してポーリング開始
@@ -474,6 +468,8 @@ export function ArchiveImportTab() {
                     images={session.images}
                     selectedIndices={selectedIndices}
                     onSelectionChange={setSelectedIndices}
+                    getThumbnailUrl={apiClient.archiveImport.getThumbnailUrl}
+                    getImageUrl={apiClient.archiveImport.getImageUrl}
                   />
                 </>
               )

@@ -1,12 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImageDescriptionSectionView } from './ImageDescriptionSectionView';
-import {
-  generateDescriptionJob,
-  getJobStatus,
-  updateImage,
-} from '@/features/gallery/api';
 import { useJobs } from '@/features/jobs';
+import { useApiClient } from '@/shared';
 
 interface ImageDescriptionSectionProps {
   imageId: string;
@@ -19,6 +15,7 @@ export function ImageDescriptionSection({
 }: ImageDescriptionSectionProps) {
   const queryClient = useQueryClient();
   const { trackJob } = useJobs();
+  const apiClient = useApiClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(description ?? '');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -50,14 +47,18 @@ export function ImageDescriptionSection({
     (jobId: string) => {
       const poll = async () => {
         try {
-          const status = await getJobStatus(jobId);
+          const status = await apiClient.jobs.detail(jobId);
           errorCountRef.current = 0; // Reset error count on success
           setGenerateProgress(status.progress);
 
           if (status.status === 'completed' && status.result !== undefined) {
             stopPolling();
             setIsGenerating(false);
-            setEditValue(status.result.description);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Job result type for description generation
+            const description = status.result.description as string | undefined;
+            if (description !== undefined) {
+              setEditValue(description);
+            }
             setGenerateProgress(0);
           }
           else if (status.status === 'failed') {
@@ -86,13 +87,13 @@ export function ImageDescriptionSection({
       // Initial poll
       void poll();
     },
-    [stopPolling],
+    [stopPolling, apiClient.jobs],
   );
 
   const updateMutation = useMutation({
     mutationFn: async (newDescription: string) => {
       const trimmed = newDescription.trim();
-      return await updateImage(imageId, {
+      return await apiClient.images.update(imageId, {
         description: trimmed === '' ? null : trimmed,
       });
     },
@@ -104,7 +105,7 @@ export function ImageDescriptionSection({
 
   const generateMutation = useMutation({
     mutationFn: async () => {
-      return await generateDescriptionJob(imageId);
+      return await apiClient.description.generateJob(imageId);
     },
     onSuccess: (result) => {
       // Track job in global context for notifications

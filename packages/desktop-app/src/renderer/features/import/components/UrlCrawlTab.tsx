@@ -10,20 +10,15 @@ import {
 } from '@mantine/core';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import type { ImportResult } from '@/features/url-crawl';
-import {
-  CrawlPreviewGallery,
-  crawlUrl,
-  deleteCrawlSession,
-  getCrawlSession,
-  importFromCrawl,
-  UrlInputForm,
-} from '@/features/url-crawl';
+import type { UrlCrawlImportResult } from '@picstash/api';
+import { CrawlPreviewGallery, UrlInputForm } from '@/features/url-crawl';
+import { useApiClient } from '@/shared';
 
 export function UrlCrawlTab() {
+  const apiClient = useApiClient();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importResult, setImportResult] = useState<UrlCrawlImportResult | null>(null);
   const sessionIdRef = useRef<string | null>(null);
 
   // Keep ref in sync with state for cleanup
@@ -35,15 +30,15 @@ export function UrlCrawlTab() {
   useEffect(() => {
     return () => {
       if (sessionIdRef.current !== null) {
-        deleteCrawlSession(sessionIdRef.current).catch(() => {
+        apiClient.urlCrawl.deleteSession(sessionIdRef.current).catch(() => {
           // Ignore errors during cleanup
         });
       }
     };
-  }, []);
+  }, [apiClient.urlCrawl]);
 
   const crawlMutation = useMutation({
-    mutationFn: crawlUrl,
+    mutationFn: async (url: string) => await apiClient.urlCrawl.crawl(url),
     onSuccess: (data) => {
       setSessionId(data.sessionId);
       setSelectedIndices(new Set());
@@ -54,14 +49,14 @@ export function UrlCrawlTab() {
   const sessionQuery = useQuery({
     queryKey: ['url-crawl-session', sessionId],
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- query is only enabled when sessionId !== null (see enabled option below)
-    queryFn: async () => await getCrawlSession(sessionId!),
+    queryFn: async () => await apiClient.urlCrawl.getSession(sessionId!),
     enabled: sessionId !== null,
   });
 
   const session = sessionQuery.data;
 
   const deleteMutation = useMutation({
-    mutationFn: deleteCrawlSession,
+    mutationFn: async (id: string) => { await apiClient.urlCrawl.deleteSession(id); },
     onSuccess: () => {
       setSessionId(null);
       setSelectedIndices(new Set());
@@ -74,7 +69,7 @@ export function UrlCrawlTab() {
       if (sessionId === null) {
         throw new Error('No session');
       }
-      return await importFromCrawl(sessionId, indices);
+      return await apiClient.urlCrawl.importImages(sessionId, indices);
     },
     onSuccess: (result) => {
       setImportResult(result);
@@ -248,6 +243,8 @@ export function UrlCrawlTab() {
                     images={session.images}
                     selectedIndices={selectedIndices}
                     onSelectionChange={setSelectedIndices}
+                    getThumbnailUrl={apiClient.urlCrawl.getThumbnailUrl}
+                    getImageUrl={apiClient.urlCrawl.getImageUrl}
                   />
                 </>
               )

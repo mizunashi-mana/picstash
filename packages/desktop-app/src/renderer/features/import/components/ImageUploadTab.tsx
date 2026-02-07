@@ -3,7 +3,8 @@ import { Alert, Button, Stack, Text } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import type { FileWithPath } from '@mantine/dropzone';
-import { ImageDropzoneView, uploadImage } from '@/features/upload';
+import { ImageDropzoneView, uploadImageWithLocalFallback } from '@/features/upload';
+import { useApiClient } from '@/shared';
 
 interface UploadResult {
   successCount: number;
@@ -11,6 +12,7 @@ interface UploadResult {
 }
 
 export function ImageUploadTab() {
+  const apiClient = useApiClient();
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
 
   const mutation = useMutation({
@@ -20,7 +22,10 @@ export function ImageUploadTab() {
 
       for (const file of files) {
         try {
-          await uploadImage(file);
+          await uploadImageWithLocalFallback(
+            file,
+            async (f: Blob) => await apiClient.images.upload(f),
+          );
           successCount++;
         }
         catch {

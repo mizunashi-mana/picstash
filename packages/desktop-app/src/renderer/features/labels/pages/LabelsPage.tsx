@@ -10,16 +10,12 @@ import {
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateLabelInput, UpdateLabelInput } from '@picstash/api';
-import {
-  createLabel,
-  deleteLabel,
-  fetchLabels,
-  updateLabel,
-} from '@/features/labels/api';
 import { LabelForm, LabelList } from '@/features/labels/components';
+import { useApiClient } from '@/shared';
 
 export function LabelsPage() {
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   const {
     data: labels,
@@ -27,11 +23,11 @@ export function LabelsPage() {
     error,
   } = useQuery({
     queryKey: ['labels'],
-    queryFn: fetchLabels,
+    queryFn: async () => await apiClient.labels.list(),
   });
 
   const createMutation = useMutation({
-    mutationFn: async (input: CreateLabelInput) => await createLabel(input),
+    mutationFn: async (input: CreateLabelInput) => await apiClient.labels.create(input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },
@@ -39,14 +35,14 @@ export function LabelsPage() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, input }: { id: string; input: UpdateLabelInput }) =>
-      await updateLabel(id, input),
+      await apiClient.labels.update(id, input),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => { await deleteLabel(id); },
+    mutationFn: async (id: string) => { await apiClient.labels.delete(id); },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['labels'] });
     },

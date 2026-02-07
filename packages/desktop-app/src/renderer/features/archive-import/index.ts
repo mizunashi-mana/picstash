@@ -1,14 +1,10 @@
 export { ArchiveDropzone } from './components/ArchiveDropzone';
 export { ArchivePreviewGallery } from './components/ArchivePreviewGallery';
-export {
-  uploadArchive,
-  getArchiveSession,
-  deleteArchiveSession,
-  importFromArchive,
-  getImportJobStatus,
-} from './api';
+
+// Types are re-exported from @picstash/api for convenience
 export type {
-  ImportResult,
+  ArchiveImportResult as ImportResult,
   ImportJobStartResponse,
   ImportJobStatus,
-} from './api';
+  ArchiveImage,
+} from '@picstash/api';

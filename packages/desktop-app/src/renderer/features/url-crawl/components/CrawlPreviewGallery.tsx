@@ -11,14 +11,15 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import type { CrawledImage } from '@/features/url-crawl/api';
-import { getCrawlImageUrl, getCrawlThumbnailUrl } from '@/features/url-crawl/api';
+import type { CrawledImage } from '@picstash/api';
 
 export interface CrawlPreviewGalleryProps {
   sessionId: string;
   images: CrawledImage[];
   selectedIndices: Set<number>;
   onSelectionChange: (indices: Set<number>) => void;
+  getThumbnailUrl: (sessionId: string, imageIndex: number) => string;
+  getImageUrl: (sessionId: string, imageIndex: number) => string;
 }
 
 export function CrawlPreviewGallery({
@@ -26,6 +27,8 @@ export function CrawlPreviewGallery({
   images,
   selectedIndices,
   onSelectionChange,
+  getThumbnailUrl,
+  getImageUrl,
 }: CrawlPreviewGalleryProps) {
   const [previewImage, setPreviewImage] = useState<CrawledImage | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
@@ -79,7 +82,7 @@ export function CrawlPreviewGallery({
             <Card.Section pos="relative">
               <AspectRatio ratio={1}>
                 <Image
-                  src={getCrawlThumbnailUrl(sessionId, image.index)}
+                  src={getThumbnailUrl(sessionId, image.index)}
                   alt={image.alt ?? image.filename}
                   fit="cover"
                   fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23dee2e6' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23868e96' font-size='12'%3ELoading%3C/text%3E%3C/svg%3E"
@@ -123,7 +126,7 @@ export function CrawlPreviewGallery({
       <Modal opened={opened} onClose={close} size="xl" title={previewImage?.filename} centered>
         {previewImage !== null && (
           <Image
-            src={getCrawlImageUrl(sessionId, previewImage.index)}
+            src={getImageUrl(sessionId, previewImage.index)}
             alt={previewImage.alt ?? previewImage.filename}
             fit="contain"
             mah="70vh"

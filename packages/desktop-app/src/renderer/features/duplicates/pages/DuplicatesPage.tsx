@@ -13,9 +13,9 @@ import {
   Title,
 } from '@mantine/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { DuplicateGroup } from '@/features/duplicates/api';
-import { deleteDuplicateImage, fetchDuplicates } from '@/features/duplicates/api';
+import type { DuplicateGroup } from '@picstash/api';
 import { DuplicateGroupCard } from '@/features/duplicates/components/DuplicateGroupCard';
+import { useApiClient } from '@/shared';
 
 interface DeleteResult {
   successIds: string[];
@@ -28,16 +28,17 @@ export function DuplicatesPage(): React.JSX.Element {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['duplicates', threshold],
-    queryFn: async () => await fetchDuplicates({ threshold }),
+    queryFn: async () => await apiClient.images.fetchDuplicates({ threshold }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (imageIds: string[]): Promise<DeleteResult> => {
       const results = await Promise.allSettled(
-        imageIds.map(async id => await deleteDuplicateImage(id).then(() => id)),
+        imageIds.map(async id => await apiClient.images.delete(id).then(() => id)),
       );
 
       const successIds: string[] = [];
@@ -212,6 +213,7 @@ export function DuplicatesPage(): React.JSX.Element {
                     selectedIds={selectedIds}
                     onSelectToggle={handleSelectToggle}
                     onSelectAllDuplicates={handleSelectAllDuplicates}
+                    getThumbnailUrl={apiClient.images.getThumbnailUrl}
                   />
                 ))}
               </Stack>

@@ -12,13 +12,13 @@ import {
 } from '@mantine/core';
 import { IconPhoto } from '@tabler/icons-react';
 import { Link } from 'react-router';
-import type { SimilarImage } from '@/features/gallery/api';
-import { getThumbnailUrl } from '@/features/gallery/api';
+import type { SimilarImage } from '@picstash/api';
 
 export interface SimilarImagesSectionViewProps {
   similarImages: SimilarImage[];
   isLoading: boolean;
   error: Error | null;
+  getThumbnailUrl: (imageId: string) => string;
 }
 
 function SimilarityScore({ distance }: { distance: number }) {
@@ -37,6 +37,7 @@ export function SimilarImagesSectionView({
   similarImages,
   isLoading,
   error,
+  getThumbnailUrl,
 }: SimilarImagesSectionViewProps) {
   return (
     <Card padding="md" withBorder>

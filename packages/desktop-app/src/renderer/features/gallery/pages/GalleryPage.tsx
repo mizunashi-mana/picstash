@@ -27,15 +27,9 @@ import {
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useSearchParams, Link } from 'react-router';
-import {
-  deleteAllSearchHistory,
-  fetchImagesPaginated,
-  getThumbnailUrl,
-  saveSearchHistory,
-} from '@/features/gallery/api';
 import { ImageCarousel } from '@/features/gallery/components/ImageCarousel';
 import { SearchBar } from '@/features/gallery/components/SearchBar';
-import { useViewMode } from '@/shared';
+import { useApiClient, useViewMode } from '@/shared';
 
 const PAGE_SIZE = 50;
 
@@ -60,6 +54,7 @@ export function GalleryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
   const queryClient = useQueryClient();
+  const apiClient = useApiClient();
   const [viewMode, setViewMode] = useViewMode('grid');
 
   // Container size for responsive grid (merged with scroll container ref)
@@ -77,7 +72,7 @@ export function GalleryPage() {
   } = useInfiniteQuery({
     queryKey: ['images-paginated', query],
     queryFn: async ({ pageParam = 0 }) => {
-      return await fetchImagesPaginated(query, {
+      return await apiClient.images.listPaginated(query, {
         limit: PAGE_SIZE,
         offset: pageParam,
       });
@@ -141,12 +136,12 @@ export function GalleryPage() {
 
   // Save search history mutation
   const saveHistoryMutation = useMutation({
-    mutationFn: saveSearchHistory,
+    mutationFn: async (q: string) => await apiClient.search.saveHistory(q),
   });
 
   // Delete all history mutation
   const deleteAllHistoryMutation = useMutation({
-    mutationFn: deleteAllSearchHistory,
+    mutationFn: async () => { await apiClient.search.deleteAllHistory(); },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['search-suggestions'] });
     },
@@ -228,7 +223,7 @@ export function GalleryPage() {
                         <Card.Section>
                           <AspectRatio ratio={1}>
                             <Image
-                              src={getThumbnailUrl(image.id)}
+                              src={apiClient.images.getThumbnailUrl(image.id)}
                               alt={image.title}
                               fit="cover"
                               fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23dee2e6' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23868e96' font-size='12'%3ENo image%3C/text%3E%3C/svg%3E"

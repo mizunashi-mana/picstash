@@ -13,7 +13,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconLoader2, IconCheck, IconX, IconClock } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import styles from './JobStatusButton.module.css';
-import type { Job } from '@/features/jobs/api';
+import type { Job } from '@picstash/api';
 import { useJobs } from '@/features/jobs/context';
 import { getJobTypeName, getImageId } from '@/features/jobs/utils';
 
