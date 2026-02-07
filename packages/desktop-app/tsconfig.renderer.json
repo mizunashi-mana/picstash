@@ -9,6 +9,6 @@
       "@desktop-app/shared/*": ["src/shared/*"]
     }
   },
-  "include": ["src/renderer/**/*"],
+  "include": ["src/renderer/**/*", ".storybook/**/*", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

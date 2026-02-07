@@ -35,7 +35,7 @@ jobs:
           retention-days: 7
 
   test-storybook:
-    name: Run Storybook tests
+    name: Run Storybook tests (web-client)
     runs-on: ubuntu-latest
 
     permissions:
@@ -54,6 +54,27 @@ jobs:
 
       - name: Run Storybook tests
         run: npm run test:storybook -w @picstash/web-client
+
+  test-storybook-desktop:
+    name: Run Storybook tests (desktop-app)
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-node
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: packages/desktop-app
+
+      - name: Run Storybook tests
+        run: npm run test:storybook -w @picstash/desktop-app
 
   test-e2e:
     name: Run E2E tests
