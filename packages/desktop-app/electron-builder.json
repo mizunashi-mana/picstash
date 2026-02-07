@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   "appId": "com.picstash.desktop",
   "productName": "Picstash",
+  "electronVersion": "40.2.1",
   "directories": {
     "output": "release",
     "buildResources": "build"
@@ -14,7 +15,7 @@
     "category": "public.app-category.photography",
     "target": [
       {
-        "target": "dmg",
+        "target": "pkg",
         "arch": ["x64", "arm64"]
       }
     ]
