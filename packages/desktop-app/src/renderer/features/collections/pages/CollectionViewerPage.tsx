@@ -213,7 +213,7 @@ export function CollectionViewerPage() {
         <Center h="100%">
           {currentImage !== null && (
             <LocalImage
-              path={currentImage.thumbnailPath}
+              path={currentImage.path}
               alt={`${collection.images.length}枚中${currentIndex + 1}枚目`}
               fit="contain"
               style={{ maxHeight: '100%', maxWidth: '100%' }}
