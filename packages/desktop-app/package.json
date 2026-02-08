@@ -33,9 +33,9 @@
     "test:coverage": "vitest run --project unit --coverage",
     "test:watch": "vitest --project unit",
     "test:storybook": "vitest run --project storybook",
-    "test:e2e": "npm run build && playwright test",
-    "test:headed": "npm run build && playwright test --headed",
-    "test:debug": "npm run build && playwright test --debug",
+    "test:e2e": "npm run rebuild && npm run build && playwright test",
+    "test:headed": "npm run rebuild && npm run build && playwright test --headed",
+    "test:debug": "npm run rebuild && npm run build && playwright test --debug",
     "storybook": "storybook dev -p 6007",
     "build:storybook": "storybook build"
   },
