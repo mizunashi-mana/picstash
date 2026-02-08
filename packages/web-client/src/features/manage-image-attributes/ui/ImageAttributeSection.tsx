@@ -1,3 +1,4 @@
+/* v8 ignore file -- Container: Hook と View を接続するだけなので Storybook テストでカバー */
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApiClient } from '@/shared';

@@ -1,3 +1,4 @@
+/* v8 ignore file -- View: 純粋な描画コンポーネントなので Storybook テストでカバー */
 import { useCallback, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router';

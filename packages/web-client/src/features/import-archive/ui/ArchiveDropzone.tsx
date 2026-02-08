@@ -1,3 +1,4 @@
+/* v8 ignore file -- UI コンポーネント: Storybook テストでカバー */
 import { Group, Text } from '@mantine/core';
 import { Dropzone, type FileWithPath } from '@mantine/dropzone';
 

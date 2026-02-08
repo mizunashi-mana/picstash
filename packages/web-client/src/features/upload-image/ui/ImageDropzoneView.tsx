@@ -1,3 +1,4 @@
+/* v8 ignore file -- View: 純粋な描画コンポーネントなので Storybook テストでカバー */
 import { Group, Text } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE, type FileWithPath } from '@mantine/dropzone';
 

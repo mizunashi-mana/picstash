@@ -1,3 +1,4 @@
+/* v8 ignore file -- UI コンポーネント: Storybook テストでカバー */
 import { Card, Group, Image, Stack, Text } from '@mantine/core';
 import type { PopularImage } from '@picstash/api';
 

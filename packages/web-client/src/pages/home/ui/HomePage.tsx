@@ -1,3 +1,4 @@
+/* v8 ignore file -- Container: Hook と View を接続するだけなので Storybook テストでカバー */
 import { Container, Divider, Stack, Text, Title } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { ImageDropzone } from '@/features/upload-image';

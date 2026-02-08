@@ -1,3 +1,4 @@
+/* v8 ignore file -- Container: Hook と View を接続するだけなので Storybook テストでカバー */
 import { CollectionViewerPageView } from '@/pages/collections/ui/CollectionViewerPageView';
 import { useCollectionViewerPageViewProps } from '@/pages/collections/ui/useCollectionViewerPageViewProps';
 

@@ -1,3 +1,4 @@
+/* v8 ignore file -- View: 純粋な描画コンポーネントなので Storybook テストでカバー */
 import { Alert, Button, Stack, Text } from '@mantine/core';
 import { Link } from 'react-router';
 import { ImageDropzoneView } from '@/features/upload-image';

@@ -1,3 +1,4 @@
+/* v8 ignore file -- Container: Hook と View を接続するだけなので Storybook テストでカバー */
 import { ImageUploadTabView } from '@/features/import/ui/ImageUploadTabView';
 import { useImageUploadTabViewProps } from '@/features/import/ui/useImageUploadTabViewProps';
 

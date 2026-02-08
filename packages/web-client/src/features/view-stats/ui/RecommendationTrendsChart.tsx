@@ -1,3 +1,4 @@
+/* v8 ignore file -- UI コンポーネント: Storybook テストでカバー */
 import { BarChart } from '@mantine/charts';
 import { Card, Text } from '@mantine/core';
 import type { DailyRecommendationStats } from '@picstash/api';

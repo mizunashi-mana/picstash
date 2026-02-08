@@ -6,12 +6,12 @@ import type { FileWithPath } from '@mantine/dropzone';
 import type { ArchiveImportResult, ImportJobStatus } from '@picstash/api';
 
 /** ジョブが完了したかどうかを判定 */
-function isJobFinished(status: string | undefined): boolean {
+export function isJobFinished(status: string | undefined): boolean {
   return status === 'completed' || status === 'failed';
 }
 
 /** ジョブステータスから完了結果を抽出 */
-function extractCompletedResult(data: ImportJobStatus): ArchiveImportResult | null {
+export function extractCompletedResult(data: ImportJobStatus): ArchiveImportResult | null {
   if (data.status !== 'completed') {
     return null;
   }
