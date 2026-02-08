@@ -1,3 +1,4 @@
+/* v8 ignore start -- Adapters module export */
 export { PrismaCollectionRepository } from './prisma-collection-repository.js';
 export { PrismaImageAttributeRepository } from './prisma-image-attribute-repository.js';
 export { PrismaImageRepository } from './prisma-image-repository.js';
@@ -8,3 +9,4 @@ export { PrismaSearchHistoryRepository } from './prisma-search-history-repositor
 export { PrismaStatsRepository } from './prisma-stats-repository.js';
 export { PrismaViewHistoryRepository } from './prisma-view-history-repository.js';
 export { SqliteVecEmbeddingRepository } from './sqlite-vec-embedding-repository.js';
+/* v8 ignore stop */

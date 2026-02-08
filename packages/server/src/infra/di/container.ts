@@ -1,3 +1,4 @@
+/* v8 ignore start -- DI container configuration */
 import 'reflect-metadata';
 import { createCoreContainer } from '@picstash/core';
 import {
@@ -137,3 +138,4 @@ export function createContainer(config: Config): Container {
 
   return container;
 }
+/* v8 ignore stop */

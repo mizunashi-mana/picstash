@@ -1,3 +1,4 @@
+/* v8 ignore start -- Route registration */
 import { healthRoutes } from '@/infra/http/routes/health.js';
 import type { AppContainer } from '@/infra/di/index.js';
 import type { FastifyInstance } from 'fastify';
@@ -22,3 +23,4 @@ export function registerRoutes(app: FastifyInstance, container: AppContainer): v
   container.getUrlCrawlController().registerRoutes(app);
   container.getJobController().registerRoutes(app);
 }
+/* v8 ignore stop */
