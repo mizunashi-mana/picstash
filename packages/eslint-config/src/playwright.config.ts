@@ -16,6 +16,7 @@ export function buildPlaywrightConfig(props: {
         ...pluginPlaywright.configs['flat/recommended'].rules,
         'playwright/no-conditional-in-test': 'error',
         'playwright/no-conditional-expect': 'error',
+        'playwright/expect-expect': 'error',
       },
     },
   ]);
