@@ -1,8 +1,6 @@
 import {
   Alert,
   Card,
-  Group,
-  Image,
   Loader,
   SimpleGrid,
   Stack,
@@ -10,15 +8,14 @@ import {
   Title,
   UnstyledButton,
 } from '@mantine/core';
-import { IconPhoto } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import type { SimilarImage } from '@picstash/api';
+import { LocalImage } from '@/shared';
 
 export interface SimilarImagesSectionViewProps {
   similarImages: SimilarImage[];
   isLoading: boolean;
   error: Error | null;
-  getThumbnailUrl: (imageId: string) => string;
 }
 
 function SimilarityScore({ distance }: { distance: number }) {
@@ -37,7 +34,6 @@ export function SimilarImagesSectionView({
   similarImages,
   isLoading,
   error,
-  getThumbnailUrl,
 }: SimilarImagesSectionViewProps) {
   return (
     <Card padding="md" withBorder>
@@ -74,27 +70,13 @@ export function SimilarImagesSectionView({
                 to={`/images/${image.id}`}
               >
                 <Stack gap={4}>
-                  {image.thumbnailPath !== null
-                    ? (
-                        <Image
-                          src={getThumbnailUrl(image.id)}
-                          alt={image.title}
-                          radius="sm"
-                          h={80}
-                          fit="cover"
-                        />
-                      )
-                    : (
-                        <Group
-                          justify="center"
-                          align="center"
-                          h={80}
-                          bg="gray.1"
-                          style={{ borderRadius: 'var(--mantine-radius-sm)' }}
-                        >
-                          <IconPhoto size={24} color="gray" />
-                        </Group>
-                      )}
+                  <LocalImage
+                    path={image.thumbnailPath}
+                    alt={image.title}
+                    radius="sm"
+                    h={80}
+                    fit="cover"
+                  />
                   <SimilarityScore distance={image.distance} />
                 </Stack>
               </UnstyledButton>

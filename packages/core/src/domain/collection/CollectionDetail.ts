@@ -6,6 +6,7 @@ export interface CollectionImageInfo {
   imageId: string;
   order: number;
   title: string;
+  path: string;
   thumbnailPath: string | null;
 }
 

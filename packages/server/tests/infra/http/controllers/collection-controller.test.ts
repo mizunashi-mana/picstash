@@ -237,8 +237,8 @@ describe('CollectionController', () => {
       const collectionDetail = createCollectionDetail('col-1', {
         name: 'Test Collection',
         images: [
-          { id: 'ci-1', imageId: 'img-1', order: 0, title: 'Image 1', thumbnailPath: 'thumb-1.jpg' },
-          { id: 'ci-2', imageId: 'img-2', order: 1, title: 'Image 2', thumbnailPath: 'thumb-2.jpg' },
+          { id: 'ci-1', imageId: 'img-1', order: 0, title: 'Image 1', path: 'img-1.jpg', thumbnailPath: 'thumb-1.jpg' },
+          { id: 'ci-2', imageId: 'img-2', order: 1, title: 'Image 2', path: 'img-2.jpg', thumbnailPath: 'thumb-2.jpg' },
         ],
       });
       vi.mocked(mockCollectionRepository.findByIdWithImages).mockResolvedValue(collectionDetail);

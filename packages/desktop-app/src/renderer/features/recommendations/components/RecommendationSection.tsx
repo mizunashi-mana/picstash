@@ -5,7 +5,6 @@ import {
   Box,
   Card,
   Group,
-  Image,
   Loader,
   Paper,
   ScrollArea,
@@ -17,7 +16,7 @@ import { IconSparkles } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import type { RecommendedImage } from '@picstash/api';
-import { useApiClient } from '@/shared';
+import { LocalImage, useApiClient } from '@/shared';
 import { buildUrl } from '@/shared/helpers';
 
 /** Maps imageId to conversionId */
@@ -146,7 +145,6 @@ export function RecommendationSection() {
                 key={image.id}
                 image={image}
                 conversionId={conversionMap.get(image.id)}
-                getThumbnailUrl={apiClient.images.getThumbnailUrl}
               />
             ))}
           </Group>
@@ -159,10 +157,9 @@ export function RecommendationSection() {
 interface RecommendationCardProps {
   image: RecommendedImage;
   conversionId: string | undefined;
-  getThumbnailUrl: (imageId: string) => string;
 }
 
-function RecommendationCard({ image, conversionId, getThumbnailUrl }: RecommendationCardProps) {
+function RecommendationCard({ image, conversionId }: RecommendationCardProps) {
   // Build URL with optional conversionId
   const url = buildUrl(`/images/${image.id}`, { conversionId });
 
@@ -181,10 +178,9 @@ function RecommendationCard({ image, conversionId, getThumbnailUrl }: Recommenda
         style={{ overflow: 'hidden' }}
       >
         <AspectRatio ratio={1}>
-          <Image
-            src={getThumbnailUrl(image.id)}
+          <LocalImage
+            path={image.thumbnailPath}
             alt={image.title}
-            fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3C/svg%3E"
           />
         </AspectRatio>
       </Card>

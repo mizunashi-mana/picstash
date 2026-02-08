@@ -18,7 +18,7 @@ import type { Prisma, PrismaClient } from '@~generated/prisma/client.js';
 
 type TransactionClient = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
 type CollectionWithCount = Prisma.CollectionGetPayload<{ include: { _count: { select: { images: true } } } }>;
-type CollectionImageWithImage = Prisma.CollectionImageGetPayload<{ include: { image: { select: { title: true; thumbnailPath: true } } } }>;
+type CollectionImageWithImage = Prisma.CollectionImageGetPayload<{ include: { image: { select: { title: true; path: true; thumbnailPath: true } } } }>;
 type CollectionImageWithCollection = Prisma.CollectionImageGetPayload<{ include: { collection: true } }>;
 
 @injectable()
@@ -49,7 +49,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
           orderBy: { order: 'asc' },
           include: {
             image: {
-              select: { title: true, thumbnailPath: true },
+              select: { title: true, path: true, thumbnailPath: true },
             },
           },
         },
@@ -72,6 +72,7 @@ export class PrismaCollectionRepository implements CollectionRepository {
         imageId: ci.imageId,
         order: ci.order,
         title: ci.image.title,
+        path: ci.image.path,
         thumbnailPath: ci.image.thumbnailPath,
       })),
     };
