@@ -25,12 +25,14 @@ test.beforeAll(async () => {
 
   // CI環境では前のElectronプロセスのクリーンアップを待つ
   if (process.env.CI !== undefined) {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
   }
 
   const args = [appPath];
   if (process.env.CI !== undefined) {
     args.push('--no-sandbox');
+    args.push('--disable-gpu');
+    args.push('--disable-dev-shm-usage');
   }
   electronApp = await electron.launch({
     args,
