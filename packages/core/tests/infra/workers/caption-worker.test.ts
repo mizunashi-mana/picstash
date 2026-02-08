@@ -44,8 +44,13 @@ function createMockFileStorage(): FileStorage {
 
 function createMockCaptionService(): CaptionService {
   return {
+    generateFromFile: vi.fn(),
     generateFromBuffer: vi.fn(),
+    generateWithContext: vi.fn(),
     generateWithContextFromBuffer: vi.fn(),
+    getModel: vi.fn().mockReturnValue('test-model'),
+    isReady: vi.fn().mockReturnValue(true),
+    initialize: vi.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -63,8 +68,11 @@ function createMockEmbeddingRepository(): EmbeddingRepository {
 
 function createMockOcrService(): OcrService {
   return {
+    extractText: vi.fn(),
     extractTextFromBuffer: vi.fn(),
-    terminate: vi.fn(),
+    isReady: vi.fn().mockReturnValue(true),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    terminate: vi.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -90,8 +98,10 @@ function createMockJob(payload: { imageId: string }): Job<{ imageId: string }> {
     id: 'test-job-id',
     type: CAPTION_JOB_TYPE,
     payload,
-    status: 'pending',
+    status: 'waiting',
     progress: 0,
+    attempts: 0,
+    maxAttempts: 3,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
