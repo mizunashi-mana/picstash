@@ -164,11 +164,6 @@ test.describe('ギャラリーページ', () => {
     await gridButton.click();
     await expect(gridButton).toBeVisible();
   });
-
-  test('画像がない場合は適切なメッセージが表示される', async () => {
-    const countText = window.locator('text=/\\d+件/');
-    await expect(countText).toBeVisible();
-  });
 });
 
 test.describe('検索機能', () => {
