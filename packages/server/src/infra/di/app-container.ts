@@ -1,3 +1,4 @@
+/* v8 ignore start -- DI container configuration */
 import { CoreContainer } from '@picstash/core';
 import { createContainer } from './container.js';
 import { CONTROLLER_TYPES, TYPES } from './types.js';
@@ -98,3 +99,4 @@ export function buildAppContainer(config: Config): AppContainer {
   const container = createContainer(config);
   return new AppContainer(container);
 }
+/* v8 ignore stop */

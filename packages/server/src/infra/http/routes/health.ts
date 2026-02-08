@@ -1,3 +1,4 @@
+/* v8 ignore start -- Route registration */
 import type { PrismaService } from '@/infra/database/prisma-service.js';
 import type { FastifyInstance } from 'fastify';
 
@@ -24,3 +25,4 @@ export function healthRoutes(app: FastifyInstance, databaseService: PrismaServic
     }
   });
 }
+/* v8 ignore stop */

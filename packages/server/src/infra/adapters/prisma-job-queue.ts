@@ -1,3 +1,4 @@
+/* v8 ignore start -- Prisma repository (integration testing) */
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/infra/di/types.js';
@@ -208,3 +209,4 @@ export class PrismaJobQueue implements JobQueue {
     };
   }
 }
+/* v8 ignore stop */

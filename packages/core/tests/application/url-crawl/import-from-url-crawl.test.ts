@@ -235,6 +235,81 @@ describe('importFromUrlCrawl', () => {
         expect.objectContaining({ extension: '.jpg' }),
       );
     });
+
+    it('should use .gif extension for image/gif content type', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+      const mockImage = createMockImage();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/gif',
+      });
+      setupSuccessMocks(deps);
+      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(1);
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ extension: '.gif' }),
+      );
+    });
+
+    it('should use .webp extension for image/webp content type', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+      const mockImage = createMockImage();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/webp',
+      });
+      setupSuccessMocks(deps);
+      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(1);
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ extension: '.webp' }),
+      );
+    });
+
+    it('should use .bmp extension for image/bmp content type', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+      const mockImage = createMockImage();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/bmp',
+      });
+      setupSuccessMocks(deps);
+      vi.mocked(deps.imageRepository.create).mockResolvedValue(mockImage);
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(1);
+      expect(deps.fileStorage.saveFile).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ extension: '.bmp' }),
+      );
+    });
   });
 
   describe('when fetch fails', () => {
@@ -254,6 +329,90 @@ describe('importFromUrlCrawl', () => {
       expect(result.failedCount).toBe(1);
       expect(result.results[0]?.success).toBe(false);
       expect(result.results[0]?.error).toBe('Network error');
+    });
+  });
+
+  describe('when file reading fails', () => {
+    it('should clean up saved file when getFileSize fails', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        filename: 'saved.png',
+        path: 'originals/saved.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockRejectedValue(new Error('File size error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(0);
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.error).toBe('File size error');
+      expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/saved.png');
+    });
+
+    it('should clean up saved file when readFile fails', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        filename: 'saved.png',
+        path: 'originals/saved.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockRejectedValue(new Error('Read file error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(0);
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.error).toBe('Read file error');
+      expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/saved.png');
+    });
+
+    it('should continue even if cleanup fails after readFile error', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        filename: 'saved.png',
+        path: 'originals/saved.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockRejectedValue(new Error('Read file error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockRejectedValue(new Error('Cleanup failed'));
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(0);
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.error).toBe('Read file error');
     });
   });
 
@@ -353,6 +512,40 @@ describe('importFromUrlCrawl', () => {
       expect(result.results[0]?.error).toBe('Database error');
       expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/saved.png');
       expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('thumbnails/saved.jpg');
+    });
+
+    it('should continue even if cleanup fails after database error', async () => {
+      const deps = createMockDeps();
+      const session = createMockSession();
+
+      vi.mocked(deps.urlCrawlSessionManager.getSession).mockReturnValue(session);
+      vi.mocked(deps.urlCrawlSessionManager.fetchImage).mockResolvedValue({
+        data: Buffer.from('image data'),
+        contentType: 'image/png',
+      });
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        filename: 'saved.png',
+        path: 'originals/saved.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('image data'));
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
+      vi.mocked(deps.fileStorage.saveFileFromBuffer).mockResolvedValue({
+        filename: 'saved.jpg',
+        path: 'thumbnails/saved.jpg',
+      });
+      vi.mocked(deps.imageRepository.create).mockRejectedValue(new Error('Database error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockRejectedValue(new Error('Cleanup failed'));
+
+      const result = await importFromUrlCrawl(
+        { sessionId: 'test-session-id', indices: [0] },
+        deps,
+      );
+
+      expect(result.successCount).toBe(0);
+      expect(result.failedCount).toBe(1);
+      expect(result.results[0]?.error).toBe('Database error');
     });
   });
 

@@ -1,3 +1,4 @@
+/* v8 ignore start -- SQLite vector repository (integration testing) */
 /**
  * sqlite-vec based implementation of EmbeddingRepository.
  */
@@ -157,3 +158,4 @@ export class SqliteVecEmbeddingRepository implements EmbeddingRepository {
     this.db.close();
   }
 }
+/* v8 ignore stop */

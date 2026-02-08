@@ -1,3 +1,4 @@
+/* v8 ignore start -- Database connection (Prisma) */
 /**
  * Injectable Prisma service that manages the database connection.
  */
@@ -45,3 +46,4 @@ export class PrismaService {
     await this.client.$disconnect();
   }
 }
+/* v8 ignore stop */
