@@ -5,8 +5,10 @@
  */
 
 import {
+  CAPTION_JOB_TYPE,
   findDuplicates,
   generateRecommendations,
+  type CaptionJobPayload,
   type CoreContainer,
 } from '@picstash/core';
 import { z } from 'zod';
@@ -235,6 +237,35 @@ route('GET', '/api/images/:imageId/collections', async (container, params) => {
 
   const collections = await repo.findCollectionsByImageId(imageId);
   return { status: 200, data: collections };
+});
+
+route('POST', '/api/images/:imageId/generate-description', async (container, params) => {
+  const imageRepo = container.getImageRepository();
+  const fileStorage = container.getFileStorage();
+  const jobQueue = container.getJobQueue();
+  const imageId = params.imageId ?? '';
+
+  const image = await imageRepo.findById(imageId);
+  if (image === null) {
+    return { status: 404, error: 'Image not found' };
+  }
+
+  if (!(await fileStorage.fileExists(image.path))) {
+    return { status: 404, error: 'Image file not found on disk' };
+  }
+
+  // キャプション生成ジョブをキューに追加
+  const payload: CaptionJobPayload = { imageId };
+  const job = await jobQueue.add(CAPTION_JOB_TYPE, payload);
+
+  return {
+    status: 202,
+    data: {
+      jobId: job.id,
+      status: 'queued',
+      message: 'Caption generation job has been queued',
+    },
+  };
 });
 
 // --- Labels ---

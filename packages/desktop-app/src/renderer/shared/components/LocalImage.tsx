@@ -1,4 +1,5 @@
 import { Box, Image, Skeleton, Text, type ImageProps } from '@mantine/core';
+import { IconPhoto } from '@tabler/icons-react';
 import { useLocalImageUrl } from '@/shared/hooks';
 
 export interface LocalImageProps extends Omit<ImageProps, 'src'> {
@@ -14,6 +15,15 @@ export interface LocalImageProps extends Omit<ImageProps, 'src'> {
  */
 export function LocalImage({ path, alt, w, h, ...props }: LocalImageProps) {
   const state = useLocalImageUrl(path);
+
+  // path が null の場合はプレースホルダーを表示
+  if (path === null) {
+    return (
+      <Box w={w} h={h} bg="gray.1" display="flex" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <IconPhoto size={32} color="var(--mantine-color-gray-5)" />
+      </Box>
+    );
+  }
 
   if (state.status === 'loading' || state.status === 'idle') {
     return (

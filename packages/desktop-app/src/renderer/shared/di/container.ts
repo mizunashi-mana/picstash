@@ -1,28 +1,15 @@
 import { API_TYPES, createApiClient, type ApiClient, type HttpClient } from '@picstash/api';
 import { Container } from 'inversify';
-import { FetchHttpClient, IpcHttpClientWithFormData } from '@/shared/api';
+import { IpcHttpClientWithFormData } from '@/shared/api';
 
 /**
- * 実行環境を検出
+ * HttpClient を作成
  *
- * - file:// プロトコル: プロダクションモード（Electron でパッケージ済み）
- * - http:// / https://: 開発モード（Vite dev server）
- */
-function isProductionMode(): boolean {
-  return window.location.protocol === 'file:';
-}
-
-/**
- * 環境に応じた HttpClient を作成
- *
- * - プロダクションモード: IpcHttpClient（IPC 経由で CoreContainer にアクセス）
- * - 開発モード: FetchHttpClient（HTTP 経由で API サーバーにアクセス）
+ * desktop-app はローカルストレージベースのため、常に IPC 経由で
+ * CoreContainer にアクセスする
  */
 function createHttpClient(): HttpClient {
-  if (isProductionMode()) {
-    return new IpcHttpClientWithFormData();
-  }
-  return new FetchHttpClient();
+  return new IpcHttpClientWithFormData();
 }
 
 /**
