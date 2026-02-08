@@ -1,3 +1,4 @@
+/* v8 ignore start -- Electron IPC handlers require Electron runtime */
 import { ipcMain } from 'electron';
 import { IPC_CHANNELS } from '@desktop-app/shared/types.js';
 import { coreManager } from './core-manager.js';
@@ -208,3 +209,4 @@ export function registerIpcHandlers(): void {
     return await handleApiRequest(container, request as IpcApiRequest);
   });
 }
+/* v8 ignore stop */

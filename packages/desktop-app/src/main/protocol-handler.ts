@@ -1,3 +1,4 @@
+/* v8 ignore start -- Electron protocol API requires Electron runtime */
 /* eslint-disable n/no-unsupported-features/node-builtins -- Response is available in Electron's main process */
 import { protocol } from 'electron';
 import { storageManager } from './storage-manager.js';
@@ -99,3 +100,4 @@ export function registerProtocolPrivileges(): void {
     },
   ]);
 }
+/* v8 ignore stop */

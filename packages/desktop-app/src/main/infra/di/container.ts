@@ -1,3 +1,4 @@
+/* v8 ignore start -- Prisma/DI implementation */
 import 'reflect-metadata';
 import { buildCoreContainer } from '@picstash/core';
 import {
@@ -115,3 +116,4 @@ export function createDesktopContainer(
 
   return coreContainer;
 }
+/* v8 ignore stop */
