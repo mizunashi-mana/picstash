@@ -1,3 +1,4 @@
+/* v8 ignore start -- App builder with Fastify plugins */
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registerCors } from '@/infra/http/plugins/cors.js';
 import { registerMultipart } from '@/infra/http/plugins/multipart.js';
@@ -25,3 +26,4 @@ export async function buildApp(
 
   return await app;
 }
+/* v8 ignore stop */

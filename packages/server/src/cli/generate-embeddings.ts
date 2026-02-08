@@ -1,3 +1,4 @@
+/* v8 ignore start -- CLI command */
 /* eslint-disable no-console, n/no-process-exit -- CLI command */
 /**
  * CLI command for generating embeddings for existing images.
@@ -143,3 +144,4 @@ main().catch((error: unknown) => {
   console.error('Error:', error);
   process.exit(1);
 });
+/* v8 ignore stop */

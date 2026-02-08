@@ -1,3 +1,4 @@
+/* v8 ignore start -- Fastify plugin registration */
 import multipart from '@fastify/multipart';
 import type { FastifyInstance } from 'fastify';
 
@@ -8,3 +9,4 @@ export async function registerMultipart(app: FastifyInstance): Promise<void> {
     },
   });
 }
+/* v8 ignore stop */

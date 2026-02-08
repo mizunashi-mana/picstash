@@ -1691,6 +1691,14 @@ exports[`buildConfig > should generate correct config for common + react + story
       "**/*.spec.{ts,tsx}",
     ],
     "rules": {
+      "max-lines": [
+        "error",
+        {
+          "max": 900,
+          "skipBlankLines": true,
+          "skipComments": true,
+        },
+      ],
       "max-nested-callbacks": [
         "error",
         4,
@@ -4738,6 +4746,14 @@ exports[`buildConfig > should generate correct config for common ruleSet only 1`
       "**/*.spec.{ts,tsx}",
     ],
     "rules": {
+      "max-lines": [
+        "error",
+        {
+          "max": 900,
+          "skipBlankLines": true,
+          "skipComments": true,
+        },
+      ],
       "max-nested-callbacks": [
         "error",
         4,

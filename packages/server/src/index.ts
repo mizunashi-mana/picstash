@@ -1,3 +1,4 @@
+/* v8 ignore start -- Server entry point */
 // @picstash/server
 // API サーバーのエントリポイント
 
@@ -126,3 +127,4 @@ main().catch((err: unknown) => {
   // eslint-disable-next-line no-console -- app not yet initialized
   console.error('Failed to start server:', err);
 });
+/* v8 ignore stop */

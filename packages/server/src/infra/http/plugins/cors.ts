@@ -1,3 +1,4 @@
+/* v8 ignore start -- Fastify plugin registration */
 import cors from '@fastify/cors';
 import type { FastifyInstance } from 'fastify';
 
@@ -7,3 +8,4 @@ export async function registerCors(app: FastifyInstance): Promise<void> {
     credentials: true,
   });
 }
+/* v8 ignore stop */

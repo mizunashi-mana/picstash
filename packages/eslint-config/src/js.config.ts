@@ -216,6 +216,10 @@ export function buildJsConfig(props: {
       files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
       rules: {
         'max-nested-callbacks': ['error', 4],
+        'max-lines': [
+          'error',
+          { max: 900, skipBlankLines: true, skipComments: true },
+        ],
       },
     },
     // Config files can use relative imports
