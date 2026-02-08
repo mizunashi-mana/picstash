@@ -11,9 +11,9 @@ const mockCollection: CollectionWithImages = {
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-02T00:00:00Z',
   images: [
-    { id: 'ci-1', imageId: 'img-1', order: 0, title: '富士山', thumbnailPath: '/thumbs/img-1.jpg' },
-    { id: 'ci-2', imageId: 'img-2', order: 1, title: '桜並木', thumbnailPath: '/thumbs/img-2.jpg' },
-    { id: 'ci-3', imageId: 'img-3', order: 2, title: '海岸', thumbnailPath: '/thumbs/img-3.jpg' },
+    { id: 'ci-1', imageId: 'img-1', order: 0, title: '富士山', path: '/images/img-1.jpg', thumbnailPath: '/thumbs/img-1.jpg' },
+    { id: 'ci-2', imageId: 'img-2', order: 1, title: '桜並木', path: '/images/img-2.jpg', thumbnailPath: '/thumbs/img-2.jpg' },
+    { id: 'ci-3', imageId: 'img-3', order: 2, title: '海岸', path: '/images/img-3.jpg', thumbnailPath: '/thumbs/img-3.jpg' },
   ],
 };
 
