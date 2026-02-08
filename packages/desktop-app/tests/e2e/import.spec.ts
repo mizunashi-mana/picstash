@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
+import { setupStorageIfNeeded } from './helpers.js';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const appPath = path.join(currentDir, '..', '..');
@@ -10,6 +11,8 @@ const fixturesPath = path.join(currentDir, '..', 'fixtures');
 
 // E2E テスト用のデータディレクトリ
 const e2eDataDir = path.join(appPath, 'tmp', 'e2e-import-data');
+// ストレージ用ディレクトリ
+const storageDir = path.join(e2eDataDir, 'storage');
 
 const nodeRequire = createRequire(import.meta.url);
 const electronBinaryPath: string = nodeRequire('electron');
@@ -35,6 +38,7 @@ test.beforeAll(async () => {
 
   window = await electronApp.firstWindow();
   await window.waitForLoadState('domcontentloaded');
+  await setupStorageIfNeeded(window, storageDir);
   await expect(window.getByRole('link', { name: 'ホーム' })).toBeVisible();
 });
 

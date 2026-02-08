@@ -3,12 +3,15 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
+import { setupStorageIfNeeded } from './helpers.js';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const appPath = path.join(currentDir, '..', '..');
 
 // E2E テスト用のデータディレクトリ
 const e2eDataDir = path.join(appPath, 'tmp', 'e2e-navigation-data');
+// ストレージ用ディレクトリ（e2eDataDir 内に作成）
+const storageDir = path.join(e2eDataDir, 'storage');
 
 const nodeRequire = createRequire(import.meta.url);
 const electronBinaryPath: string = nodeRequire('electron');
@@ -34,6 +37,9 @@ test.beforeAll(async () => {
 
   window = await electronApp.firstWindow();
   await window.waitForLoadState('domcontentloaded');
+
+  // ストレージが未設定の場合は設定する
+  await setupStorageIfNeeded(window, storageDir);
 
   // アプリが完全に読み込まれるまで待機（サイドバーのリンクが表示されるまで）
   await expect(window.getByRole('link', { name: 'ホーム' })).toBeVisible();
