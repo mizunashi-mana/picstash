@@ -197,4 +197,123 @@ describe('StorageManager', () => {
       );
     });
   });
+
+  describe('未初期化時のエラー', () => {
+    it('初期化されていない状態で readFile を呼ぶとエラーになる', async () => {
+      const newManager = new StorageManager();
+      await expect(newManager.readFile('test.txt')).rejects.toThrow(
+        'Storage path is not initialized',
+      );
+    });
+
+    it('初期化されていない状態で saveFile を呼ぶとエラーになる', async () => {
+      const newManager = new StorageManager();
+      await expect(
+        newManager.saveFile(Buffer.from('test'), {
+          category: 'originals',
+          extension: '.jpg',
+        }),
+      ).rejects.toThrow('Storage path is not initialized');
+    });
+
+    it('初期化されていない状態で deleteFile を呼ぶとエラーになる', async () => {
+      const newManager = new StorageManager();
+      await expect(newManager.deleteFile('test.txt')).rejects.toThrow(
+        'Storage path is not initialized',
+      );
+    });
+  });
+
+  describe('selectPath', () => {
+    it('ダイアログがキャンセルされた場合は null を返す', async () => {
+      const { dialog } = await import('electron');
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: true,
+        filePaths: [],
+      });
+
+      const newManager = new StorageManager();
+      const result = await newManager.selectPath();
+      expect(result).toBeNull();
+    });
+
+    it('.pstlib ディレクトリを選択した場合はそのまま使用する', async () => {
+      const { dialog } = await import('electron');
+      const libraryPath = join(tmpdir(), `test-${Date.now()}.pstlib`);
+
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: false,
+        filePaths: [libraryPath],
+      });
+
+      const newManager = new StorageManager();
+      const result = await newManager.selectPath();
+
+      expect(result).toBe(libraryPath);
+      expect(newManager.getPath()).toBe(libraryPath);
+
+      // クリーンアップ
+      await rm(libraryPath, { recursive: true, force: true });
+    });
+
+    it('通常ディレクトリを選択した場合は library.pstlib を作成する', async () => {
+      const { dialog } = await import('electron');
+      const parentDir = join(tmpdir(), `test-parent-${Date.now()}`);
+      await mkdir(parentDir, { recursive: true });
+
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: false,
+        filePaths: [parentDir],
+      });
+
+      const newManager = new StorageManager();
+      const result = await newManager.selectPath();
+
+      const expectedPath = join(parentDir, 'library.pstlib');
+      expect(result).toBe(expectedPath);
+      expect(newManager.getPath()).toBe(expectedPath);
+
+      // クリーンアップ
+      await rm(parentDir, { recursive: true, force: true });
+    });
+
+    it('filePaths が空配列の場合は null を返す', async () => {
+      const { dialog } = await import('electron');
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: false,
+        filePaths: [],
+      });
+
+      const newManager = new StorageManager();
+      const result = await newManager.selectPath();
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('loadConfig のエッジケース', () => {
+    it('設定ファイルが不正な JSON の場合は storagePath を null にする', async () => {
+      // 不正な JSON を書き込む
+      await writeFile(join(testConfigPath, 'storage-config.json'), 'not valid json');
+
+      const newManager = new StorageManager();
+      await newManager.loadConfig();
+      expect(newManager.getPath()).toBeNull();
+    });
+
+    it('設定ファイルに storagePath がない場合は null にする', async () => {
+      await writeFile(join(testConfigPath, 'storage-config.json'), JSON.stringify({ otherKey: 'value' }));
+
+      const newManager = new StorageManager();
+      await newManager.loadConfig();
+      expect(newManager.getPath()).toBeNull();
+    });
+
+    it('storagePath が文字列でも null でもない場合は null にする', async () => {
+      await writeFile(join(testConfigPath, 'storage-config.json'), JSON.stringify({ storagePath: 123 }));
+
+      const newManager = new StorageManager();
+      await newManager.loadConfig();
+      expect(newManager.getPath()).toBeNull();
+    });
+  });
 });
