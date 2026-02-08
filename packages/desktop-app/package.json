@@ -16,7 +16,8 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k \"npm run dev:renderer\" \"npm run dev:main\"",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "dev": "npm run rebuild && concurrently -k \"npm run dev:renderer\" \"npm run dev:main\"",
     "dev:renderer": "vite -c vite.renderer.config.ts",
     "dev:main": "wait-on http://localhost:5174 && npm run build:main && npm run build:preload && cross-env NODE_ENV=development electron . --remote-debugging-port=9222",
     "db:generate": "prisma generate",
@@ -64,6 +65,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
     "@picstash/eslint-config": "*",
     "@playwright/test": "^1.57.0",
     "@storybook/addon-vitest": "^10.1.11",

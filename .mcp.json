@@ -6,6 +6,15 @@
         "--yes",
         "@playwright/mcp"
       ]
+    },
+    "electron-playwright": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "@playwright/mcp",
+        "--cdp-endpoint",
+        "http://localhost:9222"
+      ]
     }
   }
 }
