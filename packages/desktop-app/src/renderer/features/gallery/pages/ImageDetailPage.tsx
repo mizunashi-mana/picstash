@@ -6,7 +6,6 @@ import {
   Button,
   Container,
   Group,
-  Image,
   Loader,
   Modal,
   Paper,
@@ -23,7 +22,7 @@ import { ImageCollectionsSection } from '@/features/gallery/components/ImageColl
 import { ImageDescriptionSection } from '@/features/gallery/components/ImageDescriptionSection';
 import { SimilarImagesSection } from '@/features/gallery/components/SimilarImagesSection';
 import { useViewHistory } from '@/features/view-history';
-import { useApiClient } from '@/shared';
+import { LocalImage, useApiClient } from '@/shared';
 
 function formatFileSize(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes < 0) {
@@ -147,8 +146,8 @@ export function ImageDetailPage() {
         </Group>
 
         <Box>
-          <Image
-            src={apiClient.images.getImageUrl(image.id)}
+          <LocalImage
+            path={image.path}
             alt={image.title}
             fit="contain"
             mah="70vh"

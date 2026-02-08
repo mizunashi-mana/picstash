@@ -7,7 +7,6 @@ import {
   Center,
   Container,
   Group,
-  Image,
   Loader,
   Modal,
   SimpleGrid,
@@ -28,7 +27,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router';
 import type { UpdateCollectionInput } from '@picstash/api';
-import { useApiClient } from '@/shared';
+import { LocalImage, useApiClient } from '@/shared';
 
 export function CollectionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -200,10 +199,10 @@ export function CollectionDetailPage() {
                   <Card key={img.id} shadow="xs" padding="xs" radius="sm" withBorder>
                     <Card.Section pos="relative">
                       <Link to={`/collections/${id}/view/${img.imageId}`}>
-                        <Image
-                          src={apiClient.images.getThumbnailUrl(img.imageId)}
+                        <LocalImage
+                          path={img.thumbnailPath}
                           alt={img.title}
-                          height={140}
+                          h={140}
                           fit="cover"
                         />
                       </Link>
