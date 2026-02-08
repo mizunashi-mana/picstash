@@ -51,6 +51,7 @@ export async function setupStorageIfNeeded(window: Page, storagePath: string): P
     await win.picstash.storage.setPath(path);
   }, storagePath);
 
-  // アプリが再描画されるまで待機
-  await window.waitForTimeout(500);
+  // ページをリロードして React コンポーネントを再マウント
+  await window.reload();
+  await window.waitForLoadState('domcontentloaded');
 }
