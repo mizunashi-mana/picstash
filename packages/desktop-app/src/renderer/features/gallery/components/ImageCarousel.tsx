@@ -4,7 +4,6 @@ import {
   AspectRatio,
   Box,
   Group,
-  Image,
   Paper,
   ScrollArea,
   Stack,
@@ -19,7 +18,7 @@ import {
 } from '@tabler/icons-react';
 import { Link } from 'react-router';
 import type { Image as ImageType } from '@picstash/api';
-import { useApiClient } from '@/shared';
+import { LocalImage } from '@/shared';
 
 export interface ImageCarouselProps {
   images: ImageType[];
@@ -28,7 +27,6 @@ export interface ImageCarouselProps {
 }
 
 export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: ImageCarouselProps) {
-  const apiClient = useApiClient();
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const goToPrev = useCallback(() => {
@@ -157,8 +155,8 @@ export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: Image
             padding: 16,
           }}
         >
-          <Image
-            src={apiClient.images.getImageUrl(currentImage.id)}
+          <LocalImage
+            path={currentImage.path}
             alt={currentImage.title}
             fit="contain"
             style={{
@@ -166,7 +164,6 @@ export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: Image
               maxHeight: '100%',
               objectFit: 'contain',
             }}
-            fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23dee2e6' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23868e96' font-size='16'%3ENo image%3C/text%3E%3C/svg%3E"
           />
         </Box>
 
@@ -214,11 +211,10 @@ export function ImageCarousel({ images, initialIndex = 0, onIndexChange }: Image
                 }}
               >
                 <AspectRatio ratio={1} w={60}>
-                  <Image
-                    src={apiClient.images.getThumbnailUrl(image.id)}
+                  <LocalImage
+                    path={image.thumbnailPath}
                     alt={image.title}
                     fit="cover"
-                    fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Crect fill='%23dee2e6' width='60' height='60'/%3E%3C/svg%3E"
                   />
                 </AspectRatio>
               </UnstyledButton>

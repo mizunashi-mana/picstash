@@ -6,7 +6,6 @@ import {
   Center,
   Container,
   Group,
-  Image,
   Loader,
   Modal,
   SimpleGrid,
@@ -26,10 +25,9 @@ interface CollectionCardProps {
   collection: CollectionWithCount;
   onDelete: (id: string) => void;
   isDeleting: boolean;
-  getThumbnailUrl: (imageId: string) => string;
 }
 
-function CollectionCard({ collection, onDelete, isDeleting, getThumbnailUrl }: CollectionCardProps) {
+function CollectionCard({ collection, onDelete, isDeleting }: CollectionCardProps) {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const handleDelete = () => {
@@ -42,20 +40,10 @@ function CollectionCard({ collection, onDelete, isDeleting, getThumbnailUrl }: C
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Card.Section>
           <Link to={`/collections/${collection.id}`}>
-            {collection.coverImageId !== null
-              ? (
-                  <Image
-                    src={getThumbnailUrl(collection.coverImageId)}
-                    height={160}
-                    alt={collection.name}
-                    fit="cover"
-                  />
-                )
-              : (
-                  <Center h={160} bg="gray.1">
-                    <IconFolder size={48} color="gray" />
-                  </Center>
-                )}
+            {/* TODO: API に coverImageThumbnailPath を追加したら LocalImage を使用 */}
+            <Center h={160} bg="gray.1">
+              <IconFolder size={48} color="gray" />
+            </Center>
           </Link>
         </Card.Section>
 
@@ -207,7 +195,6 @@ export function CollectionsPage() {
                     collection={collection}
                     onDelete={handleDelete}
                     isDeleting={deleteMutation.isPending}
-                    getThumbnailUrl={apiClient.images.getThumbnailUrl}
                   />
                 ))}
               </SimpleGrid>

@@ -18,7 +18,6 @@ export function SimilarImagesSection({ imageId }: SimilarImagesSectionProps) {
       similarImages={data?.similarImages ?? []}
       isLoading={isLoading}
       error={error}
-      getThumbnailUrl={apiClient.images.getThumbnailUrl}
     />
   );
 }

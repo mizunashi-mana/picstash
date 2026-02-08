@@ -213,7 +213,6 @@ export function DuplicatesPage(): React.JSX.Element {
                     selectedIds={selectedIds}
                     onSelectToggle={handleSelectToggle}
                     onSelectAllDuplicates={handleSelectAllDuplicates}
-                    getThumbnailUrl={apiClient.images.getThumbnailUrl}
                   />
                 ))}
               </Stack>
