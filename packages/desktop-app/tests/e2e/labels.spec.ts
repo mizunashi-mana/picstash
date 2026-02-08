@@ -22,6 +22,11 @@ let window: Page;
 test.beforeAll(async () => {
   await rm(e2eDataDir, { recursive: true, force: true });
 
+  // CI環境では前のElectronプロセスのクリーンアップを待つ
+  if (process.env.CI !== undefined) {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+
   const args = [appPath];
   if (process.env.CI !== undefined) {
     args.push('--no-sandbox');
