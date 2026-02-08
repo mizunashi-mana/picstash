@@ -74,7 +74,7 @@
 | スコープ | 単一機能・修正 | 複数タスクからなる大きな目標 |
 | 期間 | 1日〜数日 | 数週間〜数ヶ月 |
 | 例 | 「画像詳細表示を実装」 | 「Phase 1: デスクトップアプリ化」 |
-| コマンド | `/autodev:start-new-task` | `/autodev:start-new-project` |
+| コマンド | `/autodev-start-new-task` | `/autodev-start-new-project` |
 
 ### プロジェクトの進め方
 
