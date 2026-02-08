@@ -47,8 +47,7 @@ export function AppLayout({ children, headerActions }: AppLayoutProps) {
     <AppShell
       navbar={{
         width: opened ? 250 : 60,
-        breakpoint: 'sm',
-        collapsed: { mobile: !opened },
+        breakpoint: 0,
       }}
       padding="md"
     >
