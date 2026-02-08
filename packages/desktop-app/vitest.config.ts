@@ -43,5 +43,28 @@ export default defineConfig({
         },
       },
     ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/index.ts',
+        'src/renderer/**/*',
+        'src/**/*.stories.tsx',
+        'src/main/infra/**/*',
+        'src/main/ipc/**/*',
+        'src/main/ipc-handlers.ts',
+        'src/main/protocol-handler.ts',
+        'src/main/services/image-processor.ts',
+        'src/shared/types.ts',
+      ],
+      thresholds: {
+        perFile: true,
+        lines: 70,
+        branches: 70,
+        functions: 65,
+        statements: 70,
+      },
+    },
   },
 });

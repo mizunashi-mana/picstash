@@ -29,6 +29,7 @@
     "lint": "eslint src tests .storybook *.mjs playwright.config.ts esbuild.config.ts vitest.config.ts",
     "lint:deps": "depcruise src --config .dependency-cruiser.mjs",
     "test": "vitest run --project unit",
+    "test:coverage": "vitest run --project unit --coverage",
     "test:watch": "vitest --project unit",
     "test:storybook": "vitest run --project storybook",
     "test:e2e": "npm run build && playwright test",
