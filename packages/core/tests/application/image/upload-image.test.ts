@@ -332,6 +332,98 @@ describe('uploadImage', () => {
 
       await expect(uploadImage(input, deps)).rejects.toThrow('Corrupt image');
     });
+
+    it('should clean up file when getFileSize fails', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput();
+
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test-image.png',
+        filename: 'test-image.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockRejectedValue(new Error('File size error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
+
+      await expect(uploadImage(input, deps)).rejects.toThrow('File size error');
+      expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/test-image.png');
+    });
+
+    it('should clean up file when readFile fails', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput();
+
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test-image.png',
+        filename: 'test-image.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockRejectedValue(new Error('Read file error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
+
+      await expect(uploadImage(input, deps)).rejects.toThrow('Read file error');
+      expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/test-image.png');
+    });
+
+    it('should continue even if cleanup fails after readFile error', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput();
+
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test-image.png',
+        filename: 'test-image.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockRejectedValue(new Error('Read file error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockRejectedValue(new Error('Cleanup failed'));
+
+      await expect(uploadImage(input, deps)).rejects.toThrow('Read file error');
+    });
+
+    it('should clean up file and thumbnail when database creation fails', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput();
+
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test-image.png',
+        filename: 'test-image.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
+      vi.mocked(deps.fileStorage.saveFileFromBuffer).mockResolvedValue({
+        path: 'thumbnails/test-image.jpg',
+        filename: 'test-image.jpg',
+      });
+      vi.mocked(deps.imageRepository.create).mockRejectedValue(new Error('Database error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockResolvedValue();
+
+      await expect(uploadImage(input, deps)).rejects.toThrow('Database error');
+      expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('originals/test-image.png');
+      expect(deps.fileStorage.deleteFile).toHaveBeenCalledWith('thumbnails/test-image.jpg');
+    });
+
+    it('should continue even if cleanup fails after database error', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput();
+
+      vi.mocked(deps.fileStorage.saveFile).mockResolvedValue({
+        path: 'originals/test-image.png',
+        filename: 'test-image.png',
+      });
+      vi.mocked(deps.fileStorage.getFileSize).mockResolvedValue(1000);
+      vi.mocked(deps.fileStorage.readFile).mockResolvedValue(Buffer.from('fake image data'));
+      vi.mocked(deps.imageProcessor.getMetadata).mockResolvedValue({ width: 100, height: 100 });
+      vi.mocked(deps.imageProcessor.generateThumbnail).mockResolvedValue(Buffer.from('thumbnail'));
+      vi.mocked(deps.fileStorage.saveFileFromBuffer).mockResolvedValue({
+        path: 'thumbnails/test-image.jpg',
+        filename: 'test-image.jpg',
+      });
+      vi.mocked(deps.imageRepository.create).mockRejectedValue(new Error('Database error'));
+      vi.mocked(deps.fileStorage.deleteFile).mockRejectedValue(new Error('Cleanup failed'));
+
+      await expect(uploadImage(input, deps)).rejects.toThrow('Database error');
+    });
   });
 
   describe('embedding generation', () => {
@@ -345,6 +437,29 @@ describe('uploadImage', () => {
       const result = await uploadImage(input, deps);
 
       expect(result.success).toBe(true);
+    });
+
+    it('should log error when background embedding generation fails', async () => {
+      const deps = createMockDeps();
+      const input = createMockInput();
+      const mockImage = createMockImage();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      setupSuccessMocks(deps, mockImage);
+      vi.mocked(generateEmbedding).mockRejectedValue(new Error('Embedding failed'));
+
+      const result = await uploadImage(input, deps);
+
+      expect(result.success).toBe(true);
+
+      // Wait for the background task to complete
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Background embedding generation failed'),
+        expect.any(Error),
+      );
+      consoleSpy.mockRestore();
     });
   });
 });
