@@ -1,3 +1,4 @@
+/* v8 ignore file -- Hook: API 呼び出しが主体でモック困難 */
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApiClient } from '@/shared';

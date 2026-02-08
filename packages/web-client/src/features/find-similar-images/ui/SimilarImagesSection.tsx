@@ -1,3 +1,4 @@
+/* v8 ignore file -- Container: Hook と View を接続するだけなので Storybook テストでカバー */
 import { useQuery } from '@tanstack/react-query';
 import { useApiClient } from '@/shared';
 import { SimilarImagesSectionView } from './SimilarImagesSectionView';

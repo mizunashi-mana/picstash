@@ -1,3 +1,4 @@
+/* v8 ignore file -- UI コンポーネント: Storybook テストでカバー */
 import { Card, Group, SimpleGrid, Text } from '@mantine/core';
 import type { OverviewStats } from '@picstash/api';
 

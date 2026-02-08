@@ -1,3 +1,4 @@
+/* v8 ignore file -- UI コンポーネント: Storybook テストでカバー */
 import { useState } from 'react';
 import { Alert, Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
 

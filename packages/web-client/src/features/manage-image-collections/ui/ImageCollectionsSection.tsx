@@ -1,3 +1,4 @@
+/* v8 ignore file -- Container: Hook と View を接続するだけなので Storybook テストでカバー */
 import { ImageCollectionsSectionView } from '@/features/manage-image-collections/ui/ImageCollectionsSectionView';
 import { useImageCollectionsSectionViewProps } from '@/features/manage-image-collections/ui/useImageCollectionsSectionViewProps';
 

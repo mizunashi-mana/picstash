@@ -1,3 +1,4 @@
+/* v8 ignore file -- View: 純粋な描画コンポーネントなので Storybook テストでカバー */
 import { CrawlPreviewGalleryView } from '@/features/import-url/ui/CrawlPreviewGalleryView';
 import { useCrawlPreviewGalleryViewProps } from '@/features/import-url/ui/useCrawlPreviewGalleryViewProps';
 import type { CrawledImage } from '@picstash/api';

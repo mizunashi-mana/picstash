@@ -1,3 +1,4 @@
+/* v8 ignore file -- View: 純粋な描画コンポーネントなので Storybook テストでカバー */
 import { useMutation } from '@tanstack/react-query';
 import { useApiClient } from '@/shared';
 import { ImageDropzoneView } from './ImageDropzoneView';

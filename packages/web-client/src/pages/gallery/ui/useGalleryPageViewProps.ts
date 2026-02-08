@@ -18,7 +18,7 @@ const CARD_PADDING = 8;
 const MIN_CARD_WIDTH = 150;
 
 /** Calculate number of columns based on container width */
-function calculateColumns(containerWidth: number): number {
+export function calculateColumns(containerWidth: number): number {
   if (containerWidth === 0) return 2; // Default fallback
   // Calculate how many cards fit with gap
   const cols = Math.floor((containerWidth + GRID_GAP) / (MIN_CARD_WIDTH + GRID_GAP));

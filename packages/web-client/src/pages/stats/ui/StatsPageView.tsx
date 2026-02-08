@@ -1,3 +1,4 @@
+/* v8 ignore file -- View: 純粋な描画コンポーネントなので Storybook テストでカバー */
 import { Container, Grid, Group, SegmentedControl, Stack, Text, Title } from '@mantine/core';
 import { PopularImagesList } from '@/features/view-stats/ui/PopularImagesList';
 import { RecommendationTrendsChart } from '@/features/view-stats/ui/RecommendationTrendsChart';

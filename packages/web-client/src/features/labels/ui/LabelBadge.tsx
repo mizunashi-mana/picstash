@@ -1,3 +1,4 @@
+/* v8 ignore file -- UI コンポーネント: Storybook テストでカバー */
 import { Badge } from '@mantine/core';
 import type { Label } from '@picstash/api';
 
