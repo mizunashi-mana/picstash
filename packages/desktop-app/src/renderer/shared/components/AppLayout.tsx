@@ -48,7 +48,6 @@ export function AppLayout({ children, headerActions }: AppLayoutProps) {
       navbar={{
         width: opened ? 250 : 60,
         breakpoint: 0,
-        collapsed: { desktop: !opened },
       }}
       padding="md"
     >
