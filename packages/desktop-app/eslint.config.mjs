@@ -4,7 +4,7 @@ import { buildConfig } from '@picstash/eslint-config';
 export default [
   ...buildConfig({
     // playwright は e2e テストのみに適用するため、ここでは含めない
-    ruleSets: ['common', 'node', 'react'],
+    ruleSets: ['common', 'node', 'react', 'playwright'],
     e2eTestFiles: [
       'tests/e2e/**/*.spec.ts',
     ],

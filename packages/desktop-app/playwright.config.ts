@@ -6,7 +6,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: isCI,
-  retries: isCI ? 2 : 0,
+  retries: 0, // Electron テストではリトライ時にアプリ再起動がタイムアウトするため無効化
   workers: 1,
   reporter: [
     ['list', {}],
