@@ -30,6 +30,7 @@ describe('isJobFinished', () => {
 describe('extractCompletedResult', () => {
   it('should return null for non-completed status', () => {
     const data: ImportJobStatus = {
+      jobId: 'job-1',
       status: 'active',
       totalRequested: 5,
       progress: 50,
@@ -39,6 +40,7 @@ describe('extractCompletedResult', () => {
 
   it('should return null for failed status', () => {
     const data: ImportJobStatus = {
+      jobId: 'job-1',
       status: 'failed',
       totalRequested: 5,
       progress: 0,
@@ -49,6 +51,7 @@ describe('extractCompletedResult', () => {
 
   it('should return null when completed but missing successCount', () => {
     const data: ImportJobStatus = {
+      jobId: 'job-1',
       status: 'completed',
       totalRequested: 5,
       progress: 100,
@@ -60,6 +63,7 @@ describe('extractCompletedResult', () => {
 
   it('should return null when completed but missing failedCount', () => {
     const data: ImportJobStatus = {
+      jobId: 'job-1',
       status: 'completed',
       totalRequested: 5,
       progress: 100,
@@ -71,6 +75,7 @@ describe('extractCompletedResult', () => {
 
   it('should return null when completed but missing results', () => {
     const data: ImportJobStatus = {
+      jobId: 'job-1',
       status: 'completed',
       totalRequested: 5,
       progress: 100,
@@ -82,6 +87,7 @@ describe('extractCompletedResult', () => {
 
   it('should return result when completed with all required fields', () => {
     const data: ImportJobStatus = {
+      jobId: 'job-1',
       status: 'completed',
       totalRequested: 5,
       progress: 100,
@@ -114,6 +120,7 @@ describe('extractCompletedResult', () => {
 
   it('should return result when all imports succeeded', () => {
     const data: ImportJobStatus = {
+      jobId: 'job-1',
       status: 'completed',
       totalRequested: 2,
       progress: 100,

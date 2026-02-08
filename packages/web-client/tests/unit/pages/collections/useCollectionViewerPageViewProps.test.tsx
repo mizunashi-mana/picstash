@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
-import { API_TYPES, type ApiClient, type CollectionDetail } from '@picstash/api';
+import { API_TYPES, type ApiClient, type CollectionWithImages } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { Container } from 'inversify';
@@ -10,7 +10,7 @@ import { useCollectionViewerPageViewProps } from '@/pages/collections/ui/useColl
 import { ContainerProvider } from '@/shared/di';
 
 interface MockCollectionsMethods {
-  detail?: (id: string) => Promise<CollectionDetail>;
+  detail?: (id: string) => Promise<CollectionWithImages>;
 }
 
 function createMockApiClient(methods: MockCollectionsMethods = {}) {
@@ -20,6 +20,7 @@ function createMockApiClient(methods: MockCollectionsMethods = {}) {
         id: 'col-1',
         name: 'Test Collection',
         description: null,
+        coverImageId: null,
         images: [],
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',
@@ -63,16 +64,17 @@ function createWrapper(options: WrapperOptions = {}) {
   };
 }
 
-const mockCollectionWithImages: CollectionDetail = {
+const mockCollectionWithImages: CollectionWithImages = {
   id: 'col-1',
   name: 'Test Collection',
   description: 'A test collection',
+  coverImageId: null,
   images: [
-    { imageId: 'img-1', order: 0, createdAt: '2024-01-01T00:00:00Z' },
-    { imageId: 'img-2', order: 1, createdAt: '2024-01-02T00:00:00Z' },
-    { imageId: 'img-3', order: 2, createdAt: '2024-01-03T00:00:00Z' },
-    { imageId: 'img-4', order: 3, createdAt: '2024-01-04T00:00:00Z' },
-    { imageId: 'img-5', order: 4, createdAt: '2024-01-05T00:00:00Z' },
+    { id: 'ci-1', imageId: 'img-1', order: 0, title: 'Image 1', thumbnailPath: null },
+    { id: 'ci-2', imageId: 'img-2', order: 1, title: 'Image 2', thumbnailPath: null },
+    { id: 'ci-3', imageId: 'img-3', order: 2, title: 'Image 3', thumbnailPath: null },
+    { id: 'ci-4', imageId: 'img-4', order: 3, title: 'Image 4', thumbnailPath: null },
+    { id: 'ci-5', imageId: 'img-5', order: 4, title: 'Image 5', thumbnailPath: null },
   ],
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-05T00:00:00Z',
@@ -221,10 +223,11 @@ describe('useCollectionViewerPageViewProps', () => {
 
   describe('empty collection', () => {
     it('should handle empty collection', async () => {
-      const emptyCollection: CollectionDetail = {
+      const emptyCollection: CollectionWithImages = {
         id: 'col-1',
         name: 'Empty Collection',
         description: null,
+        coverImageId: null,
         images: [],
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-01T00:00:00Z',

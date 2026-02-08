@@ -50,16 +50,16 @@ function createWrapper(methods: MockImagesMethods = {}) {
 
 const mockDuplicateGroups: DuplicateGroup[] = [
   {
-    original: { id: 'img-1', filename: 'image1.jpg', width: 100, height: 100 },
+    original: { id: 'img-1', title: 'image1.jpg', thumbnailPath: null, createdAt: '2024-01-01T00:00:00Z' },
     duplicates: [
-      { id: 'img-2', filename: 'image2.jpg', width: 100, height: 100, similarity: 0.95 },
-      { id: 'img-3', filename: 'image3.jpg', width: 100, height: 100, similarity: 0.90 },
+      { id: 'img-2', title: 'image2.jpg', thumbnailPath: null, createdAt: '2024-01-02T00:00:00Z', distance: 0.05 },
+      { id: 'img-3', title: 'image3.jpg', thumbnailPath: null, createdAt: '2024-01-03T00:00:00Z', distance: 0.10 },
     ],
   },
   {
-    original: { id: 'img-4', filename: 'image4.jpg', width: 200, height: 200 },
+    original: { id: 'img-4', title: 'image4.jpg', thumbnailPath: null, createdAt: '2024-01-04T00:00:00Z' },
     duplicates: [
-      { id: 'img-5', filename: 'image5.jpg', width: 200, height: 200, similarity: 0.85 },
+      { id: 'img-5', title: 'image5.jpg', thumbnailPath: null, createdAt: '2024-01-05T00:00:00Z', distance: 0.15 },
     ],
   },
 ];

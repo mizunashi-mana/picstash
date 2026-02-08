@@ -43,7 +43,7 @@ describe('StatsPageView', () => {
 
   it('should render with stats data', () => {
     const props = createDefaultProps();
-    props.overviewStats = { totalImages: 100, totalViews: 500, totalRecommendations: 50 };
+    props.overviewStats = { totalImages: 100, totalViews: 500, totalViewDuration: 3600000, conversionRate: 0.1, avgViewDuration: 7200 };
     render(<StatsPageView {...props} />, {
       wrapper: createMantineWrapper(),
     });

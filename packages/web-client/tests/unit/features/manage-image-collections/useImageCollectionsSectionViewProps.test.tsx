@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
-import { API_TYPES, type ApiClient, type CollectionListItem } from '@picstash/api';
+import { API_TYPES, type ApiClient, type CollectionWithCount } from '@picstash/api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { Container } from 'inversify';
@@ -9,8 +9,8 @@ import { useImageCollectionsSectionViewProps } from '@/features/manage-image-col
 import { ContainerProvider } from '@/shared/di';
 
 interface MockCollectionsMethods {
-  fetchImageCollections?: (imageId: string) => Promise<CollectionListItem[]>;
-  list?: () => Promise<CollectionListItem[]>;
+  fetchImageCollections?: (imageId: string) => Promise<CollectionWithCount[]>;
+  list?: () => Promise<CollectionWithCount[]>;
   addImage?: (collectionId: string, params: { imageId: string }) => Promise<void>;
   removeImage?: (collectionId: string, imageId: string) => Promise<void>;
 }
@@ -50,7 +50,7 @@ function createWrapper(methods: MockCollectionsMethods = {}) {
   };
 }
 
-const mockCollections: CollectionListItem[] = [
+const mockCollections: CollectionWithCount[] = [
   {
     id: 'col-1',
     name: 'Favorites',
@@ -102,7 +102,7 @@ describe('useImageCollectionsSectionViewProps', () => {
     });
 
     it('should exclude collections the image is already in', async () => {
-      const imageCollections: CollectionListItem[] = [
+      const imageCollections: CollectionWithCount[] = [
         {
           id: 'col-1',
           name: 'Favorites',
@@ -241,7 +241,7 @@ describe('useImageCollectionsSectionViewProps', () => {
   describe('onRemove', () => {
     it('should remove image from collection', async () => {
       const removeImageMock = vi.fn().mockResolvedValue(undefined);
-      const imageCollections: CollectionListItem[] = [
+      const imageCollections: CollectionWithCount[] = [
         {
           id: 'col-1',
           name: 'Favorites',

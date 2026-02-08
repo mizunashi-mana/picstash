@@ -32,9 +32,9 @@ function createWrapper() {
 }
 
 const mockImages: CrawledImage[] = [
-  { index: 0, url: 'https://example.com/image1.jpg', width: 800, height: 600 },
-  { index: 1, url: 'https://example.com/image2.jpg', width: 1024, height: 768 },
-  { index: 2, url: 'https://example.com/image3.jpg', width: 640, height: 480 },
+  { index: 0, url: 'https://example.com/image1.jpg', filename: 'image1.jpg' },
+  { index: 1, url: 'https://example.com/image2.jpg', filename: 'image2.jpg' },
+  { index: 2, url: 'https://example.com/image3.jpg', filename: 'image3.jpg' },
 ];
 
 describe('useCrawlPreviewGalleryViewProps', () => {
