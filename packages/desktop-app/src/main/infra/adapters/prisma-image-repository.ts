@@ -1,3 +1,4 @@
+/* v8 ignore start -- Prisma/DI implementation */
 import 'reflect-metadata';
 import {
   buildSearchWhere,
@@ -187,3 +188,4 @@ export class PrismaImageRepository implements ImageRepository {
     });
   }
 }
+/* v8 ignore stop */

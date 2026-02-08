@@ -51,11 +51,6 @@ export default defineConfig({
         'src/**/index.ts',
         'src/renderer/**/*',
         'src/**/*.stories.tsx',
-        'src/main/infra/**/*',
-        'src/main/ipc/**/*',
-        'src/main/ipc-handlers.ts',
-        'src/main/protocol-handler.ts',
-        'src/main/services/image-processor.ts',
         'src/shared/types.ts',
       ],
       thresholds: {

@@ -1,3 +1,4 @@
+/* v8 ignore start -- Prisma/DI implementation */
 /**
  * Prisma database service for desktop-app.
  * Manages the Prisma client connection lifecycle.
@@ -38,3 +39,4 @@ export class PrismaService {
     await this.client.$disconnect();
   }
 }
+/* v8 ignore stop */

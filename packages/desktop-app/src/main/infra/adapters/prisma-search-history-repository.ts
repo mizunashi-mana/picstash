@@ -1,3 +1,4 @@
+/* v8 ignore start -- Prisma/DI implementation */
 import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@desktop-app/main/infra/di/types.js';
@@ -88,3 +89,4 @@ export class PrismaSearchHistoryRepository implements SearchHistoryRepository {
     await this.prisma.searchHistory.deleteMany();
   }
 }
+/* v8 ignore stop */

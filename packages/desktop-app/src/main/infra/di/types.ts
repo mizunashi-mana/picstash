@@ -1,3 +1,4 @@
+/* v8 ignore start -- Prisma/DI implementation */
 import { TYPES as CORE_TYPES } from '@picstash/core';
 
 // Re-export core types
@@ -13,3 +14,4 @@ export const TYPES = {
   ...CORE_TYPES,
   ...DB_TYPES,
 } as const;
+/* v8 ignore stop */
