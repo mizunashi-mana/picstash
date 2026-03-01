@@ -87,7 +87,7 @@
     "electron-builder": "^26.7.0",
     "esbuild": "^0.27.2",
     "playwright": "^1.57.0",
-    "prisma": "^7.2.0",
+    "prisma": "^7.4.2",
     "prisma-lint": "^0.13.1",
     "storybook": "^10.1.11",
     "tsx": "^4.19.4",
