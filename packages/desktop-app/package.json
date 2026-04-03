@@ -83,7 +83,7 @@
     "concurrently": "^9.1.2",
     "cross-env": "^10.1.0",
     "dependency-cruiser": "^17.3.6",
-    "electron": "^40.1.0",
+    "electron": "^40.8.5",
     "electron-builder": "^26.7.0",
     "esbuild": "^0.27.2",
     "playwright": "^1.57.0",
